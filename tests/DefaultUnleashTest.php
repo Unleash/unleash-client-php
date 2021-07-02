@@ -34,6 +34,19 @@ final class DefaultUnleashTest extends AbstractHttpClientTest
         ], 2);
         self::assertFalse($instance->isEnabled('test'));
         self::assertFalse($instance->isEnabled('test', null, true));
+
+        $this->pushResponse([
+            'version' => 1,
+            'features' => [
+                [
+                    'name' => 'test',
+                    'description' => '',
+                    'enabled' => true,
+                    'strategies' => [],
+                ],
+            ],
+        ]);
+        self::assertTrue($instance->isEnabled('test'));
     }
 
     public function testIsEnabledDefault()
