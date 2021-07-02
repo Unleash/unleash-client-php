@@ -50,9 +50,11 @@ final class UnleashBuilderTest extends TestCase
 
     public function testWithCacheHandler()
     {
-        self::assertNotEquals($this->instance, $this->instance->withCacheHandler(new FilesystemCachePool(
+        $cacheHandler = new FilesystemCachePool(
             new Filesystem(new Local(sys_get_temp_dir() . '/unleash-sdk-tests'))
-        )));
+        );
+        self::assertNotEquals($this->instance, $this->instance->withCacheHandler($cacheHandler));
+        self::assertNotEquals($this->instance, $this->instance->withCacheHandler($cacheHandler, 120));
     }
 
     public function testWithRequestFactory()
