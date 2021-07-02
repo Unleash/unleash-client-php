@@ -1,0 +1,60 @@
+name: Tests
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  code_style:
+    name: Test code style
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        version: ['8.0']
+    steps:
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.version }}
+      - name: Checkout Code
+        uses: actions/checkout@v2
+      - name: Install Dependencies
+        run: composer install
+      - name: Test code style
+        run: composer fixer -- --dry-run
+  static_analysis:
+    name: Static analysis
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        version: ['8.0']
+    steps:
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.version }}
+      - name: Checkout Code
+        uses: actions/checkout@v2
+      - name: Install Dependencies
+        run: composer install
+      - name: Run static analysis
+        run: composer phpstan
+#  tests:
+#    name: Tests
+#    runs-on: ubuntu-latest
+#    strategy:
+#      matrix:
+#        version: ['8.0']
+#    steps:
+#      - name: Setup PHP
+#        uses: shivammathur/setup-php@v2
+#        with:
+#          php-version: ${{ matrix.version }}
+#      - name: Checkout Code
+#        uses: actions/checkout@v2
+#      - name: Install Dependencies
+#        run: composer install
+#      - name: Run tests
+#        run: composer phpunit
