@@ -5,8 +5,8 @@ on:
       - trigger-73-tests
 
 jobs:
-  static_analysis:
-    name: Static analysis
+  tests:
+    name: Tests
     runs-on: ubuntu-latest
     steps:
       - name: Setup PHP
@@ -15,9 +15,7 @@ jobs:
           php-version: 7.3
       - name: Checkout Code
         uses: actions/checkout@v2
-        with:
-          ref: php-7.3
       - name: Install Dependencies
         run: composer install
-      - name: Run static analysis
-        run: composer phpstan
+      - name: Run tests
+        run: composer phpunit

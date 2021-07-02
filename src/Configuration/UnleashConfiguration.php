@@ -15,9 +15,6 @@ final class UnleashConfiguration
         private string $appName,
         private string $instanceId
     ) {
-        if (substr($this->url, -1) !== '/') {
-            $this->url .= '/';
-        }
     }
 
     public function getCache(): ?CacheInterface
@@ -27,7 +24,11 @@ final class UnleashConfiguration
 
     public function getUrl(): string
     {
-        return $this->url;
+        $url = $this->url;
+        if (substr($url, -1) !== '/') {
+            $url .= '/';
+        }
+        return $url;
     }
 
     public function getAppName(): string
