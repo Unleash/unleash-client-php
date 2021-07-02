@@ -28,31 +28,19 @@ jobs:
         env:
           VERSION: ${{ steps.extract_name.outputs.result }}
         run: git push origin v$VERSION.80
-      - name: Checkout Code
-        uses: actions/checkout@v2
-        with:
-          ref: ${{ github.sha }}
       - name: Install Dependencies
         run: composer install
       - name: Transpile
         run: php vendor/bin/rector process src
       - name: Update composer.json version
         run: 'sed -i -e ''s/"php": "\^8.0"/"php": "\^7.3"/'' composer.json'
-      - name: Checkout tmp branch
-        run: git checkout -b tmp-php-7.3-release
       - name: Commit PHP 7.3 version
-        uses: actions-x/commit@v2
-        with:
-          files: .
-          branch: tmp-php-7.3-release
-          name: GitHub Actions
-          email: noreply@github.com
-          message: Transpiled to PHP 7.3
-          force: true
-      - name: Checkout Code
-        uses: actions/checkout@v2
-        with:
-          ref: tmp-php-7.3-release
+        run: |
+          git config user.email noreply@github.com && \
+          git config user.name "GitHub Actions" && \
+          git checkout -b tmp-php-7.3-release && \
+          git commit -m "Transpile to PHP 7.3" && \
+          git push origin tmp-php-7.3-release
       - name: Create PHP 7.3 release tag
         env:
           VERSION: ${{ steps.extract_name.outputs.result }}
