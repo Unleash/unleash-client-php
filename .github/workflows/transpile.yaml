@@ -22,6 +22,10 @@ jobs:
         run: composer install
       - name: Transpile
         run: php vendor/bin/rector process src
+      - name: Update composer.json version
+        run: 'sed -i -e ''s/"php": "\^8.0"/"php": "\^7.3"/'' composer.json'
+      - name: Update README
+        run: sed -i '1s/^/# This branch is auto generated\n/' README.md
       - name: Commit PHP 7.3 version
         uses: actions-x/commit@v2
         with:
