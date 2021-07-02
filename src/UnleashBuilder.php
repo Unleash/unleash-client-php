@@ -86,9 +86,18 @@ final class UnleashBuilder
     #[Pure]
     public function withCacheHandler(?CacheInterface $cache, ?int $timeToLive = null): self
     {
-        return $this
-            ->with('cache', $cache)
-            ->with('cacheTtl', $timeToLive);
+        $result = $this->with('cache', $cache);
+        if ($timeToLive !== null) {
+            $result = $result->withCacheTimeToLive($timeToLive);
+        }
+
+        return $result;
+    }
+
+    #[Pure]
+    public function withCacheTimeToLive(int $timeToLive): self
+    {
+        return $this->with('cacheTtl', $timeToLive);
     }
 
     public function build(): Unleash

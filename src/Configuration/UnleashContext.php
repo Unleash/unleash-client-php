@@ -25,4 +25,25 @@ final class UnleashContext
     {
         return $this->sessionId ?? (session_id() ?: null);
     }
+
+    public function setCurrentUserId(?string $currentUserId): UnleashContext
+    {
+        $this->currentUserId = $currentUserId;
+
+        return $this;
+    }
+
+    public function setIpAddress(?string $ipAddress): UnleashContext
+    {
+        $this->ipAddress = $ipAddress;
+
+        return $this;
+    }
+
+    public function setSessionId(?string $sessionId): UnleashContext
+    {
+        $this->sessionId = $sessionId;
+
+        return $this;
+    }
 }

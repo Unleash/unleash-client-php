@@ -16,6 +16,9 @@ final class GradualRolloutStrategyHandler extends AbstractStrategyHandler
     ) {
     }
 
+    /**
+     * @throws MissingArgumentException
+     */
     public function isEnabled(Strategy $strategy, UnleashContext $context): bool
     {
         if (!$stickiness = $this->findParameter('stickiness', $strategy)) {
