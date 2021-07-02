@@ -29,7 +29,7 @@ jobs:
       - name: Commit PHP 7.3 version
         uses: actions-x/commit@v2
         with:
-          files: src
+          files: .
           branch: php-7.3
           name: GitHub Actions
           email: noreply@github.com
