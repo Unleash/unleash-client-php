@@ -297,3 +297,9 @@ $unleash->isEnabled('some-feature'); // works because the session is started
 // lastly you can force the feature to use the random type which always works
 $unleash->isEnabled('some-feature');
 ```
+
+## Caveats
+
+The GitLab's "Percent of users" (in Unleash documentation as "gradualRolloutUserId") is deprecated in Unleash v4 and
+thus is not available in this library. It can be replaced on GitLab side with "Percent rollout" ("Gradual rollout" in
+this library) and setting the "Based on" to "User ID".
