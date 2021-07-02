@@ -54,6 +54,8 @@ jobs:
           php-version: ${{ matrix.version }}
       - name: Checkout Code
         uses: actions/checkout@v2
+        with:
+          submodules: true
       - name: Install Dependencies
         run: composer install
       - name: Run tests
