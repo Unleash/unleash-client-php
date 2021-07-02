@@ -4,6 +4,7 @@ namespace Rikudou\Tests\Unleash\Configuration;
 
 use PHPUnit\Framework\TestCase;
 use Rikudou\Unleash\Configuration\UnleashContext;
+use Rikudou\Unleash\Exception\InvalidValueException;
 
 final class UnleashContextTest extends TestCase
 {
@@ -22,5 +23,17 @@ final class UnleashContextTest extends TestCase
 
         $context->removeCustomProperty('test');
         self::assertFalse($context->hasCustomProperty('test'));
+
+        $this->expectException(InvalidValueException::class);
+        $context->getCustomProperty('test');
+    }
+
+    public function testCustomPropertyRemoval()
+    {
+        $context = new UnleashContext();
+        $context->removeCustomProperty('nonexistent');
+
+        $this->expectException(InvalidValueException::class);
+        $context->removeCustomProperty('nonexistent', false);
     }
 }
