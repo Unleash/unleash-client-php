@@ -37,6 +37,11 @@ final class UnleashBuilder
     private ?int $cacheTtl = null;
 
     /**
+     * @var array<string,string>
+     */
+    private array $headers = [];
+
+    /**
      * @var array<StrategyHandler>|null
      */
     private ?array $strategies = null;
@@ -100,6 +105,21 @@ final class UnleashBuilder
         return $this->with('cacheTtl', $timeToLive);
     }
 
+    #[Pure]
+    public function withHeader(string $header, string $value): self
+    {
+        return $this->with('headers', array_merge($this->headers, [$header => $value]));
+    }
+
+    /**
+     * @param array<string, string> $headers
+     */
+    #[Pure]
+    public function withHeaders(array $headers): self
+    {
+        return $this->with('headers', $headers);
+    }
+
     public function build(): Unleash
     {
         if ($this->appUrl === null) {
@@ -141,7 +161,7 @@ final class UnleashBuilder
         }
         assert($requestFactory instanceof RequestFactoryInterface);
 
-        $repository = new DefaultUnleashRepository($httpClient, $requestFactory, $configuration);
+        $repository = new DefaultUnleashRepository($httpClient, $requestFactory, $configuration, $this->headers);
 
         $strategies = $this->strategies;
         if ($strategies === null || !count($strategies)) {

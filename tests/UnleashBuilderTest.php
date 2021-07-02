@@ -69,6 +69,7 @@ final class UnleashBuilderTest extends TestCase
             self::fail('Expected exception: ' . InvalidValueException::class);
         } catch (InvalidValueException $e) {
         }
+
         try {
             $this->instance
                 ->withAppUrl('https://example.com')
@@ -76,6 +77,7 @@ final class UnleashBuilderTest extends TestCase
             self::fail('Expected exception: ' . InvalidValueException::class);
         } catch (InvalidValueException $e) {
         }
+
         try {
             $this->instance
                 ->withAppUrl('https://example.com')
@@ -156,5 +158,52 @@ final class UnleashBuilderTest extends TestCase
     public function testWithAppUrl()
     {
         self::assertNotEquals($this->instance, $this->instance->withAppUrl('https://example.com'));
+    }
+
+    public function testWithHeader()
+    {
+        self::assertNotEquals($this->instance, $this->instance->withHeader('Authorization', 'test'));
+
+        $instance = $this->instance
+            ->withHeader('Authorization', 'test')
+            ->withHeader('Some-Header', 'test');
+        $reflection = new ReflectionObject($instance);
+        $headersProperty = $reflection->getProperty('headers');
+        $headersProperty->setAccessible(true);
+        $headers = $headersProperty->getValue($instance);
+        self::assertCount(2, $headers);
+
+        $instance = $instance
+            ->withHeader('Authorization', 'test2');
+        $headers = $headersProperty->getValue($instance);
+        self::assertCount(2, $headers);
+        self::assertArrayHasKey('Authorization', $headers);
+        self::assertEquals('test2', $headers['Authorization']);
+
+        $unleash = $instance
+            ->withAppUrl('test')
+            ->withInstanceId('test')
+            ->withAppName('test')
+            ->build();
+        $reflection = new ReflectionObject($unleash);
+        $repositoryProperty = $reflection->getProperty('repository');
+        $repositoryProperty->setAccessible(true);
+        $repository = $repositoryProperty->getValue($unleash);
+
+        $reflection = new ReflectionObject($repository);
+        $headersPropertyBuilt = $reflection->getProperty('headers');
+        $headersPropertyBuilt->setAccessible(true);
+        $headersBuilt = $headersPropertyBuilt->getValue($repository);
+        self::assertEquals($headers, $headersBuilt);
+
+        $instance = $instance
+            ->withHeaders([
+                'Some-Header-2' => 'value',
+                'Some-Header-3' => 'value',
+            ]);
+        $headers = $headersProperty->getValue($instance);
+        self::assertCount(2, $headers);
+        self::assertArrayHasKey('Some-Header-2', $headers);
+        self::assertArrayHasKey('Some-Header-3', $headers);
     }
 }
