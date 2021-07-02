@@ -1,46 +1,15 @@
 <?php
 
-use GuzzleHttp\Client;
-use GuzzleHttp\Handler\MockHandler;
-use GuzzleHttp\HandlerStack;
-use GuzzleHttp\Psr7\HttpFactory;
-use GuzzleHttp\Psr7\Response;
-use PHPUnit\Framework\TestCase;
-use Rikudou\Unleash\Configuration\UnleashConfiguration;
 use Rikudou\Unleash\Configuration\UnleashContext;
 use Rikudou\Unleash\DefaultUnleash;
-use Rikudou\Unleash\Repository\DefaultUnleashRepository;
-use Rikudou\Unleash\Repository\UnleashRepository;
 use Rikudou\Unleash\Stickiness\MurmurHashCalculator;
 use Rikudou\Unleash\Strategy\DefaultStrategyHandler;
 use Rikudou\Unleash\Strategy\GradualRolloutStrategyHandler;
 use Rikudou\Unleash\Strategy\IpAddressStrategyHandler;
 use Rikudou\Unleash\Strategy\UserIdStrategyHandler;
 
-final class DefaultUnleashTest extends TestCase
+final class DefaultUnleashTest extends AbstractHttpClientTest
 {
-    /**
-     * @var MockHandler
-     */
-    private $mockHandler;
-
-    /**
-     * @var UnleashRepository
-     */
-    private $repository;
-
-    protected function setUp(): void
-    {
-        $this->mockHandler = new MockHandler();
-        $this->repository = new DefaultUnleashRepository(
-            new Client([
-                'handler' => HandlerStack::create($this->mockHandler),
-            ]),
-            new HttpFactory(),
-            new UnleashConfiguration('', '', '')
-        );
-    }
-
     public function testIsEnabled()
     {
         $instance = new DefaultUnleash([
@@ -432,12 +401,5 @@ final class DefaultUnleashTest extends TestCase
         ]);
 
         self::assertTrue($instance->isEnabled('test', $context));
-    }
-
-    private function pushResponse(array $response, int $count = 1): void
-    {
-        for ($i = 0; $i < $count; ++$i) {
-            $this->mockHandler->append(new Response(200, ['Content-Type' => 'application/json'], json_encode($response)));
-        }
     }
 }
