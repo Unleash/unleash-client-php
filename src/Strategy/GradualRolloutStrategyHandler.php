@@ -31,10 +31,6 @@ final class GradualRolloutStrategyHandler extends AbstractStrategyHandler
             throw new MissingArgumentException("The remote server did not return 'rollout' config");
         }
 
-        if ((int) $rollout === 0) {
-            return false;
-        }
-
         switch (strtolower($stickiness)) {
             case Stickiness::USER_ID:
                 if ($context->getCurrentUserId() === null) {

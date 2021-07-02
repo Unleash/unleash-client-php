@@ -9,6 +9,7 @@ use Rikudou\Unleash\Configuration\UnleashContext;
 use Rikudou\Unleash\DTO\DefaultStrategy;
 use Rikudou\Unleash\DTO\Strategy;
 use Rikudou\Unleash\Enum\Stickiness;
+use Rikudou\Unleash\Exception\InvalidValueException;
 use Rikudou\Unleash\Exception\MissingArgumentException;
 use Rikudou\Unleash\Stickiness\MurmurHashCalculator;
 use Rikudou\Unleash\Strategy\GradualRolloutStrategyHandler;
@@ -38,6 +39,43 @@ final class GradualRolloutStrategyHandlerTest extends TestCase
     {
         // no exception should be thrown
         $this->instance->isEnabled($this->createStrategy(), new UnleashContext());
+
+        try {
+            $this->instance->isEnabled(new DefaultStrategy('flexibleRollout', [
+                'groupId' => 'test',
+                'rollout' => 5,
+            ]), new UnleashContext());
+            $this->fail('Expected exception: ' . MissingArgumentException::class);
+        } catch (MissingArgumentException $e) {
+        }
+
+        try {
+            $this->instance->isEnabled(new DefaultStrategy('flexibleRollout', [
+                'stickiness' => Stickiness::RANDOM,
+                'rollout' => 5,
+            ]), new UnleashContext());
+            $this->fail('Expected exception: ' . MissingArgumentException::class);
+        } catch (MissingArgumentException $e) {
+        }
+
+        try {
+            $this->instance->isEnabled(new DefaultStrategy('flexibleRollout', [
+                'groupId' => 'test',
+                'stickiness' => Stickiness::RANDOM,
+            ]), new UnleashContext());
+            $this->fail('Expected exception: ' . MissingArgumentException::class);
+        } catch (MissingArgumentException $e) {
+        }
+
+        try {
+            $this->instance->isEnabled(new DefaultStrategy('flexibleRollout', [
+                'groupId' => 'test',
+                'stickiness' => 'unknown-stickiness',
+                'rollout' => 5,
+            ]), new UnleashContext());
+            $this->fail('Expected exception: ' . InvalidValueException::class);
+        } catch (InvalidValueException $e) {
+        }
 
         self::assertFalse($this->instance->isEnabled($this->createStrategy(50), new UnleashContext('123')));
         self::assertFalse($this->instance->isEnabled($this->createStrategy(50), new UnleashContext('456')));
