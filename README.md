@@ -5,6 +5,8 @@
 A PHP implementation of the [Unleash protocol](https://www.getunleash.io/)
 aka [Feature Flags](https://docs.gitlab.com/ee/operations/feature_flags.html) in GitLab.
 
+This implementation conforms to the official Unleash standards except for [missing features](#missing-features).
+
 > Unleash allows you to gradually release your app's feature before doing a full release based on multiple strategies
 > like releasing to only specific users or releasing to a percentage of your user base. Read more in the above linked
 > documentations.
@@ -312,14 +314,14 @@ $unleash->isEnabled('some-feature');
 $context = new UnleashContext(sessionId: 'sess-123456');
 $unleash->isEnabled('some-feature', $context);
 
-// assume the feature is set to use the user id, the first call throws an exception (no context given), the second
-// one works
+// assume the feature is set to use the user id, the first call returns false (no context given), the second
+// one returns true/false based on the user id
 $unleash->isEnabled('some-feature');
 $context = new UnleashContext(currentUserId: 'some-user-id');
 $unleash->isEnabled('some-feature', $context);
 
 // the same goes for session, assume the session isn't started yet and the feature is set to use the session type
-$unleash->isEnabled('some-feature'); // throws exception because no session is available
+$unleash->isEnabled('some-feature'); // returns false because no session is available
 
 $context = new UnleashContext(sessionId: 'some-session-id');
 $unleash->isEnabled('some-feature', $context); // works because you provided the session id manually
@@ -331,8 +333,10 @@ $unleash->isEnabled('some-feature'); // works because the session is started
 $unleash->isEnabled('some-feature');
 ```
 
-## Caveats
+## Missing features
 
-The GitLab's "Percent of users" (in Unleash documentation as "gradualRolloutUserId") is deprecated in Unleash v4 and
-thus is not available in this library. It can be replaced on GitLab side with "Percent rollout" ("Gradual rollout" in
-this library) and setting the "Based on" to "User ID".
+Not every feature has been implemented yet, currently missing features are:
+
+- variants
+- constraints
+- stickiness based on custom fields

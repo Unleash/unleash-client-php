@@ -1,6 +1,6 @@
 <?php
 
-namespace Strategy;
+namespace Rikudou\Tests\Unleash\Strategy;
 
 use PHPUnit\Framework\TestCase;
 use Rikudou\Unleash\Configuration\UnleashContext;

@@ -1,0 +1,3 @@
+[submodule "tests/client-specification"]
+	path = tests/client-specification
+	url = https://github.com/Unleash/client-specification

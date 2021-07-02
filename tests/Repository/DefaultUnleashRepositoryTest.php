@@ -1,8 +1,7 @@
 <?php
 
-namespace Repository;
+namespace Rikudou\Tests\Unleash\Repository;
 
-use AbstractHttpClientTest;
 use Cache\Adapter\Filesystem\FilesystemCachePool;
 use GuzzleHttp\Client;
 use GuzzleHttp\HandlerStack;
@@ -12,6 +11,7 @@ use League\Flysystem\Adapter\Local;
 use League\Flysystem\Filesystem;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
+use Rikudou\Tests\Unleash\AbstractHttpClientTest;
 use Rikudou\Unleash\Configuration\UnleashConfiguration;
 use Rikudou\Unleash\DTO\Feature;
 use Rikudou\Unleash\Repository\DefaultUnleashRepository;

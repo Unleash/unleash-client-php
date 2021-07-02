@@ -1,5 +1,7 @@
 <?php
 
+namespace Rikudou\Tests\Unleash;
+
 use Rikudou\Unleash\Configuration\UnleashContext;
 use Rikudou\Unleash\DefaultUnleash;
 use Rikudou\Unleash\Stickiness\MurmurHashCalculator;
@@ -271,13 +273,13 @@ final class DefaultUnleashTest extends AbstractHttpClientTest
             ],
         ], 4);
 
-        $contextTrue = new UnleashContext('852');
+        $contextTrue = new UnleashContext('634');
         $contextFalse = new UnleashContext('123');
 
         self::assertTrue($instance->isEnabled('test', $contextTrue));
         self::assertFalse($instance->isEnabled('test', $contextFalse));
 
-        $contextTrue = new UnleashContext(null, null, '852');
+        $contextTrue = new UnleashContext(null, null, '634');
         $contextFalse = new UnleashContext(null, null, '123');
 
         self::assertTrue($instance->isEnabled('test', $contextTrue));

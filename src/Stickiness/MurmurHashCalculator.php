@@ -6,12 +6,11 @@ use lastguest\Murmur;
 
 final class MurmurHashCalculator implements StickinessCalculator
 {
+    /**
+     * @codeCoverageIgnore
+     */
     public function calculate(string $id, string $groupId): int
     {
-        if (!$id) {
-            return 0;
-        }
-
-        return Murmur::hash3_int("{$id}:{$groupId}") % 100 + 1;
+        return Murmur::hash3_int("{$groupId}:{$id}") % 100 + 1;
     }
 }

@@ -17,7 +17,7 @@ final class UserIdStrategyHandler extends AbstractStrategyHandler
             throw new MissingArgumentException("The remote server did not return 'userIds' config");
         }
         if ($context->getCurrentUserId() === null) {
-            throw new MissingArgumentException('The user id strategy needs a current user id set in the context');
+            return false;
         }
 
         $userIds = array_map('trim', explode(',', $userIds));

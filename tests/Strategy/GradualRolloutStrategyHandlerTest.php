@@ -1,6 +1,6 @@
 <?php
 
-namespace Strategy;
+namespace Rikudou\Tests\Unleash\Strategy;
 
 use JetBrains\PhpStorm\ExpectedValues;
 use JetBrains\PhpStorm\Pure;
@@ -10,7 +10,6 @@ use Rikudou\Unleash\DTO\DefaultStrategy;
 use Rikudou\Unleash\DTO\Strategy;
 use Rikudou\Unleash\Enum\Stickiness;
 use Rikudou\Unleash\Exception\InvalidValueException;
-use Rikudou\Unleash\Exception\MissingArgumentException;
 use Rikudou\Unleash\Stickiness\MurmurHashCalculator;
 use Rikudou\Unleash\Strategy\GradualRolloutStrategyHandler;
 
@@ -40,32 +39,20 @@ final class GradualRolloutStrategyHandlerTest extends TestCase
         // no exception should be thrown
         $this->instance->isEnabled($this->createStrategy(), new UnleashContext());
 
-        try {
-            $this->instance->isEnabled(new DefaultStrategy('flexibleRollout', [
-                'groupId' => 'test',
-                'rollout' => 5,
-            ]), new UnleashContext());
-            $this->fail('Expected exception: ' . MissingArgumentException::class);
-        } catch (MissingArgumentException $e) {
-        }
+        self::assertFalse($this->instance->isEnabled(new DefaultStrategy('flexibleRollout', [
+            'groupId' => 'test',
+            'rollout' => 5,
+        ]), new UnleashContext()));
 
-        try {
-            $this->instance->isEnabled(new DefaultStrategy('flexibleRollout', [
-                'stickiness' => Stickiness::RANDOM,
-                'rollout' => 5,
-            ]), new UnleashContext());
-            $this->fail('Expected exception: ' . MissingArgumentException::class);
-        } catch (MissingArgumentException $e) {
-        }
+        self::assertFalse($this->instance->isEnabled(new DefaultStrategy('flexibleRollout', [
+            'stickiness' => Stickiness::RANDOM,
+            'rollout' => 5,
+        ]), new UnleashContext()));
 
-        try {
-            $this->instance->isEnabled(new DefaultStrategy('flexibleRollout', [
-                'groupId' => 'test',
-                'stickiness' => Stickiness::RANDOM,
-            ]), new UnleashContext());
-            $this->fail('Expected exception: ' . MissingArgumentException::class);
-        } catch (MissingArgumentException $e) {
-        }
+        self::assertFalse($this->instance->isEnabled(new DefaultStrategy('flexibleRollout', [
+            'groupId' => 'test',
+            'stickiness' => Stickiness::RANDOM,
+        ]), new UnleashContext()));
 
         try {
             $this->instance->isEnabled(new DefaultStrategy('flexibleRollout', [
@@ -79,48 +66,36 @@ final class GradualRolloutStrategyHandlerTest extends TestCase
 
         self::assertFalse($this->instance->isEnabled($this->createStrategy(50), new UnleashContext('123')));
         self::assertFalse($this->instance->isEnabled($this->createStrategy(50), new UnleashContext('456')));
-        self::assertTrue($this->instance->isEnabled($this->createStrategy(50), new UnleashContext('852')));
-
-        self::assertFalse($this->instance->isEnabled($this->createStrategy(50), new UnleashContext('123')));
-        self::assertFalse($this->instance->isEnabled($this->createStrategy(50), new UnleashContext('456')));
-        self::assertTrue($this->instance->isEnabled($this->createStrategy(50), new UnleashContext('852')));
+        self::assertTrue($this->instance->isEnabled($this->createStrategy(50), new UnleashContext('634')));
 
         self::assertFalse(
             $this->instance->isEnabled(
                 $this->createStrategy(50),
-                new UnleashContext('123', null, '852')
+                new UnleashContext('123', null, '634')
             )
         );
         self::assertFalse(
             $this->instance->isEnabled(
                 $this->createStrategy(50),
-                new UnleashContext('456', null, '852')
+                new UnleashContext('456', null, '634')
             )
         );
         self::assertTrue(
             $this->instance->isEnabled(
                 $this->createStrategy(50),
-                new UnleashContext('852', null, '123')
+                new UnleashContext('634', null, '123')
             )
         );
 
-        try {
-            $this->instance->isEnabled(
-                $this->createStrategy(100, Stickiness::USER_ID),
-                new UnleashContext(),
-            );
-            $this->fail('Expected exception of class ' . MissingArgumentException::class);
-        } catch (MissingArgumentException $e) {
-        }
+        self::assertFalse($this->instance->isEnabled(
+            $this->createStrategy(100, Stickiness::USER_ID),
+            new UnleashContext(),
+        ));
 
-        try {
-            $this->instance->isEnabled(
-                $this->createStrategy(100, Stickiness::USER_ID),
-                new UnleashContext(null, null, 'test'),
-            );
-            $this->fail('Expected exception of class ' . MissingArgumentException::class);
-        } catch (MissingArgumentException $e) {
-        }
+        self::assertFalse($this->instance->isEnabled(
+            $this->createStrategy(100, Stickiness::USER_ID),
+            new UnleashContext(null, null, 'test'),
+        ));
 
         self::assertFalse(
             $this->instance->isEnabled(
@@ -131,27 +106,19 @@ final class GradualRolloutStrategyHandlerTest extends TestCase
         self::assertTrue(
             $this->instance->isEnabled(
                 $this->createStrategy(50, Stickiness::USER_ID),
-                new UnleashContext('852')
+                new UnleashContext('634')
             )
         );
 
-        try {
-            $this->instance->isEnabled(
-                $this->createStrategy(100, Stickiness::SESSION_ID),
-                new UnleashContext(),
-            );
-            $this->fail('Expected exception of class ' . MissingArgumentException::class);
-        } catch (MissingArgumentException $e) {
-        }
+        self::assertFalse($this->instance->isEnabled(
+            $this->createStrategy(100, Stickiness::SESSION_ID),
+            new UnleashContext(),
+        ));
 
-        try {
-            $this->instance->isEnabled(
-                $this->createStrategy(100, Stickiness::SESSION_ID),
-                new UnleashContext('test'),
-            );
-            $this->fail('Expected exception of class ' . MissingArgumentException::class);
-        } catch (MissingArgumentException $e) {
-        }
+        self::assertFalse($this->instance->isEnabled(
+            $this->createStrategy(100, Stickiness::SESSION_ID),
+            new UnleashContext('test'),
+        ));
 
         self::assertFalse(
             $this->instance->isEnabled(
@@ -162,7 +129,7 @@ final class GradualRolloutStrategyHandlerTest extends TestCase
         self::assertTrue(
             $this->instance->isEnabled(
                 $this->createStrategy(50, Stickiness::SESSION_ID),
-                new UnleashContext(null, null, '852')
+                new UnleashContext(null, null, '634')
             )
         );
 
