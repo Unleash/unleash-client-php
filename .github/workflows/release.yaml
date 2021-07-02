@@ -34,22 +34,18 @@ jobs:
       - name: Update composer.json version
         run: 'sed -i -e ''s/"php": "\^8.0"/"php": "\^7.3"/'' composer.json'
       - name: Commit PHP 7.3 version
-        env:
-          VERSION: ${{ steps.extract_name.outputs.result }}
         uses: actions-x/commit@v2
         with:
           files: .
-          branch: tmp-php-7.3-release-$VERSION
+          branch: tmp-php-7.3-release
           name: GitHub Actions
           email: noreply@github.com
           message: Transpiled to PHP 7.3
           force: true
       - name: Checkout Code
-        env:
-          VERSION: ${{ steps.extract_name.outputs.result }}
         uses: actions/checkout@v2
         with:
-          ref: tmp-php-7.3-release-$VERSION
+          ref: tmp-php-7.3-release
       - name: Create PHP 7.3 release tag
         env:
           VERSION: ${{ steps.extract_name.outputs.result }}
@@ -58,10 +54,8 @@ jobs:
         env:
           VERSION: ${{ steps.extract_name.outputs.result }}
         run: git push origin v$VERSION.73
-      - name: Delete temporary branch
-        env:
-          VERSION: ${{ steps.extract_name.outputs.result }}
-        run: git push origin --delete tmp-php-7.3-release-$VERSION
+      - name: Delete temporary tag
+        run: git push origin --delete tmp-php-7.3-release
       - name: Delete original tag
         env:
           VERSION: ${{ steps.extract_name.outputs.result }}
