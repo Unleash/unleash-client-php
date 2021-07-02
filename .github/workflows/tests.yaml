@@ -1,4 +1,4 @@
-name: Tests
+name: Tests (8.x)
 on:
   push:
     branches:
