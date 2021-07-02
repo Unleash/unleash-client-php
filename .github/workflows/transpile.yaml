@@ -35,9 +35,9 @@ jobs:
           email: noreply@github.com
           message: Transpiled to PHP 7.3
           force: true
-      - name: Trigger 7.3 tests
-        uses: peter-evans/repository-dispatch@v1
-        with:
-          token: ${{ secrets.REPO_TOKEN }}
-          event-type: trigger-73-tests
-          client-payload: '{"ref": "${{ github.ref }}", "sha": "${{ github.sha }}"}'
+#      - name: Trigger 7.3 tests
+#        uses: peter-evans/repository-dispatch@v1
+#        with:
+#          token: ${{ secrets.REPO_TOKEN }}
+#          event-type: trigger-73-tests
+#          client-payload: '{"ref": "${{ github.ref }}", "sha": "${{ github.sha }}"}'
