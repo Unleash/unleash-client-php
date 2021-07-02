@@ -1,0 +1,33 @@
+name: Create Release
+
+on:
+  push:
+    tags:
+      - release-*
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Extract Version Name
+        id: extract_name
+        uses: actions/github-script@v4
+        with:
+          result-encoding: string
+          script: |
+            return context.payload.ref.replace(/refs\/tags\/release-/, '');
+      - name: Checkout Code
+        uses: actions/checkout@v2
+      - name: Create PHP 8 release tag
+        env:
+          VERSION: ${{ steps.extract_name.outputs.result }}
+        run: git tag v$VERSION.80
+      - name: Push PHP 8 release tag
+        env:
+          VERSION: ${{ steps.extract_name.outputs.result }}
+        run: git push origin v$VERSION.80
+      - name: Delete original tag
+        env:
+          VERSION: ${{ steps.extract_name.outputs.result }}
+        run: git push origin --delete release-$VERSION
