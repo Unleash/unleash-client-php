@@ -1,0 +1,36 @@
+name: Tests (7.3)
+on:
+  push:
+    branches:
+      - php-7.3
+  workflow_dispatch:
+
+jobs:
+  code_style:
+    name: Test code style
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 7.3
+      - name: Checkout Code
+        uses: actions/checkout@v2
+      - name: Install Dependencies
+        run: composer install
+      - name: Test code style
+        run: composer fixer -- --dry-run
+  static_analysis:
+    name: Static analysis
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 7.3
+      - name: Checkout Code
+        uses: actions/checkout@v2
+      - name: Install Dependencies
+        run: composer install
+      - name: Run static analysis
+        run: composer phpstan
