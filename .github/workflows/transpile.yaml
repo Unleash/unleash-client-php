@@ -1,0 +1,34 @@
+name: Transpile to 7.3
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+jobs:
+  transpile:
+    name: Transpile to PHP 7.3
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.0
+      - name: Checkout Code
+        uses: actions/checkout@v2
+        with:
+          ref: master
+      - name: Install Dependencies
+        run: composer install
+      - name: Transpile
+        run: php vendor/bin/rector process src
+      - name: Create 7.3 branch
+        run: git branch -D php-7.3 && git checkout -b php-7.3
+      - name: Update config.json
+        uses: actions-x/commit@v2
+        with:
+          files: src
+          name: GitHub Actions
+          email: noreply@github.com
+          message: Transpiled to PHP 7.3
+          force: true
