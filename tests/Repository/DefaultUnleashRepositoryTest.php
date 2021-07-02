@@ -54,18 +54,20 @@ final class DefaultUnleashRepositoryTest extends AbstractHttpClientTest
 
     protected function tearDown(): void
     {
-        $files = (new RecursiveIteratorIterator(
-            new RecursiveDirectoryIterator(
-                sys_get_temp_dir() . '/unleash-sdk-tests'
-            )
-        ));
+        if (is_dir(sys_get_temp_dir() . '/unleash-sdk-tests')) {
+            $files = (new RecursiveIteratorIterator(
+                new RecursiveDirectoryIterator(
+                    sys_get_temp_dir() . '/unleash-sdk-tests'
+                )
+            ));
 
-        foreach ($files as $file) {
-            assert($file instanceof SplFileInfo);
-            if (!$file->isFile()) {
-                continue;
+            foreach ($files as $file) {
+                assert($file instanceof SplFileInfo);
+                if (!$file->isFile()) {
+                    continue;
+                }
+                unlink($file->getRealPath());
             }
-            unlink($file->getRealPath());
         }
 
         parent::tearDown();
