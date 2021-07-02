@@ -1,4 +1,5 @@
 [![Tests](https://github.com/RikudouSage/UnleashSDK/actions/workflows/tests.yaml/badge.svg)](https://github.com/RikudouSage/UnleashSDK/actions/workflows/tests.yaml)
+[![Tests (7.3)](https://github.com/RikudouSage/UnleashSDK/actions/workflows/tests-7.3.yaml/badge.svg)](https://github.com/RikudouSage/UnleashSDK/actions/workflows/tests-7.3.yaml)
 
 A PHP implementation of the [Unleash protocol](https://www.getunleash.io/)
 aka [Feature Flags](https://docs.gitlab.com/ee/operations/feature_flags.html) in GitLab.
