@@ -3,6 +3,7 @@
 use GuzzleHttp\Client;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\HttpFactory;
 use GuzzleHttp\Psr7\Response;
 use PHPUnit\Framework\TestCase;
@@ -21,12 +22,26 @@ abstract class AbstractHttpClientTest extends TestCase
      */
     protected $repository;
 
+    /**
+     * @var array[]
+     */
+    protected $requestHistory = [];
+
+    /**
+     * @var HandlerStack
+     */
+    protected $handlerStack;
+
     protected function setUp(): void
     {
         $this->mockHandler = new MockHandler();
+
+        $this->handlerStack = HandlerStack::create($this->mockHandler);
+        $this->handlerStack->push(Middleware::history($this->requestHistory));
+
         $this->repository = new DefaultUnleashRepository(
             new Client([
-                'handler' => HandlerStack::create($this->mockHandler),
+                'handler' => $this->handlerStack,
             ]),
             new HttpFactory(),
             new UnleashConfiguration('', '', '')

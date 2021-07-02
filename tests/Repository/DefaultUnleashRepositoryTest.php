@@ -7,6 +7,7 @@ use Cache\Adapter\Filesystem\FilesystemCachePool;
 use GuzzleHttp\Client;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\HttpFactory;
+use GuzzleHttp\Psr7\Request;
 use League\Flysystem\Adapter\Local;
 use League\Flysystem\Filesystem;
 use RecursiveDirectoryIterator;
@@ -120,5 +121,35 @@ final class DefaultUnleashRepositoryTest extends AbstractHttpClientTest
         $feature = $repository->findFeature('test');
         sleep(6);
         self::assertEquals($feature->getName(), $repository->findFeature('test')->getName());
+    }
+
+    public function testCustomHeaders()
+    {
+        $this->pushResponse($this->response);
+        $repository = new DefaultUnleashRepository(
+            new Client([
+                'handler' => $this->handlerStack,
+            ]),
+            new HttpFactory(),
+            new UnleashConfiguration('', '', ''),
+            [
+                'Custom-Header-1' => 'some value',
+                'Custom-Header-2' => 'some other value',
+                'Authorization' => 'Some API key',
+            ]
+        );
+
+        $repository->getFeatures();
+
+        self::assertCount(1, $this->requestHistory);
+        $request = $this->requestHistory[0]['request'];
+        assert($request instanceof Request);
+        $headers = $request->getHeaders();
+        self::assertArrayHasKey('Custom-Header-1', $headers);
+        self::assertArrayHasKey('Custom-Header-2', $headers);
+        self::assertArrayHasKey('Authorization', $headers);
+        self::assertEquals('some value', $headers['Custom-Header-1'][0]);
+        self::assertEquals('some other value', $headers['Custom-Header-2'][0]);
+        self::assertEquals('Some API key', $headers['Authorization'][0]);
     }
 }

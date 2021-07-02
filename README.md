@@ -105,6 +105,20 @@ $builder = UnleashBuilder::create()
     ->withInstanceId('Some instance id');
 ```
 
+If you're using Unleash v4 you also need to specify authorization key (API key), you can do so with custom header.
+
+```php
+<?php
+
+use Rikudou\Unleash\UnleashBuilder;
+
+$builder = UnleashBuilder::create()
+    ->withAppName('Some app name')
+    ->withAppUrl('https://some-app-url.com')
+    ->withInstanceId('Some instance id')
+    ->withHeader('Authorization', 'my-api-key');
+```
+
 #### Optional parameters
 
 Some optional parameters can be set, these include:
@@ -114,6 +128,7 @@ Some optional parameters can be set, these include:
 - cache implementation ([PSR-16](https://packagist.org/providers/psr/simple-cache-implementation))
 - cache ttl
 - available strategies
+- http headers
 
 If you use Guzzle as your http implementation, the http client and request factory will be created automatically,
 if you use any other implementation you must provide http client and request factory implementation on your own.
@@ -152,7 +167,15 @@ $builder = UnleashBuilder::create()
         new GradualRolloutStrategyHandler(new MurmurHashCalculator()),
         new IpAddressStrategyHandler(),
         new UserIdStrategyHandler(),
-    );
+    )
+    // add headers one by one, if you specify a header with the same name multiple times it will be replaced by the
+    // latest value
+    ->withHeader('My-Custom-Header', 'some-value')
+    ->withHeader('Some-Other-Header', 'some-other-value')
+    // you can specify multiple headers at the same time, be aware that this REPLACES all the headers
+    ->withHeaders([
+        'Yet-Another-Header' => 'and-another-value',
+    ]);
 ```
 
 ## Caching
