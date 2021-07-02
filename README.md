@@ -17,7 +17,7 @@ Requires PHP 7.3 or newer.
 
 ## Usage
 
-The basic using is getting the `Unleash` object and checking for a feature:
+The basic usage is getting the `Unleash` object and checking for a feature:
 
 ```php
 <?php
