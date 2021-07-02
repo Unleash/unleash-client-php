@@ -16,7 +16,7 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v2
         with:
-          ref: ${{ github.event.client_payload.ref }}
+          ref: php-7.3
       - name: Install Dependencies
         run: composer install
       - name: Test code style
@@ -32,7 +32,7 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v2
         with:
-          ref: ${{ github.event.client_payload.ref }}
+          ref: php-7.3
       - name: Install Dependencies
         run: composer install
       - name: Run static analysis
