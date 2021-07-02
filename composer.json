@@ -1,0 +1,41 @@
+{
+    "name": "rikudou/unleash-sdk",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Dominik Chrastecky",
+            "email": "dominik@chrastecky.cz"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {
+        "php": "^8.0",
+        "psr/http-client": "^1.0",
+        "psr/http-client-implementation": "^1.0",
+        "psr/http-factory": "^1.0",
+        "psr/http-factory-implementation": "^1.0",
+        "psr/simple-cache": "^1.0",
+        "lastguest/murmurhash": "^2.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "Rikudou\\Unleash\\": "src/"
+        }
+    },
+    "require-dev": {
+        "guzzlehttp/guzzle": "^7.0",
+        "cache/filesystem-adapter": "^1.1",
+        "friendsofphp/php-cs-fixer": "^3.0",
+        "phpstan/phpstan": "^0.12.90",
+        "jetbrains/phpstorm-attributes": "^1.0",
+        "rector/rector": "^0.11.32"
+    },
+    "suggest": {
+        "guzzlehttp/guzzle": "A http client implementation (PSR-7)"
+    },
+    "scripts": {
+        "fixer": "php-cs-fixer fix --verbose --allow-risky=yes",
+        "phpstan": "phpstan analyse --level=max src"
+    }
+}
