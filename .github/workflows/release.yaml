@@ -1,4 +1,5 @@
 name: Create Release
+concurrency: release
 
 on:
   push:
@@ -33,6 +34,8 @@ jobs:
         run: php vendor/bin/rector process src
       - name: Update composer.json version
         run: 'sed -i -e ''s/"php": "\^8.0"/"php": "\^7.3"/'' composer.json'
+      - name: Checkout tmp branch
+        run: git chekout -b tmp-php-7.3-release
       - name: Commit PHP 7.3 version
         uses: actions-x/commit@v2
         with:
@@ -54,7 +57,7 @@ jobs:
         env:
           VERSION: ${{ steps.extract_name.outputs.result }}
         run: git push origin v$VERSION.73
-      - name: Delete temporary tag
+      - name: Delete temporary branch
         run: git push origin --delete tmp-php-7.3-release
       - name: Delete original tag
         env:
