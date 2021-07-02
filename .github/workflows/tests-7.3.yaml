@@ -1,9 +1,8 @@
 name: Tests (7.3)
 on:
-  push:
-    branches:
-      - php-7.3
-  workflow_dispatch:
+  repository_dispatch:
+    types:
+      - trigger-73-tests
 
 jobs:
   code_style:
@@ -16,6 +15,8 @@ jobs:
           php-version: 7.3
       - name: Checkout Code
         uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.client_payload.ref }}
       - name: Install Dependencies
         run: composer install
       - name: Test code style
@@ -30,6 +31,8 @@ jobs:
           php-version: 7.3
       - name: Checkout Code
         uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.client_payload.ref }}
       - name: Install Dependencies
         run: composer install
       - name: Run static analysis
