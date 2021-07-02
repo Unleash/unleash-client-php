@@ -117,8 +117,8 @@ final class UnleashBuilder
             ->setCache($this->cache)
             ->setTtl($this->cacheTtl ?? $configuration->getTtl());
 
-        $httpClient = null;
-        if ($this->httpClient === null) {
+        $httpClient = $this->httpClient;
+        if ($httpClient === null) {
             if (class_exists(Client::class)) {
                 $httpClient = new Client();
             } else {
@@ -129,8 +129,8 @@ final class UnleashBuilder
         }
         assert($httpClient instanceof ClientInterface);
 
-        $requestFactory = null;
-        if ($this->requestFactory === null) {
+        $requestFactory = $this->requestFactory;
+        if ($requestFactory === null) {
             if (class_exists(HttpFactory::class)) {
                 $requestFactory = new HttpFactory();
             } else {
@@ -143,8 +143,8 @@ final class UnleashBuilder
 
         $repository = new DefaultUnleashRepository($httpClient, $requestFactory, $configuration);
 
-        $strategies = [];
-        if ($this->strategies === null || !count($this->strategies)) {
+        $strategies = $this->strategies;
+        if ($strategies === null || !count($strategies)) {
             $strategies = [
                 new DefaultStrategyHandler(),
                 new IpAddressStrategyHandler(),
