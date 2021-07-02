@@ -2,3 +2,5 @@
 /phpstan.neon.dist export-ignore
 /rector.php export-ignore
 /.gitattributes export-ignore
+/tests export-ignore
+/.github export-ignore

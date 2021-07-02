@@ -33,7 +33,7 @@
         "phpunit/phpunit": "^9.5"
     },
     "autoload-dev": {
-        "Rikuou\\Tests\\Unleas\\": "tests/"
+        "Rikuou\\Tests\\Unleash\\": "tests/"
     },
     "suggest": {
         "guzzlehttp/guzzle": "A http client implementation (PSR-7)"

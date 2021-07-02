@@ -14,7 +14,7 @@ final class UserIdStrategyHandler extends AbstractStrategyHandler
     public function isEnabled(Strategy $strategy, UnleashContext $context): bool
     {
         if (!$userIds = $this->findParameter('userIds', $strategy)) {
-            throw new MissingArgumentException("The remote server did not return 'userWithIds' config");
+            throw new MissingArgumentException("The remote server did not return 'userIds' config");
         }
         if ($context->getCurrentUserId() === null) {
             throw new MissingArgumentException('The user id strategy needs a current user id set in the context');
