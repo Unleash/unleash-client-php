@@ -23,7 +23,7 @@ final class IpAddressStrategyHandlerTest extends TestCase
     public function testIsEnabled()
     {
         $_SERVER['REMOTE_ADDR'] = '192.168.0.1';
-        $context = new UnleashContext(ipAddress: '127.0.0.1');
+        $context = new UnleashContext(null, '127.0.0.1');
 
         $instance = new IpAddressStrategyHandler();
 
@@ -47,7 +47,7 @@ final class IpAddressStrategyHandlerTest extends TestCase
 
     public function testEmptyIpAddresses()
     {
-        $context = new UnleashContext(ipAddress: '127.0.0.1');
+        $context = new UnleashContext(null, '127.0.0.1');
         $instance = new IpAddressStrategyHandler();
 
         $this->expectException(MissingArgumentException::class);

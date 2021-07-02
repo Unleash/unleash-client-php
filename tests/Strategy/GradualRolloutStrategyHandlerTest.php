@@ -15,7 +15,10 @@ use Rikudou\Unleash\Strategy\GradualRolloutStrategyHandler;
 
 final class GradualRolloutStrategyHandlerTest extends TestCase
 {
-    private GradualRolloutStrategyHandler $instance;
+    /**
+     * @var GradualRolloutStrategyHandler
+     */
+    private $instance;
 
     protected function setUp(): void
     {
@@ -36,36 +39,36 @@ final class GradualRolloutStrategyHandlerTest extends TestCase
         // no exception should be thrown
         $this->instance->isEnabled($this->createStrategy(), new UnleashContext());
 
-        self::assertFalse($this->instance->isEnabled($this->createStrategy(50), new UnleashContext(currentUserId: '123')));
-        self::assertFalse($this->instance->isEnabled($this->createStrategy(50), new UnleashContext(currentUserId: '456')));
-        self::assertTrue($this->instance->isEnabled($this->createStrategy(50), new UnleashContext(currentUserId: '852')));
+        self::assertFalse($this->instance->isEnabled($this->createStrategy(50), new UnleashContext('123')));
+        self::assertFalse($this->instance->isEnabled($this->createStrategy(50), new UnleashContext('456')));
+        self::assertTrue($this->instance->isEnabled($this->createStrategy(50), new UnleashContext('852')));
 
-        self::assertFalse($this->instance->isEnabled($this->createStrategy(50), new UnleashContext(sessionId: '123')));
-        self::assertFalse($this->instance->isEnabled($this->createStrategy(50), new UnleashContext(sessionId: '456')));
-        self::assertTrue($this->instance->isEnabled($this->createStrategy(50), new UnleashContext(sessionId: '852')));
+        self::assertFalse($this->instance->isEnabled($this->createStrategy(50), new UnleashContext('123')));
+        self::assertFalse($this->instance->isEnabled($this->createStrategy(50), new UnleashContext('456')));
+        self::assertTrue($this->instance->isEnabled($this->createStrategy(50), new UnleashContext('852')));
 
         self::assertFalse(
             $this->instance->isEnabled(
-            $this->createStrategy(50),
-            new UnleashContext(currentUserId: '123', sessionId: '852')
-        )
+                $this->createStrategy(50),
+                new UnleashContext('123', null, '852')
+            )
         );
         self::assertFalse(
             $this->instance->isEnabled(
-            $this->createStrategy(50),
-            new UnleashContext(currentUserId: '456', sessionId: '852')
-        )
+                $this->createStrategy(50),
+                new UnleashContext('456', null, '852')
+            )
         );
         self::assertTrue(
             $this->instance->isEnabled(
-            $this->createStrategy(50),
-            new UnleashContext(currentUserId: '852', sessionId: '123')
-        )
+                $this->createStrategy(50),
+                new UnleashContext('852', null, '123')
+            )
         );
 
         try {
             $this->instance->isEnabled(
-                $this->createStrategy(stickiness: Stickiness::USER_ID),
+                $this->createStrategy(100, Stickiness::USER_ID),
                 new UnleashContext(),
             );
             $this->fail('Expected exception of class ' . MissingArgumentException::class);
@@ -74,8 +77,8 @@ final class GradualRolloutStrategyHandlerTest extends TestCase
 
         try {
             $this->instance->isEnabled(
-                $this->createStrategy(stickiness: Stickiness::USER_ID),
-                new UnleashContext(sessionId: 'test'),
+                $this->createStrategy(100, Stickiness::USER_ID),
+                new UnleashContext(null, null, 'test'),
             );
             $this->fail('Expected exception of class ' . MissingArgumentException::class);
         } catch (MissingArgumentException $e) {
@@ -83,20 +86,20 @@ final class GradualRolloutStrategyHandlerTest extends TestCase
 
         self::assertFalse(
             $this->instance->isEnabled(
-            $this->createStrategy(percentage: 50, stickiness: Stickiness::USER_ID),
-            new UnleashContext(currentUserId: '456')
-        )
+                $this->createStrategy(50, Stickiness::USER_ID),
+                new UnleashContext('456')
+            )
         );
         self::assertTrue(
             $this->instance->isEnabled(
-            $this->createStrategy(percentage: 50, stickiness: Stickiness::USER_ID),
-            new UnleashContext(currentUserId: '852')
-        )
+                $this->createStrategy(50, Stickiness::USER_ID),
+                new UnleashContext('852')
+            )
         );
 
         try {
             $this->instance->isEnabled(
-                $this->createStrategy(stickiness: Stickiness::SESSION_ID),
+                $this->createStrategy(100, Stickiness::SESSION_ID),
                 new UnleashContext(),
             );
             $this->fail('Expected exception of class ' . MissingArgumentException::class);
@@ -105,8 +108,8 @@ final class GradualRolloutStrategyHandlerTest extends TestCase
 
         try {
             $this->instance->isEnabled(
-                $this->createStrategy(stickiness: Stickiness::SESSION_ID),
-                new UnleashContext(currentUserId: 'test'),
+                $this->createStrategy(100, Stickiness::SESSION_ID),
+                new UnleashContext('test'),
             );
             $this->fail('Expected exception of class ' . MissingArgumentException::class);
         } catch (MissingArgumentException $e) {
@@ -114,18 +117,18 @@ final class GradualRolloutStrategyHandlerTest extends TestCase
 
         self::assertFalse(
             $this->instance->isEnabled(
-            $this->createStrategy(percentage: 50, stickiness: Stickiness::SESSION_ID),
-            new UnleashContext(sessionId: '456')
-        )
+                $this->createStrategy(50, Stickiness::SESSION_ID),
+                new UnleashContext(null, null, '456')
+            )
         );
         self::assertTrue(
             $this->instance->isEnabled(
-            $this->createStrategy(percentage: 50, stickiness: Stickiness::SESSION_ID),
-            new UnleashContext(sessionId: '852')
-        )
+                $this->createStrategy(50, Stickiness::SESSION_ID),
+                new UnleashContext(null, null, '852')
+            )
         );
 
-        $this->instance->isEnabled($this->createStrategy(stickiness: Stickiness::RANDOM), new UnleashContext());
+        $this->instance->isEnabled($this->createStrategy(100, Stickiness::RANDOM), new UnleashContext());
     }
 
     #[Pure]

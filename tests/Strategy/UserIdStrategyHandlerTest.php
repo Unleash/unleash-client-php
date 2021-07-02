@@ -23,7 +23,7 @@ final class UserIdStrategyHandlerTest extends TestCase
     public function testIsEnabled()
     {
         $instance = new UserIdStrategyHandler();
-        $context = new UnleashContext(currentUserId: '123');
+        $context = new UnleashContext('123');
 
         try {
             $instance->isEnabled(new DefaultStrategy('userWithId', [
