@@ -1,0 +1,4 @@
+/.php-cs-fixer.dist.php export-ignore
+/phpstan.neon.dist export-ignore
+/rector.php export-ignore
+/.gitattributes export-ignore
