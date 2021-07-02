@@ -9,6 +9,8 @@ aka [Feature Flags](https://docs.gitlab.com/ee/operations/feature_flags.html) in
 
 `composer require rikudou/unleash-sdk`
 
+Requires PHP 7.3 or newer.
+
 > You will also need some implementation of [PSR-7](https://packagist.org/providers/psr/http-message-implementation)
 > and [PSR-17](https://packagist.org/providers/psr/http-factory-implementation), for example 
 > [Guzzle](https://packagist.org/packages/guzzlehttp/guzzle)
