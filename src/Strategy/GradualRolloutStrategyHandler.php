@@ -35,19 +35,32 @@ final class GradualRolloutStrategyHandler extends AbstractStrategyHandler
             return false;
         }
 
-        $id = match (strtolower($stickiness)) {
-            Stickiness::USER_ID => $context->getCurrentUserId()
-                ?? throw new MissingArgumentException(
-                    'The flexible rollout strategy is set to use user id but no user id is present in context'
-                ),
-            Stickiness::SESSION_ID => $context->getSessionId()
-                ?? throw new MissingArgumentException(
-                    'The flexible rollout strategy is set to use session id but no session is started'
-                ),
-            Stickiness::RANDOM => random_int(1, 100),
-            Stickiness::DEFAULT => $context->getCurrentUserId() ?? $context->getSessionId() ?? random_int(1, 100),
-            default => throw new InvalidValueException("Unknown stickiness value: '{$stickiness}'"),
-        };
+        switch (strtolower($stickiness)) {
+            case Stickiness::USER_ID:
+                if ($context->getCurrentUserId() === null) {
+                    throw new MissingArgumentException(
+                        'The flexible rollout strategy is set to use user id but no user id is present in context'
+                    );
+                }
+                $id = $context->getCurrentUserId();
+                break;
+            case Stickiness::SESSION_ID:
+                if ($context->getSessionId() === null) {
+                    throw new MissingArgumentException(
+                        'The flexible rollout strategy is set to use session id but no session is started'
+                    );
+                }
+                $id = $context->getSessionId();
+                break;
+            case Stickiness::RANDOM:
+                $id = random_int(1, 100);
+                break;
+            case Stickiness::DEFAULT:
+                $id = $context->getCurrentUserId() ?? $context->getSessionId() ?? random_int(1, 100);
+                break;
+            default:
+                throw new InvalidValueException("Unknown stickiness value: '{$stickiness}'");
+        }
 
         $normalized = $this->stickinessCalculator->calculate((string) $id, $groupId);
 
