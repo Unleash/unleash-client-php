@@ -1,8 +1,8 @@
-name: Tests (7.3)
+name: Tests (7.x)
 on:
   repository_dispatch:
     types:
-      - trigger-73-tests
+      - trigger-7x-tests
 
 jobs:
   tests:
