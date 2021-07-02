@@ -41,7 +41,7 @@ jobs:
           git checkout -b tmp-php-7.3-release && \
           git add . -v && \
           git commit -m "Transpile to PHP 7.3" && \
-          git push origin tmp-php-7.3-release && \
+          git push origin tmp-php-7.3-release
       - name: Create PHP 7.3 release tag
         env:
           VERSION: ${{ steps.extract_name.outputs.result }}
