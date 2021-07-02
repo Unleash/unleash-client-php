@@ -22,7 +22,7 @@ jobs:
         run: composer install
       - name: Transpile
         run: php vendor/bin/rector process src
-      - name: Update config.json
+      - name: Commit PHP 7.3 version
         uses: actions-x/commit@v2
         with:
           files: src
