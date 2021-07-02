@@ -5,6 +5,10 @@
 A PHP implementation of the [Unleash protocol](https://www.getunleash.io/)
 aka [Feature Flags](https://docs.gitlab.com/ee/operations/feature_flags.html) in GitLab.
 
+> Unleash allows you to gradually release your app's feature before doing a full release based on multiple strategies
+> like releasing to only specific users or releasing to a percentage of your user base. Read more in the above linked
+> documentations.
+
 ## Installation
 
 `composer require rikudou/unleash-sdk`
