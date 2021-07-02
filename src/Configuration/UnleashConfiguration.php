@@ -28,6 +28,7 @@ final class UnleashConfiguration
         if (substr($url, -1) !== '/') {
             $url .= '/';
         }
+
         return $url;
     }
 
