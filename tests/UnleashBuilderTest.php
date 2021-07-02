@@ -1,11 +1,14 @@
 <?php
 
+namespace Rikudou\Tests\Unleash;
+
 use Cache\Adapter\Filesystem\FilesystemCachePool;
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\HttpFactory;
 use League\Flysystem\Adapter\Local;
 use League\Flysystem\Filesystem;
 use PHPUnit\Framework\TestCase;
+use ReflectionObject;
 use Rikudou\Unleash\Configuration\UnleashConfiguration;
 use Rikudou\Unleash\Exception\InvalidValueException;
 use Rikudou\Unleash\Strategy\DefaultStrategyHandler;
@@ -110,7 +113,7 @@ final class UnleashBuilderTest extends TestCase
         self::assertEquals('test', $configuration->getInstanceId());
         self::assertNull($configuration->getCache());
         self::assertIsInt($configuration->getTtl());
-        self::assertCount(4, $strategies);
+        self::assertCount(7, $strategies);
 
         $requestFactory = new HttpFactory();
         $httpClient = new Client();

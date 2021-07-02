@@ -14,7 +14,10 @@ use Rikudou\Unleash\Exception\InvalidValueException;
 use Rikudou\Unleash\Repository\DefaultUnleashRepository;
 use Rikudou\Unleash\Stickiness\MurmurHashCalculator;
 use Rikudou\Unleash\Strategy\DefaultStrategyHandler;
+use Rikudou\Unleash\Strategy\GradualRolloutRandomStrategyHandler;
+use Rikudou\Unleash\Strategy\GradualRolloutSessionIdStrategyHandler;
 use Rikudou\Unleash\Strategy\GradualRolloutStrategyHandler;
+use Rikudou\Unleash\Strategy\GradualRolloutUserIdStrategyHandler;
 use Rikudou\Unleash\Strategy\IpAddressStrategyHandler;
 use Rikudou\Unleash\Strategy\StrategyHandler;
 use Rikudou\Unleash\Strategy\UserIdStrategyHandler;
@@ -165,11 +168,15 @@ final class UnleashBuilder
 
         $strategies = $this->strategies;
         if ($strategies === null || !count($strategies)) {
+            $rolloutStrategyHandler = new GradualRolloutStrategyHandler(new MurmurHashCalculator());
             $strategies = [
                 new DefaultStrategyHandler(),
                 new IpAddressStrategyHandler(),
                 new UserIdStrategyHandler(),
-                new GradualRolloutStrategyHandler(new MurmurHashCalculator()),
+                $rolloutStrategyHandler,
+                new GradualRolloutUserIdStrategyHandler($rolloutStrategyHandler),
+                new GradualRolloutSessionIdStrategyHandler($rolloutStrategyHandler),
+                new GradualRolloutRandomStrategyHandler($rolloutStrategyHandler),
             ];
         }
 

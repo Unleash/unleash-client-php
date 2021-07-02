@@ -1,6 +1,6 @@
 <?php
 
-namespace Configuration;
+namespace Rikudou\Tests\Unleash\Configuration;
 
 use PHPUnit\Framework\TestCase;
 use Rikudou\Unleash\Configuration\UnleashConfiguration;

@@ -1,6 +1,6 @@
 <?php
 
-namespace Strategy;
+namespace Rikudou\Tests\Unleash\Strategy;
 
 use PHPUnit\Framework\TestCase;
 use Rikudou\Unleash\Configuration\UnleashContext;
@@ -25,13 +25,9 @@ final class UserIdStrategyHandlerTest extends TestCase
         $instance = new UserIdStrategyHandler();
         $context = new UnleashContext('123');
 
-        try {
-            $instance->isEnabled(new DefaultStrategy('userWithId', [
-                'userIds' => '123',
-            ]), new UnleashContext());
-            $this->fail('Expected exception of class ' . MissingArgumentException::class);
-        } catch (MissingArgumentException $ignored) {
-        }
+        self::assertFalse($instance->isEnabled(new DefaultStrategy('userWithId', [
+            'userIds' => '123',
+        ]), new UnleashContext()));
 
         try {
             $instance->isEnabled(new DefaultStrategy('userWithId', [

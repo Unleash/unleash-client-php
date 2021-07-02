@@ -2,8 +2,15 @@
 
 namespace Rikudou\Unleash\Configuration;
 
+use Rikudou\Unleash\Exception\InvalidValueException;
+
 final class UnleashContext
 {
+    /**
+     * @var array<string,string>
+     */
+    private array $customContext = [];
+
     public function __construct(
         private ?string $currentUserId = null,
         private ?string $ipAddress = null,
@@ -24,6 +31,38 @@ final class UnleashContext
     public function getSessionId(): ?string
     {
         return $this->sessionId ?? (session_id() ?: null);
+    }
+
+    public function getCustomProperty(string $name): string
+    {
+        if (!array_key_exists($name, $this->customContext)) {
+            throw new InvalidValueException("The custom context value '{$name}' does not exist");
+        }
+
+        return $this->customContext[$name];
+    }
+
+    public function setCustomProperty(string $name, string $value): self
+    {
+        $this->customContext[$name] = $value;
+
+        return $this;
+    }
+
+    public function hasCustomProperty(string $name): bool
+    {
+        return array_key_exists($name, $this->customContext);
+    }
+
+    public function removeCustomProperty(string $name, bool $silent = true): self
+    {
+        if (!$this->hasCustomProperty($name) && !$silent) {
+            throw new InvalidValueException("The custom context value '{$name}' does not exist");
+        }
+
+        unset($this->customContext[$name]);
+
+        return $this;
     }
 
     /**
