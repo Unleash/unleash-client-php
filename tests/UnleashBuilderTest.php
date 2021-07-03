@@ -248,6 +248,6 @@ final class UnleashBuilderTest extends TestCase
 
     public function testWithMetricsInterval()
     {
-        self::assertNotSame($this->instance, $this->instance->withMetricsInterval(5_000));
+        self::assertNotSame($this->instance, $this->instance->withMetricsInterval(5000));
     }
 }
