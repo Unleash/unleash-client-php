@@ -378,7 +378,7 @@ Example:
 1. user visits your site and this sdk gets triggered, no metric has been sent
 2. after five seconds user visits another page where again this sdk gets triggered, no metric sent
 3. user waits one minute before doing anything, no one else is accessing your site
-4. after one minute user visits another page, the metrics have been to the Unleash server
+4. after one minute user visits another page, the metrics have been sent to the Unleash server
 
 In the example above the metric bundle gets sent after 1 minute and 5 seconds because there was no one to trigger
 the code.
