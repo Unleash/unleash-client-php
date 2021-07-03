@@ -19,7 +19,7 @@ final class DefaultUnleash implements Unleash
         private iterable $strategyHandlers,
         private UnleashRepository $repository,
         private RegistrationService $registrationService,
-        bool $autoregister
+        bool $autoregister,
     ) {
         if ($autoregister) {
             $this->register();

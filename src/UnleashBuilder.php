@@ -45,6 +45,10 @@ final class UnleashBuilder
 
     private bool $autoregister = true;
 
+    private ?bool $metricsEnabled = null;
+
+    private ?int $metricsInterval = null;
+
     /**
      * @var array<string,string>
      */
@@ -147,6 +151,18 @@ final class UnleashBuilder
         return $this->with('autoregister', $enabled);
     }
 
+    #[Pure]
+    public function withMetricsEnabled(bool $enabled): self
+    {
+        return $this->with('metricsEnabled', $enabled);
+    }
+
+    #[Pure]
+    public function withMetricsInterval(int $milliseconds): self
+    {
+        return $this->with('metricsInterval', $milliseconds);
+    }
+
     public function build(): Unleash
     {
         if ($this->appUrl === null) {
@@ -164,7 +180,10 @@ final class UnleashBuilder
         $configuration = new UnleashConfiguration($this->appUrl, $this->appName, $this->instanceId);
         $configuration
             ->setCache($this->cache)
-            ->setTtl($this->cacheTtl ?? $configuration->getTtl());
+            ->setTtl($this->cacheTtl ?? $configuration->getTtl())
+            ->setMetricsEnabled($this->metricsEnabled ?? $configuration->isMetricsEnabled())
+            ->setMetricsInterval($this->metricsInterval ?? $configuration->getMetricsInterval())
+        ;
 
         $httpClient = $this->httpClient;
         if ($httpClient === null) {
@@ -211,7 +230,12 @@ final class UnleashBuilder
             $registrationService = new DefaultRegistrationService($httpClient, $requestFactory, $configuration, $this->headers);
         }
 
-        return new DefaultUnleash($strategies, $repository, $registrationService, $this->autoregister);
+        return new DefaultUnleash(
+            $strategies,
+            $repository,
+            $registrationService,
+            $this->autoregister,
+        );
     }
 
     private function with(string $property, mixed $value): self
