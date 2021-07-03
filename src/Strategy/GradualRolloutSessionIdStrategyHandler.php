@@ -27,7 +27,7 @@ final class GradualRolloutSessionIdStrategyHandler extends AbstractStrategyHandl
         return $this->rolloutStrategyHandler->isEnabled($transformedStrategy, $context);
     }
 
-    protected function getStrategyName(): string
+    public function getStrategyName(): string
     {
         return 'gradualRolloutSessionId';
     }

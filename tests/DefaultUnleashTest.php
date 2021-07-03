@@ -16,7 +16,7 @@ final class DefaultUnleashTest extends AbstractHttpClientTest
     {
         $instance = new DefaultUnleash([
             new DefaultStrategyHandler(),
-        ], $this->repository);
+        ], $this->repository, $this->registrationService);
 
         $this->pushResponse([
             'version' => 1,
@@ -55,7 +55,7 @@ final class DefaultUnleashTest extends AbstractHttpClientTest
     {
         $instance = new DefaultUnleash([
             new DefaultStrategyHandler(),
-        ], $this->repository);
+        ], $this->repository, $this->registrationService);
 
         $this->pushResponse([
             'version' => 1,
@@ -105,7 +105,7 @@ final class DefaultUnleashTest extends AbstractHttpClientTest
     {
         $instance = new DefaultUnleash([
             new IpAddressStrategyHandler(),
-        ], $this->repository);
+        ], $this->repository, $this->registrationService);
         $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
 
         $this->pushResponse([
@@ -177,7 +177,7 @@ final class DefaultUnleashTest extends AbstractHttpClientTest
     {
         $instance = new DefaultUnleash([
             new UserIdStrategyHandler(),
-        ], $this->repository);
+        ], $this->repository, $this->registrationService);
         $context = new UnleashContext('123');
 
         $this->pushResponse([
@@ -225,7 +225,7 @@ final class DefaultUnleashTest extends AbstractHttpClientTest
     {
         $instance = new DefaultUnleash([
             new GradualRolloutStrategyHandler(new MurmurHashCalculator()),
-        ], $this->repository);
+        ], $this->repository, $this->registrationService);
 
         $this->pushResponse([
             'version' => 1,
@@ -293,7 +293,7 @@ final class DefaultUnleashTest extends AbstractHttpClientTest
             new GradualRolloutStrategyHandler(new MurmurHashCalculator()),
             new IpAddressStrategyHandler(),
             new UserIdStrategyHandler(),
-        ], $this->repository);
+        ], $this->repository, $this->registrationService);
         $_SERVER['REMOTE_ADDR'] = '1.2.3.4';
 
         $this->pushResponse([

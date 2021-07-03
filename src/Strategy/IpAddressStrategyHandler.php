@@ -21,7 +21,7 @@ final class IpAddressStrategyHandler extends AbstractStrategyHandler
         return in_array($context->getIpAddress(), $ipAddresses, true);
     }
 
-    protected function getStrategyName(): string
+    public function getStrategyName(): string
     {
         return 'remoteAddress';
     }

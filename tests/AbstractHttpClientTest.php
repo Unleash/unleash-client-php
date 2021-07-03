@@ -9,6 +9,8 @@ use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\HttpFactory;
 use GuzzleHttp\Psr7\Response;
 use PHPUnit\Framework\TestCase;
+use Rikudou\Unleash\Client\DefaultRegistrationService;
+use Rikudou\Unleash\Client\RegistrationService;
 use Rikudou\Unleash\Configuration\UnleashConfiguration;
 use Rikudou\Unleash\Repository\DefaultUnleashRepository;
 
@@ -34,6 +36,16 @@ abstract class AbstractHttpClientTest extends TestCase
      */
     protected $handlerStack;
 
+    /**
+     * @var Client
+     */
+    protected $httpClient;
+
+    /**
+     * @var RegistrationService
+     */
+    protected $registrationService;
+
     protected function setUp(): void
     {
         $this->mockHandler = new MockHandler();
@@ -41,10 +53,19 @@ abstract class AbstractHttpClientTest extends TestCase
         $this->handlerStack = HandlerStack::create($this->mockHandler);
         $this->handlerStack->push(Middleware::history($this->requestHistory));
 
+        $this->httpClient = new Client([
+            'handler' => $this->handlerStack,
+        ]);
+
+        $this->registrationService = new DefaultRegistrationService(
+            $this->httpClient,
+            new HttpFactory(),
+            new UnleashConfiguration('', '', ''),
+            []
+        );
+
         $this->repository = new DefaultUnleashRepository(
-            new Client([
-                'handler' => $this->handlerStack,
-            ]),
+            $this->httpClient,
             new HttpFactory(),
             new UnleashConfiguration('', '', '')
         );

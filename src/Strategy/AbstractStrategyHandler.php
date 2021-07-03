@@ -11,8 +11,6 @@ abstract class AbstractStrategyHandler implements StrategyHandler
         return $strategy->getName() === $this->getStrategyName();
     }
 
-    abstract protected function getStrategyName(): string;
-
     protected function findParameter(string $parameter, Strategy $strategy): ?string
     {
         $parameters = $strategy->getParameters();

@@ -2,6 +2,7 @@
 
 namespace Rikudou\Unleash;
 
+use Rikudou\Unleash\Client\RegistrationService;
 use Rikudou\Unleash\Configuration\UnleashContext;
 use Rikudou\Unleash\DTO\Strategy;
 use Rikudou\Unleash\Repository\UnleashRepository;
@@ -15,6 +16,7 @@ final class DefaultUnleash implements Unleash
     public function __construct(
         private iterable $strategyHandlers,
         private UnleashRepository $repository,
+        private RegistrationService $registrationService
     ) {
     }
 
@@ -56,6 +58,11 @@ final class DefaultUnleash implements Unleash
         }
 
         return false;
+    }
+
+    public function register(): bool
+    {
+        return $this->registrationService->register($this->strategyHandlers);
     }
 
     /**
