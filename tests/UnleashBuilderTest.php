@@ -14,6 +14,7 @@ use Rikudou\Unleash\Configuration\UnleashConfiguration;
 use Rikudou\Unleash\Exception\InvalidValueException;
 use Rikudou\Unleash\Strategy\DefaultStrategyHandler;
 use Rikudou\Unleash\UnleashBuilder;
+use Symfony\Component\HttpClient\Psr18Client;
 
 final class UnleashBuilderTest extends TestCase
 {
@@ -249,5 +250,82 @@ final class UnleashBuilderTest extends TestCase
     public function testWithMetricsInterval()
     {
         self::assertNotSame($this->instance, $this->instance->withMetricsInterval(5000));
+    }
+
+    public function testWithoutDefaultHttpClients()
+    {
+        $instance = $this->instance
+            ->withAppUrl('http://example.com')
+            ->withInstanceId('test')
+            ->withAppName('test')
+        ;
+        $unleash = $instance->build();
+
+        $locatorProperty = (new ReflectionObject($instance))->getProperty('defaultHttpImplementationLocator');
+        $locatorProperty->setAccessible(true);
+        $locator = $locatorProperty->getValue($instance);
+
+        $defaultImplementationsProperty = (new ReflectionObject($locator))->getProperty('defaultImplementations');
+        $defaultImplementationsProperty->setAccessible(true);
+        $defaultImplementations = $defaultImplementationsProperty->getValue($locator);
+
+        $repositoryProperty = (new ReflectionObject($unleash))->getProperty('repository');
+        $repositoryProperty->setAccessible(true);
+        $repository = $repositoryProperty->getValue($unleash);
+
+        $httpClientProperty = (new ReflectionObject($repository))->getProperty('httpClient');
+        $httpClientProperty->setAccessible(true);
+        $httpClient = $httpClientProperty->getValue($repository);
+
+        self::assertInstanceOf(Client::class, $httpClient);
+
+        $defaultImplementations['client'][Client::class . 2] = [];
+        unset($defaultImplementations['client'][Client::class]);
+        $defaultImplementationsProperty->setValue($locator, $defaultImplementations);
+
+        $unleash = $instance->build();
+        $repository = $repositoryProperty->getValue($unleash);
+        $httpClient = $httpClientProperty->getValue($repository);
+
+        self::assertInstanceOf(Psr18Client::class, $httpClient);
+
+        $defaultImplementations['client'][Psr18Client::class . 2] = [];
+        unset($defaultImplementations['client'][Psr18Client::class]);
+        $defaultImplementationsProperty->setValue($locator, $defaultImplementations);
+
+        try {
+            $instance->build();
+            $this->fail('No default http client is available, expected exception');
+        } catch (InvalidValueException $e) {
+        }
+
+        $defaultImplementations['client'][Psr18Client::class] = [];
+        $defaultImplementationsProperty->setValue($locator, $defaultImplementations);
+
+        $requestFactoryProperty = (new ReflectionObject($repository))->getProperty('requestFactory');
+        $requestFactoryProperty->setAccessible(true);
+
+        $unleash = $instance->build();
+        $repository = $repositoryProperty->getValue($unleash);
+        $requestFactory = $requestFactoryProperty->getValue($repository);
+
+        self::assertInstanceOf(HttpFactory::class, $requestFactory);
+
+        $defaultImplementations['factory'][HttpFactory::class . 2] = [];
+        unset($defaultImplementations['factory'][HttpFactory::class]);
+        $defaultImplementationsProperty->setValue($locator, $defaultImplementations);
+
+        $unleash = $instance->build();
+        $repository = $repositoryProperty->getValue($unleash);
+        $requestFactory = $requestFactoryProperty->getValue($repository);
+
+        self::assertInstanceOf(Psr18Client::class, $requestFactory);
+
+        $defaultImplementations['factory'][Psr18Client::class . 2] = [];
+        unset($defaultImplementations['factory'][Psr18Client::class]);
+        $defaultImplementationsProperty->setValue($locator, $defaultImplementations);
+
+        $this->expectException(InvalidValueException::class);
+        $instance->build();
     }
 }

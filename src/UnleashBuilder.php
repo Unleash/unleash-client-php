@@ -2,8 +2,6 @@
 
 namespace Rikudou\Unleash;
 
-use GuzzleHttp\Client;
-use GuzzleHttp\Psr7\HttpFactory;
 use JetBrains\PhpStorm\Immutable;
 use JetBrains\PhpStorm\Pure;
 use Psr\Http\Client\ClientInterface;
@@ -13,6 +11,7 @@ use Rikudou\Unleash\Client\DefaultRegistrationService;
 use Rikudou\Unleash\Client\RegistrationService;
 use Rikudou\Unleash\Configuration\UnleashConfiguration;
 use Rikudou\Unleash\Exception\InvalidValueException;
+use Rikudou\Unleash\Helper\DefaultHttpImplementationLocator;
 use Rikudou\Unleash\Metrics\DefaultMetricsHandler;
 use Rikudou\Unleash\Metrics\DefaultMetricsSender;
 use Rikudou\Unleash\Repository\DefaultUnleashRepository;
@@ -25,11 +24,12 @@ use Rikudou\Unleash\Strategy\GradualRolloutUserIdStrategyHandler;
 use Rikudou\Unleash\Strategy\IpAddressStrategyHandler;
 use Rikudou\Unleash\Strategy\StrategyHandler;
 use Rikudou\Unleash\Strategy\UserIdStrategyHandler;
-use Symfony\Component\HttpClient\Psr18Client;
 
 #[Immutable]
 final class UnleashBuilder
 {
+    private DefaultHttpImplementationLocator $defaultHttpImplementationLocator;
+
     private ?string $appUrl = null;
 
     private ?string $instanceId = null;
@@ -61,6 +61,12 @@ final class UnleashBuilder
      * @var array<StrategyHandler>|null
      */
     private ?array $strategies = null;
+
+    #[Pure]
+    public function __construct()
+    {
+        $this->defaultHttpImplementationLocator = new DefaultHttpImplementationLocator();
+    }
 
     #[Pure]
     public static function create(): self
@@ -190,13 +196,13 @@ final class UnleashBuilder
 
         $httpClient = $this->httpClient;
         if ($httpClient === null) {
-            if (class_exists(Client::class)) {
-                $httpClient = new Client();
-            } elseif (class_exists(Psr18Client::class)) {
-                $httpClient = new Psr18Client();
-            } else {
+            $httpClient = $this->defaultHttpImplementationLocator->findHttpClient();
+            if ($httpClient === null) {
                 throw new InvalidValueException(
-                    "No http client provided and Guzzle is not installed, please use 'withHttpClient()' method"
+                    sprintf(
+                        "No http client provided, please use 'withHttpClient()' method or install one of officially supported clients: '%s'",
+                        implode("', '", $this->defaultHttpImplementationLocator->getHttpClientPackages())
+                    )
                 );
             }
         }
@@ -204,13 +210,13 @@ final class UnleashBuilder
 
         $requestFactory = $this->requestFactory;
         if ($requestFactory === null) {
-            if (class_exists(HttpFactory::class)) {
-                $requestFactory = new HttpFactory();
-            } elseif (class_exists(Psr18Client::class)) {
-                $requestFactory = new Psr18Client();
-            } else {
+            $requestFactory = $this->defaultHttpImplementationLocator->findRequestFactory();
+            if ($requestFactory === null) {
                 throw new InvalidValueException(
-                    "No request factory provided and Guzzle is not installed, please use 'withRequestFactory()' method"
+                    sprintf(
+                        "No request factory provided, please use 'withHttpClient()' method or install one of officially supported clients: '%s'",
+                        implode("', '", $this->defaultHttpImplementationLocator->getRequestFactoryPackages())
+                    )
                 );
             }
         }
