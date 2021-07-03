@@ -43,6 +43,8 @@ final class UnleashBuilder
 
     private ?RegistrationService $registrationService = null;
 
+    private bool $autoregister = true;
+
     /**
      * @var array<string,string>
      */
@@ -133,6 +135,12 @@ final class UnleashBuilder
         return $this->with('registrationService', $registrationService);
     }
 
+    #[Pure]
+    public function withAutomaticRegistrationEnabled(bool $enabled): self
+    {
+        return $this->with('autoregister', $enabled);
+    }
+
     public function build(): Unleash
     {
         if ($this->appUrl === null) {
@@ -195,7 +203,7 @@ final class UnleashBuilder
             $registrationService = new DefaultRegistrationService($httpClient, $requestFactory, $configuration, $this->headers);
         }
 
-        return new DefaultUnleash($strategies, $repository, $registrationService);
+        return new DefaultUnleash($strategies, $repository, $registrationService, $this->autoregister);
     }
 
     private function with(string $property, mixed $value): self

@@ -16,7 +16,7 @@ final class DefaultUnleashTest extends AbstractHttpClientTest
     {
         $instance = new DefaultUnleash([
             new DefaultStrategyHandler(),
-        ], $this->repository, $this->registrationService);
+        ], $this->repository, $this->registrationService, false);
 
         $this->pushResponse([
             'version' => 1,
@@ -55,7 +55,7 @@ final class DefaultUnleashTest extends AbstractHttpClientTest
     {
         $instance = new DefaultUnleash([
             new DefaultStrategyHandler(),
-        ], $this->repository, $this->registrationService);
+        ], $this->repository, $this->registrationService, false);
 
         $this->pushResponse([
             'version' => 1,
@@ -105,7 +105,7 @@ final class DefaultUnleashTest extends AbstractHttpClientTest
     {
         $instance = new DefaultUnleash([
             new IpAddressStrategyHandler(),
-        ], $this->repository, $this->registrationService);
+        ], $this->repository, $this->registrationService, false);
         $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
 
         $this->pushResponse([
@@ -177,7 +177,7 @@ final class DefaultUnleashTest extends AbstractHttpClientTest
     {
         $instance = new DefaultUnleash([
             new UserIdStrategyHandler(),
-        ], $this->repository, $this->registrationService);
+        ], $this->repository, $this->registrationService, false);
         $context = new UnleashContext('123');
 
         $this->pushResponse([
@@ -225,7 +225,7 @@ final class DefaultUnleashTest extends AbstractHttpClientTest
     {
         $instance = new DefaultUnleash([
             new GradualRolloutStrategyHandler(new MurmurHashCalculator()),
-        ], $this->repository, $this->registrationService);
+        ], $this->repository, $this->registrationService, false);
 
         $this->pushResponse([
             'version' => 1,
@@ -293,7 +293,7 @@ final class DefaultUnleashTest extends AbstractHttpClientTest
             new GradualRolloutStrategyHandler(new MurmurHashCalculator()),
             new IpAddressStrategyHandler(),
             new UserIdStrategyHandler(),
-        ], $this->repository, $this->registrationService);
+        ], $this->repository, $this->registrationService, false);
         $_SERVER['REMOTE_ADDR'] = '1.2.3.4';
 
         $this->pushResponse([
@@ -420,10 +420,14 @@ final class DefaultUnleashTest extends AbstractHttpClientTest
 
     public function testRegister()
     {
-        $instance = new DefaultUnleash([], $this->repository, $this->registrationService);
+        $instance = new DefaultUnleash([], $this->repository, $this->registrationService, false);
         $this->pushResponse([]);
         self::assertTrue($instance->register());
         $this->pushResponse([], 1, 400);
         self::assertFalse($instance->register());
+
+        $this->pushResponse([]);
+        new DefaultUnleash([], $this->repository, $this->registrationService, true);
+        self::assertCount(3, $this->requestHistory);
     }
 }

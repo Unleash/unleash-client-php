@@ -16,8 +16,12 @@ final class DefaultUnleash implements Unleash
     public function __construct(
         private iterable $strategyHandlers,
         private UnleashRepository $repository,
-        private RegistrationService $registrationService
+        private RegistrationService $registrationService,
+        bool $autoregister
     ) {
+        if ($autoregister) {
+            $this->register();
+        }
     }
 
     public function isEnabled(string $featureName, UnleashContext $context = null, bool $default = false): bool
