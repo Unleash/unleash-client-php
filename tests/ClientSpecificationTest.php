@@ -4,6 +4,8 @@ namespace Rikudou\Tests\Unleash;
 
 use Rikudou\Unleash\Configuration\UnleashContext;
 use Rikudou\Unleash\DefaultUnleash;
+use Rikudou\Unleash\DTO\Feature;
+use Rikudou\Unleash\Metrics\MetricsHandler;
 use Rikudou\Unleash\Stickiness\MurmurHashCalculator;
 use Rikudou\Unleash\Strategy\DefaultStrategyHandler;
 use Rikudou\Unleash\Strategy\GradualRolloutRandomStrategyHandler;
@@ -25,7 +27,11 @@ final class ClientSpecificationTest extends AbstractHttpClientTest
             new GradualRolloutUserIdStrategyHandler(new GradualRolloutStrategyHandler(new MurmurHashCalculator())),
             new GradualRolloutSessionIdStrategyHandler(new GradualRolloutStrategyHandler(new MurmurHashCalculator())),
             new GradualRolloutRandomStrategyHandler(new GradualRolloutStrategyHandler(new MurmurHashCalculator())),
-        ], $this->repository, $this->registrationService, false);
+        ], $this->repository, $this->registrationService, false, new class implements MetricsHandler {
+            public function handleMetrics(Feature $feature, bool $successful): void
+            {
+            }
+        });
 
         $specificationList = $this->getJson('index.json');
 

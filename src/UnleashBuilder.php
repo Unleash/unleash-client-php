@@ -13,6 +13,8 @@ use Rikudou\Unleash\Client\DefaultRegistrationService;
 use Rikudou\Unleash\Client\RegistrationService;
 use Rikudou\Unleash\Configuration\UnleashConfiguration;
 use Rikudou\Unleash\Exception\InvalidValueException;
+use Rikudou\Unleash\Metrics\DefaultMetricsHandler;
+use Rikudou\Unleash\Metrics\DefaultMetricsSender;
 use Rikudou\Unleash\Repository\DefaultUnleashRepository;
 use Rikudou\Unleash\Stickiness\MurmurHashCalculator;
 use Rikudou\Unleash\Strategy\DefaultStrategyHandler;
@@ -235,6 +237,15 @@ final class UnleashBuilder
             $repository,
             $registrationService,
             $this->autoregister,
+            new DefaultMetricsHandler(
+                new DefaultMetricsSender(
+                    $httpClient,
+                    $requestFactory,
+                    $configuration,
+                    $this->headers
+                ),
+                $configuration
+            )
         );
     }
 

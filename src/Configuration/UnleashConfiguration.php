@@ -10,7 +10,7 @@ final class UnleashConfiguration
 
     private int $ttl = 30;
 
-    private int $metricsInterval = 10_000;
+    private int $metricsInterval = 30_000;
 
     private bool $metricsEnabled = true;
 
