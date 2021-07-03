@@ -29,27 +29,27 @@ final class UnleashBuilderTest extends TestCase
 
     public function testWithInstanceId()
     {
-        self::assertNotEquals($this->instance, $this->instance->withInstanceId('test'));
+        self::assertNotSame($this->instance, $this->instance->withInstanceId('test'));
     }
 
     public function testWithHttpClient()
     {
-        self::assertNotEquals($this->instance, $this->instance->withHttpClient(new Client()));
+        self::assertNotSame($this->instance, $this->instance->withHttpClient(new Client()));
     }
 
     public function testWithStrategies()
     {
-        self::assertNotEquals($this->instance, $this->instance->withStrategies(new DefaultStrategyHandler()));
+        self::assertNotSame($this->instance, $this->instance->withStrategies(new DefaultStrategyHandler()));
     }
 
     public function testWithCacheTimeToLive()
     {
-        self::assertNotEquals($this->instance, $this->instance->withCacheTimeToLive(123));
+        self::assertNotSame($this->instance, $this->instance->withCacheTimeToLive(123));
     }
 
     public function testWithAppName()
     {
-        self::assertNotEquals($this->instance, $this->instance->withAppName('test-app'));
+        self::assertNotSame($this->instance, $this->instance->withAppName('test-app'));
     }
 
     public function testWithCacheHandler()
@@ -57,13 +57,13 @@ final class UnleashBuilderTest extends TestCase
         $cacheHandler = new FilesystemCachePool(
             new Filesystem(new Local(sys_get_temp_dir() . '/unleash-sdk-tests'))
         );
-        self::assertNotEquals($this->instance, $this->instance->withCacheHandler($cacheHandler));
-        self::assertNotEquals($this->instance, $this->instance->withCacheHandler($cacheHandler, 120));
+        self::assertNotSame($this->instance, $this->instance->withCacheHandler($cacheHandler));
+        self::assertNotSame($this->instance, $this->instance->withCacheHandler($cacheHandler, 120));
     }
 
     public function testWithRequestFactory()
     {
-        self::assertNotEquals($this->instance, $this->instance->withRequestFactory(new HttpFactory()));
+        self::assertNotSame($this->instance, $this->instance->withRequestFactory(new HttpFactory()));
     }
 
     public function testBuild()
@@ -165,12 +165,12 @@ final class UnleashBuilderTest extends TestCase
 
     public function testWithAppUrl()
     {
-        self::assertNotEquals($this->instance, $this->instance->withAppUrl('https://example.com'));
+        self::assertNotSame($this->instance, $this->instance->withAppUrl('https://example.com'));
     }
 
     public function testWithHeader()
     {
-        self::assertNotEquals($this->instance, $this->instance->withHeader('Authorization', 'test'));
+        self::assertNotSame($this->instance, $this->instance->withHeader('Authorization', 'test'));
 
         $instance = $this->instance
             ->withHeader('Authorization', 'test')
@@ -218,7 +218,7 @@ final class UnleashBuilderTest extends TestCase
 
     public function testWithRegistrationService()
     {
-        self::assertNotEquals($this->instance, $this->instance->withRegistrationService(new DefaultRegistrationService(
+        self::assertNotSame($this->instance, $this->instance->withRegistrationService(new DefaultRegistrationService(
             new Client(),
             new HttpFactory(),
             new UnleashConfiguration('', '', ''),
@@ -228,12 +228,12 @@ final class UnleashBuilderTest extends TestCase
 
     public function testWithAutomaticRegistrationEnabled()
     {
-        self::assertNotEquals($this->instance, $this->instance->withAutomaticRegistrationEnabled(false));
+        self::assertNotSame($this->instance, $this->instance->withAutomaticRegistrationEnabled(false));
     }
 
     public function testWithGitlabEnvironment()
     {
-        self::assertNotEquals($this->instance, $this->instance->withGitlabEnvironment('Test'));
+        self::assertNotSame($this->instance, $this->instance->withGitlabEnvironment('Test'));
         $instance = $this->instance->withGitlabEnvironment('Test');
         $reflection = new ReflectionObject($instance);
         $appNameProperty = $reflection->getProperty('appName');
