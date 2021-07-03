@@ -37,7 +37,6 @@ final class DefaultMetricsSender implements MetricsSender
         foreach ($this->headers as $name => $value) {
             $request = $request->withHeader($name, $value);
         }
-        $response = $this->httpClient->sendRequest($request);
-        $body = $request->getBody()->getContents();
+        $this->httpClient->sendRequest($request);
     }
 }
