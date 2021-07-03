@@ -361,6 +361,14 @@ $unleash->register();
 $unleash->register();
 ```
 
+## GitLab specifics
+
+- In GitLab you have to use the provided instance id, you cannot create your own.
+- No authorization header is necessary.
+- Instead of app name you need to specify the GitLab environment.
+  - For this purpose you can use `withGitlabEnvironment()` method in builder, it's an alias to `withAppName()` but
+    communicates the intent better.
+
 ## Missing features
 
 Not every feature has been implemented yet, currently missing features are:

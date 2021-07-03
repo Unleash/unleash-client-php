@@ -80,6 +80,12 @@ final class UnleashBuilder
     }
 
     #[Pure]
+    public function withGitlabEnvironment(string $environment): self
+    {
+        return $this->withAppName($environment);
+    }
+
+    #[Pure]
     public function withHttpClient(ClientInterface $client): self
     {
         return $this->with('httpClient', $client);
@@ -150,7 +156,9 @@ final class UnleashBuilder
             throw new InvalidValueException("Instance ID must be set, please use 'withInstanceId()' method");
         }
         if ($this->appName === null) {
-            throw new InvalidValueException("App name must be set, please use 'withAppName()' method");
+            throw new InvalidValueException(
+                "App name must be set, please use 'withAppName()' or 'withGitlabEnvironment()' method"
+            );
         }
 
         $configuration = new UnleashConfiguration($this->appUrl, $this->appName, $this->instanceId);

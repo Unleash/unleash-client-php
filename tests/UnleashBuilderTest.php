@@ -230,4 +230,14 @@ final class UnleashBuilderTest extends TestCase
     {
         self::assertNotEquals($this->instance, $this->instance->withAutomaticRegistrationEnabled(false));
     }
+
+    public function testWithGitlabEnvironment()
+    {
+        self::assertNotEquals($this->instance, $this->instance->withGitlabEnvironment('Test'));
+        $instance = $this->instance->withGitlabEnvironment('Test');
+        $reflection = new ReflectionObject($instance);
+        $appNameProperty = $reflection->getProperty('appName');
+        $appNameProperty->setAccessible(true);
+        self::assertEquals('Test', $appNameProperty->getValue($instance));
+    }
 }
