@@ -33,6 +33,11 @@ final class DefaultRegistrationService implements RegistrationService
      */
     public function register(iterable $strategyHandlers): bool
     {
+        if (!is_array($strategyHandlers)) {
+            // @codeCoverageIgnoreStart
+            $strategyHandlers = iterator_to_array($strategyHandlers);
+            // @codeCoverageIgnoreEnd
+        }
         $request = $this->requestFactory
             ->createRequest('POST', $this->configuration->getUrl() . 'client/register')
             ->withHeader('Content-Type', 'application/json')
@@ -42,7 +47,7 @@ final class DefaultRegistrationService implements RegistrationService
                 'sdkVersion' => 'rikudou-unleash-sdk:' . Unleash::SDK_VERSION,
                 'strategies' => array_map(function (StrategyHandler $strategyHandler): string {
                     return $strategyHandler->getStrategyName();
-                }, [...$strategyHandlers]),
+                }, $strategyHandlers),
                 'started' => (new DateTimeImmutable())->format('c'),
                 'interval' => 10_000,
             ], JSON_THROW_ON_ERROR)));
