@@ -369,6 +369,7 @@ $unleash->register();
   - For this purpose you can use `withGitlabEnvironment()` method in builder, it's an alias to `withAppName()` but
     communicates the intent better.
 - GitLab doesn't use registration system, you can set the SDK to disable automatic registration and save one http call.
+- GitLab doesn't read metrics, you can set the SDK to disable sending them and save some http calls.
 
 ```php
 <?php
@@ -380,6 +381,7 @@ $gitlabUnleash = UnleashBuilder::create()
     ->withAppUrl('https://git.example.com/api/v4/feature_flags/unleash/1')
     ->withGitlabEnvironment('Production')
     ->withAutomaticRegistrationEnabled(false)
+    ->withMetricsEnabled(false)
     ->build();
 ```
 
