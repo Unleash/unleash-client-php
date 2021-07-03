@@ -9,6 +9,7 @@ use League\Flysystem\Adapter\Local;
 use League\Flysystem\Filesystem;
 use PHPUnit\Framework\TestCase;
 use ReflectionObject;
+use Rikudou\Unleash\Client\DefaultRegistrationService;
 use Rikudou\Unleash\Configuration\UnleashConfiguration;
 use Rikudou\Unleash\Exception\InvalidValueException;
 use Rikudou\Unleash\Strategy\DefaultStrategyHandler;
@@ -208,5 +209,15 @@ final class UnleashBuilderTest extends TestCase
         self::assertCount(2, $headers);
         self::assertArrayHasKey('Some-Header-2', $headers);
         self::assertArrayHasKey('Some-Header-3', $headers);
+    }
+
+    public function testWithRegistrationService()
+    {
+        self::assertNotEquals($this->instance, $this->instance->withRegistrationService(new DefaultRegistrationService(
+            new Client(),
+            new HttpFactory(),
+            new UnleashConfiguration('', '', ''),
+            []
+        )));
     }
 }

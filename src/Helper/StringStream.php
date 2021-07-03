@@ -3,7 +3,7 @@
 namespace Rikudou\Unleash\Helper;
 
 use Psr\Http\Message\StreamInterface;
-use RuntimeException;
+use Rikudou\Unleash\Exception\StreamException;
 
 final class StringStream implements StreamInterface
 {
@@ -20,7 +20,9 @@ final class StringStream implements StreamInterface
         $this->size = strlen($content);
         $stream = fopen('php://temp', 'w+');
         if (!is_resource($stream)) {
-            throw new RuntimeException('Cannot create temporary stream for storing data');
+            // @codeCoverageIgnoreStart
+            throw new StreamException('Cannot create temporary stream for storing data');
+            // @codeCoverageIgnoreEnd
         }
         $this->stream = $stream;
         fwrite($this->stream, $content);
@@ -35,7 +37,9 @@ final class StringStream implements StreamInterface
         }
         $content = stream_get_contents($stream, -1, 0);
         if (!is_string($content)) {
+            // @codeCoverageIgnoreStart
             $content = '';
+            // @codeCoverageIgnoreEnd
         }
 
         return $content;
@@ -44,7 +48,11 @@ final class StringStream implements StreamInterface
     public function close()
     {
         if ($this->stream === null) {
-            throw new RuntimeException('The stream is detached');
+            throw new StreamException('The stream is detached');
+        }
+        $type = get_resource_type($this->stream);
+        if ($type !== 'stream') {
+            throw new StreamException('The stream is already closed');
         }
         fclose($this->stream);
     }
@@ -60,7 +68,7 @@ final class StringStream implements StreamInterface
     public function getSize(): int
     {
         if ($this->stream === null) {
-            throw new RuntimeException('The stream is detached');
+            throw new StreamException('The stream is detached');
         }
 
         return $this->size;
@@ -69,11 +77,11 @@ final class StringStream implements StreamInterface
     public function tell(): int
     {
         if ($this->stream === null) {
-            throw new RuntimeException('The stream is detached');
+            throw new StreamException('The stream is detached');
         }
         $tell = ftell($this->stream);
         if ($tell === false) {
-            throw new RuntimeException('Could not retrieve stream position');
+            throw new StreamException('Could not retrieve stream position. Is the stream after EOF?');
         }
 
         return $tell;
@@ -82,7 +90,7 @@ final class StringStream implements StreamInterface
     public function eof(): bool
     {
         if ($this->stream === null) {
-            throw new RuntimeException('The stream is detached');
+            throw new StreamException('The stream is detached');
         }
 
         return feof($this->stream);
@@ -91,7 +99,7 @@ final class StringStream implements StreamInterface
     public function isSeekable(): bool
     {
         if ($this->stream === null) {
-            throw new RuntimeException('The stream is detached');
+            throw new StreamException('The stream is detached');
         }
 
         return true;
@@ -100,7 +108,7 @@ final class StringStream implements StreamInterface
     public function seek($offset, $whence = SEEK_SET): void
     {
         if ($this->stream === null) {
-            throw new RuntimeException('The stream is detached');
+            throw new StreamException('The stream is detached');
         }
         fseek($this->stream, $offset, $whence);
     }
@@ -108,24 +116,30 @@ final class StringStream implements StreamInterface
     public function rewind(): void
     {
         if ($this->stream === null) {
-            throw new RuntimeException('The stream is detached');
+            throw new StreamException('The stream is detached');
         }
         rewind($this->stream);
     }
 
     public function isWritable(): bool
     {
+        if ($this->stream === null) {
+            throw new StreamException('The stream is detached');
+        }
+
         return true;
     }
 
     public function write($string): int
     {
         if ($this->stream === null) {
-            throw new RuntimeException('The stream is detached');
+            throw new StreamException('The stream is detached');
         }
         $result = fwrite($this->stream, $string);
         if ($result === false) {
-            throw new RuntimeException('Failed to write to the stream');
+            // @codeCoverageIgnoreStart
+            throw new StreamException('Failed to write to the stream');
+            // @codeCoverageIgnoreEnd
         }
 
         return $result;
@@ -133,17 +147,23 @@ final class StringStream implements StreamInterface
 
     public function isReadable(): bool
     {
+        if ($this->stream === null) {
+            throw new StreamException('The stream is detached');
+        }
+
         return true;
     }
 
     public function read($length): string
     {
         if ($this->stream === null) {
-            throw new RuntimeException('The stream is detached');
+            throw new StreamException('The stream is detached');
         }
         $result = fread($this->stream, $length);
         if ($result === false) {
-            throw new RuntimeException('Failed to read from stream');
+            // @codeCoverageIgnoreStart
+            throw new StreamException('Failed to read from stream');
+            // @codeCoverageIgnoreEnd
         }
 
         return $result;
@@ -152,11 +172,13 @@ final class StringStream implements StreamInterface
     public function getContents(): string
     {
         if ($this->stream === null) {
-            throw new RuntimeException('The stream is detached');
+            throw new StreamException('The stream is detached');
         }
         $result = stream_get_contents($this->stream);
         if ($result === false) {
-            throw new RuntimeException('Failed to read from stream');
+            // @codeCoverageIgnoreStart
+            throw new StreamException('Failed to read from stream');
+            // @codeCoverageIgnoreEnd
         }
 
         return $result;
@@ -165,7 +187,7 @@ final class StringStream implements StreamInterface
     public function getMetadata($key = null)
     {
         if ($this->stream === null) {
-            throw new RuntimeException('The stream is detached');
+            throw new StreamException('The stream is detached');
         }
         $metadata = stream_get_meta_data($this->stream);
         if ($key === null) {

@@ -417,4 +417,13 @@ final class DefaultUnleashTest extends AbstractHttpClientTest
 
         self::assertTrue($instance->isEnabled('test', $context));
     }
+
+    public function testRegister()
+    {
+        $instance = new DefaultUnleash([], $this->repository, $this->registrationService);
+        $this->pushResponse([]);
+        self::assertTrue($instance->register());
+        $this->pushResponse([], 1, 400);
+        self::assertFalse($instance->register());
+    }
 }

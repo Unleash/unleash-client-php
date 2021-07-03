@@ -51,6 +51,6 @@ final class DefaultRegistrationService implements RegistrationService
         }
         $response = $this->httpClient->sendRequest($request);
 
-        return $response->getStatusCode() === 202;
+        return $response->getStatusCode() >= 200 && $response->getStatusCode() < 300;
     }
 }

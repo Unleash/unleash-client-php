@@ -76,10 +76,10 @@ abstract class AbstractHttpClientTest extends TestCase
         self::assertEquals(0, $this->mockHandler->count(), 'Some responses are leftover in the mock queue');
     }
 
-    protected function pushResponse(array $response, int $count = 1): void
+    protected function pushResponse(array $response, int $count = 1, int $statusCode = 200): void
     {
         for ($i = 0; $i < $count; ++$i) {
-            $this->mockHandler->append(new Response(200, ['Content-Type' => 'application/json'], json_encode($response)));
+            $this->mockHandler->append(new Response($statusCode, ['Content-Type' => 'application/json'], json_encode($response)));
         }
     }
 }
