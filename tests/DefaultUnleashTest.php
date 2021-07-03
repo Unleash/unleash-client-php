@@ -4,19 +4,35 @@ namespace Rikudou\Tests\Unleash;
 
 use Rikudou\Unleash\Configuration\UnleashContext;
 use Rikudou\Unleash\DefaultUnleash;
+use Rikudou\Unleash\DTO\Feature;
+use Rikudou\Unleash\Metrics\MetricsHandler;
 use Rikudou\Unleash\Stickiness\MurmurHashCalculator;
 use Rikudou\Unleash\Strategy\DefaultStrategyHandler;
 use Rikudou\Unleash\Strategy\GradualRolloutStrategyHandler;
 use Rikudou\Unleash\Strategy\IpAddressStrategyHandler;
+use Rikudou\Unleash\Strategy\StrategyHandler;
 use Rikudou\Unleash\Strategy\UserIdStrategyHandler;
 
 final class DefaultUnleashTest extends AbstractHttpClientTest
 {
+    /**
+     * @var MetricsHandler
+     */
+    private $metricsHandler;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->metricsHandler = new class implements MetricsHandler {
+            public function handleMetrics(Feature $feature, bool $successful): void
+            {
+            }
+        };
+    }
+
     public function testIsEnabled()
     {
-        $instance = new DefaultUnleash([
-            new DefaultStrategyHandler(),
-        ], $this->repository, $this->registrationService, false);
+        $instance = $this->getInstance(new DefaultStrategyHandler());
 
         $this->pushResponse([
             'version' => 1,
@@ -53,9 +69,7 @@ final class DefaultUnleashTest extends AbstractHttpClientTest
 
     public function testIsEnabledDefault()
     {
-        $instance = new DefaultUnleash([
-            new DefaultStrategyHandler(),
-        ], $this->repository, $this->registrationService, false);
+        $instance = $this->getInstance(new DefaultStrategyHandler());
 
         $this->pushResponse([
             'version' => 1,
@@ -103,9 +117,7 @@ final class DefaultUnleashTest extends AbstractHttpClientTest
 
     public function testIsEnabledIpAddress()
     {
-        $instance = new DefaultUnleash([
-            new IpAddressStrategyHandler(),
-        ], $this->repository, $this->registrationService, false);
+        $instance = $this->getInstance(new IpAddressStrategyHandler());
         $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
 
         $this->pushResponse([
@@ -175,9 +187,7 @@ final class DefaultUnleashTest extends AbstractHttpClientTest
 
     public function testIsEnabledUserId()
     {
-        $instance = new DefaultUnleash([
-            new UserIdStrategyHandler(),
-        ], $this->repository, $this->registrationService, false);
+        $instance = $this->getInstance(new UserIdStrategyHandler());
         $context = new UnleashContext('123');
 
         $this->pushResponse([
@@ -223,9 +233,7 @@ final class DefaultUnleashTest extends AbstractHttpClientTest
 
     public function testIsEnabledGradual()
     {
-        $instance = new DefaultUnleash([
-            new GradualRolloutStrategyHandler(new MurmurHashCalculator()),
-        ], $this->repository, $this->registrationService, false);
+        $instance = $this->getInstance(new GradualRolloutStrategyHandler(new MurmurHashCalculator()));
 
         $this->pushResponse([
             'version' => 1,
@@ -288,12 +296,12 @@ final class DefaultUnleashTest extends AbstractHttpClientTest
 
     public function testIsEnabledMultiple()
     {
-        $instance = new DefaultUnleash([
+        $instance = $this->getInstance(
             new DefaultStrategyHandler(),
             new GradualRolloutStrategyHandler(new MurmurHashCalculator()),
             new IpAddressStrategyHandler(),
-            new UserIdStrategyHandler(),
-        ], $this->repository, $this->registrationService, false);
+            new UserIdStrategyHandler()
+        );
         $_SERVER['REMOTE_ADDR'] = '1.2.3.4';
 
         $this->pushResponse([
@@ -420,14 +428,25 @@ final class DefaultUnleashTest extends AbstractHttpClientTest
 
     public function testRegister()
     {
-        $instance = new DefaultUnleash([], $this->repository, $this->registrationService, false);
+        $instance = $this->getInstance();
         $this->pushResponse([]);
         self::assertTrue($instance->register());
         $this->pushResponse([], 1, 400);
         self::assertFalse($instance->register());
 
         $this->pushResponse([]);
-        new DefaultUnleash([], $this->repository, $this->registrationService, true);
+        new DefaultUnleash([], $this->repository, $this->registrationService, true, $this->metricsHandler);
         self::assertCount(3, $this->requestHistory);
+    }
+
+    private function getInstance(StrategyHandler ...$handlers): DefaultUnleash
+    {
+        return new DefaultUnleash(
+            $handlers,
+            $this->repository,
+            $this->registrationService,
+            false,
+            $this->metricsHandler
+        );
     }
 }

@@ -51,7 +51,7 @@ final class DefaultRegistrationService implements RegistrationService
                     return $strategyHandler->getStrategyName();
                 }, $strategyHandlers),
                 'started' => (new DateTimeImmutable())->format('c'),
-                'interval' => 10_000,
+                'interval' => $this->configuration->getMetricsInterval(),
             ], JSON_THROW_ON_ERROR)));
         foreach ($this->headers as $name => $value) {
             $request = $request->withHeader($name, $value);

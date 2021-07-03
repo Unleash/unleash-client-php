@@ -45,11 +45,6 @@ final class GradualRolloutStrategyHandlerTest extends TestCase
         ]), new UnleashContext()));
 
         self::assertFalse($this->instance->isEnabled(new DefaultStrategy('flexibleRollout', [
-            'stickiness' => Stickiness::RANDOM,
-            'rollout' => 5,
-        ]), new UnleashContext()));
-
-        self::assertFalse($this->instance->isEnabled(new DefaultStrategy('flexibleRollout', [
             'groupId' => 'test',
             'stickiness' => Stickiness::RANDOM,
         ]), new UnleashContext()));
