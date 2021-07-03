@@ -9,6 +9,7 @@ use League\Flysystem\Adapter\Local;
 use League\Flysystem\Filesystem;
 use PHPUnit\Framework\TestCase;
 use ReflectionObject;
+use Rikudou\Unleash\Client\DefaultRegistrationService;
 use Rikudou\Unleash\Configuration\UnleashConfiguration;
 use Rikudou\Unleash\Exception\InvalidValueException;
 use Rikudou\Unleash\Strategy\DefaultStrategyHandler;
@@ -94,6 +95,7 @@ final class UnleashBuilderTest extends TestCase
             ->withAppUrl('https://example.com')
             ->withAppName('Test App')
             ->withInstanceId('test')
+            ->withAutomaticRegistrationEnabled(false)
             ->build();
         $reflection = new ReflectionObject($instance);
         $repositoryProperty = $reflection->getProperty('repository');
@@ -122,6 +124,7 @@ final class UnleashBuilderTest extends TestCase
             ->withAppUrl('https://example.com')
             ->withAppName('Test App')
             ->withInstanceId('test')
+            ->withAutomaticRegistrationEnabled(false)
             ->withRequestFactory($requestFactory)
             ->withHttpClient($httpClient)
             ->build();
@@ -137,6 +140,7 @@ final class UnleashBuilderTest extends TestCase
             ->withAppUrl('https://example.com')
             ->withAppName('Test App')
             ->withInstanceId('test')
+            ->withAutomaticRegistrationEnabled(false)
             ->withStrategies(new DefaultStrategyHandler())
             ->build();
         self::assertCount(1, $strategiesProperty->getValue($instance));
@@ -148,6 +152,7 @@ final class UnleashBuilderTest extends TestCase
             ->withAppUrl('https://example.com')
             ->withAppName('Test App')
             ->withInstanceId('test')
+            ->withAutomaticRegistrationEnabled(false)
             ->withCacheHandler($cacheHandler)
             ->withCacheTimeToLive(359)
             ->build();
@@ -187,6 +192,7 @@ final class UnleashBuilderTest extends TestCase
             ->withAppUrl('test')
             ->withInstanceId('test')
             ->withAppName('test')
+            ->withAutomaticRegistrationEnabled(false)
             ->build();
         $reflection = new ReflectionObject($unleash);
         $repositoryProperty = $reflection->getProperty('repository');
@@ -208,5 +214,20 @@ final class UnleashBuilderTest extends TestCase
         self::assertCount(2, $headers);
         self::assertArrayHasKey('Some-Header-2', $headers);
         self::assertArrayHasKey('Some-Header-3', $headers);
+    }
+
+    public function testWithRegistrationService()
+    {
+        self::assertNotEquals($this->instance, $this->instance->withRegistrationService(new DefaultRegistrationService(
+            new Client(),
+            new HttpFactory(),
+            new UnleashConfiguration('', '', ''),
+            []
+        )));
+    }
+
+    public function testWithAutomaticRegistrationEnabled()
+    {
+        self::assertNotEquals($this->instance, $this->instance->withAutomaticRegistrationEnabled(false));
     }
 }

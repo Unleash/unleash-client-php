@@ -25,7 +25,7 @@ final class UserIdStrategyHandler extends AbstractStrategyHandler
         return in_array($context->getCurrentUserId(), $userIds, true);
     }
 
-    protected function getStrategyName(): string
+    public function getStrategyName(): string
     {
         return 'userWithId';
     }

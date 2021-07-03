@@ -12,7 +12,7 @@ final class DefaultStrategyHandler extends AbstractStrategyHandler
         return true;
     }
 
-    protected function getStrategyName(): string
+    public function getStrategyName(): string
     {
         return 'default';
     }

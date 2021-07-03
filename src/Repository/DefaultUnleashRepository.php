@@ -11,6 +11,7 @@ use Rikudou\Unleash\Configuration\UnleashConfiguration;
 use Rikudou\Unleash\DTO\DefaultFeature;
 use Rikudou\Unleash\DTO\DefaultStrategy;
 use Rikudou\Unleash\DTO\Feature;
+use Rikudou\Unleash\Exception\HttpResponseException;
 
 final class DefaultUnleashRepository implements UnleashRepository
 {
@@ -60,6 +61,11 @@ final class DefaultUnleashRepository implements UnleashRepository
             }
 
             $response = $this->httpClient->sendRequest($request);
+            if ($response->getStatusCode() !== 200) {
+                throw new HttpResponseException(
+                    'Got invalid response code when getting features: ' . $response->getStatusCode()
+                );
+            }
             $features = $this->parseFeatures($response->getBody()->getContents());
             $this->setCache($features);
         }

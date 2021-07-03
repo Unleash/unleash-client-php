@@ -333,6 +333,34 @@ $unleash->isEnabled('some-feature'); // works because the session is started
 $unleash->isEnabled('some-feature');
 ```
 
+## Client registration
+
+By default, the library automatically registers itself as an application in the Unleash server. If you want to prevent
+this, use `withAutomaticRegistrationEnabled(false)` in the builder.
+
+```php
+<?php
+
+use Rikudou\Unleash\UnleashBuilder;
+
+$unleash = UnleashBuilder::create()
+    ->withAppName('Some App Name')
+    ->withAppUrl('https://somewhere.com')
+    ->withInstanceId('some-instance-id')
+    ->withAutomaticRegistrationEnabled(false)
+    ->build();
+
+// event though the client will not attempt to register, you can still use isEnabled()
+$unleash->isEnabled('someFeature');
+
+// if you want to register manually
+$unleash->register();
+
+// you can call the register method multiple times, the Unleash server doesn't mind
+$unleash->register();
+$unleash->register();
+```
+
 ## Missing features
 
 Not every feature has been implemented yet, currently missing features are:

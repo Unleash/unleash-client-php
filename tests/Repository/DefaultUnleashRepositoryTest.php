@@ -14,6 +14,7 @@ use RecursiveIteratorIterator;
 use Rikudou\Tests\Unleash\AbstractHttpClientTest;
 use Rikudou\Unleash\Configuration\UnleashConfiguration;
 use Rikudou\Unleash\DTO\Feature;
+use Rikudou\Unleash\Exception\HttpResponseException;
 use Rikudou\Unleash\Repository\DefaultUnleashRepository;
 use SplFileInfo;
 
@@ -92,6 +93,10 @@ final class DefaultUnleashRepositoryTest extends AbstractHttpClientTest
         self::assertEquals('flexibleRollout', $features[array_key_first($features)]->getStrategies()[0]->getName());
         self::assertEquals('test2', $features[array_key_last($features)]->getName());
         self::assertEquals('userWithId', $features[array_key_last($features)]->getStrategies()[0]->getName());
+
+        $this->pushResponse([], 1, 401);
+        $this->expectException(HttpResponseException::class);
+        $this->repository->getFeatures();
     }
 
     public function testCache()

@@ -9,5 +9,7 @@ interface StrategyHandler
 {
     public function supports(Strategy $strategy): bool;
 
+    public function getStrategyName(): string;
+
     public function isEnabled(Strategy $strategy, UnleashContext $context): bool;
 }

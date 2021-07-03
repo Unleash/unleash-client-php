@@ -9,6 +9,8 @@ use JetBrains\PhpStorm\Pure;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
 use Psr\SimpleCache\CacheInterface;
+use Rikudou\Unleash\Client\DefaultRegistrationService;
+use Rikudou\Unleash\Client\RegistrationService;
 use Rikudou\Unleash\Configuration\UnleashConfiguration;
 use Rikudou\Unleash\Exception\InvalidValueException;
 use Rikudou\Unleash\Repository\DefaultUnleashRepository;
@@ -38,6 +40,10 @@ final class UnleashBuilder
     private ?CacheInterface $cache = null;
 
     private ?int $cacheTtl = null;
+
+    private ?RegistrationService $registrationService = null;
+
+    private bool $autoregister = true;
 
     /**
      * @var array<string,string>
@@ -123,6 +129,18 @@ final class UnleashBuilder
         return $this->with('headers', $headers);
     }
 
+    #[Pure]
+    public function withRegistrationService(RegistrationService $registrationService): self
+    {
+        return $this->with('registrationService', $registrationService);
+    }
+
+    #[Pure]
+    public function withAutomaticRegistrationEnabled(bool $enabled): self
+    {
+        return $this->with('autoregister', $enabled);
+    }
+
     public function build(): Unleash
     {
         if ($this->appUrl === null) {
@@ -180,7 +198,12 @@ final class UnleashBuilder
             ];
         }
 
-        return new DefaultUnleash($strategies, $repository);
+        $registrationService = $this->registrationService;
+        if ($registrationService === null) {
+            $registrationService = new DefaultRegistrationService($httpClient, $requestFactory, $configuration, $this->headers);
+        }
+
+        return new DefaultUnleash($strategies, $repository, $registrationService, $this->autoregister);
     }
 
     private function with(string $property, mixed $value): self

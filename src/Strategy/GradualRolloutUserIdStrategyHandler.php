@@ -31,7 +31,7 @@ final class GradualRolloutUserIdStrategyHandler extends AbstractStrategyHandler
         return $this->rolloutStrategyHandler->isEnabled($transformedStrategy, $context);
     }
 
-    protected function getStrategyName(): string
+    public function getStrategyName(): string
     {
         return 'gradualRolloutUserId';
     }

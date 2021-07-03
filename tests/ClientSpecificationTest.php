@@ -25,7 +25,7 @@ final class ClientSpecificationTest extends AbstractHttpClientTest
             new GradualRolloutUserIdStrategyHandler(new GradualRolloutStrategyHandler(new MurmurHashCalculator())),
             new GradualRolloutSessionIdStrategyHandler(new GradualRolloutStrategyHandler(new MurmurHashCalculator())),
             new GradualRolloutRandomStrategyHandler(new GradualRolloutStrategyHandler(new MurmurHashCalculator())),
-        ], $this->repository);
+        ], $this->repository, $this->registrationService, false);
 
         $specificationList = $this->getJson('index.json');
 

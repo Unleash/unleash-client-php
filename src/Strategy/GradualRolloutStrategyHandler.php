@@ -53,7 +53,7 @@ final class GradualRolloutStrategyHandler extends AbstractStrategyHandler
         return $normalized <= (int) $rollout;
     }
 
-    protected function getStrategyName(): string
+    public function getStrategyName(): string
     {
         return 'flexibleRollout';
     }
