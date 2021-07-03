@@ -23,7 +23,7 @@ jobs:
       - name: Check if version is updated in SDK
         env:
           VERSION: ${{ steps.extract_name.outputs.result }}
-        run: php tests/check-version $VERSION
+        run: php tests/check-version.php $VERSION
       - name: Create PHP 8 release tag
         env:
           VERSION: ${{ steps.extract_name.outputs.result }}
