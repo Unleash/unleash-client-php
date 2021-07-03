@@ -17,7 +17,7 @@ This implementation conforms to the official Unleash standards except for [missi
 
 Requires PHP 7.3 or newer.
 
-> You will also need some implementation of [PSR-7](https://packagist.org/providers/psr/http-message-implementation)
+> You will also need some implementation of [PSR-18](https://packagist.org/providers/psr/http-client-implementation)
 > and [PSR-17](https://packagist.org/providers/psr/http-factory-implementation), for example 
 > [Guzzle](https://packagist.org/packages/guzzlehttp/guzzle)
 
