@@ -19,6 +19,8 @@ final class DefaultUnleashRepository implements UnleashRepository
 
     /**
      * @param array<string,string> $headers
+     *
+     * @internal
      */
     public function __construct(
         private ClientInterface $httpClient,

@@ -16,6 +16,8 @@ final class DefaultRegistrationService implements RegistrationService
 {
     /**
      * @param array<string,string> $headers
+     *
+     * @internal
      */
     public function __construct(
         private ClientInterface $httpClient,

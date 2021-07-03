@@ -12,6 +12,8 @@ final class DefaultUnleash implements Unleash
 {
     /**
      * @param iterable<StrategyHandler> $strategyHandlers
+     *
+     * @internal
      */
     public function __construct(
         private iterable $strategyHandlers,

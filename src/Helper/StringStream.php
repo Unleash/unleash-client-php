@@ -5,6 +5,9 @@ namespace Rikudou\Unleash\Helper;
 use Psr\Http\Message\StreamInterface;
 use Rikudou\Unleash\Exception\StreamException;
 
+/**
+ * @internal
+ */
 final class StringStream implements StreamInterface
 {
     /**
