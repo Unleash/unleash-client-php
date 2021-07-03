@@ -18,7 +18,7 @@ final class DefaultMetricsHandlerTest extends AbstractHttpClientTest
     public function testHandleMetrics()
     {
         $configuration = (new UnleashConfiguration('', '', ''))
-            ->setMetricsInterval(3_000);
+            ->setMetricsInterval(3000);
         $instance = new DefaultMetricsHandler(
             new DefaultMetricsSender(
                 $this->httpClient,
