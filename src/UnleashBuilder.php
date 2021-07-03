@@ -23,6 +23,7 @@ use Rikudou\Unleash\Strategy\GradualRolloutUserIdStrategyHandler;
 use Rikudou\Unleash\Strategy\IpAddressStrategyHandler;
 use Rikudou\Unleash\Strategy\StrategyHandler;
 use Rikudou\Unleash\Strategy\UserIdStrategyHandler;
+use Symfony\Component\HttpClient\Psr18Client;
 
 #[Immutable]
 final class UnleashBuilder
@@ -170,6 +171,8 @@ final class UnleashBuilder
         if ($httpClient === null) {
             if (class_exists(Client::class)) {
                 $httpClient = new Client();
+            } elseif (class_exists(Psr18Client::class)) {
+                $httpClient = new Psr18Client();
             } else {
                 throw new InvalidValueException(
                     "No http client provided and Guzzle is not installed, please use 'withHttpClient()' method"
@@ -182,6 +185,8 @@ final class UnleashBuilder
         if ($requestFactory === null) {
             if (class_exists(HttpFactory::class)) {
                 $requestFactory = new HttpFactory();
+            } elseif (class_exists(Psr18Client::class)) {
+                $requestFactory = new Psr18Client();
             } else {
                 throw new InvalidValueException(
                     "No request factory provided and Guzzle is not installed, please use 'withRequestFactory()' method"
