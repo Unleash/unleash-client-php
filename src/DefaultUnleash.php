@@ -5,6 +5,7 @@ namespace Rikudou\Unleash;
 use Rikudou\Unleash\Client\RegistrationService;
 use Rikudou\Unleash\Configuration\UnleashContext;
 use Rikudou\Unleash\DTO\Strategy;
+use Rikudou\Unleash\Metrics\MetricsHandler;
 use Rikudou\Unleash\Repository\UnleashRepository;
 use Rikudou\Unleash\Strategy\StrategyHandler;
 
@@ -19,7 +20,8 @@ final class DefaultUnleash implements Unleash
         private iterable $strategyHandlers,
         private UnleashRepository $repository,
         private RegistrationService $registrationService,
-        bool $autoregister
+        bool $autoregister,
+        private MetricsHandler $metricsHandler,
     ) {
         if ($autoregister) {
             $this->register();
@@ -38,6 +40,8 @@ final class DefaultUnleash implements Unleash
         }
 
         if (!$feature->isEnabled()) {
+            $this->metricsHandler->handleMetrics($feature, false);
+
             return false;
         }
 
@@ -48,6 +52,8 @@ final class DefaultUnleash implements Unleash
             // @codeCoverageIgnoreEnd
         }
         if (!count($strategies)) {
+            $this->metricsHandler->handleMetrics($feature, true);
+
             return true;
         }
 
@@ -58,10 +64,14 @@ final class DefaultUnleash implements Unleash
             }
             foreach ($handlers as $handler) {
                 if ($handler->isEnabled($strategy, $context)) {
+                    $this->metricsHandler->handleMetrics($feature, true);
+
                     return true;
                 }
             }
         }
+
+        $this->metricsHandler->handleMetrics($feature, false);
 
         return false;
     }

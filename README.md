@@ -361,6 +361,49 @@ $unleash->register();
 $unleash->register();
 ```
 
+## Metrics
+
+By default, this library sends metrics which are simple statistics about whether user was granted access or not.
+
+> Warning: If you don't provide a cache implementation, there will be additional http call with metrics for every
+> `isEnabled()` call.
+
+If you use cache the metrics will be bundled and sent once the bundle created time crosses the configured threshold.
+By default this threshold is 30,000 milliseconds (30 seconds) meaning that when a new bundle gets created it won't be
+sent sooner than in 30 seconds. That doesn't mean it's guaranteed that the metrics will be sent every 30 seconds, it
+only guarantees that the metrics won't be sent sooner.
+
+Example:
+
+1. user visits your site and this sdk gets triggered, no metric has been sent
+2. after five seconds user visits another page where again this sdk gets triggered, no metric sent
+3. user waits one minute before doing anything, no one else is accessing your site
+4. after one minute user visits another page, the metrics have been sent to the Unleash server
+
+In the example above the metric bundle gets sent after 1 minute and 5 seconds because there was no one to trigger
+the code.
+
+```php
+<?php
+
+use Rikudou\Unleash\UnleashBuilder;
+
+$unleash = UnleashBuilder::create()
+    ->withAppName('Some App Name')
+    ->withAppUrl('https://somewhere.com')
+    ->withInstanceId('some-instance-id')
+    ->withMetricsEnabled(false) // turn off metric sending
+    ->withMetricsEnabled(true) // turn on metric sending
+    ->withMetricsInterval(10_000) // interval in milliseconds (10 seconds)
+    ->build();
+
+// the metric will be collected but not sent immediately
+$unleash->isEnabled('test');
+sleep(10);
+// now the metrics will get sent
+$unleash->isEnabled('test');
+```
+
 ## GitLab specifics
 
 - In GitLab you have to use the provided instance id, you cannot create your own.
@@ -369,6 +412,7 @@ $unleash->register();
   - For this purpose you can use `withGitlabEnvironment()` method in builder, it's an alias to `withAppName()` but
     communicates the intent better.
 - GitLab doesn't use registration system, you can set the SDK to disable automatic registration and save one http call.
+- GitLab doesn't read metrics, you can set the SDK to disable sending them and save some http calls.
 
 ```php
 <?php
@@ -380,6 +424,7 @@ $gitlabUnleash = UnleashBuilder::create()
     ->withAppUrl('https://git.example.com/api/v4/feature_flags/unleash/1')
     ->withGitlabEnvironment('Production')
     ->withAutomaticRegistrationEnabled(false)
+    ->withMetricsEnabled(false)
     ->build();
 ```
 

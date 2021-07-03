@@ -240,4 +240,14 @@ final class UnleashBuilderTest extends TestCase
         $appNameProperty->setAccessible(true);
         self::assertEquals('Test', $appNameProperty->getValue($instance));
     }
+
+    public function testWithMetricsEnabled()
+    {
+        self::assertNotSame($this->instance, $this->instance->withMetricsEnabled(false));
+    }
+
+    public function testWithMetricsInterval()
+    {
+        self::assertNotSame($this->instance, $this->instance->withMetricsInterval(5_000));
+    }
 }

@@ -10,6 +10,10 @@ final class UnleashConfiguration
 
     private int $ttl = 30;
 
+    private int $metricsInterval = 30_000;
+
+    private bool $metricsEnabled = true;
+
     public function __construct(
         private string $url,
         private string $appName,
@@ -61,6 +65,16 @@ final class UnleashConfiguration
         return $this;
     }
 
+    public function getMetricsInterval(): int
+    {
+        return $this->metricsInterval;
+    }
+
+    public function isMetricsEnabled(): bool
+    {
+        return $this->metricsEnabled;
+    }
+
     public function setUrl(string $url): self
     {
         $this->url = $url;
@@ -84,6 +98,26 @@ final class UnleashConfiguration
     public function setInstanceId(string $instanceId): self
     {
         $this->instanceId = $instanceId;
+
+        return $this;
+    }
+
+    /**
+     * @codeCoverageIgnore
+     */
+    public function setMetricsInterval(int $metricsInterval): self
+    {
+        $this->metricsInterval = $metricsInterval;
+
+        return $this;
+    }
+
+    /**
+     * @codeCoverageIgnore
+     */
+    public function setMetricsEnabled(bool $metricsEnabled): self
+    {
+        $this->metricsEnabled = $metricsEnabled;
 
         return $this;
     }
