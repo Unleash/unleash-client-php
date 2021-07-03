@@ -6,7 +6,7 @@ use Rikudou\Unleash\Configuration\UnleashContext;
 
 interface Unleash
 {
-    public const SDK_VERSION = '0.9.11';
+    public const SDK_VERSION = '0.10.0';
 
     public function isEnabled(string $featureName, UnleashContext $context = null, bool $default = false): bool;
 
