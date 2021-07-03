@@ -368,6 +368,20 @@ $unleash->register();
 - Instead of app name you need to specify the GitLab environment.
   - For this purpose you can use `withGitlabEnvironment()` method in builder, it's an alias to `withAppName()` but
     communicates the intent better.
+- GitLab doesn't use registration system, you can set the SDK to disable automatic registration and save one http call.
+
+```php
+<?php
+
+use Rikudou\Unleash\UnleashBuilder;
+
+$gitlabUnleash = UnleashBuilder::create()
+    ->withInstanceId('H9sU9yVHVAiWFiLsH2Mo') // generated in GitLab
+    ->withAppUrl('https://git.example.com/api/v4/feature_flags/unleash/1')
+    ->withGitlabEnvironment('Production')
+    ->withAutomaticRegistrationEnabled(false)
+    ->build();
+```
 
 ## Missing features
 
