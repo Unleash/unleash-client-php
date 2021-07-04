@@ -12,4 +12,9 @@ interface Feature
      * @return iterable<Strategy>
      */
     public function getStrategies(): iterable;
+
+    /**
+     * @return array<Variant>
+     */
+    public function getVariants(): array;
 }

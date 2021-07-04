@@ -333,6 +333,58 @@ $unleash->isEnabled('some-feature'); // works because the session is started
 $unleash->isEnabled('some-feature');
 ```
 
+## Variants
+
+You can use multiple variants of one feature, for example for A/B testing. If no variant matches or the feature doesn't
+have any variants, a default one will be returned which returns `false` for `isEnabled()`. You can also provide your
+own default variant.
+
+Variant may or may not contain a payload.
+
+```php
+<?php
+
+use Rikudou\Unleash\DTO\DefaultVariant;
+use Rikudou\Unleash\UnleashBuilder;
+use Rikudou\Unleash\Configuration\UnleashContext;
+use Rikudou\Unleash\Enum\VariantPayloadType;
+use Rikudou\Unleash\DTO\DefaultVariantPayload;
+
+$unleash = UnleashBuilder::create()
+    ->withAppName('Some app name')
+    ->withAppUrl('https://some-app-url.com')
+    ->withInstanceId('Some instance id')
+    ->build();
+    
+$variant = $unleash->getVariant('nonexistentFeature');
+assert($variant->isEnabled() === false);
+
+// getVariant() does isEnabled() call in the background meaning that it will return the default falsy variant
+// whenever isEnabled() returns false
+$variant = $unleash->getVariant('existingFeatureThatThisUserDoesNotHaveAccessTo');
+assert($variant->isEnabled() === false);
+
+$variant = $unleash->getVariant('someFeature', new UnleashContext(currentUserId: '123'));
+if ($variant->isEnabled()) {
+    $payload = $variant->getPayload();
+    if ($payload !== null) {
+        if ($payload->getType() === VariantPayloadType::JSON) {
+            $jsonData = $payload->fromJson();
+        }
+        $stringPayload = $payload->getValue();
+    }
+}
+
+// providing custom default variant
+
+$variant = $unleash->getVariant('nonexistentFeature', fallbackVariant: new DefaultVariant(
+    'variantName',
+    enabled: true,
+    payload: new DefaultVariantPayload(VariantPayloadType::STRING, 'somePayload'),
+));
+assert($variant->getPayload()->getValue() === 'somePayload');
+```
+
 ## Client registration
 
 By default, the library automatically registers itself as an application in the Unleash server. If you want to prevent
@@ -432,6 +484,5 @@ $gitlabUnleash = UnleashBuilder::create()
 
 Not every feature has been implemented yet, currently missing features are:
 
-- variants
 - constraints
 - stickiness based on custom fields

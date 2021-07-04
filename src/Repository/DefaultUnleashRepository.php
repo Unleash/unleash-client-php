@@ -10,7 +10,11 @@ use Psr\SimpleCache\InvalidArgumentException;
 use Rikudou\Unleash\Configuration\UnleashConfiguration;
 use Rikudou\Unleash\DTO\DefaultFeature;
 use Rikudou\Unleash\DTO\DefaultStrategy;
+use Rikudou\Unleash\DTO\DefaultVariant;
+use Rikudou\Unleash\DTO\DefaultVariantOverride;
+use Rikudou\Unleash\DTO\DefaultVariantPayload;
 use Rikudou\Unleash\DTO\Feature;
+use Rikudou\Unleash\Enum\Stickiness;
 use Rikudou\Unleash\Exception\HttpResponseException;
 
 final class DefaultUnleashRepository implements UnleashRepository
@@ -120,13 +124,32 @@ final class DefaultUnleashRepository implements UnleashRepository
         $body = json_decode($rawBody, true, 512, JSON_THROW_ON_ERROR);
         foreach ($body['features'] as $feature) {
             $strategies = [];
+            $variants = [];
+
             foreach ($feature['strategies'] as $strategy) {
                 $strategies[] = new DefaultStrategy($strategy['name'], $strategy['parameters'] ?? []);
+            }
+            foreach ($feature['variants'] ?? [] as $variant) {
+                $overrides = [];
+                foreach ($variant['overrides'] ?? [] as $override) {
+                    $overrides[] = new DefaultVariantOverride($override['contextName'], $override['values']);
+                }
+                $variants[] = new DefaultVariant(
+                    $variant['name'],
+                    true,
+                    $variant['weight'],
+                    $variant['stickiness'] ?? Stickiness::DEFAULT,
+                    isset($variant['payload'])
+                        ? new DefaultVariantPayload($variant['payload']['type'], $variant['payload']['value'])
+                        : null,
+                    $overrides,
+                );
             }
             $features[$feature['name']] = new DefaultFeature(
                 $feature['name'],
                 $feature['enabled'],
                 $strategies,
+                $variants,
             );
         }
 

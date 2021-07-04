@@ -24,6 +24,7 @@ use Rikudou\Unleash\Strategy\GradualRolloutUserIdStrategyHandler;
 use Rikudou\Unleash\Strategy\IpAddressStrategyHandler;
 use Rikudou\Unleash\Strategy\StrategyHandler;
 use Rikudou\Unleash\Strategy\UserIdStrategyHandler;
+use Rikudou\Unleash\Variant\DefaultVariantHandler;
 
 #[Immutable]
 final class UnleashBuilder
@@ -224,9 +225,10 @@ final class UnleashBuilder
 
         $repository = new DefaultUnleashRepository($httpClient, $requestFactory, $configuration, $this->headers);
 
+        $hashCalculator = new MurmurHashCalculator();
         $strategies = $this->strategies;
         if ($strategies === null || !count($strategies)) {
-            $rolloutStrategyHandler = new GradualRolloutStrategyHandler(new MurmurHashCalculator());
+            $rolloutStrategyHandler = new GradualRolloutStrategyHandler($hashCalculator);
             $strategies = [
                 new DefaultStrategyHandler(),
                 new IpAddressStrategyHandler(),
@@ -256,7 +258,8 @@ final class UnleashBuilder
                     $this->headers
                 ),
                 $configuration
-            )
+            ),
+            new DefaultVariantHandler($hashCalculator),
         );
     }
 

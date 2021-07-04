@@ -14,6 +14,7 @@ use Rikudou\Unleash\Strategy\GradualRolloutStrategyHandler;
 use Rikudou\Unleash\Strategy\GradualRolloutUserIdStrategyHandler;
 use Rikudou\Unleash\Strategy\IpAddressStrategyHandler;
 use Rikudou\Unleash\Strategy\UserIdStrategyHandler;
+use Rikudou\Unleash\Variant\DefaultVariantHandler;
 
 final class ClientSpecificationTest extends AbstractHttpClientTest
 {
@@ -31,12 +32,11 @@ final class ClientSpecificationTest extends AbstractHttpClientTest
             public function handleMetrics(Feature $feature, bool $successful): void
             {
             }
-        });
+        }, new DefaultVariantHandler(new MurmurHashCalculator()));
 
         $specificationList = $this->getJson('index.json');
 
         $disabledFeatureTests = [
-            '08-variants.json',
             '09-strategy-constraints.json',
             '11-strategy-constraints-edge-cases.json',
             '12-custom-stickiness.json',
@@ -47,12 +47,23 @@ final class ClientSpecificationTest extends AbstractHttpClientTest
                 continue;
             }
             $specificationConfig = $this->getJson($specificationFilename);
-            foreach ($specificationConfig['tests'] as $test) {
+            foreach ($specificationConfig['tests'] ?? [] as $test) {
                 $this->pushResponse($specificationConfig['state']);
                 self::assertEquals(
                     $test['expectedResult'],
                     $unleash->isEnabled($test['toggleName'], $this->createContext($test['context'])),
                     $test['description']
+                );
+            }
+
+            foreach ($specificationConfig['variantTests'] ?? [] as $variantTest) {
+                $this->pushResponse($specificationConfig['state']);
+                self::assertEquals(
+                    $variantTest['expectedResult'],
+                    $unleash
+                        ->getVariant($variantTest['toggleName'], $this->createContext($variantTest['context']))
+                        ->jsonSerialize(),
+                    $variantTest['description']
                 );
             }
         }

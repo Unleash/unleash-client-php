@@ -2,6 +2,8 @@
 
 namespace Rikudou\Unleash\Configuration;
 
+use Rikudou\Unleash\Enum\ContextField;
+use Rikudou\Unleash\Enum\Stickiness;
 use Rikudou\Unleash\Exception\InvalidValueException;
 
 final class UnleashContext
@@ -23,9 +25,9 @@ final class UnleashContext
         return $this->currentUserId;
     }
 
-    public function getIpAddress(): string
+    public function getIpAddress(): ?string
     {
-        return $this->ipAddress ?? $_SERVER['REMOTE_ADDR'];
+        return $this->ipAddress ?? $_SERVER['REMOTE_ADDR'] ?? null;
     }
 
     public function getSessionId(): ?string
@@ -93,5 +95,28 @@ final class UnleashContext
         $this->sessionId = $sessionId;
 
         return $this;
+    }
+
+    /**
+     * @param array<string> $values
+     */
+    public function hasMatchingFieldValue(string $fieldName, array $values): bool
+    {
+        $fieldValue = $this->findContextValue($fieldName);
+        if ($fieldValue === null) {
+            return false;
+        }
+
+        return in_array($fieldValue, $values, true);
+    }
+
+    public function findContextValue(string $fieldName): ?string
+    {
+        return match ($fieldName) {
+            ContextField::USER_ID, Stickiness::USER_ID => $this->getCurrentUserId(),
+            ContextField::SESSION_ID, Stickiness::SESSION_ID => $this->getSessionId(),
+            ContextField::IP_ADDRESS => $this->getIpAddress(),
+            default => $this->customContext[$fieldName] ?? null,
+        };
     }
 }

@@ -5,9 +5,11 @@ namespace Rikudou\Unleash;
 use Rikudou\Unleash\Client\RegistrationService;
 use Rikudou\Unleash\Configuration\UnleashContext;
 use Rikudou\Unleash\DTO\Strategy;
+use Rikudou\Unleash\DTO\Variant;
 use Rikudou\Unleash\Metrics\MetricsHandler;
 use Rikudou\Unleash\Repository\UnleashRepository;
 use Rikudou\Unleash\Strategy\StrategyHandler;
+use Rikudou\Unleash\Variant\VariantHandler;
 
 final class DefaultUnleash implements Unleash
 {
@@ -22,6 +24,7 @@ final class DefaultUnleash implements Unleash
         private RegistrationService $registrationService,
         bool $autoregister,
         private MetricsHandler $metricsHandler,
+        private VariantHandler $variantHandler,
     ) {
         if ($autoregister) {
             $this->register();
@@ -74,6 +77,19 @@ final class DefaultUnleash implements Unleash
         $this->metricsHandler->handleMetrics($feature, false);
 
         return false;
+    }
+
+    public function getVariant(string $featureName, ?UnleashContext $context = null, ?Variant $fallbackVariant = null): Variant
+    {
+        $fallbackVariant ??= $this->variantHandler->getDefaultVariant();
+        $context ??= new UnleashContext();
+
+        $feature = $this->repository->findFeature($featureName);
+        if ($feature === null || !$feature->isEnabled() || !count($feature->getVariants())) {
+            return $fallbackVariant;
+        }
+
+        return $this->variantHandler->selectVariant($feature, $context) ?? $fallbackVariant;
     }
 
     public function register(): bool
