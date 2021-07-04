@@ -344,9 +344,11 @@ Variant may or may not contain a payload.
 ```php
 <?php
 
+use Rikudou\Unleash\DTO\DefaultVariant;
 use Rikudou\Unleash\UnleashBuilder;
 use Rikudou\Unleash\Configuration\UnleashContext;
 use Rikudou\Unleash\Enum\VariantPayloadType;
+use Rikudou\Unleash\DTO\DefaultVariantPayload;
 
 $unleash = UnleashBuilder::create()
     ->withAppName('Some app name')
@@ -373,6 +375,14 @@ if ($variant->isEnabled()) {
     }
 }
 
+// providing custom default variant
+
+$variant = $unleash->getVariant('nonexistentFeature', fallbackVariant: new DefaultVariant(
+    'variantName',
+    enabled: true,
+    payload: new DefaultVariantPayload(VariantPayloadType::STRING, 'somePayload'),
+));
+assert($variant->getPayload()->getValue() === 'somePayload');
 ```
 
 ## Client registration

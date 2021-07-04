@@ -12,11 +12,7 @@ interface VariantPayload extends JsonSerializable
     #[ExpectedValues(valuesFromClass: VariantPayloadType::class)]
     public function getType(): string;
 
-    /**
-     * @return array<mixed>|string
-     * @noinspection PhpPluralMixedCanBeReplacedWithArrayInspection
-     */
-    public function getValue(): array|string;
+    public function getValue(): string;
 
     /**
      * @throws LogicException
