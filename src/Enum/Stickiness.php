@@ -10,7 +10,5 @@ final class Stickiness
 
     public const RANDOM = 'random';
 
-    public const IP_ADDRESS = 'remoteAddress';
-
     public const DEFAULT = 'default';
 }

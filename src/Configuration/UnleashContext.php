@@ -2,6 +2,7 @@
 
 namespace Rikudou\Unleash\Configuration;
 
+use Rikudou\Unleash\Enum\ContextField;
 use Rikudou\Unleash\Enum\Stickiness;
 use Rikudou\Unleash\Exception\InvalidValueException;
 
@@ -112,9 +113,9 @@ final class UnleashContext
     public function findContextValue(string $fieldName): ?string
     {
         return match ($fieldName) {
-            Stickiness::USER_ID, 'userId' => $this->getCurrentUserId(),
-            Stickiness::SESSION_ID, 'sessionId' => $this->getSessionId(),
-            Stickiness::IP_ADDRESS => $this->getIpAddress(),
+            ContextField::USER_ID, Stickiness::USER_ID => $this->getCurrentUserId(),
+            ContextField::SESSION_ID, Stickiness::SESSION_ID => $this->getSessionId(),
+            ContextField::IP_ADDRESS => $this->getIpAddress(),
             default => $this->customContext[$fieldName] ?? null,
         };
     }

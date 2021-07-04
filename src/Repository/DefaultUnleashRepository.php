@@ -136,7 +136,7 @@ final class DefaultUnleashRepository implements UnleashRepository
                 }
                 $variants[] = new DefaultVariant(
                     $variant['name'],
-                    true, // todo
+                    true,
                     $variant['weight'],
                     $variant['stickiness'] ?? Stickiness::DEFAULT,
                     isset($variant['payload'])

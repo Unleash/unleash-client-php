@@ -32,14 +32,10 @@ final class DefaultVariantHandler implements VariantHandler
 
     public function selectVariant(Feature $feature, UnleashContext $context): ?Variant
     {
-        $totalWeight = (function () use ($feature): int {
-            $result = 0;
-            foreach ($feature->getVariants() as $variant) {
-                $result += $variant->getWeight();
-            }
-
-            return $result;
-        })();
+        $totalWeight = 0;
+        foreach ($feature->getVariants() as $variant) {
+            $totalWeight += $variant->getWeight();
+        }
         if ($totalWeight <= 0) {
             return null;
         }
@@ -65,7 +61,9 @@ final class DefaultVariantHandler implements VariantHandler
             }
         }
 
+        // @codeCoverageIgnoreStart
         return null;
+        // @codeCoverageIgnoreEnd
     }
 
     private function findOverriddenVariant(Feature $feature, UnleashContext $context): ?Variant

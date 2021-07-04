@@ -22,11 +22,17 @@ final class DefaultVariant implements Variant
     ) {
     }
 
+    /**
+     * @codeCoverageIgnore
+     */
     public function getName(): string
     {
         return $this->name;
     }
 
+    /**
+     * @codeCoverageIgnore
+     */
     public function getPayload(): ?VariantPayload
     {
         return $this->payload;
@@ -54,6 +60,9 @@ final class DefaultVariant implements Variant
         return $this->weight;
     }
 
+    /**
+     * @codeCoverageIgnore
+     */
     public function isEnabled(): bool
     {
         return $this->enabled;
