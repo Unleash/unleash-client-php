@@ -13,7 +13,7 @@ use Rikudou\Unleash\Enum\VariantPayloadType;
 final class DefaultVariantPayload implements VariantPayload
 {
     public function __construct(
-        #[ExpectedValues(valuesFromClass: VariantPayloadType::class)]
+//        #[ExpectedValues(valuesFromClass: VariantPayloadType::class)]
         private string $type,
         private string $value,
     ) {
