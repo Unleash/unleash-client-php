@@ -7,7 +7,7 @@ use Rikudou\Unleash\DTO\Variant;
 
 interface Unleash
 {
-    public const SDK_VERSION = '0.11.0';
+    public const SDK_VERSION = '0.11.1';
 
     public function isEnabled(string $featureName, UnleashContext $context = null, bool $default = false): bool;
 
