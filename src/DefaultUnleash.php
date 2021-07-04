@@ -89,7 +89,12 @@ final class DefaultUnleash implements Unleash
             return $fallbackVariant;
         }
 
-        return $this->variantHandler->selectVariant($feature, $context) ?? $fallbackVariant;
+        $variant = $this->variantHandler->selectVariant($feature, $context);
+        if ($variant !== null) {
+            $this->metricsHandler->handleMetrics($feature, true, $variant);
+        }
+
+        return $variant  ?? $fallbackVariant;
     }
 
     public function register(): bool
