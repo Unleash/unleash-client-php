@@ -22,6 +22,8 @@ final class DefaultVariantHandlerTest extends TestCase
 
     public function testSelectVariant()
     {
+        unset($_SERVER['REMOTE_ADDR']);
+
         $instance = new DefaultVariantHandler(new MurmurHashCalculator());
         $feature = new DefaultFeature(
             'test',
