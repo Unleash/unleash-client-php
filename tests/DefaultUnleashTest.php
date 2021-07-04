@@ -5,6 +5,7 @@ namespace Rikudou\Tests\Unleash;
 use Rikudou\Unleash\Configuration\UnleashContext;
 use Rikudou\Unleash\DefaultUnleash;
 use Rikudou\Unleash\DTO\Feature;
+use Rikudou\Unleash\DTO\Variant;
 use Rikudou\Unleash\Metrics\MetricsHandler;
 use Rikudou\Unleash\Stickiness\MurmurHashCalculator;
 use Rikudou\Unleash\Strategy\DefaultStrategyHandler;
@@ -25,7 +26,7 @@ final class DefaultUnleashTest extends AbstractHttpClientTest
     {
         parent::setUp();
         $this->metricsHandler = new class implements MetricsHandler {
-            public function handleMetrics(Feature $feature, bool $successful): void
+            public function handleMetrics(Feature $feature, bool $successful, Variant $variant = null): void
             {
             }
         };

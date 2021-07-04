@@ -5,6 +5,7 @@ namespace Rikudou\Unleash\Metrics;
 use DateTimeImmutable;
 use Rikudou\Unleash\Configuration\UnleashConfiguration;
 use Rikudou\Unleash\DTO\Feature;
+use Rikudou\Unleash\DTO\Variant;
 
 final class DefaultMetricsHandler implements MetricsHandler
 {
@@ -16,14 +17,14 @@ final class DefaultMetricsHandler implements MetricsHandler
     ) {
     }
 
-    public function handleMetrics(Feature $feature, bool $successful): void
+    public function handleMetrics(Feature $feature, bool $successful, Variant $variant = null): void
     {
         if (!$this->configuration->isMetricsEnabled()) {
             return;
         }
 
         $bucket = $this->getOrCreateBucket($feature);
-        $bucket->addToggle(new MetricsBucketToggle($feature, $successful));
+        $bucket->addToggle(new MetricsBucketToggle($feature, $successful, $variant));
         if ($this->shouldSend($bucket)) {
             $this->send($bucket);
         } else {
