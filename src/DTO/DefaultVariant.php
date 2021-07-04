@@ -15,7 +15,7 @@ final class DefaultVariant implements Variant
         private string $name,
         private bool $enabled,
         private int $weight = 0,
-        #[ExpectedValues(valuesFromClass: Stickiness::class)]
+//        #[ExpectedValues(valuesFromClass: Stickiness::class)]
         private string $stickiness = Stickiness::DEFAULT,
         private ?VariantPayload $payload = null,
         private ?array $overrides = null,
