@@ -30,8 +30,8 @@ final class DefaultVariantHandlerTest extends TestCase
             true,
             [],
             [
-                new DefaultVariant('test', true, 0, Stickiness::DEFAULT, null, null),
-                new DefaultVariant('test2', true, 0, Stickiness::DEFAULT, null, null),
+                new DefaultVariant('test', true),
+                new DefaultVariant('test2', true),
             ]
         );
 
@@ -42,8 +42,8 @@ final class DefaultVariantHandlerTest extends TestCase
             true,
             [],
             [
-                new DefaultVariant('test', true, 0, Stickiness::DEFAULT, null, null),
-                new DefaultVariant('test2', true, 1, Stickiness::DEFAULT, null, null),
+                new DefaultVariant('test', true),
+                new DefaultVariant('test2', true, 1),
             ]
         );
 
@@ -54,8 +54,8 @@ final class DefaultVariantHandlerTest extends TestCase
             true,
             [],
             [
-                new DefaultVariant('test', true, 1, Stickiness::USER_ID, null, null),
-                new DefaultVariant('test2', true, 1, Stickiness::USER_ID, null, null),
+                new DefaultVariant('test', true, 1, Stickiness::USER_ID),
+                new DefaultVariant('test2', true, 1, Stickiness::USER_ID),
             ]
         );
         self::assertEquals('test2', $instance->selectVariant($feature, new UnleashContext('125'))->getName());

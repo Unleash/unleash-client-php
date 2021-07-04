@@ -14,11 +14,11 @@ final class DefaultVariant implements Variant
     public function __construct(
         private string $name,
         private bool $enabled,
-        private int $weight,
+        private int $weight = 0,
         #[ExpectedValues(valuesFromClass: Stickiness::class)]
-        private string $stickiness,
-        private ?VariantPayload $payload,
-        private ?array $overrides,
+        private string $stickiness = Stickiness::DEFAULT,
+        private ?VariantPayload $payload = null,
+        private ?array $overrides = null,
     ) {
     }
 

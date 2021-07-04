@@ -6,6 +6,8 @@ namespace Rikudou\Unleash\DTO;
 
 use JetBrains\PhpStorm\ArrayShape;
 use JetBrains\PhpStorm\ExpectedValues;
+use JetBrains\PhpStorm\Pure;
+use LogicException;
 use Rikudou\Unleash\Enum\VariantPayloadType;
 
 final class DefaultVariantPayload implements VariantPayload
@@ -26,21 +28,34 @@ final class DefaultVariantPayload implements VariantPayload
         return $this->type;
     }
 
-    /**
-     * @return array<mixed>|string
-     */
-    public function getValue(): array|string
+    public function getValue(): string
     {
-        return match ($this->type) {
-            VariantPayloadType::JSON => json_decode($this->value, true, flags: JSON_THROW_ON_ERROR),
-            default => $this->value,
-        };
+        return $this->value;
     }
 
     /**
-     * @phpstan-return array<string|array>
+     * @return array<mixed>
      */
-    #[ArrayShape(['type' => 'string', 'value' => 'array|mixed[]|string'])]
+    public function fromJson(): array
+    {
+        if ($this->type !== VariantPayloadType::JSON) {
+            throw new LogicException(
+                sprintf(
+                    "Only payloads of type '%s' can be converted from json, this payload has type '%s'",
+                    VariantPayloadType::JSON,
+                    $this->type,
+                )
+            );
+        }
+
+        return json_decode($this->value, true, flags: JSON_THROW_ON_ERROR);
+    }
+
+    /**
+     * @return array<string>
+     */
+    #[Pure]
+    #[ArrayShape(['type' => 'string', 'value' => 'string'])]
     public function jsonSerialize(): array
     {
         return [
