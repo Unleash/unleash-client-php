@@ -471,8 +471,15 @@ $unleash->isEnabled('test');
 
 use Rikudou\Unleash\UnleashBuilder;
 
-$gitlabUnleash = UnleashBuilder::create()
+$gitlabUnleash = UnleashBuilder::createForGitlab()
     ->withInstanceId('H9sU9yVHVAiWFiLsH2Mo') // generated in GitLab
+    ->withAppUrl('https://git.example.com/api/v4/feature_flags/unleash/1')
+    ->withGitlabEnvironment('Production')
+    ->build();
+
+// the above is equivalent to
+$gitlabUnleash = UnleashBuilder::create()
+    ->withInstanceId('H9sU9yVHVAiWFiLsH2Mo')
     ->withAppUrl('https://git.example.com/api/v4/feature_flags/unleash/1')
     ->withGitlabEnvironment('Production')
     ->withAutomaticRegistrationEnabled(false)

@@ -76,6 +76,14 @@ final class UnleashBuilder
     }
 
     #[Pure]
+    public static function createForGitlab(): self
+    {
+        return self::create()
+            ->withMetricsEnabled(false)
+            ->withAutomaticRegistrationEnabled(false);
+    }
+
+    #[Pure]
     public function withAppUrl(string $appUrl): self
     {
         return $this->with('appUrl', $appUrl);
