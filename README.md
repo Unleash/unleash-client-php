@@ -485,4 +485,3 @@ $gitlabUnleash = UnleashBuilder::create()
 Not every feature has been implemented yet, currently missing features are:
 
 - constraints
-- stickiness based on custom fields

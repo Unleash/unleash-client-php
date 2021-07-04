@@ -39,7 +39,6 @@ final class ClientSpecificationTest extends AbstractHttpClientTest
         $disabledFeatureTests = [
             '09-strategy-constraints.json',
             '11-strategy-constraints-edge-cases.json',
-            '12-custom-stickiness.json',
         ];
 
         foreach ($specificationList as $specificationFilename) {

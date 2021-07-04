@@ -9,7 +9,6 @@ use Rikudou\Unleash\Configuration\UnleashContext;
 use Rikudou\Unleash\DTO\DefaultStrategy;
 use Rikudou\Unleash\DTO\Strategy;
 use Rikudou\Unleash\Enum\Stickiness;
-use Rikudou\Unleash\Exception\InvalidValueException;
 use Rikudou\Unleash\Stickiness\MurmurHashCalculator;
 use Rikudou\Unleash\Strategy\GradualRolloutStrategyHandler;
 
@@ -49,15 +48,11 @@ final class GradualRolloutStrategyHandlerTest extends TestCase
             'stickiness' => Stickiness::RANDOM,
         ]), new UnleashContext()));
 
-        try {
-            $this->instance->isEnabled(new DefaultStrategy('flexibleRollout', [
-                'groupId' => 'test',
-                'stickiness' => 'unknown-stickiness',
-                'rollout' => 5,
-            ]), new UnleashContext());
-            $this->fail('Expected exception: ' . InvalidValueException::class);
-        } catch (InvalidValueException $e) {
-        }
+        self::assertFalse($this->instance->isEnabled(new DefaultStrategy('flexibleRollout', [
+            'groupId' => 'test',
+            'stickiness' => 'unknown-stickiness',
+            'rollout' => 5,
+        ]), new UnleashContext()));
 
         self::assertFalse($this->instance->isEnabled($this->createStrategy(50), new UnleashContext('123')));
         self::assertFalse($this->instance->isEnabled($this->createStrategy(50), new UnleashContext('456')));

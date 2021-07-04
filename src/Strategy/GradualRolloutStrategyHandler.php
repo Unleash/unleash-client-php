@@ -5,7 +5,6 @@ namespace Rikudou\Unleash\Strategy;
 use Rikudou\Unleash\Configuration\UnleashContext;
 use Rikudou\Unleash\DTO\Strategy;
 use Rikudou\Unleash\Enum\Stickiness;
-use Rikudou\Unleash\Exception\InvalidValueException;
 use Rikudou\Unleash\Stickiness\StickinessCalculator;
 
 final class GradualRolloutStrategyHandler extends AbstractStrategyHandler
@@ -45,7 +44,11 @@ final class GradualRolloutStrategyHandler extends AbstractStrategyHandler
                 $id = $context->getCurrentUserId() ?? $context->getSessionId() ?? random_int(1, 100);
                 break;
             default:
-                throw new InvalidValueException("Unknown stickiness value: '{$stickiness}'");
+                $id = $context->findContextValue($stickiness);
+                if ($id === null) {
+                    return false;
+                }
+                break;
         }
 
         $normalized = $this->stickinessCalculator->calculate((string) $id, $groupId);
