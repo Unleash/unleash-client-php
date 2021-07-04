@@ -6,11 +6,13 @@ final class DefaultFeature implements Feature
 {
     /**
      * @param iterable<Strategy> $strategies
+     * @param array<Variant>     $variants
      */
     public function __construct(
         private string $name,
         private bool $enabled,
-        private iterable $strategies
+        private iterable $strategies,
+        private array $variants = [],
     ) {
     }
 
@@ -30,5 +32,13 @@ final class DefaultFeature implements Feature
     public function getStrategies(): iterable
     {
         return $this->strategies;
+    }
+
+    /**
+     * @return array<Variant>
+     */
+    public function getVariants(): array
+    {
+        return $this->variants;
     }
 }

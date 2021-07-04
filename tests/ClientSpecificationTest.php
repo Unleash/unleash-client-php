@@ -14,6 +14,7 @@ use Rikudou\Unleash\Strategy\GradualRolloutStrategyHandler;
 use Rikudou\Unleash\Strategy\GradualRolloutUserIdStrategyHandler;
 use Rikudou\Unleash\Strategy\IpAddressStrategyHandler;
 use Rikudou\Unleash\Strategy\UserIdStrategyHandler;
+use Rikudou\Unleash\Variant\DefaultVariantHandler;
 
 final class ClientSpecificationTest extends AbstractHttpClientTest
 {
@@ -31,7 +32,7 @@ final class ClientSpecificationTest extends AbstractHttpClientTest
             public function handleMetrics(Feature $feature, bool $successful): void
             {
             }
-        });
+        }, new DefaultVariantHandler(new MurmurHashCalculator()));
 
         $specificationList = $this->getJson('index.json');
 

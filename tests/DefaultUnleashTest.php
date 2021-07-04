@@ -12,6 +12,7 @@ use Rikudou\Unleash\Strategy\GradualRolloutStrategyHandler;
 use Rikudou\Unleash\Strategy\IpAddressStrategyHandler;
 use Rikudou\Unleash\Strategy\StrategyHandler;
 use Rikudou\Unleash\Strategy\UserIdStrategyHandler;
+use Rikudou\Unleash\Variant\DefaultVariantHandler;
 
 final class DefaultUnleashTest extends AbstractHttpClientTest
 {
@@ -435,7 +436,14 @@ final class DefaultUnleashTest extends AbstractHttpClientTest
         self::assertFalse($instance->register());
 
         $this->pushResponse([]);
-        new DefaultUnleash([], $this->repository, $this->registrationService, true, $this->metricsHandler);
+        new DefaultUnleash(
+            [],
+            $this->repository,
+            $this->registrationService,
+            true,
+            $this->metricsHandler,
+            new DefaultVariantHandler(new MurmurHashCalculator())
+        );
         self::assertCount(3, $this->requestHistory);
     }
 
@@ -446,7 +454,8 @@ final class DefaultUnleashTest extends AbstractHttpClientTest
             $this->repository,
             $this->registrationService,
             false,
-            $this->metricsHandler
+            $this->metricsHandler,
+            new DefaultVariantHandler(new MurmurHashCalculator())
         );
     }
 }
