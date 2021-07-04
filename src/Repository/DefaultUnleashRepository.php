@@ -14,6 +14,7 @@ use Rikudou\Unleash\DTO\DefaultVariant;
 use Rikudou\Unleash\DTO\DefaultVariantOverride;
 use Rikudou\Unleash\DTO\DefaultVariantPayload;
 use Rikudou\Unleash\DTO\Feature;
+use Rikudou\Unleash\Enum\Stickiness;
 use Rikudou\Unleash\Exception\HttpResponseException;
 
 final class DefaultUnleashRepository implements UnleashRepository
@@ -137,8 +138,7 @@ final class DefaultUnleashRepository implements UnleashRepository
                     $variant['name'],
                     true, // todo
                     $variant['weight'],
-                    $variant['weightType'],
-                    $variant['stickiness'],
+                    $variant['stickiness'] ?? Stickiness::DEFAULT,
                     isset($variant['payload'])
                         ? new DefaultVariantPayload($variant['payload']['type'], $variant['payload']['value'])
                         : null,

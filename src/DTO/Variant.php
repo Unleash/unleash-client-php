@@ -16,8 +16,6 @@ interface Variant extends JsonSerializable
 
     public function getWeight(): int;
 
-    public function getWeightType(): string;
-
     /**
      * @return array<VariantOverride>
      */

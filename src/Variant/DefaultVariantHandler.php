@@ -8,7 +8,6 @@ use Rikudou\Unleash\DTO\DefaultVariant;
 use Rikudou\Unleash\DTO\Feature;
 use Rikudou\Unleash\DTO\Variant;
 use Rikudou\Unleash\Enum\Stickiness;
-use Rikudou\Unleash\Enum\VariantWeightType;
 use Rikudou\Unleash\Stickiness\StickinessCalculator;
 
 final class DefaultVariantHandler implements VariantHandler
@@ -25,7 +24,6 @@ final class DefaultVariantHandler implements VariantHandler
             'disabled',
             false,
             0,
-            VariantWeightType::FIXED,
             Stickiness::DEFAULT,
             null,
             null,

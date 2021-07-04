@@ -5,7 +5,6 @@ namespace Rikudou\Unleash\DTO;
 use JetBrains\PhpStorm\ArrayShape;
 use JetBrains\PhpStorm\ExpectedValues;
 use Rikudou\Unleash\Enum\Stickiness;
-use Rikudou\Unleash\Enum\VariantWeightType;
 
 final class DefaultVariant implements Variant
 {
@@ -16,8 +15,6 @@ final class DefaultVariant implements Variant
         private string $name,
         private bool $enabled,
         private int $weight,
-        #[ExpectedValues(valuesFromClass: VariantWeightType::class)]
-        private string $weightType,
         #[ExpectedValues(valuesFromClass: Stickiness::class)]
         private string $stickiness,
         private ?VariantPayload $payload,
@@ -41,22 +38,20 @@ final class DefaultVariant implements Variant
     #[ArrayShape(['name' => 'string', 'enabled' => 'bool', 'payload' => 'mixed'])]
     public function jsonSerialize(): array
     {
-        return [
+        $result = [
             'name' => $this->name,
             'enabled' => $this->enabled,
-            'payload' => $this->payload?->jsonSerialize(),
         ];
+        if ($this->payload !== null) {
+            $result['payload'] = $this->payload->jsonSerialize();
+        }
+
+        return $result;
     }
 
     public function getWeight(): int
     {
         return $this->weight;
-    }
-
-    #[ExpectedValues(valuesFromClass: VariantWeightType::class)]
-    public function getWeightType(): string
-    {
-        return $this->weightType;
     }
 
     public function isEnabled(): bool
