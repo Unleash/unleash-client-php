@@ -328,4 +328,17 @@ final class UnleashBuilderTest extends TestCase
         $this->expectException(InvalidValueException::class);
         $instance->build();
     }
+
+    public function testCreateForGitlab()
+    {
+        $instance = UnleashBuilder::createForGitlab();
+
+        $autoRegistrationProperty = (new ReflectionObject($instance))->getProperty('autoregister');
+        $autoRegistrationProperty->setAccessible(true);
+        $metricsProperty = (new ReflectionObject($instance))->getProperty('metricsEnabled');
+        $metricsProperty->setAccessible(true);
+
+        self::assertFalse($autoRegistrationProperty->getValue($instance));
+        self::assertFalse($metricsProperty->getValue($instance));
+    }
 }
