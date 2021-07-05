@@ -16,8 +16,8 @@ jobs:
           php-version: 8.0
       - name: Checkout Code
         uses: actions/checkout@v2
-#        with:
-#          ref: master
+        with:
+          ref: master
       - name: Install Dependencies
         run: composer install
       - name: Transpile to 7.3
@@ -45,8 +45,8 @@ jobs:
           php-version: 8.0
       - name: Checkout Code
         uses: actions/checkout@v2
-#        with:
-#          ref: master
+        with:
+          ref: master
       - name: Install Dependencies
         run: composer install
       - name: Transpile to 7.4
