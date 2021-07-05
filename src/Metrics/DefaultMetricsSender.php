@@ -9,14 +9,10 @@ use Rikudou\Unleash\Helper\StringStream;
 
 final class DefaultMetricsSender implements MetricsSender
 {
-    /**
-     * @param array<string,string> $headers
-     */
     public function __construct(
         private ClientInterface $httpClient,
         private RequestFactoryInterface $requestFactory,
         private UnleashConfiguration $configuration,
-        private array $headers = [],
     ) {
     }
 
@@ -34,7 +30,7 @@ final class DefaultMetricsSender implements MetricsSender
                 'instanceId' => $this->configuration->getInstanceId(),
                 'bucket' => $bucket->jsonSerialize(),
             ], JSON_THROW_ON_ERROR)));
-        foreach ($this->headers as $name => $value) {
+        foreach ($this->configuration->getHeaders() as $name => $value) {
             $request = $request->withHeader($name, $value);
         }
         $this->httpClient->sendRequest($request);

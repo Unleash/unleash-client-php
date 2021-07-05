@@ -60,8 +60,7 @@ abstract class AbstractHttpClientTest extends TestCase
         $this->registrationService = new DefaultRegistrationService(
             $this->httpClient,
             new HttpFactory(),
-            new UnleashConfiguration('', '', ''),
-            []
+            new UnleashConfiguration('', '', '')
         );
 
         $this->repository = new DefaultUnleashRepository(

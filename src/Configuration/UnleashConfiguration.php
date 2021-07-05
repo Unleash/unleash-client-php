@@ -14,6 +14,11 @@ final class UnleashConfiguration
 
     private bool $metricsEnabled = true;
 
+    /**
+     * @var array<string,string>
+     */
+    private array $headers = [];
+
     public function __construct(
         private string $url,
         private string $appName,
@@ -118,6 +123,24 @@ final class UnleashConfiguration
     public function setMetricsEnabled(bool $metricsEnabled): self
     {
         $this->metricsEnabled = $metricsEnabled;
+
+        return $this;
+    }
+
+    /**
+     * @return array<string,string>
+     */
+    public function getHeaders(): array
+    {
+        return $this->headers;
+    }
+
+    /**
+     * @param array<string,string> $headers
+     */
+    public function setHeaders(array $headers): self
+    {
+        $this->headers = $headers;
 
         return $this;
     }

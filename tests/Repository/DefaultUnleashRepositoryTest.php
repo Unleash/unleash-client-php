@@ -136,12 +136,12 @@ final class DefaultUnleashRepositoryTest extends AbstractHttpClientTest
                 'handler' => $this->handlerStack,
             ]),
             new HttpFactory(),
-            new UnleashConfiguration('', '', ''),
-            [
-                'Custom-Header-1' => 'some value',
-                'Custom-Header-2' => 'some other value',
-                'Authorization' => 'Some API key',
-            ]
+            (new UnleashConfiguration('', '', ''))
+                ->setHeaders([
+                    'Custom-Header-1' => 'some value',
+                    'Custom-Header-2' => 'some other value',
+                    'Authorization' => 'Some API key',
+                ])
         );
 
         $repository->getFeatures();

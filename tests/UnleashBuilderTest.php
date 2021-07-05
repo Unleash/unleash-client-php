@@ -201,9 +201,14 @@ final class UnleashBuilderTest extends TestCase
         $repository = $repositoryProperty->getValue($unleash);
 
         $reflection = new ReflectionObject($repository);
+        $configurationProperty = $reflection->getProperty('configuration');
+        $configurationProperty->setAccessible(true);
+        $configuration = $configurationProperty->getValue($repository);
+
+        $reflection = new ReflectionObject($configuration);
         $headersPropertyBuilt = $reflection->getProperty('headers');
         $headersPropertyBuilt->setAccessible(true);
-        $headersBuilt = $headersPropertyBuilt->getValue($repository);
+        $headersBuilt = $headersPropertyBuilt->getValue($configuration);
         self::assertEquals($headers, $headersBuilt);
 
         $instance = $instance
@@ -222,8 +227,7 @@ final class UnleashBuilderTest extends TestCase
         self::assertNotSame($this->instance, $this->instance->withRegistrationService(new DefaultRegistrationService(
             new Client(),
             new HttpFactory(),
-            new UnleashConfiguration('', '', ''),
-            []
+            new UnleashConfiguration('', '', '')
         )));
     }
 

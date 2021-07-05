@@ -15,10 +15,10 @@ final class DefaultRegistrationServiceTest extends AbstractHttpClientTest
         $instance = new DefaultRegistrationService(
             $this->httpClient,
             new HttpFactory(),
-            new UnleashConfiguration('', '', ''),
-            [
-                'Some-Header' => 'some-value',
-            ]
+            (new UnleashConfiguration('', '', ''))
+                ->setHeaders([
+                    'Some-Header' => 'some-value',
+                ]),
         );
 
         $this->pushResponse([], 1, 202);

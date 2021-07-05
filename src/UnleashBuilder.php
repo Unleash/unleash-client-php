@@ -201,6 +201,7 @@ final class UnleashBuilder
             ->setTtl($this->cacheTtl ?? $configuration->getTtl())
             ->setMetricsEnabled($this->metricsEnabled ?? $configuration->isMetricsEnabled())
             ->setMetricsInterval($this->metricsInterval ?? $configuration->getMetricsInterval())
+            ->setHeaders($this->headers)
         ;
 
         $httpClient = $this->httpClient;
@@ -231,7 +232,7 @@ final class UnleashBuilder
         }
         assert($requestFactory instanceof RequestFactoryInterface);
 
-        $repository = new DefaultUnleashRepository($httpClient, $requestFactory, $configuration, $this->headers);
+        $repository = new DefaultUnleashRepository($httpClient, $requestFactory, $configuration);
 
         $hashCalculator = new MurmurHashCalculator();
         $strategies = $this->strategies;
@@ -250,7 +251,7 @@ final class UnleashBuilder
 
         $registrationService = $this->registrationService;
         if ($registrationService === null) {
-            $registrationService = new DefaultRegistrationService($httpClient, $requestFactory, $configuration, $this->headers);
+            $registrationService = new DefaultRegistrationService($httpClient, $requestFactory, $configuration);
         }
 
         return new DefaultUnleash(
@@ -263,7 +264,6 @@ final class UnleashBuilder
                     $httpClient,
                     $requestFactory,
                     $configuration,
-                    $this->headers
                 ),
                 $configuration
             ),
