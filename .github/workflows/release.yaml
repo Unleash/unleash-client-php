@@ -32,10 +32,11 @@ jobs:
         env:
           VERSION: ${{ steps.extract_name.outputs.result }}
         run: git push origin v$VERSION.80
+
       - name: Install Dependencies
         run: composer install
-      - name: Transpile
-        run: php vendor/bin/rector process src
+      - name: Transpile 7.3
+        run: php vendor/bin/rector process --no-diffs --no-progress-bar --config rector.73.php src
       - name: Update composer.json version
         run: 'sed -i -e ''s/"php": "\^8.0"/"php": "\^7.3"/'' composer.json'
       - name: Commit PHP 7.3 version
@@ -50,12 +51,40 @@ jobs:
         env:
           VERSION: ${{ steps.extract_name.outputs.result }}
         run: git tag v$VERSION.73
-      - name: Push PHP 73 release tag
+      - name: Push PHP 7.3 release tag
         env:
           VERSION: ${{ steps.extract_name.outputs.result }}
         run: git push origin v$VERSION.73
       - name: Delete temporary branch
         run: git push origin --delete tmp-php-7.3-release
+
+      - name: Checkout Code
+        uses: actions/checkout@v2
+      - name: Install Dependencies
+        run: composer install
+      - name: Transpile 7.4
+        run: php vendor/bin/rector process --no-diffs --no-progress-bar --config rector.74.php src
+      - name: Update composer.json version
+        run: 'sed -i -e ''s/"php": "\^8.0"/"php": "\^7.4"/'' composer.json'
+      - name: Commit PHP 7.4 version
+        run: |
+          git config user.email noreply@github.com && \
+          git config user.name "GitHub Actions" && \
+          git checkout -b tmp-php-7.4-release && \
+          git add . -v && \
+          git commit -m "Transpile to PHP 7.4" && \
+          git push origin tmp-php-7.4-release
+      - name: Create PHP 7.4 release tag
+        env:
+          VERSION: ${{ steps.extract_name.outputs.result }}
+        run: git tag v$VERSION.74
+      - name: Push PHP 7.4 release tag
+        env:
+          VERSION: ${{ steps.extract_name.outputs.result }}
+        run: git push origin v$VERSION.74
+      - name: Delete temporary branch
+        run: git push origin --delete tmp-php-7.4-release
+
       - name: Delete original tag
         env:
           VERSION: ${{ steps.extract_name.outputs.result }}
