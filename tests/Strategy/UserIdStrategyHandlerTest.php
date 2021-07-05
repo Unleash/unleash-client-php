@@ -4,7 +4,9 @@ namespace Rikudou\Tests\Unleash\Strategy;
 
 use PHPUnit\Framework\TestCase;
 use Rikudou\Unleash\Configuration\UnleashContext;
+use Rikudou\Unleash\DTO\DefaultConstraint;
 use Rikudou\Unleash\DTO\DefaultStrategy;
+use Rikudou\Unleash\Enum\ConstraintOperator;
 use Rikudou\Unleash\Exception\MissingArgumentException;
 use Rikudou\Unleash\Strategy\UserIdStrategyHandler;
 
@@ -43,5 +45,27 @@ final class UserIdStrategyHandlerTest extends TestCase
         self::assertFalse($instance->isEnabled(new DefaultStrategy('userWithId', [
             'userIds' => '789',
         ]), $context));
+
+        $strategy = new DefaultStrategy('whatever', [
+            'userIds' => '123',
+        ], [
+            new DefaultConstraint('something', ConstraintOperator::IN, ['test']),
+        ]);
+        self::assertFalse($instance->isEnabled($strategy, new UnleashContext('123')));
+        self::assertTrue($instance->isEnabled(
+            $strategy,
+            (new UnleashContext('123'))->setCustomProperty('something', 'test')
+        ));
+
+        $strategy = new DefaultStrategy('whatever', [
+            'userIds' => '123',
+        ], [
+            new DefaultConstraint('something', ConstraintOperator::NOT_IN, ['test']),
+        ]);
+        self::assertTrue($instance->isEnabled($strategy, new UnleashContext('123')));
+        self::assertFalse($instance->isEnabled(
+            $strategy,
+            (new UnleashContext('123'))->setCustomProperty('something', 'test')
+        ));
     }
 }

@@ -9,6 +9,10 @@ final class DefaultStrategyHandler extends AbstractStrategyHandler
 {
     public function isEnabled(Strategy $strategy, UnleashContext $context): bool
     {
+        if (!$this->validateConstraints($strategy, $context)) {
+            return false;
+        }
+
         return true;
     }
 

@@ -40,7 +40,17 @@ final class GradualRolloutStrategyHandler extends AbstractStrategyHandler
 
         $normalized = $this->stickinessCalculator->calculate((string) $id, $groupId);
 
-        return $normalized <= (int) $rollout;
+        $enabled = $normalized <= (int) $rollout;
+
+        if (!$enabled) {
+            return false;
+        }
+
+        if (!$this->validateConstraints($strategy, $context)) {
+            return false;
+        }
+
+        return true;
     }
 
     public function getStrategyName(): string

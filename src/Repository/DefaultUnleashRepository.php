@@ -8,6 +8,7 @@ use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
 use Psr\SimpleCache\InvalidArgumentException;
 use Rikudou\Unleash\Configuration\UnleashConfiguration;
+use Rikudou\Unleash\DTO\DefaultConstraint;
 use Rikudou\Unleash\DTO\DefaultFeature;
 use Rikudou\Unleash\DTO\DefaultStrategy;
 use Rikudou\Unleash\DTO\DefaultVariant;
@@ -127,7 +128,19 @@ final class DefaultUnleashRepository implements UnleashRepository
             $variants = [];
 
             foreach ($feature['strategies'] as $strategy) {
-                $strategies[] = new DefaultStrategy($strategy['name'], $strategy['parameters'] ?? []);
+                $constraints = [];
+                foreach ($strategy['constraints'] ?? [] as $constraint) {
+                    $constraints[] = new DefaultConstraint(
+                        $constraint['contextName'],
+                        $constraint['operator'],
+                        $constraint['values']
+                    );
+                }
+                $strategies[] = new DefaultStrategy(
+                    $strategy['name'],
+                    $strategy['parameters'] ?? [],
+                    $constraints
+                );
             }
             foreach ($feature['variants'] ?? [] as $variant) {
                 $overrides = [];

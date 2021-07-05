@@ -5,7 +5,7 @@
 A PHP implementation of the [Unleash protocol](https://www.getunleash.io/)
 aka [Feature Flags](https://docs.gitlab.com/ee/operations/feature_flags.html) in GitLab.
 
-This implementation conforms to the official Unleash standards except for [missing features](#missing-features).
+This implementation conforms to the official Unleash standards and is feature complete.
 
 > Unleash allows you to gradually release your app's feature before doing a full release based on multiple strategies
 > like releasing to only specific users or releasing to a percentage of your user base. Read more in the above linked
@@ -456,6 +456,10 @@ sleep(10);
 $unleash->isEnabled('test');
 ```
 
+## Constraints
+
+Constraints are supported by this SDK and will be handled correctly by `Unleash::isEnabled()` if present.
+
 ## GitLab specifics
 
 - In GitLab you have to use the provided instance id, you cannot create your own.
@@ -486,9 +490,3 @@ $gitlabUnleash = UnleashBuilder::create()
     ->withMetricsEnabled(false)
     ->build();
 ```
-
-## Missing features
-
-Not every feature has been implemented yet, currently missing features are:
-
-- constraints
