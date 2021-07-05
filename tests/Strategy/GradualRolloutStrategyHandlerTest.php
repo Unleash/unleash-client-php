@@ -6,8 +6,10 @@ use JetBrains\PhpStorm\ExpectedValues;
 use JetBrains\PhpStorm\Pure;
 use PHPUnit\Framework\TestCase;
 use Rikudou\Unleash\Configuration\UnleashContext;
+use Rikudou\Unleash\DTO\DefaultConstraint;
 use Rikudou\Unleash\DTO\DefaultStrategy;
 use Rikudou\Unleash\DTO\Strategy;
+use Rikudou\Unleash\Enum\ConstraintOperator;
 use Rikudou\Unleash\Enum\Stickiness;
 use Rikudou\Unleash\Stickiness\MurmurHashCalculator;
 use Rikudou\Unleash\Strategy\GradualRolloutStrategyHandler;
@@ -124,18 +126,37 @@ final class GradualRolloutStrategyHandlerTest extends TestCase
         );
 
         $this->instance->isEnabled($this->createStrategy(100, Stickiness::RANDOM), new UnleashContext());
+
+        $strategy = $this->createStrategy(100, Stickiness::DEFAULT, [
+            new DefaultConstraint('something', ConstraintOperator::IN, ['test']),
+        ]);
+        self::assertFalse($this->instance->isEnabled($strategy, new UnleashContext()));
+        self::assertTrue($this->instance->isEnabled(
+            $strategy,
+            (new UnleashContext())->setCustomProperty('something', 'test'),
+        ));
+
+        $strategy = $this->createStrategy(100, Stickiness::DEFAULT, [
+            new DefaultConstraint('something', ConstraintOperator::NOT_IN, ['test']),
+        ]);
+        self::assertTrue($this->instance->isEnabled($strategy, new UnleashContext()));
+        self::assertFalse($this->instance->isEnabled(
+            $strategy,
+            (new UnleashContext())->setCustomProperty('something', 'test'),
+        ));
     }
 
     #[Pure]
     private function createStrategy(
         int $percentage = 100,
         #[ExpectedValues(valuesFromClass: Stickiness::class)]
-        $stickiness = Stickiness::DEFAULT
+        $stickiness = Stickiness::DEFAULT,
+        array $constraints = []
     ): Strategy {
         return new DefaultStrategy('flexibleRollout', [
             'stickiness' => $stickiness,
             'groupId'=> 'default',
             'rollout' => $percentage,
-        ]);
+        ], $constraints);
     }
 }
