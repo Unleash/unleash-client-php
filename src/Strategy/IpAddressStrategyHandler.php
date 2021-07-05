@@ -18,7 +18,17 @@ final class IpAddressStrategyHandler extends AbstractStrategyHandler
         }
         $ipAddresses = array_map('trim', explode(',', $ipAddresses));
 
-        return in_array($context->getIpAddress(), $ipAddresses, true);
+        $enabled = in_array($context->getIpAddress(), $ipAddresses, true);
+
+        if (!$enabled) {
+            return false;
+        }
+
+        if (!$this->validateConstraints($strategy, $context)) {
+            return false;
+        }
+
+        return true;
     }
 
     public function getStrategyName(): string

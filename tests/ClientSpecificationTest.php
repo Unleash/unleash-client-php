@@ -37,10 +37,7 @@ final class ClientSpecificationTest extends AbstractHttpClientTest
 
         $specificationList = $this->getJson('index.json');
 
-        $disabledFeatureTests = [
-            '09-strategy-constraints.json',
-            '11-strategy-constraints-edge-cases.json',
-        ];
+        $disabledFeatureTests = [];
 
         foreach ($specificationList as $specificationFilename) {
             if (in_array($specificationFilename, $disabledFeatureTests, true)) {
@@ -90,6 +87,13 @@ final class ClientSpecificationTest extends AbstractHttpClientTest
             foreach ($context['properties'] as $property => $value) {
                 $contextObject->setCustomProperty($property, $value);
             }
+        }
+
+        foreach ($context as $key => $value) {
+            if ($key === 'properties') {
+                continue;
+            }
+            $contextObject->setCustomProperty($key, $value);
         }
 
         return $contextObject;

@@ -22,7 +22,16 @@ final class UserIdStrategyHandler extends AbstractStrategyHandler
 
         $userIds = array_map('trim', explode(',', $userIds));
 
-        return in_array($context->getCurrentUserId(), $userIds, true);
+        $enabled = in_array($context->getCurrentUserId(), $userIds, true);
+
+        if (!$enabled) {
+            return false;
+        }
+        if (!$this->validateConstraints($strategy, $context)) {
+            return false;
+        }
+
+        return true;
     }
 
     public function getStrategyName(): string
