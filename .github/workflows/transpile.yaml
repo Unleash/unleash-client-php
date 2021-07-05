@@ -19,7 +19,7 @@ jobs:
         with:
           ref: master
       - name: Install Dependencies
-        run: composer install
+        run: composer install && pwd
       - name: Transpile to 7.3
         run: php vendor/bin/rector process --no-diffs --no-progress-bar --config rector.73.php src
       - name: Update composer.json version
