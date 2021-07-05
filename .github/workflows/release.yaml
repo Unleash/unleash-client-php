@@ -20,10 +20,10 @@ jobs:
             return context.payload.ref.replace(/refs\/tags\/release-/, '');
       - name: Checkout Code
         uses: actions/checkout@v2
-#      - name: Check if version is updated in SDK
-#        env:
-#          VERSION: ${{ steps.extract_name.outputs.result }}
-#        run: php tests/check-version.php $VERSION
+      - name: Check if version is updated in SDK
+        env:
+          VERSION: ${{ steps.extract_name.outputs.result }}
+        run: php tests/check-version.php $VERSION
       - name: Create PHP 8 release tag
         env:
           VERSION: ${{ steps.extract_name.outputs.result }}
