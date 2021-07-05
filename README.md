@@ -333,6 +333,71 @@ $unleash->isEnabled('some-feature'); // works because the session is started
 $unleash->isEnabled('some-feature');
 ```
 
+> Note: This library also implements some deprecated strategies, namely `gradualRolloutRandom`, `gradualRolloutSessionId`
+> and `gradualRolloutUserId` which all alias to the Gradual rollout strategy.
+
+### Custom strategies
+
+To implement your own strategy you need to create a class implementing `StrategyHandler` (or `AbstractStrategyHandler`
+which contains some useful methods). Then you need to instruct the builder to use your custom strategy.
+
+```php
+<?php
+
+use Rikudou\Unleash\Strategy\AbstractStrategyHandler;
+use Rikudou\Unleash\DTO\Strategy;
+use Rikudou\Unleash\Configuration\UnleashContext;
+use Rikudou\Unleash\Strategy\DefaultStrategyHandler;
+
+class AprilFoolsStrategy extends AbstractStrategyHandler
+{
+    public function __construct(private DefaultStrategyHandler $original)
+    {
+    }
+    
+    public function getStrategyName() : string
+    {
+        return 'aprilFools';
+    }
+    
+    public function isEnabled(Strategy $strategy, UnleashContext $context) : bool
+    {
+        $date = new DateTimeImmutable();
+        if ((int) $date->format('n') === 4 && (int) $date->format('j') === 1) {
+            return (bool) random_int(0, 1);
+        }
+        
+        return $this->original->isEnabled($strategy, $context);
+    }
+}
+```
+
+Now you must instruct the builder to use your new strategy
+
+```php
+<?php
+
+use Rikudou\Unleash\UnleashBuilder;
+use Rikudou\Unleash\Strategy\IpAddressStrategyHandler;
+
+$unleash = UnleashBuilder::create()
+    ->withAppName('Some app name')
+    ->withAppUrl('https://some-app-url.com')
+    ->withInstanceId('Some instance id')
+    ->withStrategy(new AprilFoolsStrategy()) // this will append your strategy to the existing list
+    ->build();
+
+// if you want to replace all strategies, use withStrategies() instead
+
+$unleash = UnleashBuilder::create()
+    ->withAppName('Some app name')
+    ->withAppUrl('https://some-app-url.com')
+    ->withInstanceId('Some instance id')
+    ->withStrategies(new AprilFoolsStrategy(), new IpAddressStrategyHandler())
+    // now the unleash object will have only the two strategies
+    ->build();
+```
+
 ## Variants
 
 You can use multiple variants of one feature, for example for A/B testing. If no variant matches or the feature doesn't

@@ -59,14 +59,25 @@ final class UnleashBuilder
     private array $headers = [];
 
     /**
-     * @var array<StrategyHandler>|null
+     * @var array<StrategyHandler>
      */
-    private ?array $strategies = null;
+    private array $strategies;
 
     #[Pure]
     public function __construct()
     {
         $this->defaultHttpImplementationLocator = new DefaultHttpImplementationLocator();
+
+        $rolloutStrategyHandler = new GradualRolloutStrategyHandler(new MurmurHashCalculator());
+        $this->strategies = [
+            new DefaultStrategyHandler(),
+            new IpAddressStrategyHandler(),
+            new UserIdStrategyHandler(),
+            $rolloutStrategyHandler,
+            new GradualRolloutUserIdStrategyHandler($rolloutStrategyHandler),
+            new GradualRolloutSessionIdStrategyHandler($rolloutStrategyHandler),
+            new GradualRolloutRandomStrategyHandler($rolloutStrategyHandler),
+        ];
     }
 
     #[Pure]
@@ -123,6 +134,12 @@ final class UnleashBuilder
     public function withStrategies(StrategyHandler ...$strategies): self
     {
         return $this->with('strategies', $strategies);
+    }
+
+    #[Pure]
+    public function withStrategy(StrategyHandler $strategy): self
+    {
+        return $this->withStrategies(...array_merge($this->strategies, [$strategy]));
     }
 
     #[Pure]
@@ -236,19 +253,6 @@ final class UnleashBuilder
         $repository = new DefaultUnleashRepository($httpClient, $requestFactory, $configuration);
 
         $hashCalculator = new MurmurHashCalculator();
-        $strategies = $this->strategies;
-        if ($strategies === null || !count($strategies)) {
-            $rolloutStrategyHandler = new GradualRolloutStrategyHandler($hashCalculator);
-            $strategies = [
-                new DefaultStrategyHandler(),
-                new IpAddressStrategyHandler(),
-                new UserIdStrategyHandler(),
-                $rolloutStrategyHandler,
-                new GradualRolloutUserIdStrategyHandler($rolloutStrategyHandler),
-                new GradualRolloutSessionIdStrategyHandler($rolloutStrategyHandler),
-                new GradualRolloutRandomStrategyHandler($rolloutStrategyHandler),
-            ];
-        }
 
         $registrationService = $this->registrationService;
         if ($registrationService === null) {
@@ -256,7 +260,7 @@ final class UnleashBuilder
         }
 
         return new DefaultUnleash(
-            $strategies,
+            $this->strategies,
             $repository,
             $registrationService,
             $configuration,

@@ -11,8 +11,11 @@ use PHPUnit\Framework\TestCase;
 use ReflectionObject;
 use Rikudou\Unleash\Client\DefaultRegistrationService;
 use Rikudou\Unleash\Configuration\UnleashConfiguration;
+use Rikudou\Unleash\Configuration\UnleashContext;
+use Rikudou\Unleash\DTO\Strategy;
 use Rikudou\Unleash\Exception\InvalidValueException;
 use Rikudou\Unleash\Strategy\DefaultStrategyHandler;
+use Rikudou\Unleash\Strategy\StrategyHandler;
 use Rikudou\Unleash\UnleashBuilder;
 use Symfony\Component\HttpClient\Psr18Client;
 
@@ -41,6 +44,27 @@ final class UnleashBuilderTest extends TestCase
     public function testWithStrategies()
     {
         self::assertNotSame($this->instance, $this->instance->withStrategies(new DefaultStrategyHandler()));
+        $strategiesProperty = (new ReflectionObject($this->instance))->getProperty('strategies');
+        $strategiesProperty->setAccessible(true);
+
+        self::assertCount(7, $strategiesProperty->getValue($this->instance));
+        $instance = $this->instance->withStrategies(new class implements StrategyHandler {
+            public function supports(Strategy $strategy): bool
+            {
+                return false;
+            }
+
+            public function getStrategyName(): string
+            {
+                return '';
+            }
+
+            public function isEnabled(Strategy $strategy, UnleashContext $context): bool
+            {
+                return false;
+            }
+        });
+        self::assertCount(1, $strategiesProperty->getValue($instance));
     }
 
     public function testWithCacheTimeToLive()
@@ -344,5 +368,30 @@ final class UnleashBuilderTest extends TestCase
 
         self::assertFalse($autoRegistrationProperty->getValue($instance));
         self::assertFalse($metricsProperty->getValue($instance));
+    }
+
+    public function testWithStrategy()
+    {
+        $strategiesProperty = (new ReflectionObject($this->instance))->getProperty('strategies');
+        $strategiesProperty->setAccessible(true);
+
+        self::assertCount(7, $strategiesProperty->getValue($this->instance));
+        $instance = $this->instance->withStrategy(new class implements StrategyHandler {
+            public function supports(Strategy $strategy): bool
+            {
+                return false;
+            }
+
+            public function getStrategyName(): string
+            {
+                return '';
+            }
+
+            public function isEnabled(Strategy $strategy, UnleashContext $context): bool
+            {
+                return false;
+            }
+        });
+        self::assertCount(8, $strategiesProperty->getValue($instance));
     }
 }
