@@ -11,7 +11,7 @@ $appName = $gitlabEnvironment =
         ?: getenv('UNLEASH_GITLAB_ENVIRONMENT')
         ?: 'unleashSdkExamples';
 $instanceId = getenv('UNLEASH_INSTANCE_ID') ?: $appName;
-$appUrl = getenv('UNLEASH_APP_URL') ?: 'http://localhost:4242';
+$appUrl = getenv('UNLEASH_APP_URL') ?: 'http://localhost:4242/api';
 if (!getenv('UNLEASH_NO_API_KEY')) {
     $apiKey = getenv('UNLEASH_API_KEY') ?: trim(readline('Please input your api key: '));
 }
