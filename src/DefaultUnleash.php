@@ -30,7 +30,7 @@ final class DefaultUnleash implements Unleash
         }
     }
 
-    public function isEnabled(string $featureName, UnleashContext $context = null, bool $default = false): bool
+    public function isEnabled(string $featureName, ?UnleashContext $context = null, bool $default = false): bool
     {
         if ($context === null) {
             $context = new UnleashContext();
