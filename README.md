@@ -5,7 +5,7 @@
 A PHP implementation of the [Unleash protocol](https://www.getunleash.io/)
 aka [Feature Flags](https://docs.gitlab.com/ee/operations/feature_flags.html) in GitLab.
 
-This implementation conforms to the official Unleash standards and is feature complete.
+This implementation conforms to the official Unleash standards and implements all of Unleash features.
 
 > Unleash allows you to gradually release your app's feature before doing a full release based on multiple strategies
 > like releasing to only specific users or releasing to a percentage of your user base. Read more in the above linked
