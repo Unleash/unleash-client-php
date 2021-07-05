@@ -6,23 +6,19 @@ use Psr\SimpleCache\CacheInterface;
 
 final class UnleashConfiguration
 {
-    private ?CacheInterface $cache = null;
-
-    private int $ttl = 30;
-
-    private int $metricsInterval = 30_000;
-
-    private bool $metricsEnabled = true;
-
     /**
-     * @var array<string,string>
+     * @param array<string,string> $headers
      */
-    private array $headers = [];
-
     public function __construct(
         private string $url,
         private string $appName,
-        private string $instanceId
+        private string $instanceId,
+        private ?CacheInterface $cache = null,
+        private int $ttl = 30,
+        private int $metricsInterval = 30_000,
+        private bool $metricsEnabled = true,
+        private array $headers = [],
+        private bool $autoRegistrationEnabled = true,
     ) {
     }
 
@@ -141,6 +137,18 @@ final class UnleashConfiguration
     public function setHeaders(array $headers): self
     {
         $this->headers = $headers;
+
+        return $this;
+    }
+
+    public function isAutoRegistrationEnabled(): bool
+    {
+        return $this->autoRegistrationEnabled;
+    }
+
+    public function setAutoRegistrationEnabled(bool $autoRegistrationEnabled): self
+    {
+        $this->autoRegistrationEnabled = $autoRegistrationEnabled;
 
         return $this;
     }

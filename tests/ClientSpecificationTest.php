@@ -2,6 +2,7 @@
 
 namespace Rikudou\Tests\Unleash;
 
+use Rikudou\Unleash\Configuration\UnleashConfiguration;
 use Rikudou\Unleash\Configuration\UnleashContext;
 use Rikudou\Unleash\DefaultUnleash;
 use Rikudou\Unleash\DTO\Feature;
@@ -21,7 +22,8 @@ final class ClientSpecificationTest extends AbstractHttpClientTest
 {
     public function testClientSpecifications()
     {
-        $unleash = new DefaultUnleash([
+        $unleash = new DefaultUnleash(
+            [
             new DefaultStrategyHandler(),
             new GradualRolloutStrategyHandler(new MurmurHashCalculator()),
             new IpAddressStrategyHandler(),
@@ -29,11 +31,17 @@ final class ClientSpecificationTest extends AbstractHttpClientTest
             new GradualRolloutUserIdStrategyHandler(new GradualRolloutStrategyHandler(new MurmurHashCalculator())),
             new GradualRolloutSessionIdStrategyHandler(new GradualRolloutStrategyHandler(new MurmurHashCalculator())),
             new GradualRolloutRandomStrategyHandler(new GradualRolloutStrategyHandler(new MurmurHashCalculator())),
-        ], $this->repository, $this->registrationService, false, new class implements MetricsHandler {
-            public function handleMetrics(Feature $feature, bool $successful, Variant $variant = null): void
-            {
-            }
-        }, new DefaultVariantHandler(new MurmurHashCalculator()));
+        ],
+            $this->repository,
+            $this->registrationService,
+            (new UnleashConfiguration('', '', ''))->setAutoRegistrationEnabled(false),
+            new class implements MetricsHandler {
+                public function handleMetrics(Feature $feature, bool $successful, Variant $variant = null): void
+                {
+                }
+            },
+            new DefaultVariantHandler(new MurmurHashCalculator())
+        );
 
         $specificationList = $this->getJson('index.json');
 

@@ -3,6 +3,7 @@
 namespace Rikudou\Unleash;
 
 use Rikudou\Unleash\Client\RegistrationService;
+use Rikudou\Unleash\Configuration\UnleashConfiguration;
 use Rikudou\Unleash\Configuration\UnleashContext;
 use Rikudou\Unleash\DTO\Strategy;
 use Rikudou\Unleash\DTO\Variant;
@@ -15,18 +16,16 @@ final class DefaultUnleash implements Unleash
 {
     /**
      * @param iterable<StrategyHandler> $strategyHandlers
-     *
-     * @internal
      */
     public function __construct(
         private iterable $strategyHandlers,
         private UnleashRepository $repository,
         private RegistrationService $registrationService,
-        bool $autoregister,
+        UnleashConfiguration $configuration,
         private MetricsHandler $metricsHandler,
         private VariantHandler $variantHandler,
     ) {
-        if ($autoregister) {
+        if ($configuration->isAutoRegistrationEnabled()) {
             $this->register();
         }
     }

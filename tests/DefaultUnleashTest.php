@@ -2,6 +2,7 @@
 
 namespace Rikudou\Tests\Unleash;
 
+use Rikudou\Unleash\Configuration\UnleashConfiguration;
 use Rikudou\Unleash\Configuration\UnleashContext;
 use Rikudou\Unleash\DefaultUnleash;
 use Rikudou\Unleash\DTO\Feature;
@@ -441,7 +442,7 @@ final class DefaultUnleashTest extends AbstractHttpClientTest
             [],
             $this->repository,
             $this->registrationService,
-            true,
+            new UnleashConfiguration('', '', ''),
             $this->metricsHandler,
             new DefaultVariantHandler(new MurmurHashCalculator())
         );
@@ -454,7 +455,7 @@ final class DefaultUnleashTest extends AbstractHttpClientTest
             $handlers,
             $this->repository,
             $this->registrationService,
-            false,
+            (new UnleashConfiguration('', '', ''))->setAutoRegistrationEnabled(false),
             $this->metricsHandler,
             new DefaultVariantHandler(new MurmurHashCalculator())
         );

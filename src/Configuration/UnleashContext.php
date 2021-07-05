@@ -9,14 +9,13 @@ use Rikudou\Unleash\Exception\InvalidValueException;
 final class UnleashContext
 {
     /**
-     * @var array<string,string>
+     * @param array<string,string> $customContext
      */
-    private array $customContext = [];
-
     public function __construct(
         private ?string $currentUserId = null,
         private ?string $ipAddress = null,
         private ?string $sessionId = null,
+        private array $customContext = [],
     ) {
     }
 

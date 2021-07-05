@@ -202,6 +202,7 @@ final class UnleashBuilder
             ->setMetricsEnabled($this->metricsEnabled ?? $configuration->isMetricsEnabled())
             ->setMetricsInterval($this->metricsInterval ?? $configuration->getMetricsInterval())
             ->setHeaders($this->headers)
+            ->setAutoRegistrationEnabled($this->autoregister)
         ;
 
         $httpClient = $this->httpClient;
@@ -258,7 +259,7 @@ final class UnleashBuilder
             $strategies,
             $repository,
             $registrationService,
-            $this->autoregister,
+            $configuration,
             new DefaultMetricsHandler(
                 new DefaultMetricsSender(
                     $httpClient,

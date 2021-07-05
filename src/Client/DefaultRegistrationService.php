@@ -14,9 +14,6 @@ use Rikudou\Unleash\Unleash;
 
 final class DefaultRegistrationService implements RegistrationService
 {
-    /**
-     * @internal
-     */
     public function __construct(
         private ClientInterface $httpClient,
         private RequestFactoryInterface $requestFactory,

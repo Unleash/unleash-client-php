@@ -8,6 +8,9 @@ use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
 use Symfony\Component\HttpClient\Psr18Client;
 
+/**
+ * @internal
+ */
 final class DefaultHttpImplementationLocator
 {
     /**

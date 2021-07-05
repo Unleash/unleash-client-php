@@ -13,7 +13,7 @@ final class MetricsBucketToggle
     public function __construct(
         private Feature $feature,
         private bool $success,
-        private ?Variant $variant,
+        private ?Variant $variant = null,
     ) {
     }
 

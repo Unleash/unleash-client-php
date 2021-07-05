@@ -22,9 +22,6 @@ final class DefaultUnleashRepository implements UnleashRepository
 {
     private const CACHE_KEY_FEATURES = 'rikudou.unleash.feature.list';
 
-    /**
-     * @internal
-     */
     public function __construct(
         private ClientInterface $httpClient,
         private RequestFactoryInterface $requestFactory,

@@ -10,7 +10,7 @@ final class DefaultStrategy implements Strategy
      */
     public function __construct(
         private string $name,
-        private array $parameters,
+        private array $parameters = [],
         private array $constraints = [],
     ) {
     }
