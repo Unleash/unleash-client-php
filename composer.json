@@ -42,7 +42,7 @@
         }
     },
     "suggest": {
-        "guzzlehttp/guzzle": "A http client implementation (PSR-7)"
+        "guzzlehttp/guzzle": "A http client implementation (PSR-17 and PSR-18)"
     },
     "scripts": {
         "fixer": "php-cs-fixer fix --verbose --allow-risky=yes",
