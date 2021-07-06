@@ -2,6 +2,7 @@
 
 namespace Rikudou\Unleash\Configuration;
 
+use LogicException;
 use Psr\SimpleCache\CacheInterface;
 
 final class UnleashConfiguration
@@ -22,8 +23,12 @@ final class UnleashConfiguration
     ) {
     }
 
-    public function getCache(): ?CacheInterface
+    public function getCache(): CacheInterface
     {
+        if ($this->cache === null) {
+            throw new LogicException('Cache handler is not set');
+        }
+
         return $this->cache;
     }
 
@@ -52,7 +57,7 @@ final class UnleashConfiguration
         return $this->ttl;
     }
 
-    public function setCache(?CacheInterface $cache): self
+    public function setCache(CacheInterface $cache): self
     {
         $this->cache = $cache;
 

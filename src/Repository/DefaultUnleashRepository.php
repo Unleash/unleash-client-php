@@ -82,9 +82,6 @@ final class DefaultUnleashRepository implements UnleashRepository
     private function getCachedFeatures(): ?array
     {
         $cache = $this->configuration->getCache();
-        if ($cache === null) {
-            return null;
-        }
 
         if (!$cache->has(self::CACHE_KEY_FEATURES)) {
             return null;
@@ -101,10 +98,6 @@ final class DefaultUnleashRepository implements UnleashRepository
     private function setCache(array $features): void
     {
         $cache = $this->configuration->getCache();
-        if ($cache === null) {
-            return;
-        }
-
         $cache->set(self::CACHE_KEY_FEATURES, $features, $this->configuration->getTtl());
     }
 

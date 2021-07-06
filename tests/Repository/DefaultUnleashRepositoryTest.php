@@ -12,6 +12,7 @@ use League\Flysystem\Filesystem;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use Rikudou\Tests\Unleash\AbstractHttpClientTest;
+use Rikudou\Tests\Unleash\Trait\FakeCacheImplementationTrait;
 use Rikudou\Unleash\Configuration\UnleashConfiguration;
 use Rikudou\Unleash\DTO\Feature;
 use Rikudou\Unleash\Exception\HttpResponseException;
@@ -20,6 +21,8 @@ use SplFileInfo;
 
 final class DefaultUnleashRepositoryTest extends AbstractHttpClientTest
 {
+    use FakeCacheImplementationTrait;
+
     private $response = [
         'version' => 1,
         'features' => [
@@ -142,6 +145,7 @@ final class DefaultUnleashRepositoryTest extends AbstractHttpClientTest
                     'Custom-Header-2' => 'some other value',
                     'Authorization' => 'Some API key',
                 ])
+            ->setCache($this->getCache())
         );
 
         $repository->getFeatures();

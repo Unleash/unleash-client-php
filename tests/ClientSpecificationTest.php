@@ -2,6 +2,7 @@
 
 namespace Rikudou\Tests\Unleash;
 
+use Rikudou\Tests\Unleash\Trait\FakeCacheImplementationTrait;
 use Rikudou\Unleash\Configuration\UnleashConfiguration;
 use Rikudou\Unleash\Configuration\UnleashContext;
 use Rikudou\Unleash\DefaultUnleash;
@@ -20,6 +21,8 @@ use Rikudou\Unleash\Variant\DefaultVariantHandler;
 
 final class ClientSpecificationTest extends AbstractHttpClientTest
 {
+    use FakeCacheImplementationTrait;
+
     public function testClientSpecifications()
     {
         $unleash = new DefaultUnleash(
@@ -34,7 +37,9 @@ final class ClientSpecificationTest extends AbstractHttpClientTest
         ],
             $this->repository,
             $this->registrationService,
-            (new UnleashConfiguration('', '', ''))->setAutoRegistrationEnabled(false),
+            (new UnleashConfiguration('', '', ''))
+                ->setAutoRegistrationEnabled(false)
+                ->setCache($this->getCache()),
             new class implements MetricsHandler {
                 public function handleMetrics(Feature $feature, bool $successful, Variant $variant = null): void
                 {

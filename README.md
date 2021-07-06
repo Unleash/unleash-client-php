@@ -19,7 +19,9 @@ Requires PHP 7.3 or newer.
 
 > You will also need some implementation of [PSR-18](https://packagist.org/providers/psr/http-client-implementation)
 > and [PSR-17](https://packagist.org/providers/psr/http-factory-implementation), for example 
-> [Guzzle](https://packagist.org/packages/guzzlehttp/guzzle)
+> [Guzzle](https://packagist.org/packages/guzzlehttp/guzzle) 
+> and [PSR-16](https://packagist.org/providers/psr/simple-cache-implementation), for example 
+> [Symfony Cache](https://packagist.org/packages/symfony/cache)
 
 ## Usage
 
@@ -139,6 +141,10 @@ Some optional parameters can be set, these include:
 If you use Guzzle as your http implementation, the http client and request factory will be created automatically,
 if you use any other implementation you must provide http client and request factory implementation on your own.
 
+If you use [symfony/cache](https://packagist.org/packages/symfony/cache) or
+[cache/filesystem-adapter](https://packagist.org/packages/cache/filesystem-adapter) as your cache implementation, the
+cache handler will be created automatically, otherwise you need to provide some implementation on your own.
+
 ```php
 <?php
 
@@ -186,10 +192,16 @@ $builder = UnleashBuilder::create()
 
 ## Caching
 
-It may be unnecessary to perform a http request every time you check if a feature is enabled, especially in popular
+It would be slow to perform a http request every time you check if a feature is enabled, especially in popular
 apps. That's why this library has built-in support for PSR-16 cache implementations.
 
-If you don't provide any implementation no cache is used. You can also provide a TTL which defaults to 30 seconds.
+If you don't provide any implementation and default implementation exists, it's used, otherwise you'll get an exception.
+You can also provide a TTL which defaults to 30 seconds.
+
+Cache implementations supported out of the box (meaning you don't need to configure anything):
+
+- [symfony/cache](https://packagist.org/packages/symfony/cache)
+- [cache/filesystem-adapter](https://packagist.org/packages/cache/filesystem-adapter)
 
 ```php
 <?php
@@ -207,7 +219,7 @@ $builder = UnleashBuilder::create()
     ))
     ->withCacheTimeToLive(120);
 
-// you can set the cache handler explicitly to null to disable cache
+// you can set the cache handler explicitly to null to revert back to autodetection
 
 $builder = $builder
     ->withCacheHandler(null);
@@ -482,10 +494,7 @@ $unleash->register();
 
 By default, this library sends metrics which are simple statistics about whether user was granted access or not.
 
-> Warning: If you don't provide a cache implementation, there will be additional http call with metrics for every
-> `isEnabled()` call.
-
-If you use cache the metrics will be bundled and sent once the bundle created time crosses the configured threshold.
+The metrics will be bundled and sent once the bundle created time crosses the configured threshold.
 By default this threshold is 30,000 milliseconds (30 seconds) meaning that when a new bundle gets created it won't be
 sent sooner than in 30 seconds. That doesn't mean it's guaranteed that the metrics will be sent every 30 seconds, it
 only guarantees that the metrics won't be sent sooner.
