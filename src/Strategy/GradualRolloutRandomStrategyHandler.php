@@ -8,7 +8,7 @@ use Rikudou\Unleash\DTO\DefaultStrategy;
 use Rikudou\Unleash\DTO\Strategy;
 use Rikudou\Unleash\Enum\Stickiness;
 
-#[Deprecated(reason: "The strategy has been deprecated, please use Gradual Rollout (flexibleRollout)")]
+#[Deprecated(reason: 'The strategy has been deprecated, please use Gradual Rollout (flexibleRollout)')]
 final class GradualRolloutRandomStrategyHandler extends AbstractStrategyHandler
 {
     public function __construct(private GradualRolloutStrategyHandler $rolloutStrategyHandler)

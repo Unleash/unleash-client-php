@@ -35,8 +35,9 @@ final class DefaultVariantPayload implements VariantPayload
     }
 
     /**
-     * @return array<mixed>
      * @throws JsonException
+     *
+     * @return array<mixed>
      */
     public function fromJson(): array
     {
