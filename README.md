@@ -138,8 +138,10 @@ Some optional parameters can be set, these include:
 - available strategies
 - http headers
 
-If you use Guzzle as your http implementation, the http client and request factory will be created automatically,
-if you use any other implementation you must provide http client and request factory implementation on your own.
+If you use [guzzlehttp/guzzle](https://packagist.org/packages/guzzlehttp/guzzle) or
+[symfony/http-client](https://packagist.org/packages/symfony/http-client) (in combination with 
+[nyholm/psr7]), the http client and request factory will be created automatically, otherwise you need to provide
+an implementation on your own.
 
 If you use [symfony/cache](https://packagist.org/packages/symfony/cache) or
 [cache/filesystem-adapter](https://packagist.org/packages/cache/filesystem-adapter) as your cache implementation, the
