@@ -16,9 +16,6 @@ final class GradualRolloutUserIdStrategyHandler extends AbstractStrategyHandler
     {
     }
 
-    /**
-     * @throws MissingArgumentException
-     */
     public function isEnabled(Strategy $strategy, UnleashContext $context): bool
     {
         $transformedStrategy = new DefaultStrategy(
