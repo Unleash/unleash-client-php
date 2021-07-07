@@ -140,8 +140,8 @@ Some optional parameters can be set, these include:
 
 If you use [guzzlehttp/guzzle](https://packagist.org/packages/guzzlehttp/guzzle) or
 [symfony/http-client](https://packagist.org/packages/symfony/http-client) (in combination with 
-[nyholm/psr7]), the http client and request factory will be created automatically, otherwise you need to provide
-an implementation on your own.
+[nyholm/psr7](https://packagist.org/packages/nyholm/psr7)), the http client and request factory will be created 
+automatically, otherwise you need to provide an implementation on your own.
 
 If you use [symfony/cache](https://packagist.org/packages/symfony/cache) or
 [cache/filesystem-adapter](https://packagist.org/packages/cache/filesystem-adapter) as your cache implementation, the
