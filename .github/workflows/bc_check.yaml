@@ -10,9 +10,15 @@ jobs:
     name: Backwards Compatibility Check
     runs-on: ubuntu-latest
     steps:
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.0'
       - name: Checkout Code
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
+      - name: Install BC checker
+        run: composer require --dev roave/backward-compatibility-check
       - name: Check for BC breaks
-        uses: docker://nyholm/roave-bc-check-ga
+        run: vendor/bin/roave-backward-compatibility-check
