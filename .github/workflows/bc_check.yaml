@@ -28,8 +28,8 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: 7.4
-      - name: Update Dependencies
-        run: composer update
+      - name: Remove Composer Lock
+        run: rm -rf composer.lock
       - name: Install BC checker
         run: composer require --dev roave/backward-compatibility-check
       - name: Check for BC breaks
