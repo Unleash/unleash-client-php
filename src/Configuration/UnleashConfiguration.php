@@ -108,9 +108,6 @@ final class UnleashConfiguration
         return $this;
     }
 
-    /**
-     * @codeCoverageIgnore
-     */
     public function setMetricsInterval(int $metricsInterval): self
     {
         $this->metricsInterval = $metricsInterval;
@@ -118,9 +115,6 @@ final class UnleashConfiguration
         return $this;
     }
 
-    /**
-     * @codeCoverageIgnore
-     */
     public function setMetricsEnabled(bool $metricsEnabled): self
     {
         $this->metricsEnabled = $metricsEnabled;

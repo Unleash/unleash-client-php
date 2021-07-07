@@ -66,9 +66,6 @@ final class UnleashContext
         return $this;
     }
 
-    /**
-     * @codeCoverageIgnore
-     */
     public function setCurrentUserId(?string $currentUserId): UnleashContext
     {
         $this->currentUserId = $currentUserId;
@@ -76,9 +73,6 @@ final class UnleashContext
         return $this;
     }
 
-    /**
-     * @codeCoverageIgnore
-     */
     public function setIpAddress(?string $ipAddress): UnleashContext
     {
         $this->ipAddress = $ipAddress;
@@ -86,9 +80,6 @@ final class UnleashContext
         return $this;
     }
 
-    /**
-     * @codeCoverageIgnore
-     */
     public function setSessionId(?string $sessionId): UnleashContext
     {
         $this->sessionId = $sessionId;
