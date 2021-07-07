@@ -9,7 +9,7 @@ use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\HttpFactory;
 use GuzzleHttp\Psr7\Response;
 use PHPUnit\Framework\TestCase;
-use Rikudou\Tests\Unleash\Trait\FakeCacheImplementationTrait;
+use Rikudou\Tests\Unleash\Traits\FakeCacheImplementationTrait;
 use Rikudou\Unleash\Client\DefaultRegistrationService;
 use Rikudou\Unleash\Client\RegistrationService;
 use Rikudou\Unleash\Configuration\UnleashConfiguration;

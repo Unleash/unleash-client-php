@@ -8,7 +8,7 @@ use League\Flysystem\Adapter\Local;
 use League\Flysystem\Filesystem;
 use Psr\Http\Message\RequestInterface;
 use Rikudou\Tests\Unleash\AbstractHttpClientTest;
-use Rikudou\Tests\Unleash\Trait\FakeCacheImplementationTrait;
+use Rikudou\Tests\Unleash\Traits\FakeCacheImplementationTrait;
 use Rikudou\Unleash\Configuration\UnleashConfiguration;
 use Rikudou\Unleash\DTO\DefaultFeature;
 use Rikudou\Unleash\Metrics\DefaultMetricsHandler;

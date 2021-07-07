@@ -5,7 +5,7 @@ namespace Rikudou\Tests\Unleash\Configuration;
 use LogicException;
 use PHPUnit\Framework\TestCase;
 use Psr\SimpleCache\CacheInterface;
-use Rikudou\Tests\Unleash\Trait\FakeCacheImplementationTrait;
+use Rikudou\Tests\Unleash\Traits\FakeCacheImplementationTrait;
 use Rikudou\Unleash\Configuration\UnleashConfiguration;
 
 final class UnleashConfigurationTest extends TestCase

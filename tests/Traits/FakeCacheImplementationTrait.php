@@ -1,6 +1,6 @@
 <?php
 
-namespace Rikudou\Tests\Unleash\Trait;
+namespace Rikudou\Tests\Unleash\Traits;
 
 use Psr\SimpleCache\CacheInterface;
 

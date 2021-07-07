@@ -2,7 +2,7 @@
 
 namespace Rikudou\Tests\Unleash;
 
-use Rikudou\Tests\Unleash\Trait\FakeCacheImplementationTrait;
+use Rikudou\Tests\Unleash\Traits\FakeCacheImplementationTrait;
 use Rikudou\Unleash\Configuration\UnleashConfiguration;
 use Rikudou\Unleash\Configuration\UnleashContext;
 use Rikudou\Unleash\DefaultUnleash;
