@@ -4,21 +4,27 @@ namespace Rikudou\Tests\Unleash\Client;
 
 use GuzzleHttp\Psr7\HttpFactory;
 use Rikudou\Tests\Unleash\AbstractHttpClientTest;
+use Rikudou\Tests\Unleash\Traits\RealCacheImplementationTrait;
 use Rikudou\Unleash\Client\DefaultRegistrationService;
 use Rikudou\Unleash\Configuration\UnleashConfiguration;
 use Rikudou\Unleash\Strategy\DefaultStrategyHandler;
 
 final class DefaultRegistrationServiceTest extends AbstractHttpClientTest
 {
+    use RealCacheImplementationTrait;
+
     public function testRegister()
     {
+        $configuration = (new UnleashConfiguration('', '', ''))
+            ->setHeaders([
+                'Some-Header' => 'some-value',
+            ])
+            ->setCache($this->getCache())
+            ->setTtl(0);
         $instance = new DefaultRegistrationService(
             $this->httpClient,
             new HttpFactory(),
-            (new UnleashConfiguration('', '', ''))
-                ->setHeaders([
-                    'Some-Header' => 'some-value',
-                ]),
+            $configuration
         );
 
         $this->pushResponse([], 1, 202);
@@ -35,5 +41,10 @@ final class DefaultRegistrationServiceTest extends AbstractHttpClientTest
 
         $this->pushResponse([], 1, 400);
         self::assertFalse($instance->register([]));
+
+        $configuration->setTtl(30);
+        $this->pushResponse([]);
+        self::assertTrue($instance->register([]));
+        self::assertTrue($instance->register([]));
     }
 }

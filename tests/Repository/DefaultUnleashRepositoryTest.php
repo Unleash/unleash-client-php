@@ -2,26 +2,24 @@
 
 namespace Rikudou\Tests\Unleash\Repository;
 
-use Cache\Adapter\Filesystem\FilesystemCachePool;
 use GuzzleHttp\Client;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\HttpFactory;
 use GuzzleHttp\Psr7\Request;
-use League\Flysystem\Adapter\Local;
-use League\Flysystem\Filesystem;
-use RecursiveDirectoryIterator;
-use RecursiveIteratorIterator;
 use Rikudou\Tests\Unleash\AbstractHttpClientTest;
 use Rikudou\Tests\Unleash\Traits\FakeCacheImplementationTrait;
+use Rikudou\Tests\Unleash\Traits\RealCacheImplementationTrait;
 use Rikudou\Unleash\Configuration\UnleashConfiguration;
 use Rikudou\Unleash\DTO\Feature;
 use Rikudou\Unleash\Exception\HttpResponseException;
 use Rikudou\Unleash\Repository\DefaultUnleashRepository;
-use SplFileInfo;
 
 final class DefaultUnleashRepositoryTest extends AbstractHttpClientTest
 {
-    use FakeCacheImplementationTrait;
+    use FakeCacheImplementationTrait, RealCacheImplementationTrait {
+        FakeCacheImplementationTrait::getCache insteadof RealCacheImplementationTrait;
+        RealCacheImplementationTrait::getCache as getRealCache;
+    }
 
     private $response = [
         'version' => 1,
@@ -57,27 +55,6 @@ final class DefaultUnleashRepositoryTest extends AbstractHttpClientTest
         ],
     ];
 
-    protected function tearDown(): void
-    {
-        if (is_dir(sys_get_temp_dir() . '/unleash-sdk-tests')) {
-            $files = (new RecursiveIteratorIterator(
-                new RecursiveDirectoryIterator(
-                    sys_get_temp_dir() . '/unleash-sdk-tests'
-                )
-            ));
-
-            foreach ($files as $file) {
-                assert($file instanceof SplFileInfo);
-                if (!$file->isFile()) {
-                    continue;
-                }
-                unlink($file->getRealPath());
-            }
-        }
-
-        parent::tearDown();
-    }
-
     public function testFindFeature()
     {
         $this->pushResponse($this->response, 3);
@@ -104,11 +81,7 @@ final class DefaultUnleashRepositoryTest extends AbstractHttpClientTest
 
     public function testCache()
     {
-        $cache = new FilesystemCachePool(
-            new Filesystem(
-                new Local(sys_get_temp_dir() . '/unleash-sdk-tests')
-            )
-        );
+        $cache = $this->getRealCache();
         $repository = new DefaultUnleashRepository(
             new Client([
                 'handler' => HandlerStack::create($this->mockHandler),

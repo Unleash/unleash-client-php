@@ -8,6 +8,7 @@ use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
 use Rikudou\Unleash\Configuration\UnleashConfiguration;
+use Rikudou\Unleash\Enum\CacheKey;
 use Rikudou\Unleash\Helper\StringStream;
 use Rikudou\Unleash\Strategy\StrategyHandler;
 use Rikudou\Unleash\Unleash;
@@ -29,6 +30,9 @@ final class DefaultRegistrationService implements RegistrationService
      */
     public function register(iterable $strategyHandlers): bool
     {
+        if ($this->hasValidCacheRegistration()) {
+            return true;
+        }
         if (!is_array($strategyHandlers)) {
             // @codeCoverageIgnoreStart
             $strategyHandlers = iterator_to_array($strategyHandlers);
@@ -52,6 +56,24 @@ final class DefaultRegistrationService implements RegistrationService
         }
         $response = $this->httpClient->sendRequest($request);
 
-        return $response->getStatusCode() >= 200 && $response->getStatusCode() < 300;
+        $result = $response->getStatusCode() >= 200 && $response->getStatusCode() < 300;
+        $this->storeCache($result);
+
+        return $result;
+    }
+
+    private function hasValidCacheRegistration(): bool
+    {
+        $cache = $this->configuration->getCache();
+        if (!$cache->has(CacheKey::REGISTRATION)) {
+            return false;
+        }
+
+        return $cache->get(CacheKey::REGISTRATION);
+    }
+
+    private function storeCache(bool $result): void
+    {
+        $this->configuration->getCache()->set(CacheKey::REGISTRATION, $result, $this->configuration->getTtl());
     }
 }
