@@ -21,7 +21,14 @@ Requires PHP 7.3 or newer.
 > and [PSR-17](https://packagist.org/providers/psr/http-factory-implementation), for example 
 > [Guzzle](https://packagist.org/packages/guzzlehttp/guzzle) 
 > and [PSR-16](https://packagist.org/providers/psr/simple-cache-implementation), for example 
-> [Symfony Cache](https://packagist.org/packages/symfony/cache)
+> [Symfony Cache](https://packagist.org/packages/symfony/cache).
+> Example:
+
+`composer require rikudou/unleash-sdk guzzlehttp/guzzle`
+
+or
+
+`composer require rikudou/unleash-sdk symfony/http-client nyholm/psr7`
 
 ## Usage
 
