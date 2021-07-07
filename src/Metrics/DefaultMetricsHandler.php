@@ -6,11 +6,10 @@ use DateTimeImmutable;
 use Rikudou\Unleash\Configuration\UnleashConfiguration;
 use Rikudou\Unleash\DTO\Feature;
 use Rikudou\Unleash\DTO\Variant;
+use Rikudou\Unleash\Enum\CacheKey;
 
 final class DefaultMetricsHandler implements MetricsHandler
 {
-    private const CACHE_KEY_BUCKET = 'rikudou.unleash.bucket';
-
     public function __construct(
         private MetricsSender $metricsSender,
         private UnleashConfiguration $configuration
@@ -35,8 +34,8 @@ final class DefaultMetricsHandler implements MetricsHandler
     private function getOrCreateBucket(Feature $feature): MetricsBucket
     {
         $cache = $this->configuration->getCache();
-        if ($cache->has(self::CACHE_KEY_BUCKET)) {
-            return $cache->get(self::CACHE_KEY_BUCKET);
+        if ($cache->has(CacheKey::METRICS_BUCKET)) {
+            return $cache->get(CacheKey::METRICS_BUCKET);
         }
 
         return new MetricsBucket(new DateTimeImmutable());
@@ -59,14 +58,14 @@ final class DefaultMetricsHandler implements MetricsHandler
         $bucket->setEndDate(new DateTimeImmutable());
         $this->metricsSender->sendMetrics($bucket);
         $cache = $this->configuration->getCache();
-        if ($cache->has(self::CACHE_KEY_BUCKET)) {
-            $cache->delete(self::CACHE_KEY_BUCKET);
+        if ($cache->has(CacheKey::METRICS_BUCKET)) {
+            $cache->delete(CacheKey::METRICS_BUCKET);
         }
     }
 
     private function store(MetricsBucket $bucket): void
     {
         $cache = $this->configuration->getCache();
-        $cache->set(self::CACHE_KEY_BUCKET, $bucket);
+        $cache->set(CacheKey::METRICS_BUCKET, $bucket);
     }
 }

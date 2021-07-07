@@ -5,10 +5,9 @@ namespace Rikudou\Tests\Unleash;
 use Cache\Adapter\Filesystem\FilesystemCachePool;
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\HttpFactory;
-use League\Flysystem\Adapter\Local;
-use League\Flysystem\Filesystem;
 use PHPUnit\Framework\TestCase;
 use ReflectionObject;
+use Rikudou\Tests\Unleash\Traits\RealCacheImplementationTrait;
 use Rikudou\Unleash\Client\DefaultRegistrationService;
 use Rikudou\Unleash\Configuration\UnleashConfiguration;
 use Rikudou\Unleash\Configuration\UnleashContext;
@@ -22,6 +21,8 @@ use Symfony\Component\HttpClient\Psr18Client;
 
 final class UnleashBuilderTest extends TestCase
 {
+    use RealCacheImplementationTrait;
+
     /**
      * @var UnleashBuilder
      */
@@ -80,11 +81,8 @@ final class UnleashBuilderTest extends TestCase
 
     public function testWithCacheHandler()
     {
-        $cacheHandler = new FilesystemCachePool(
-            new Filesystem(new Local(sys_get_temp_dir() . '/unleash-sdk-tests'))
-        );
-        self::assertNotSame($this->instance, $this->instance->withCacheHandler($cacheHandler));
-        self::assertNotSame($this->instance, $this->instance->withCacheHandler($cacheHandler, 120));
+        self::assertNotSame($this->instance, $this->instance->withCacheHandler($this->getCache()));
+        self::assertNotSame($this->instance, $this->instance->withCacheHandler($this->getCache(), 120));
     }
 
     public function testWithRequestFactory()
@@ -171,9 +169,7 @@ final class UnleashBuilderTest extends TestCase
             ->build();
         self::assertCount(1, $strategiesProperty->getValue($instance));
 
-        $cacheHandler = new FilesystemCachePool(
-            new Filesystem(new Local(sys_get_temp_dir() . '/unleash-sdk-tests'))
-        );
+        $cacheHandler = $this->getCache();
         $instance = $this->instance
             ->withAppUrl('https://example.com')
             ->withAppName('Test App')

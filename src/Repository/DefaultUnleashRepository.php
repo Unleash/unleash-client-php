@@ -15,13 +15,12 @@ use Rikudou\Unleash\DTO\DefaultVariant;
 use Rikudou\Unleash\DTO\DefaultVariantOverride;
 use Rikudou\Unleash\DTO\DefaultVariantPayload;
 use Rikudou\Unleash\DTO\Feature;
+use Rikudou\Unleash\Enum\CacheKey;
 use Rikudou\Unleash\Enum\Stickiness;
 use Rikudou\Unleash\Exception\HttpResponseException;
 
 final class DefaultUnleashRepository implements UnleashRepository
 {
-    private const CACHE_KEY_FEATURES = 'rikudou.unleash.feature.list';
-
     public function __construct(
         private ClientInterface $httpClient,
         private RequestFactoryInterface $requestFactory,
@@ -83,11 +82,11 @@ final class DefaultUnleashRepository implements UnleashRepository
     {
         $cache = $this->configuration->getCache();
 
-        if (!$cache->has(self::CACHE_KEY_FEATURES)) {
+        if (!$cache->has(CacheKey::FEATURES)) {
             return null;
         }
 
-        return $cache->get(self::CACHE_KEY_FEATURES, []);
+        return $cache->get(CacheKey::FEATURES, []);
     }
 
     /**
@@ -98,7 +97,7 @@ final class DefaultUnleashRepository implements UnleashRepository
     private function setCache(array $features): void
     {
         $cache = $this->configuration->getCache();
-        $cache->set(self::CACHE_KEY_FEATURES, $features, $this->configuration->getTtl());
+        $cache->set(CacheKey::FEATURES, $features, $this->configuration->getTtl());
     }
 
     /**

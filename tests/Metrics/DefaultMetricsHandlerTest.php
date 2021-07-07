@@ -2,13 +2,11 @@
 
 namespace Rikudou\Tests\Unleash\Metrics;
 
-use Cache\Adapter\Filesystem\FilesystemCachePool;
 use GuzzleHttp\Psr7\HttpFactory;
-use League\Flysystem\Adapter\Local;
-use League\Flysystem\Filesystem;
 use Psr\Http\Message\RequestInterface;
 use Rikudou\Tests\Unleash\AbstractHttpClientTest;
 use Rikudou\Tests\Unleash\Traits\FakeCacheImplementationTrait;
+use Rikudou\Tests\Unleash\Traits\RealCacheImplementationTrait;
 use Rikudou\Unleash\Configuration\UnleashConfiguration;
 use Rikudou\Unleash\DTO\DefaultFeature;
 use Rikudou\Unleash\Metrics\DefaultMetricsHandler;
@@ -16,7 +14,10 @@ use Rikudou\Unleash\Metrics\DefaultMetricsSender;
 
 final class DefaultMetricsHandlerTest extends AbstractHttpClientTest
 {
-    use FakeCacheImplementationTrait;
+    use FakeCacheImplementationTrait, RealCacheImplementationTrait {
+        FakeCacheImplementationTrait::getCache insteadof RealCacheImplementationTrait;
+        RealCacheImplementationTrait::getCache as getRealCache;
+    }
 
     public function testHandleMetrics()
     {
@@ -44,13 +45,7 @@ final class DefaultMetricsHandlerTest extends AbstractHttpClientTest
         $instance->handleMetrics($feature, true);
         self::assertCount(3, $this->requestHistory);
 
-        $cache = new FilesystemCachePool(
-            new Filesystem(
-                new Local(sys_get_temp_dir() . '/unleash-sdk-tests')
-            )
-        );
-        $cache->clear();
-        $configuration->setCache($cache)
+        $configuration->setCache($this->getRealCache())
             ->setMetricsInterval(3000);
         $this->requestHistory = [];
         $this->pushResponse([]);
