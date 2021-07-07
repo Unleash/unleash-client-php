@@ -360,7 +360,7 @@ which contains some useful methods). Then you need to instruct the builder to us
 
 use Rikudou\Unleash\Strategy\AbstractStrategyHandler;
 use Rikudou\Unleash\DTO\Strategy;
-use Rikudou\Unleash\Configuration\UnleashContext;
+use Rikudou\Unleash\Configuration\Context;
 use Rikudou\Unleash\Strategy\DefaultStrategyHandler;
 
 class AprilFoolsStrategy extends AbstractStrategyHandler
@@ -374,7 +374,7 @@ class AprilFoolsStrategy extends AbstractStrategyHandler
         return 'aprilFools';
     }
     
-    public function isEnabled(Strategy $strategy, UnleashContext $context) : bool
+    public function isEnabled(Strategy $strategy, Context $context) : bool
     {
         $date = new DateTimeImmutable();
         if ((int) $date->format('n') === 4 && (int) $date->format('j') === 1) {

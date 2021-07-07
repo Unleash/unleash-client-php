@@ -5,7 +5,7 @@
  * this might be slightly more useful than the April Fools strategy from README.
  */
 
-use Rikudou\Unleash\Configuration\UnleashContext;
+use Rikudou\Unleash\Configuration\Context;
 use Rikudou\Unleash\DTO\DefaultStrategy;
 use Rikudou\Unleash\DTO\Strategy;
 use Rikudou\Unleash\Strategy\AbstractStrategyHandler;
@@ -34,7 +34,7 @@ final class MaintenanceKillSwitchStrategyHandler extends AbstractStrategyHandler
      * Note that if the kill switch toggle is disabled in Unleash it won't even get here and thus in this method
      * we can always assume the toggle is enabled.
      */
-    public function isEnabled(Strategy $strategy, UnleashContext $context): bool
+    public function isEnabled(Strategy $strategy, Context $context): bool
     {
         // assume we named our parameter with whitelisted IPs as ipAddresses
         $whitelistIpAddresses = $this->findParameter('ipAddresses', $strategy);
