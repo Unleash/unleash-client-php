@@ -27,7 +27,8 @@ final class UnleashConfigurationTest extends TestCase
 
     public function testGetCache()
     {
-        $instance = new UnleashConfiguration('', '', '', cache: $this->getCache());
+        $instance = (new UnleashConfiguration('', '', ''))
+            ->setCache($this->getCache());
         self::assertInstanceOf(CacheInterface::class, $instance->getCache());
 
         $instance = new UnleashConfiguration('', '', '');
