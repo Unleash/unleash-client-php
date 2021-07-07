@@ -30,6 +30,8 @@ jobs:
           php-version: 7.4
       - name: Remove Composer Lock
         run: rm -rf composer.lock
+      - name: Remove Offending Packages
+        run: composer remove friendsofphp/php-cs-fixer --dev
       - name: Install BC checker
         run: composer require --dev roave/backward-compatibility-check
       - name: Check for BC breaks
