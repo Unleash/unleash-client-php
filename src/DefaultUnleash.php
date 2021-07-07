@@ -5,7 +5,6 @@ namespace Rikudou\Unleash;
 use Rikudou\Unleash\Client\RegistrationService;
 use Rikudou\Unleash\Configuration\Context;
 use Rikudou\Unleash\Configuration\UnleashConfiguration;
-use Rikudou\Unleash\Configuration\UnleashContext;
 use Rikudou\Unleash\DTO\Strategy;
 use Rikudou\Unleash\DTO\Variant;
 use Rikudou\Unleash\Metrics\MetricsHandler;
@@ -22,7 +21,7 @@ final class DefaultUnleash implements Unleash
         private iterable $strategyHandlers,
         private UnleashRepository $repository,
         private RegistrationService $registrationService,
-        UnleashConfiguration $configuration,
+        private UnleashConfiguration $configuration,
         private MetricsHandler $metricsHandler,
         private VariantHandler $variantHandler,
     ) {
@@ -33,9 +32,7 @@ final class DefaultUnleash implements Unleash
 
     public function isEnabled(string $featureName, ?Context $context = null, bool $default = false): bool
     {
-        if ($context === null) {
-            $context = new UnleashContext();
-        }
+        $context ??= $this->configuration->getDefaultContext();
 
         $feature = $this->repository->findFeature($featureName);
         if ($feature === null) {
@@ -82,7 +79,7 @@ final class DefaultUnleash implements Unleash
     public function getVariant(string $featureName, ?Context $context = null, ?Variant $fallbackVariant = null): Variant
     {
         $fallbackVariant ??= $this->variantHandler->getDefaultVariant();
-        $context ??= new UnleashContext();
+        $context ??= $this->configuration->getDefaultContext();
 
         $feature = $this->repository->findFeature($featureName);
         if ($feature === null || !$feature->isEnabled() || !count($feature->getVariants())) {

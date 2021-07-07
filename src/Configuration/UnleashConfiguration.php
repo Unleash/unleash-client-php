@@ -2,6 +2,7 @@
 
 namespace Rikudou\Unleash\Configuration;
 
+use JetBrains\PhpStorm\Pure;
 use LogicException;
 use Psr\SimpleCache\CacheInterface;
 
@@ -20,6 +21,7 @@ final class UnleashConfiguration
         private bool $metricsEnabled = true,
         private array $headers = [],
         private bool $autoRegistrationEnabled = true,
+        private ?Context $defaultContext = null,
     ) {
     }
 
@@ -148,6 +150,19 @@ final class UnleashConfiguration
     public function setAutoRegistrationEnabled(bool $autoRegistrationEnabled): self
     {
         $this->autoRegistrationEnabled = $autoRegistrationEnabled;
+
+        return $this;
+    }
+
+    #[Pure]
+    public function getDefaultContext(): Context
+    {
+        return $this->defaultContext ?? new UnleashContext();
+    }
+
+    public function setDefaultContext(?Context $defaultContext): self
+    {
+        $this->defaultContext = $defaultContext;
 
         return $this;
     }

@@ -11,6 +11,7 @@ use Rikudou\Tests\Unleash\Traits\RealCacheImplementationTrait;
 use Rikudou\Unleash\Client\DefaultRegistrationService;
 use Rikudou\Unleash\Configuration\Context;
 use Rikudou\Unleash\Configuration\UnleashConfiguration;
+use Rikudou\Unleash\Configuration\UnleashContext;
 use Rikudou\Unleash\DTO\Strategy;
 use Rikudou\Unleash\Exception\InvalidValueException;
 use Rikudou\Unleash\Strategy\DefaultStrategyHandler;
@@ -431,5 +432,16 @@ final class UnleashBuilderTest extends TestCase
             }
         });
         self::assertCount(8, $strategiesProperty->getValue($instance));
+    }
+
+    public function testWithDefaultContext()
+    {
+        self::assertNotSame($this->instance, $this->instance->withDefaultContext(new UnleashContext()));
+
+        $context = new UnleashContext();
+        $instance = $this->instance->withDefaultContext($context);
+        $defaultContextProperty = (new ReflectionObject($instance))->getProperty('defaultContext');
+        $defaultContextProperty->setAccessible(true);
+        self::assertSame($context, $defaultContextProperty->getValue($instance));
     }
 }

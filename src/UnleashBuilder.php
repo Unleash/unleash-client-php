@@ -9,6 +9,7 @@ use Psr\Http\Message\RequestFactoryInterface;
 use Psr\SimpleCache\CacheInterface;
 use Rikudou\Unleash\Client\DefaultRegistrationService;
 use Rikudou\Unleash\Client\RegistrationService;
+use Rikudou\Unleash\Configuration\Context;
 use Rikudou\Unleash\Configuration\UnleashConfiguration;
 use Rikudou\Unleash\Exception\InvalidValueException;
 use Rikudou\Unleash\Helper\DefaultImplementationLocator;
@@ -52,6 +53,8 @@ final class UnleashBuilder
     private ?bool $metricsEnabled = null;
 
     private ?int $metricsInterval = null;
+
+    private ?Context $defaultContext = null;
 
     /**
      * @var array<string,string>
@@ -198,6 +201,12 @@ final class UnleashBuilder
         return $this->with('metricsInterval', $milliseconds);
     }
 
+    #[Pure]
+    public function withDefaultContext(?Context $context): self
+    {
+        return $this->with('defaultContext', $context);
+    }
+
     public function build(): Unleash
     {
         if ($this->appUrl === null) {
@@ -234,6 +243,7 @@ final class UnleashBuilder
             ->setMetricsInterval($this->metricsInterval ?? $configuration->getMetricsInterval())
             ->setHeaders($this->headers)
             ->setAutoRegistrationEnabled($this->autoregister)
+            ->setDefaultContext($this->defaultContext)
         ;
 
         $httpClient = $this->httpClient;
