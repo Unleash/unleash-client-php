@@ -27,11 +27,11 @@ jobs:
       - name: Create PHP 8 release tag
         env:
           VERSION: ${{ steps.extract_name.outputs.result }}
-        run: git tag v$VERSION.80
+        run: git tag v${VERSION}80
       - name: Push PHP 8 release tag
         env:
           VERSION: ${{ steps.extract_name.outputs.result }}
-        run: git push origin v$VERSION.80
+        run: git push origin v${VERSION}80
 
       - name: Install Dependencies
         run: composer install
@@ -50,11 +50,11 @@ jobs:
       - name: Create PHP 7.3 release tag
         env:
           VERSION: ${{ steps.extract_name.outputs.result }}
-        run: git tag v$VERSION.73
+        run: git tag v${VERSION}73
       - name: Push PHP 7.3 release tag
         env:
           VERSION: ${{ steps.extract_name.outputs.result }}
-        run: git push origin v$VERSION.73
+        run: git push origin v${VERSION}73
       - name: Delete temporary branch
         run: git push origin --delete tmp-php-7.3-release
 
@@ -77,11 +77,11 @@ jobs:
       - name: Create PHP 7.4 release tag
         env:
           VERSION: ${{ steps.extract_name.outputs.result }}
-        run: git tag v$VERSION.74
+        run: git tag v${VERSION}74
       - name: Push PHP 7.4 release tag
         env:
           VERSION: ${{ steps.extract_name.outputs.result }}
-        run: git push origin v$VERSION.74
+        run: git push origin v${VERSION}74
       - name: Delete temporary branch
         run: git push origin --delete tmp-php-7.4-release
 
