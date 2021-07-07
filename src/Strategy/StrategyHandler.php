@@ -2,7 +2,7 @@
 
 namespace Rikudou\Unleash\Strategy;
 
-use Rikudou\Unleash\Configuration\UnleashContext;
+use Rikudou\Unleash\Configuration\Context;
 use Rikudou\Unleash\DTO\Strategy;
 
 interface StrategyHandler
@@ -11,5 +11,5 @@ interface StrategyHandler
 
     public function getStrategyName(): string;
 
-    public function isEnabled(Strategy $strategy, UnleashContext $context): bool;
+    public function isEnabled(Strategy $strategy, Context $context): bool;
 }

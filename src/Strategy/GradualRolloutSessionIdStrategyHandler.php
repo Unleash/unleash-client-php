@@ -3,7 +3,7 @@
 namespace Rikudou\Unleash\Strategy;
 
 use JetBrains\PhpStorm\Deprecated;
-use Rikudou\Unleash\Configuration\UnleashContext;
+use Rikudou\Unleash\Configuration\Context;
 use Rikudou\Unleash\DTO\DefaultStrategy;
 use Rikudou\Unleash\DTO\Strategy;
 use Rikudou\Unleash\Enum\Stickiness;
@@ -15,7 +15,7 @@ final class GradualRolloutSessionIdStrategyHandler extends AbstractStrategyHandl
     {
     }
 
-    public function isEnabled(Strategy $strategy, UnleashContext $context): bool
+    public function isEnabled(Strategy $strategy, Context $context): bool
     {
         $transformedStrategy = new DefaultStrategy(
             $this->getStrategyName(),

@@ -3,7 +3,7 @@
 namespace Rikudou\Unleash\Variant;
 
 use JetBrains\PhpStorm\Pure;
-use Rikudou\Unleash\Configuration\UnleashContext;
+use Rikudou\Unleash\Configuration\Context;
 use Rikudou\Unleash\DTO\DefaultVariant;
 use Rikudou\Unleash\DTO\Feature;
 use Rikudou\Unleash\DTO\Variant;
@@ -30,7 +30,7 @@ final class DefaultVariantHandler implements VariantHandler
         );
     }
 
-    public function selectVariant(Feature $feature, UnleashContext $context): ?Variant
+    public function selectVariant(Feature $feature, Context $context): ?Variant
     {
         $totalWeight = 0;
         foreach ($feature->getVariants() as $variant) {
@@ -66,7 +66,7 @@ final class DefaultVariantHandler implements VariantHandler
         // @codeCoverageIgnoreEnd
     }
 
-    private function findOverriddenVariant(Feature $feature, UnleashContext $context): ?Variant
+    private function findOverriddenVariant(Feature $feature, Context $context): ?Variant
     {
         foreach ($feature->getVariants() as $variant) {
             foreach ($variant->getOverrides() as $override) {
@@ -81,7 +81,7 @@ final class DefaultVariantHandler implements VariantHandler
 
     private function calculateStickiness(
         Feature $feature,
-        UnleashContext $context,
+        Context $context,
         int $totalWeight
     ): int {
         $stickiness = $feature->getVariants()[0]->getStickiness();

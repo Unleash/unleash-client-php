@@ -2,7 +2,7 @@
 
 namespace Rikudou\Unleash\Strategy;
 
-use Rikudou\Unleash\Configuration\UnleashContext;
+use Rikudou\Unleash\Configuration\Context;
 use Rikudou\Unleash\DTO\Strategy;
 use Rikudou\Unleash\Enum\ConstraintOperator;
 
@@ -20,7 +20,7 @@ abstract class AbstractStrategyHandler implements StrategyHandler
         return $parameters[$parameter] ?? null;
     }
 
-    protected function validateConstraints(Strategy $strategy, UnleashContext $context): bool
+    protected function validateConstraints(Strategy $strategy, Context $context): bool
     {
         $constraints = $strategy->getConstraints();
         foreach ($constraints as $constraint) {

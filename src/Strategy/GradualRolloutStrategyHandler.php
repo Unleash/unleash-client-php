@@ -2,7 +2,7 @@
 
 namespace Rikudou\Unleash\Strategy;
 
-use Rikudou\Unleash\Configuration\UnleashContext;
+use Rikudou\Unleash\Configuration\Context;
 use Rikudou\Unleash\DTO\Strategy;
 use Rikudou\Unleash\Enum\Stickiness;
 use Rikudou\Unleash\Stickiness\StickinessCalculator;
@@ -14,7 +14,7 @@ final class GradualRolloutStrategyHandler extends AbstractStrategyHandler
     ) {
     }
 
-    public function isEnabled(Strategy $strategy, UnleashContext $context): bool
+    public function isEnabled(Strategy $strategy, Context $context): bool
     {
         if (!$stickiness = $this->findParameter('stickiness', $strategy)) {
             return false;

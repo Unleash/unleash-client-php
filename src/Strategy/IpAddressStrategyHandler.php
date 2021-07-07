@@ -2,7 +2,7 @@
 
 namespace Rikudou\Unleash\Strategy;
 
-use Rikudou\Unleash\Configuration\UnleashContext;
+use Rikudou\Unleash\Configuration\Context;
 use Rikudou\Unleash\DTO\Strategy;
 use Rikudou\Unleash\Exception\MissingArgumentException;
 
@@ -11,7 +11,7 @@ final class IpAddressStrategyHandler extends AbstractStrategyHandler
     /**
      * @throws MissingArgumentException
      */
-    public function isEnabled(Strategy $strategy, UnleashContext $context): bool
+    public function isEnabled(Strategy $strategy, Context $context): bool
     {
         if (!$ipAddresses = $this->findParameter('IPs', $strategy)) {
             throw new MissingArgumentException("The remote server did not return 'IPs' config");

@@ -9,8 +9,8 @@ use PHPUnit\Framework\TestCase;
 use ReflectionObject;
 use Rikudou\Tests\Unleash\Traits\RealCacheImplementationTrait;
 use Rikudou\Unleash\Client\DefaultRegistrationService;
+use Rikudou\Unleash\Configuration\Context;
 use Rikudou\Unleash\Configuration\UnleashConfiguration;
-use Rikudou\Unleash\Configuration\UnleashContext;
 use Rikudou\Unleash\DTO\Strategy;
 use Rikudou\Unleash\Exception\InvalidValueException;
 use Rikudou\Unleash\Strategy\DefaultStrategyHandler;
@@ -61,7 +61,7 @@ final class UnleashBuilderTest extends TestCase
                 return '';
             }
 
-            public function isEnabled(Strategy $strategy, UnleashContext $context): bool
+            public function isEnabled(Strategy $strategy, Context $context): bool
             {
                 return false;
             }
@@ -425,7 +425,7 @@ final class UnleashBuilderTest extends TestCase
                 return '';
             }
 
-            public function isEnabled(Strategy $strategy, UnleashContext $context): bool
+            public function isEnabled(Strategy $strategy, Context $context): bool
             {
                 return false;
             }

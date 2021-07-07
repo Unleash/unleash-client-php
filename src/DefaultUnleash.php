@@ -3,6 +3,7 @@
 namespace Rikudou\Unleash;
 
 use Rikudou\Unleash\Client\RegistrationService;
+use Rikudou\Unleash\Configuration\Context;
 use Rikudou\Unleash\Configuration\UnleashConfiguration;
 use Rikudou\Unleash\Configuration\UnleashContext;
 use Rikudou\Unleash\DTO\Strategy;
@@ -30,7 +31,7 @@ final class DefaultUnleash implements Unleash
         }
     }
 
-    public function isEnabled(string $featureName, ?UnleashContext $context = null, bool $default = false): bool
+    public function isEnabled(string $featureName, ?Context $context = null, bool $default = false): bool
     {
         if ($context === null) {
             $context = new UnleashContext();
@@ -78,7 +79,7 @@ final class DefaultUnleash implements Unleash
         return false;
     }
 
-    public function getVariant(string $featureName, ?UnleashContext $context = null, ?Variant $fallbackVariant = null): Variant
+    public function getVariant(string $featureName, ?Context $context = null, ?Variant $fallbackVariant = null): Variant
     {
         $fallbackVariant ??= $this->variantHandler->getDefaultVariant();
         $context ??= new UnleashContext();

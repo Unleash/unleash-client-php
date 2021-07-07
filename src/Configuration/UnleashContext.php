@@ -6,7 +6,7 @@ use Rikudou\Unleash\Enum\ContextField;
 use Rikudou\Unleash\Enum\Stickiness;
 use Rikudou\Unleash\Exception\InvalidValueException;
 
-final class UnleashContext
+final class UnleashContext implements Context
 {
     /**
      * @param array<string,string> $customContext
@@ -66,21 +66,21 @@ final class UnleashContext
         return $this;
     }
 
-    public function setCurrentUserId(?string $currentUserId): UnleashContext
+    public function setCurrentUserId(?string $currentUserId): self
     {
         $this->currentUserId = $currentUserId;
 
         return $this;
     }
 
-    public function setIpAddress(?string $ipAddress): UnleashContext
+    public function setIpAddress(?string $ipAddress): self
     {
         $this->ipAddress = $ipAddress;
 
         return $this;
     }
 
-    public function setSessionId(?string $sessionId): UnleashContext
+    public function setSessionId(?string $sessionId): self
     {
         $this->sessionId = $sessionId;
 
