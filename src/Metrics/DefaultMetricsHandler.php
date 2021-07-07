@@ -35,7 +35,7 @@ final class DefaultMetricsHandler implements MetricsHandler
     private function getOrCreateBucket(Feature $feature): MetricsBucket
     {
         $cache = $this->configuration->getCache();
-        if ($cache !== null && $cache->has(self::CACHE_KEY_BUCKET)) {
+        if ($cache->has(self::CACHE_KEY_BUCKET)) {
             return $cache->get(self::CACHE_KEY_BUCKET);
         }
 
@@ -44,25 +44,22 @@ final class DefaultMetricsHandler implements MetricsHandler
 
     private function shouldSend(MetricsBucket $bucket): bool
     {
-        if ($this->configuration->getCache() !== null) {
-            $bucketStartDate = $bucket->getStartDate();
-            $nowMilliseconds = (int) (microtime(true) * 1000);
-            $startDateMilliseconds = (int) (
-                ($bucketStartDate->getTimestamp() + (int) $bucketStartDate->format('v') / 1000) * 1_000
-            );
-            $diff = $nowMilliseconds - $startDateMilliseconds;
+        $bucketStartDate = $bucket->getStartDate();
+        $nowMilliseconds = (int) (microtime(true) * 1000);
+        $startDateMilliseconds = (int) (
+            ($bucketStartDate->getTimestamp() + (int) $bucketStartDate->format('v') / 1000) * 1_000
+        );
+        $diff = $nowMilliseconds - $startDateMilliseconds;
 
-            return $diff > $this->configuration->getMetricsInterval();
-        }
-
-        return true;
+        return $diff >= $this->configuration->getMetricsInterval();
     }
 
     private function send(MetricsBucket $bucket): void
     {
         $bucket->setEndDate(new DateTimeImmutable());
         $this->metricsSender->sendMetrics($bucket);
-        if ($cache = $this->configuration->getCache()) {
+        $cache = $this->configuration->getCache();
+        if ($cache->has(self::CACHE_KEY_BUCKET)) {
             $cache->delete(self::CACHE_KEY_BUCKET);
         }
     }
@@ -70,7 +67,6 @@ final class DefaultMetricsHandler implements MetricsHandler
     private function store(MetricsBucket $bucket): void
     {
         $cache = $this->configuration->getCache();
-        assert($cache !== null);
         $cache->set(self::CACHE_KEY_BUCKET, $bucket);
     }
 }

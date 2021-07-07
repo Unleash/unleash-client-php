@@ -22,9 +22,6 @@ final class DefaultVariant implements Variant
     ) {
     }
 
-    /**
-     * @codeCoverageIgnore
-     */
     public function getName(): string
     {
         return $this->name;
@@ -60,9 +57,6 @@ final class DefaultVariant implements Variant
         return $this->weight;
     }
 
-    /**
-     * @codeCoverageIgnore
-     */
     public function isEnabled(): bool
     {
         return $this->enabled;

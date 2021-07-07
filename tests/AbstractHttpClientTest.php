@@ -9,6 +9,7 @@ use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\HttpFactory;
 use GuzzleHttp\Psr7\Response;
 use PHPUnit\Framework\TestCase;
+use Rikudou\Tests\Unleash\Trait\FakeCacheImplementationTrait;
 use Rikudou\Unleash\Client\DefaultRegistrationService;
 use Rikudou\Unleash\Client\RegistrationService;
 use Rikudou\Unleash\Configuration\UnleashConfiguration;
@@ -16,6 +17,8 @@ use Rikudou\Unleash\Repository\DefaultUnleashRepository;
 
 abstract class AbstractHttpClientTest extends TestCase
 {
+    use FakeCacheImplementationTrait;
+
     /**
      * @var MockHandler
      */
@@ -60,14 +63,14 @@ abstract class AbstractHttpClientTest extends TestCase
         $this->registrationService = new DefaultRegistrationService(
             $this->httpClient,
             new HttpFactory(),
-            new UnleashConfiguration('', '', ''),
-            []
+            new UnleashConfiguration('', '', '')
         );
 
         $this->repository = new DefaultUnleashRepository(
             $this->httpClient,
             new HttpFactory(),
-            new UnleashConfiguration('', '', '')
+            (new UnleashConfiguration('', '', ''))
+                ->setCache($this->getCache())
         );
     }
 

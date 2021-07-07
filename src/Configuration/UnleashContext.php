@@ -9,14 +9,13 @@ use Rikudou\Unleash\Exception\InvalidValueException;
 final class UnleashContext
 {
     /**
-     * @var array<string,string>
+     * @param array<string,string> $customContext
      */
-    private array $customContext = [];
-
     public function __construct(
         private ?string $currentUserId = null,
         private ?string $ipAddress = null,
         private ?string $sessionId = null,
+        private array $customContext = [],
     ) {
     }
 
@@ -67,9 +66,6 @@ final class UnleashContext
         return $this;
     }
 
-    /**
-     * @codeCoverageIgnore
-     */
     public function setCurrentUserId(?string $currentUserId): UnleashContext
     {
         $this->currentUserId = $currentUserId;
@@ -77,9 +73,6 @@ final class UnleashContext
         return $this;
     }
 
-    /**
-     * @codeCoverageIgnore
-     */
     public function setIpAddress(?string $ipAddress): UnleashContext
     {
         $this->ipAddress = $ipAddress;
@@ -87,9 +80,6 @@ final class UnleashContext
         return $this;
     }
 
-    /**
-     * @codeCoverageIgnore
-     */
     public function setSessionId(?string $sessionId): UnleashContext
     {
         $this->sessionId = $sessionId;

@@ -8,6 +8,7 @@ use League\Flysystem\Adapter\Local;
 use League\Flysystem\Filesystem;
 use Psr\Http\Message\RequestInterface;
 use Rikudou\Tests\Unleash\AbstractHttpClientTest;
+use Rikudou\Tests\Unleash\Trait\FakeCacheImplementationTrait;
 use Rikudou\Unleash\Configuration\UnleashConfiguration;
 use Rikudou\Unleash\DTO\DefaultFeature;
 use Rikudou\Unleash\Metrics\DefaultMetricsHandler;
@@ -15,10 +16,13 @@ use Rikudou\Unleash\Metrics\DefaultMetricsSender;
 
 final class DefaultMetricsHandlerTest extends AbstractHttpClientTest
 {
+    use FakeCacheImplementationTrait;
+
     public function testHandleMetrics()
     {
         $configuration = (new UnleashConfiguration('', '', ''))
-            ->setMetricsInterval(3000);
+            ->setMetricsInterval(0)
+            ->setCache($this->getCache());
         $instance = new DefaultMetricsHandler(
             new DefaultMetricsSender(
                 $this->httpClient,
@@ -46,7 +50,8 @@ final class DefaultMetricsHandlerTest extends AbstractHttpClientTest
             )
         );
         $cache->clear();
-        $configuration->setCache($cache);
+        $configuration->setCache($cache)
+            ->setMetricsInterval(3000);
         $this->requestHistory = [];
         $this->pushResponse([]);
 

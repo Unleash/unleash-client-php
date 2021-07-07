@@ -22,16 +22,10 @@ final class DefaultUnleashRepository implements UnleashRepository
 {
     private const CACHE_KEY_FEATURES = 'rikudou.unleash.feature.list';
 
-    /**
-     * @param array<string,string> $headers
-     *
-     * @internal
-     */
     public function __construct(
         private ClientInterface $httpClient,
         private RequestFactoryInterface $requestFactory,
         private UnleashConfiguration $configuration,
-        private array $headers = [],
     ) {
     }
 
@@ -63,7 +57,7 @@ final class DefaultUnleashRepository implements UnleashRepository
                 ->withHeader('UNLEASH-APPNAME', $this->configuration->getAppName())
                 ->withHeader('UNLEASH-INSTANCEID', $this->configuration->getInstanceId());
 
-            foreach ($this->headers as $name => $value) {
+            foreach ($this->configuration->getHeaders() as $name => $value) {
                 $request = $request->withHeader($name, $value);
             }
 
@@ -88,9 +82,6 @@ final class DefaultUnleashRepository implements UnleashRepository
     private function getCachedFeatures(): ?array
     {
         $cache = $this->configuration->getCache();
-        if ($cache === null) {
-            return null;
-        }
 
         if (!$cache->has(self::CACHE_KEY_FEATURES)) {
             return null;
@@ -107,10 +98,6 @@ final class DefaultUnleashRepository implements UnleashRepository
     private function setCache(array $features): void
     {
         $cache = $this->configuration->getCache();
-        if ($cache === null) {
-            return;
-        }
-
         $cache->set(self::CACHE_KEY_FEATURES, $features, $this->configuration->getTtl());
     }
 

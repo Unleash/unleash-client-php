@@ -19,7 +19,9 @@ Requires PHP 7.3 or newer.
 
 > You will also need some implementation of [PSR-18](https://packagist.org/providers/psr/http-client-implementation)
 > and [PSR-17](https://packagist.org/providers/psr/http-factory-implementation), for example 
-> [Guzzle](https://packagist.org/packages/guzzlehttp/guzzle)
+> [Guzzle](https://packagist.org/packages/guzzlehttp/guzzle) 
+> and [PSR-16](https://packagist.org/providers/psr/simple-cache-implementation), for example 
+> [Symfony Cache](https://packagist.org/packages/symfony/cache)
 
 ## Usage
 
@@ -136,8 +138,14 @@ Some optional parameters can be set, these include:
 - available strategies
 - http headers
 
-If you use Guzzle as your http implementation, the http client and request factory will be created automatically,
-if you use any other implementation you must provide http client and request factory implementation on your own.
+If you use [guzzlehttp/guzzle](https://packagist.org/packages/guzzlehttp/guzzle) or
+[symfony/http-client](https://packagist.org/packages/symfony/http-client) (in combination with 
+[nyholm/psr7]), the http client and request factory will be created automatically, otherwise you need to provide
+an implementation on your own.
+
+If you use [symfony/cache](https://packagist.org/packages/symfony/cache) or
+[cache/filesystem-adapter](https://packagist.org/packages/cache/filesystem-adapter) as your cache implementation, the
+cache handler will be created automatically, otherwise you need to provide some implementation on your own.
 
 ```php
 <?php
@@ -186,10 +194,16 @@ $builder = UnleashBuilder::create()
 
 ## Caching
 
-It may be unnecessary to perform a http request every time you check if a feature is enabled, especially in popular
+It would be slow to perform a http request every time you check if a feature is enabled, especially in popular
 apps. That's why this library has built-in support for PSR-16 cache implementations.
 
-If you don't provide any implementation no cache is used. You can also provide a TTL which defaults to 30 seconds.
+If you don't provide any implementation and default implementation exists, it's used, otherwise you'll get an exception.
+You can also provide a TTL which defaults to 30 seconds.
+
+Cache implementations supported out of the box (meaning you don't need to configure anything):
+
+- [symfony/cache](https://packagist.org/packages/symfony/cache)
+- [cache/filesystem-adapter](https://packagist.org/packages/cache/filesystem-adapter)
 
 ```php
 <?php
@@ -207,7 +221,7 @@ $builder = UnleashBuilder::create()
     ))
     ->withCacheTimeToLive(120);
 
-// you can set the cache handler explicitly to null to disable cache
+// you can set the cache handler explicitly to null to revert back to autodetection
 
 $builder = $builder
     ->withCacheHandler(null);
@@ -333,6 +347,71 @@ $unleash->isEnabled('some-feature'); // works because the session is started
 $unleash->isEnabled('some-feature');
 ```
 
+> Note: This library also implements some deprecated strategies, namely `gradualRolloutRandom`, `gradualRolloutSessionId`
+> and `gradualRolloutUserId` which all alias to the Gradual rollout strategy.
+
+### Custom strategies
+
+To implement your own strategy you need to create a class implementing `StrategyHandler` (or `AbstractStrategyHandler`
+which contains some useful methods). Then you need to instruct the builder to use your custom strategy.
+
+```php
+<?php
+
+use Rikudou\Unleash\Strategy\AbstractStrategyHandler;
+use Rikudou\Unleash\DTO\Strategy;
+use Rikudou\Unleash\Configuration\UnleashContext;
+use Rikudou\Unleash\Strategy\DefaultStrategyHandler;
+
+class AprilFoolsStrategy extends AbstractStrategyHandler
+{
+    public function __construct(private DefaultStrategyHandler $original)
+    {
+    }
+    
+    public function getStrategyName() : string
+    {
+        return 'aprilFools';
+    }
+    
+    public function isEnabled(Strategy $strategy, UnleashContext $context) : bool
+    {
+        $date = new DateTimeImmutable();
+        if ((int) $date->format('n') === 4 && (int) $date->format('j') === 1) {
+            return (bool) random_int(0, 1);
+        }
+        
+        return $this->original->isEnabled($strategy, $context);
+    }
+}
+```
+
+Now you must instruct the builder to use your new strategy
+
+```php
+<?php
+
+use Rikudou\Unleash\UnleashBuilder;
+use Rikudou\Unleash\Strategy\IpAddressStrategyHandler;
+
+$unleash = UnleashBuilder::create()
+    ->withAppName('Some app name')
+    ->withAppUrl('https://some-app-url.com')
+    ->withInstanceId('Some instance id')
+    ->withStrategy(new AprilFoolsStrategy()) // this will append your strategy to the existing list
+    ->build();
+
+// if you want to replace all strategies, use withStrategies() instead
+
+$unleash = UnleashBuilder::create()
+    ->withAppName('Some app name')
+    ->withAppUrl('https://some-app-url.com')
+    ->withInstanceId('Some instance id')
+    ->withStrategies(new AprilFoolsStrategy(), new IpAddressStrategyHandler())
+    // now the unleash object will have only the two strategies
+    ->build();
+```
+
 ## Variants
 
 You can use multiple variants of one feature, for example for A/B testing. If no variant matches or the feature doesn't
@@ -417,10 +496,7 @@ $unleash->register();
 
 By default, this library sends metrics which are simple statistics about whether user was granted access or not.
 
-> Warning: If you don't provide a cache implementation, there will be additional http call with metrics for every
-> `isEnabled()` call.
-
-If you use cache the metrics will be bundled and sent once the bundle created time crosses the configured threshold.
+The metrics will be bundled and sent once the bundle created time crosses the configured threshold.
 By default this threshold is 30,000 milliseconds (30 seconds) meaning that when a new bundle gets created it won't be
 sent sooner than in 30 seconds. That doesn't mean it's guaranteed that the metrics will be sent every 30 seconds, it
 only guarantees that the metrics won't be sent sooner.

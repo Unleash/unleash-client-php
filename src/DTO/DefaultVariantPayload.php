@@ -7,6 +7,7 @@ namespace Rikudou\Unleash\DTO;
 use JetBrains\PhpStorm\ArrayShape;
 use JetBrains\PhpStorm\ExpectedValues;
 use JetBrains\PhpStorm\Pure;
+use JsonException;
 use LogicException;
 use Rikudou\Unleash\Enum\VariantPayloadType;
 
@@ -34,6 +35,8 @@ final class DefaultVariantPayload implements VariantPayload
     }
 
     /**
+     * @throws JsonException
+     *
      * @return array<mixed>
      */
     public function fromJson(): array

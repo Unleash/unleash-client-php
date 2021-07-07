@@ -17,14 +17,14 @@ final class DefaultMetricsSenderTest extends AbstractHttpClientTest
     public function testSendMetrics()
     {
         $configuration = new UnleashConfiguration('', '', '');
+        $configuration->setHeaders([
+            'Authorization' => 'test',
+        ]);
 
         $instance = new DefaultMetricsSender(
             $this->httpClient,
             new HttpFactory(),
-            $configuration,
-            [
-                'Authorization' => 'test',
-            ]
+            $configuration
         );
         $bucket = new MetricsBucket(new DateTimeImmutable(), new DateTimeImmutable());
         $bucket

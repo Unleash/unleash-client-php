@@ -11,7 +11,7 @@ use Rikudou\Unleash\Client\DefaultRegistrationService;
 use Rikudou\Unleash\Client\RegistrationService;
 use Rikudou\Unleash\Configuration\UnleashConfiguration;
 use Rikudou\Unleash\Exception\InvalidValueException;
-use Rikudou\Unleash\Helper\DefaultHttpImplementationLocator;
+use Rikudou\Unleash\Helper\DefaultImplementationLocator;
 use Rikudou\Unleash\Metrics\DefaultMetricsHandler;
 use Rikudou\Unleash\Metrics\DefaultMetricsSender;
 use Rikudou\Unleash\Repository\DefaultUnleashRepository;
@@ -29,7 +29,7 @@ use Rikudou\Unleash\Variant\DefaultVariantHandler;
 #[Immutable]
 final class UnleashBuilder
 {
-    private DefaultHttpImplementationLocator $defaultHttpImplementationLocator;
+    private DefaultImplementationLocator $defaultImplementationLocator;
 
     private ?string $appUrl = null;
 
@@ -59,14 +59,25 @@ final class UnleashBuilder
     private array $headers = [];
 
     /**
-     * @var array<StrategyHandler>|null
+     * @var array<StrategyHandler>
      */
-    private ?array $strategies = null;
+    private array $strategies;
 
     #[Pure]
     public function __construct()
     {
-        $this->defaultHttpImplementationLocator = new DefaultHttpImplementationLocator();
+        $this->defaultImplementationLocator = new DefaultImplementationLocator();
+
+        $rolloutStrategyHandler = new GradualRolloutStrategyHandler(new MurmurHashCalculator());
+        $this->strategies = [
+            new DefaultStrategyHandler(),
+            new IpAddressStrategyHandler(),
+            new UserIdStrategyHandler(),
+            $rolloutStrategyHandler,
+            new GradualRolloutUserIdStrategyHandler($rolloutStrategyHandler),
+            new GradualRolloutSessionIdStrategyHandler($rolloutStrategyHandler),
+            new GradualRolloutRandomStrategyHandler($rolloutStrategyHandler),
+        ];
     }
 
     #[Pure]
@@ -123,6 +134,12 @@ final class UnleashBuilder
     public function withStrategies(StrategyHandler ...$strategies): self
     {
         return $this->with('strategies', $strategies);
+    }
+
+    #[Pure]
+    public function withStrategy(StrategyHandler $strategy): self
+    {
+        return $this->withStrategies(...array_merge($this->strategies, [$strategy]));
     }
 
     #[Pure]
@@ -195,22 +212,38 @@ final class UnleashBuilder
             );
         }
 
+        $cache = $this->cache;
+        if ($cache === null) {
+            $cache = $this->defaultImplementationLocator->findCache();
+            if ($cache === null) {
+                throw new InvalidValueException(
+                    sprintf(
+                        "No cache implementation provided, please use 'withCacheHandler()' method or install one of officially supported clients: '%s'",
+                        implode("', '", $this->defaultImplementationLocator->getCachePackages())
+                    )
+                );
+            }
+        }
+        assert($cache instanceof CacheInterface);
+
         $configuration = new UnleashConfiguration($this->appUrl, $this->appName, $this->instanceId);
         $configuration
-            ->setCache($this->cache)
+            ->setCache($cache)
             ->setTtl($this->cacheTtl ?? $configuration->getTtl())
             ->setMetricsEnabled($this->metricsEnabled ?? $configuration->isMetricsEnabled())
             ->setMetricsInterval($this->metricsInterval ?? $configuration->getMetricsInterval())
+            ->setHeaders($this->headers)
+            ->setAutoRegistrationEnabled($this->autoregister)
         ;
 
         $httpClient = $this->httpClient;
         if ($httpClient === null) {
-            $httpClient = $this->defaultHttpImplementationLocator->findHttpClient();
+            $httpClient = $this->defaultImplementationLocator->findHttpClient();
             if ($httpClient === null) {
                 throw new InvalidValueException(
                     sprintf(
                         "No http client provided, please use 'withHttpClient()' method or install one of officially supported clients: '%s'",
-                        implode("', '", $this->defaultHttpImplementationLocator->getHttpClientPackages())
+                        implode("', '", $this->defaultImplementationLocator->getHttpClientPackages())
                     )
                 );
             }
@@ -219,51 +252,37 @@ final class UnleashBuilder
 
         $requestFactory = $this->requestFactory;
         if ($requestFactory === null) {
-            $requestFactory = $this->defaultHttpImplementationLocator->findRequestFactory();
+            $requestFactory = $this->defaultImplementationLocator->findRequestFactory();
             if ($requestFactory === null) {
                 throw new InvalidValueException(
                     sprintf(
                         "No request factory provided, please use 'withHttpClient()' method or install one of officially supported clients: '%s'",
-                        implode("', '", $this->defaultHttpImplementationLocator->getRequestFactoryPackages())
+                        implode("', '", $this->defaultImplementationLocator->getRequestFactoryPackages())
                     )
                 );
             }
         }
         assert($requestFactory instanceof RequestFactoryInterface);
 
-        $repository = new DefaultUnleashRepository($httpClient, $requestFactory, $configuration, $this->headers);
+        $repository = new DefaultUnleashRepository($httpClient, $requestFactory, $configuration);
 
         $hashCalculator = new MurmurHashCalculator();
-        $strategies = $this->strategies;
-        if ($strategies === null || !count($strategies)) {
-            $rolloutStrategyHandler = new GradualRolloutStrategyHandler($hashCalculator);
-            $strategies = [
-                new DefaultStrategyHandler(),
-                new IpAddressStrategyHandler(),
-                new UserIdStrategyHandler(),
-                $rolloutStrategyHandler,
-                new GradualRolloutUserIdStrategyHandler($rolloutStrategyHandler),
-                new GradualRolloutSessionIdStrategyHandler($rolloutStrategyHandler),
-                new GradualRolloutRandomStrategyHandler($rolloutStrategyHandler),
-            ];
-        }
 
         $registrationService = $this->registrationService;
         if ($registrationService === null) {
-            $registrationService = new DefaultRegistrationService($httpClient, $requestFactory, $configuration, $this->headers);
+            $registrationService = new DefaultRegistrationService($httpClient, $requestFactory, $configuration);
         }
 
         return new DefaultUnleash(
-            $strategies,
+            $this->strategies,
             $repository,
             $registrationService,
-            $this->autoregister,
+            $configuration,
             new DefaultMetricsHandler(
                 new DefaultMetricsSender(
                     $httpClient,
                     $requestFactory,
                     $configuration,
-                    $this->headers
                 ),
                 $configuration
             ),

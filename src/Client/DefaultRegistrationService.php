@@ -14,16 +14,10 @@ use Rikudou\Unleash\Unleash;
 
 final class DefaultRegistrationService implements RegistrationService
 {
-    /**
-     * @param array<string,string> $headers
-     *
-     * @internal
-     */
     public function __construct(
         private ClientInterface $httpClient,
         private RequestFactoryInterface $requestFactory,
         private UnleashConfiguration $configuration,
-        private array $headers
     ) {
     }
 
@@ -53,7 +47,7 @@ final class DefaultRegistrationService implements RegistrationService
                 'started' => (new DateTimeImmutable())->format('c'),
                 'interval' => $this->configuration->getMetricsInterval(),
             ], JSON_THROW_ON_ERROR)));
-        foreach ($this->headers as $name => $value) {
+        foreach ($this->configuration->getHeaders() as $name => $value) {
             $request = $request->withHeader($name, $value);
         }
         $response = $this->httpClient->sendRequest($request);

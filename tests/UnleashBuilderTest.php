@@ -11,9 +11,13 @@ use PHPUnit\Framework\TestCase;
 use ReflectionObject;
 use Rikudou\Unleash\Client\DefaultRegistrationService;
 use Rikudou\Unleash\Configuration\UnleashConfiguration;
+use Rikudou\Unleash\Configuration\UnleashContext;
+use Rikudou\Unleash\DTO\Strategy;
 use Rikudou\Unleash\Exception\InvalidValueException;
 use Rikudou\Unleash\Strategy\DefaultStrategyHandler;
+use Rikudou\Unleash\Strategy\StrategyHandler;
 use Rikudou\Unleash\UnleashBuilder;
+use Symfony\Component\Cache\Psr16Cache;
 use Symfony\Component\HttpClient\Psr18Client;
 
 final class UnleashBuilderTest extends TestCase
@@ -41,6 +45,27 @@ final class UnleashBuilderTest extends TestCase
     public function testWithStrategies()
     {
         self::assertNotSame($this->instance, $this->instance->withStrategies(new DefaultStrategyHandler()));
+        $strategiesProperty = (new ReflectionObject($this->instance))->getProperty('strategies');
+        $strategiesProperty->setAccessible(true);
+
+        self::assertCount(7, $strategiesProperty->getValue($this->instance));
+        $instance = $this->instance->withStrategies(new class implements StrategyHandler {
+            public function supports(Strategy $strategy): bool
+            {
+                return false;
+            }
+
+            public function getStrategyName(): string
+            {
+                return '';
+            }
+
+            public function isEnabled(Strategy $strategy, UnleashContext $context): bool
+            {
+                return false;
+            }
+        });
+        self::assertCount(1, $strategiesProperty->getValue($instance));
     }
 
     public function testWithCacheTimeToLive()
@@ -114,7 +139,7 @@ final class UnleashBuilderTest extends TestCase
         self::assertEquals('https://example.com/', $configuration->getUrl());
         self::assertEquals('Test App', $configuration->getAppName());
         self::assertEquals('test', $configuration->getInstanceId());
-        self::assertNull($configuration->getCache());
+        self::assertNotNull($configuration->getCache());
         self::assertIsInt($configuration->getTtl());
         self::assertCount(7, $strategies);
 
@@ -201,9 +226,14 @@ final class UnleashBuilderTest extends TestCase
         $repository = $repositoryProperty->getValue($unleash);
 
         $reflection = new ReflectionObject($repository);
+        $configurationProperty = $reflection->getProperty('configuration');
+        $configurationProperty->setAccessible(true);
+        $configuration = $configurationProperty->getValue($repository);
+
+        $reflection = new ReflectionObject($configuration);
         $headersPropertyBuilt = $reflection->getProperty('headers');
         $headersPropertyBuilt->setAccessible(true);
-        $headersBuilt = $headersPropertyBuilt->getValue($repository);
+        $headersBuilt = $headersPropertyBuilt->getValue($configuration);
         self::assertEquals($headers, $headersBuilt);
 
         $instance = $instance
@@ -222,8 +252,7 @@ final class UnleashBuilderTest extends TestCase
         self::assertNotSame($this->instance, $this->instance->withRegistrationService(new DefaultRegistrationService(
             new Client(),
             new HttpFactory(),
-            new UnleashConfiguration('', '', ''),
-            []
+            new UnleashConfiguration('', '', '')
         )));
     }
 
@@ -252,7 +281,7 @@ final class UnleashBuilderTest extends TestCase
         self::assertNotSame($this->instance, $this->instance->withMetricsInterval(5000));
     }
 
-    public function testWithoutDefaultHttpClients()
+    public function testWithoutDefaultClients()
     {
         $instance = $this->instance
             ->withAppUrl('http://example.com')
@@ -261,7 +290,7 @@ final class UnleashBuilderTest extends TestCase
         ;
         $unleash = $instance->build();
 
-        $locatorProperty = (new ReflectionObject($instance))->getProperty('defaultHttpImplementationLocator');
+        $locatorProperty = (new ReflectionObject($instance))->getProperty('defaultImplementationLocator');
         $locatorProperty->setAccessible(true);
         $locator = $locatorProperty->getValue($instance);
 
@@ -325,8 +354,49 @@ final class UnleashBuilderTest extends TestCase
         unset($defaultImplementations['factory'][Psr18Client::class]);
         $defaultImplementationsProperty->setValue($locator, $defaultImplementations);
 
-        $this->expectException(InvalidValueException::class);
-        $instance->build();
+        try {
+            $instance->build();
+            $this->fail('No default request factory is available, expected exception');
+        } catch (InvalidValueException $e) {
+        }
+
+        $defaultImplementations['factory'][Psr18Client::class] = [];
+        $defaultImplementationsProperty->setValue($locator, $defaultImplementations);
+
+        $configurationProperty = (new ReflectionObject($repository))->getProperty('configuration');
+        $configurationProperty->setAccessible(true);
+        $configuration = $configurationProperty->getValue($repository);
+
+        $cacheProperty = (new ReflectionObject($configuration))->getProperty('cache');
+        $cacheProperty->setAccessible(true);
+
+        $unleash = $instance->build();
+        $repository = $repositoryProperty->getValue($unleash);
+        $configuration = $configurationProperty->getValue($repository);
+        $cache = $cacheProperty->getValue($configuration);
+
+        self::assertInstanceOf(FilesystemCachePool::class, $cache);
+
+        $defaultImplementations['cache'][FilesystemCachePool::class . 2] = [];
+        unset($defaultImplementations['cache'][FilesystemCachePool::class]);
+        $defaultImplementationsProperty->setValue($locator, $defaultImplementations);
+
+        $unleash = $instance->build();
+        $repository = $repositoryProperty->getValue($unleash);
+        $configuration = $configurationProperty->getValue($repository);
+        $cache = $cacheProperty->getValue($configuration);
+
+        self::assertInstanceOf(Psr16Cache::class, $cache);
+
+        $defaultImplementations['cache'][Psr16Cache::class . 2] = [];
+        unset($defaultImplementations['cache'][Psr16Cache::class]);
+        $defaultImplementationsProperty->setValue($locator, $defaultImplementations);
+
+        try {
+            $instance->build();
+            $this->fail('No default cache implementation is available, expected exception');
+        } catch (InvalidValueException $e) {
+        }
     }
 
     public function testCreateForGitlab()
@@ -340,5 +410,30 @@ final class UnleashBuilderTest extends TestCase
 
         self::assertFalse($autoRegistrationProperty->getValue($instance));
         self::assertFalse($metricsProperty->getValue($instance));
+    }
+
+    public function testWithStrategy()
+    {
+        $strategiesProperty = (new ReflectionObject($this->instance))->getProperty('strategies');
+        $strategiesProperty->setAccessible(true);
+
+        self::assertCount(7, $strategiesProperty->getValue($this->instance));
+        $instance = $this->instance->withStrategy(new class implements StrategyHandler {
+            public function supports(Strategy $strategy): bool
+            {
+                return false;
+            }
+
+            public function getStrategyName(): string
+            {
+                return '';
+            }
+
+            public function isEnabled(Strategy $strategy, UnleashContext $context): bool
+            {
+                return false;
+            }
+        });
+        self::assertCount(8, $strategiesProperty->getValue($instance));
     }
 }

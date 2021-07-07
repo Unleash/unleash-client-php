@@ -9,7 +9,7 @@ interface Unleash
 {
     public const SDK_VERSION = '0.12.1';
 
-    public function isEnabled(string $featureName, UnleashContext $context = null, bool $default = false): bool;
+    public function isEnabled(string $featureName, ?UnleashContext $context = null, bool $default = false): bool;
 
     public function getVariant(string $featureName, ?UnleashContext $context = null, ?Variant $fallbackVariant = null): Variant;
 

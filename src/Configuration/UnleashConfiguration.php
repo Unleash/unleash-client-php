@@ -2,27 +2,33 @@
 
 namespace Rikudou\Unleash\Configuration;
 
+use LogicException;
 use Psr\SimpleCache\CacheInterface;
 
 final class UnleashConfiguration
 {
-    private ?CacheInterface $cache = null;
-
-    private int $ttl = 30;
-
-    private int $metricsInterval = 30_000;
-
-    private bool $metricsEnabled = true;
-
+    /**
+     * @param array<string,string> $headers
+     */
     public function __construct(
         private string $url,
         private string $appName,
-        private string $instanceId
+        private string $instanceId,
+        private ?CacheInterface $cache = null,
+        private int $ttl = 30,
+        private int $metricsInterval = 30_000,
+        private bool $metricsEnabled = true,
+        private array $headers = [],
+        private bool $autoRegistrationEnabled = true,
     ) {
     }
 
-    public function getCache(): ?CacheInterface
+    public function getCache(): CacheInterface
     {
+        if ($this->cache === null) {
+            throw new LogicException('Cache handler is not set');
+        }
+
         return $this->cache;
     }
 
@@ -51,7 +57,7 @@ final class UnleashConfiguration
         return $this->ttl;
     }
 
-    public function setCache(?CacheInterface $cache): self
+    public function setCache(CacheInterface $cache): self
     {
         $this->cache = $cache;
 
@@ -102,9 +108,6 @@ final class UnleashConfiguration
         return $this;
     }
 
-    /**
-     * @codeCoverageIgnore
-     */
     public function setMetricsInterval(int $metricsInterval): self
     {
         $this->metricsInterval = $metricsInterval;
@@ -112,12 +115,39 @@ final class UnleashConfiguration
         return $this;
     }
 
-    /**
-     * @codeCoverageIgnore
-     */
     public function setMetricsEnabled(bool $metricsEnabled): self
     {
         $this->metricsEnabled = $metricsEnabled;
+
+        return $this;
+    }
+
+    /**
+     * @return array<string,string>
+     */
+    public function getHeaders(): array
+    {
+        return $this->headers;
+    }
+
+    /**
+     * @param array<string,string> $headers
+     */
+    public function setHeaders(array $headers): self
+    {
+        $this->headers = $headers;
+
+        return $this;
+    }
+
+    public function isAutoRegistrationEnabled(): bool
+    {
+        return $this->autoRegistrationEnabled;
+    }
+
+    public function setAutoRegistrationEnabled(bool $autoRegistrationEnabled): self
+    {
+        $this->autoRegistrationEnabled = $autoRegistrationEnabled;
 
         return $this;
     }
