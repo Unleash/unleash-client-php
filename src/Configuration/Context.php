@@ -22,7 +22,7 @@ interface Context
 
     public function setIpAddress(?string $ipAddress): self;
 
-    public function setSessionId(?string $sessionId): UnleashContext;
+    public function setSessionId(?string $sessionId): self;
 
     /**
      * @param array<string> $values
