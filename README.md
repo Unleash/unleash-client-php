@@ -5,6 +5,8 @@
 A PHP implementation of the [Unleash protocol](https://www.getunleash.io/)
 aka [Feature Flags](https://docs.gitlab.com/ee/operations/feature_flags.html) in GitLab.
 
+You may also be interested in the [Symfony Bundle](https://github.com/RikudouSage/UnleashSdkBundle) for this package.
+
 This implementation conforms to the official Unleash standards and implements all of Unleash features.
 
 > Unleash allows you to gradually release your app's feature before doing a full release based on multiple strategies
