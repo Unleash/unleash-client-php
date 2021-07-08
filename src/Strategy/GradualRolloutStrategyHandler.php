@@ -24,18 +24,15 @@ final class GradualRolloutStrategyHandler extends AbstractStrategyHandler
             return false;
         }
 
-        switch (strtolower($stickiness)) {
-            case Stickiness::DEFAULT:
-                $id = $context->getCurrentUserId() ?? $context->getSessionId() ?? random_int(1, 100_000);
-                break;
-            case Stickiness::RANDOM:
-                $id = random_int(1, 100_000);
-                break;
-            default:
-                $id = $context->findContextValue($stickiness);
-                if ($id === null) {
-                    return false;
-                }
+        $id = match (strtolower($stickiness)) {
+            Stickiness::DEFAULT => $context->getCurrentUserId() ?? $context->getSessionId() ?? random_int(1, 100_000),
+            Stickiness::RANDOM => random_int(1, 100_000),
+            Stickiness::USER_ID => $context->getCurrentUserId(),
+            Stickiness::SESSION_ID => $context->getSessionId(),
+            default => $context->findContextValue($stickiness),
+        };
+        if ($id === null) {
+            return false;
         }
 
         $normalized = $this->stickinessCalculator->calculate((string) $id, $groupId);
