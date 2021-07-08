@@ -26,11 +26,11 @@ Requires PHP 7.3 or newer.
 > [Symfony Cache](https://packagist.org/packages/symfony/cache).
 > Example:
 
-`composer require rikudou/unleash-sdk guzzlehttp/guzzle`
+`composer require rikudou/unleash-sdk guzzlehttp/guzzle symfony/cache`
 
 or
 
-`composer require rikudou/unleash-sdk symfony/http-client nyholm/psr7`
+`composer require rikudou/unleash-sdk symfony/http-client nyholm/psr7 symfony/cache`
 
 ## Usage
 
