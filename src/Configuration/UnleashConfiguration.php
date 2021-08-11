@@ -37,7 +37,7 @@ final class UnleashConfiguration
     public function getUrl(): string
     {
         $url = $this->url;
-        if (substr($url, -1) !== '/') {
+        if (!str_ends_with($url, '/')) {
             $url .= '/';
         }
 

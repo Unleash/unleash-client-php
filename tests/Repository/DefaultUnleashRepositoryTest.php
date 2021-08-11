@@ -18,6 +18,7 @@ final class DefaultUnleashRepositoryTest extends AbstractHttpClientTest
 {
     use FakeCacheImplementationTrait, RealCacheImplementationTrait {
         FakeCacheImplementationTrait::getCache insteadof RealCacheImplementationTrait;
+
         RealCacheImplementationTrait::getCache as getRealCache;
     }
 
