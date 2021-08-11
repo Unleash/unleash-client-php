@@ -16,6 +16,7 @@ final class DefaultMetricsHandlerTest extends AbstractHttpClientTest
 {
     use FakeCacheImplementationTrait, RealCacheImplementationTrait {
         FakeCacheImplementationTrait::getCache insteadof RealCacheImplementationTrait;
+
         RealCacheImplementationTrait::getCache as getRealCache;
     }
 
