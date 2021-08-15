@@ -1,9 +1,9 @@
 <?php
 
-namespace Rikudou\Unleash;
+namespace Unleash\Client;
 
-use Rikudou\Unleash\Configuration\Context;
-use Rikudou\Unleash\DTO\Variant;
+use Unleash\Client\Configuration\Context;
+use Unleash\Client\DTO\Variant;
 
 interface Unleash
 {

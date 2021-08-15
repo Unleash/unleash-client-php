@@ -1,11 +1,11 @@
 <?php
 
-namespace Rikudou\Tests\Unleash\Metrics;
+namespace Unleash\Client\Tests\Metrics;
 
 use DateTimeImmutable;
 use LogicException;
 use PHPUnit\Framework\TestCase;
-use Rikudou\Unleash\Metrics\MetricsBucket;
+use Unleash\Client\Metrics\MetricsBucket;
 
 final class MetricsBucketTest extends TestCase
 {

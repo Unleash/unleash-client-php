@@ -1,6 +1,6 @@
 <?php
 
-use Rikudou\Unleash\Unleash;
+use Unleash\Client\Unleash;
 
 if (!isset($argv[1])) {
     echo 'No argument with version provided', PHP_EOL;

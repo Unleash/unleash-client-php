@@ -1,8 +1,8 @@
 <?php
 
-namespace Rikudou\Unleash\Repository;
+namespace Unleash\Client\Repository;
 
-use Rikudou\Unleash\DTO\Feature;
+use Unleash\Client\DTO\Feature;
 
 interface UnleashRepository
 {

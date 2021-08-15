@@ -1,11 +1,11 @@
 <?php
 
-namespace Rikudou\Unleash\Strategy;
+namespace Unleash\Client\Strategy;
 
-use Rikudou\Unleash\Configuration\Context;
-use Rikudou\Unleash\DTO\Strategy;
-use Rikudou\Unleash\Enum\Stickiness;
-use Rikudou\Unleash\Stickiness\StickinessCalculator;
+use Unleash\Client\Configuration\Context;
+use Unleash\Client\DTO\Strategy;
+use Unleash\Client\Enum\Stickiness;
+use Unleash\Client\Stickiness\StickinessCalculator;
 
 final class GradualRolloutStrategyHandler extends AbstractStrategyHandler
 {

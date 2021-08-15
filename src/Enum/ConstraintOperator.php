@@ -1,6 +1,6 @@
 <?php
 
-namespace Rikudou\Unleash\Enum;
+namespace Unleash\Client\Enum;
 
 final class ConstraintOperator
 {

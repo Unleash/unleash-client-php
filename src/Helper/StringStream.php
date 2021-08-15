@@ -1,9 +1,9 @@
 <?php
 
-namespace Rikudou\Unleash\Helper;
+namespace Unleash\Client\Helper;
 
 use Psr\Http\Message\StreamInterface;
-use Rikudou\Unleash\Exception\StreamException;
+use Unleash\Client\Exception\StreamException;
 
 /**
  * @internal

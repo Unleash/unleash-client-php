@@ -1,16 +1,16 @@
 <?php
 
-namespace Rikudou\Unleash;
+namespace Unleash\Client;
 
-use Rikudou\Unleash\Client\RegistrationService;
-use Rikudou\Unleash\Configuration\Context;
-use Rikudou\Unleash\Configuration\UnleashConfiguration;
-use Rikudou\Unleash\DTO\Strategy;
-use Rikudou\Unleash\DTO\Variant;
-use Rikudou\Unleash\Metrics\MetricsHandler;
-use Rikudou\Unleash\Repository\UnleashRepository;
-use Rikudou\Unleash\Strategy\StrategyHandler;
-use Rikudou\Unleash\Variant\VariantHandler;
+use Unleash\Client\Client\RegistrationService;
+use Unleash\Client\Configuration\Context;
+use Unleash\Client\Configuration\UnleashConfiguration;
+use Unleash\Client\DTO\Strategy;
+use Unleash\Client\DTO\Variant;
+use Unleash\Client\Metrics\MetricsHandler;
+use Unleash\Client\Repository\UnleashRepository;
+use Unleash\Client\Strategy\StrategyHandler;
+use Unleash\Client\Variant\VariantHandler;
 
 final class DefaultUnleash implements Unleash
 {

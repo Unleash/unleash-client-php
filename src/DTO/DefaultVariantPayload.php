@@ -2,14 +2,14 @@
 
 /** @noinspection PhpPluralMixedCanBeReplacedWithArrayInspection */
 
-namespace Rikudou\Unleash\DTO;
+namespace Unleash\Client\DTO;
 
 use JetBrains\PhpStorm\ArrayShape;
 use JetBrains\PhpStorm\ExpectedValues;
 use JetBrains\PhpStorm\Pure;
 use JsonException;
 use LogicException;
-use Rikudou\Unleash\Enum\VariantPayloadType;
+use Unleash\Client\Enum\VariantPayloadType;
 
 final class DefaultVariantPayload implements VariantPayload
 {

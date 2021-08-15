@@ -1,10 +1,10 @@
 <?php
 
-namespace Rikudou\Tests\Unleash\Helper;
+namespace Unleash\Client\Tests\Helper;
 
 use PHPUnit\Framework\TestCase;
-use Rikudou\Unleash\Exception\StreamException;
-use Rikudou\Unleash\Helper\StringStream;
+use Unleash\Client\Exception\StreamException;
+use Unleash\Client\Helper\StringStream;
 
 final class StringStreamTest extends TestCase
 {

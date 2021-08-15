@@ -1,10 +1,10 @@
 <?php
 
-namespace Rikudou\Unleash\Strategy;
+namespace Unleash\Client\Strategy;
 
-use Rikudou\Unleash\Configuration\Context;
-use Rikudou\Unleash\DTO\Strategy;
-use Rikudou\Unleash\Exception\MissingArgumentException;
+use Unleash\Client\Configuration\Context;
+use Unleash\Client\DTO\Strategy;
+use Unleash\Client\Exception\MissingArgumentException;
 
 final class IpAddressStrategyHandler extends AbstractStrategyHandler
 {

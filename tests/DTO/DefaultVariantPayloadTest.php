@@ -1,11 +1,11 @@
 <?php
 
-namespace Rikudou\Tests\Unleash\DTO;
+namespace Unleash\Client\Tests\DTO;
 
 use LogicException;
 use PHPUnit\Framework\TestCase;
-use Rikudou\Unleash\DTO\DefaultVariantPayload;
-use Rikudou\Unleash\Enum\VariantPayloadType;
+use Unleash\Client\DTO\DefaultVariantPayload;
+use Unleash\Client\Enum\VariantPayloadType;
 
 final class DefaultVariantPayloadTest extends TestCase
 {

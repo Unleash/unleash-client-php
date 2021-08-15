@@ -5,12 +5,12 @@
  * this might be slightly more useful than the April Fools strategy from README.
  */
 
-use Rikudou\Unleash\Configuration\Context;
-use Rikudou\Unleash\DTO\DefaultStrategy;
-use Rikudou\Unleash\DTO\Strategy;
-use Rikudou\Unleash\Strategy\AbstractStrategyHandler;
-use Rikudou\Unleash\Strategy\IpAddressStrategyHandler;
-use Rikudou\Unleash\UnleashBuilder;
+use Unleash\Client\Configuration\Context;
+use Unleash\Client\DTO\DefaultStrategy;
+use Unleash\Client\DTO\Strategy;
+use Unleash\Client\Strategy\AbstractStrategyHandler;
+use Unleash\Client\Strategy\IpAddressStrategyHandler;
+use Unleash\Client\UnleashBuilder;
 
 require __DIR__ . '/_common.php';
 

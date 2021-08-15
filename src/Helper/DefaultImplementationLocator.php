@@ -1,6 +1,6 @@
 <?php
 
-namespace Rikudou\Unleash\Helper;
+namespace Unleash\Client\Helper;
 
 use Cache\Adapter\Filesystem\FilesystemCachePool;
 use GuzzleHttp\Client;

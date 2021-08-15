@@ -4,10 +4,10 @@
  * Let's assume you want features to be prefixed per environment, here's a sample implementation
  */
 
-use Rikudou\Unleash\Configuration\UnleashContext;
-use Rikudou\Unleash\DTO\Variant;
-use Rikudou\Unleash\Unleash;
-use Rikudou\Unleash\UnleashBuilder;
+use Unleash\Client\Configuration\UnleashContext;
+use Unleash\Client\DTO\Variant;
+use Unleash\Client\Unleash;
+use Unleash\Client\UnleashBuilder;
 
 require_once __DIR__ . '/_common.php';
 

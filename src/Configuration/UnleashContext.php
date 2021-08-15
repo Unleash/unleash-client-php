@@ -1,10 +1,10 @@
 <?php
 
-namespace Rikudou\Unleash\Configuration;
+namespace Unleash\Client\Configuration;
 
-use Rikudou\Unleash\Enum\ContextField;
-use Rikudou\Unleash\Enum\Stickiness;
-use Rikudou\Unleash\Exception\InvalidValueException;
+use Unleash\Client\Enum\ContextField;
+use Unleash\Client\Enum\Stickiness;
+use Unleash\Client\Exception\InvalidValueException;
 
 final class UnleashContext implements Context
 {

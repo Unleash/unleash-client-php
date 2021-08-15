@@ -1,13 +1,13 @@
 <?php
 
-namespace Rikudou\Tests\Unleash\Client;
+namespace Unleash\Client\Tests\Client;
 
 use GuzzleHttp\Psr7\HttpFactory;
-use Rikudou\Tests\Unleash\AbstractHttpClientTest;
-use Rikudou\Tests\Unleash\Traits\RealCacheImplementationTrait;
-use Rikudou\Unleash\Client\DefaultRegistrationService;
-use Rikudou\Unleash\Configuration\UnleashConfiguration;
-use Rikudou\Unleash\Strategy\DefaultStrategyHandler;
+use Unleash\Client\Client\DefaultRegistrationService;
+use Unleash\Client\Configuration\UnleashConfiguration;
+use Unleash\Client\Strategy\DefaultStrategyHandler;
+use Unleash\Client\Tests\AbstractHttpClientTest;
+use Unleash\Client\Tests\Traits\RealCacheImplementationTrait;
 
 final class DefaultRegistrationServiceTest extends AbstractHttpClientTest
 {

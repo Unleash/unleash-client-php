@@ -1,23 +1,23 @@
 <?php
 
-namespace Rikudou\Tests\Unleash;
+namespace Unleash\Client\Tests;
 
-use Rikudou\Tests\Unleash\Traits\FakeCacheImplementationTrait;
-use Rikudou\Unleash\Configuration\UnleashConfiguration;
-use Rikudou\Unleash\Configuration\UnleashContext;
-use Rikudou\Unleash\DefaultUnleash;
-use Rikudou\Unleash\DTO\Feature;
-use Rikudou\Unleash\DTO\Variant;
-use Rikudou\Unleash\Metrics\MetricsHandler;
-use Rikudou\Unleash\Stickiness\MurmurHashCalculator;
-use Rikudou\Unleash\Strategy\DefaultStrategyHandler;
-use Rikudou\Unleash\Strategy\GradualRolloutRandomStrategyHandler;
-use Rikudou\Unleash\Strategy\GradualRolloutSessionIdStrategyHandler;
-use Rikudou\Unleash\Strategy\GradualRolloutStrategyHandler;
-use Rikudou\Unleash\Strategy\GradualRolloutUserIdStrategyHandler;
-use Rikudou\Unleash\Strategy\IpAddressStrategyHandler;
-use Rikudou\Unleash\Strategy\UserIdStrategyHandler;
-use Rikudou\Unleash\Variant\DefaultVariantHandler;
+use Unleash\Client\Configuration\UnleashConfiguration;
+use Unleash\Client\Configuration\UnleashContext;
+use Unleash\Client\DefaultUnleash;
+use Unleash\Client\DTO\Feature;
+use Unleash\Client\DTO\Variant;
+use Unleash\Client\Metrics\MetricsHandler;
+use Unleash\Client\Stickiness\MurmurHashCalculator;
+use Unleash\Client\Strategy\DefaultStrategyHandler;
+use Unleash\Client\Strategy\GradualRolloutRandomStrategyHandler;
+use Unleash\Client\Strategy\GradualRolloutSessionIdStrategyHandler;
+use Unleash\Client\Strategy\GradualRolloutStrategyHandler;
+use Unleash\Client\Strategy\GradualRolloutUserIdStrategyHandler;
+use Unleash\Client\Strategy\IpAddressStrategyHandler;
+use Unleash\Client\Strategy\UserIdStrategyHandler;
+use Unleash\Client\Tests\Traits\FakeCacheImplementationTrait;
+use Unleash\Client\Variant\DefaultVariantHandler;
 
 final class ClientSpecificationTest extends AbstractHttpClientTest
 {

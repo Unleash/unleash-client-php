@@ -1,23 +1,23 @@
 <?php
 
-namespace Rikudou\Unleash\Repository;
+namespace Unleash\Client\Repository;
 
 use JsonException;
 use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
 use Psr\SimpleCache\InvalidArgumentException;
-use Rikudou\Unleash\Configuration\UnleashConfiguration;
-use Rikudou\Unleash\DTO\DefaultConstraint;
-use Rikudou\Unleash\DTO\DefaultFeature;
-use Rikudou\Unleash\DTO\DefaultStrategy;
-use Rikudou\Unleash\DTO\DefaultVariant;
-use Rikudou\Unleash\DTO\DefaultVariantOverride;
-use Rikudou\Unleash\DTO\DefaultVariantPayload;
-use Rikudou\Unleash\DTO\Feature;
-use Rikudou\Unleash\Enum\CacheKey;
-use Rikudou\Unleash\Enum\Stickiness;
-use Rikudou\Unleash\Exception\HttpResponseException;
+use Unleash\Client\Configuration\UnleashConfiguration;
+use Unleash\Client\DTO\DefaultConstraint;
+use Unleash\Client\DTO\DefaultFeature;
+use Unleash\Client\DTO\DefaultStrategy;
+use Unleash\Client\DTO\DefaultVariant;
+use Unleash\Client\DTO\DefaultVariantOverride;
+use Unleash\Client\DTO\DefaultVariantPayload;
+use Unleash\Client\DTO\Feature;
+use Unleash\Client\Enum\CacheKey;
+use Unleash\Client\Enum\Stickiness;
+use Unleash\Client\Exception\HttpResponseException;
 
 final class DefaultUnleashRepository implements UnleashRepository
 {

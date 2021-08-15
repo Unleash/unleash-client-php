@@ -1,24 +1,24 @@
 <?php
 
-namespace Rikudou\Tests\Unleash;
+namespace Unleash\Client\Tests;
 
 use Cache\Adapter\Filesystem\FilesystemCachePool;
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\HttpFactory;
 use PHPUnit\Framework\TestCase;
 use ReflectionObject;
-use Rikudou\Tests\Unleash\Traits\RealCacheImplementationTrait;
-use Rikudou\Unleash\Client\DefaultRegistrationService;
-use Rikudou\Unleash\Configuration\Context;
-use Rikudou\Unleash\Configuration\UnleashConfiguration;
-use Rikudou\Unleash\Configuration\UnleashContext;
-use Rikudou\Unleash\DTO\Strategy;
-use Rikudou\Unleash\Exception\InvalidValueException;
-use Rikudou\Unleash\Strategy\DefaultStrategyHandler;
-use Rikudou\Unleash\Strategy\StrategyHandler;
-use Rikudou\Unleash\UnleashBuilder;
 use Symfony\Component\Cache\Psr16Cache;
 use Symfony\Component\HttpClient\Psr18Client;
+use Unleash\Client\Client\DefaultRegistrationService;
+use Unleash\Client\Configuration\Context;
+use Unleash\Client\Configuration\UnleashConfiguration;
+use Unleash\Client\Configuration\UnleashContext;
+use Unleash\Client\DTO\Strategy;
+use Unleash\Client\Exception\InvalidValueException;
+use Unleash\Client\Strategy\DefaultStrategyHandler;
+use Unleash\Client\Strategy\StrategyHandler;
+use Unleash\Client\Tests\Traits\RealCacheImplementationTrait;
+use Unleash\Client\UnleashBuilder;
 
 final class UnleashBuilderTest extends TestCase
 {

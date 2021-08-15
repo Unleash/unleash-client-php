@@ -1,6 +1,6 @@
 <?php
 
-use Rikudou\Unleash\UnleashBuilder;
+use Unleash\Client\UnleashBuilder;
 
 putenv('UNLEASH_NO_API_KEY=1');
 require __DIR__ . '/_common.php';

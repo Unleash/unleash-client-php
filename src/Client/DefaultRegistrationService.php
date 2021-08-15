@@ -1,17 +1,17 @@
 <?php
 
-namespace Rikudou\Unleash\Client;
+namespace Unleash\Client\Client;
 
 use DateTimeImmutable;
 use JsonException;
 use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
-use Rikudou\Unleash\Configuration\UnleashConfiguration;
-use Rikudou\Unleash\Enum\CacheKey;
-use Rikudou\Unleash\Helper\StringStream;
-use Rikudou\Unleash\Strategy\StrategyHandler;
-use Rikudou\Unleash\Unleash;
+use Unleash\Client\Configuration\UnleashConfiguration;
+use Unleash\Client\Enum\CacheKey;
+use Unleash\Client\Helper\StringStream;
+use Unleash\Client\Strategy\StrategyHandler;
+use Unleash\Client\Unleash;
 
 final class DefaultRegistrationService implements RegistrationService
 {
@@ -44,7 +44,7 @@ final class DefaultRegistrationService implements RegistrationService
             ->withBody(new StringStream(json_encode([
                 'appName' => $this->configuration->getAppName(),
                 'instanceId' => $this->configuration->getInstanceId(),
-                'sdkVersion' => 'rikudou-unleash-sdk:' . Unleash::SDK_VERSION,
+                'sdkVersion' => 'unleash-client-php:' . Unleash::SDK_VERSION,
                 'strategies' => array_map(function (StrategyHandler $strategyHandler): string {
                     return $strategyHandler->getStrategyName();
                 }, $strategyHandlers),

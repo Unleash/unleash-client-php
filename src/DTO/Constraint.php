@@ -1,9 +1,9 @@
 <?php
 
-namespace Rikudou\Unleash\DTO;
+namespace Unleash\Client\DTO;
 
 use JetBrains\PhpStorm\ExpectedValues;
-use Rikudou\Unleash\Enum\ConstraintOperator;
+use Unleash\Client\Enum\ConstraintOperator;
 
 interface Constraint
 {
