@@ -1,11 +1,11 @@
 <?php
 
-namespace Rikudou\Tests\Unleash\Configuration;
+namespace Unleash\Client\Tests\Configuration;
 
 use PHPUnit\Framework\TestCase;
-use Rikudou\Unleash\Configuration\UnleashContext;
-use Rikudou\Unleash\Enum\ContextField;
-use Rikudou\Unleash\Exception\InvalidValueException;
+use Unleash\Client\Configuration\UnleashContext;
+use Unleash\Client\Enum\ContextField;
+use Unleash\Client\Exception\InvalidValueException;
 
 final class UnleashContextTest extends TestCase
 {

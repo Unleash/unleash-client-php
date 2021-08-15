@@ -4,7 +4,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Handler\CurlHandler;
 use GuzzleHttp\HandlerStack;
 use Psr\Http\Message\RequestInterface;
-use Rikudou\Unleash\UnleashBuilder;
+use Unleash\Client\UnleashBuilder;
 use Symfony\Component\HttpClient\Psr18Client;
 
 require __DIR__ . '/_common.php';

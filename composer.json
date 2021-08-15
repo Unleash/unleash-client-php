@@ -1,5 +1,5 @@
 {
-    "name": "rikudou/unleash-sdk",
+    "name": "unleash/unleash-client",
     "type": "library",
     "license": "MIT",
     "authors": [
@@ -23,7 +23,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Rikudou\\Unleash\\": "src/"
+            "Unleash\\Client\\": "src/"
         }
     },
     "require-dev": {
@@ -40,7 +40,7 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Rikudou\\Tests\\Unleash\\": "tests/"
+            "Unleash\\Client\\Tests\\": "tests/"
         }
     },
     "suggest": {

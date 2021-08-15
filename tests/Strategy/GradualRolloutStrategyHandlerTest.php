@@ -1,18 +1,18 @@
 <?php
 
-namespace Rikudou\Tests\Unleash\Strategy;
+namespace Unleash\Client\Tests\Strategy;
 
 use JetBrains\PhpStorm\ExpectedValues;
 use JetBrains\PhpStorm\Pure;
 use PHPUnit\Framework\TestCase;
-use Rikudou\Unleash\Configuration\UnleashContext;
-use Rikudou\Unleash\DTO\DefaultConstraint;
-use Rikudou\Unleash\DTO\DefaultStrategy;
-use Rikudou\Unleash\DTO\Strategy;
-use Rikudou\Unleash\Enum\ConstraintOperator;
-use Rikudou\Unleash\Enum\Stickiness;
-use Rikudou\Unleash\Stickiness\MurmurHashCalculator;
-use Rikudou\Unleash\Strategy\GradualRolloutStrategyHandler;
+use Unleash\Client\Configuration\UnleashContext;
+use Unleash\Client\DTO\DefaultConstraint;
+use Unleash\Client\DTO\DefaultStrategy;
+use Unleash\Client\DTO\Strategy;
+use Unleash\Client\Enum\ConstraintOperator;
+use Unleash\Client\Enum\Stickiness;
+use Unleash\Client\Stickiness\MurmurHashCalculator;
+use Unleash\Client\Strategy\GradualRolloutStrategyHandler;
 
 final class GradualRolloutStrategyHandlerTest extends TestCase
 {

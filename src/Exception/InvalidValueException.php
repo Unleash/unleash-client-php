@@ -1,6 +1,6 @@
 <?php
 
-namespace Rikudou\Unleash\Exception;
+namespace Unleash\Client\Exception;
 
 use InvalidArgumentException;
 

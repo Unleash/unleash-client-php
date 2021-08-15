@@ -1,6 +1,6 @@
 <?php
 
-namespace Rikudou\Tests\Unleash\Traits;
+namespace Unleash\Client\Tests\Traits;
 
 use Cache\Adapter\Filesystem\FilesystemCachePool;
 use League\Flysystem\Adapter\Local;

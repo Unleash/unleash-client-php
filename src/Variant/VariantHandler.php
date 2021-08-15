@@ -1,10 +1,10 @@
 <?php
 
-namespace Rikudou\Unleash\Variant;
+namespace Unleash\Client\Variant;
 
-use Rikudou\Unleash\Configuration\Context;
-use Rikudou\Unleash\DTO\Feature;
-use Rikudou\Unleash\DTO\Variant;
+use Unleash\Client\Configuration\Context;
+use Unleash\Client\DTO\Feature;
+use Unleash\Client\DTO\Variant;
 
 interface VariantHandler
 {

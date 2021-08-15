@@ -1,6 +1,6 @@
 <?php
 
-namespace Rikudou\Unleash\Configuration;
+namespace Unleash\Client\Configuration;
 
 interface Context
 {

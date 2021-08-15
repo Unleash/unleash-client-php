@@ -1,12 +1,12 @@
 <?php
 
-namespace Rikudou\Unleash\Metrics;
+namespace Unleash\Client\Metrics;
 
 use DateTimeImmutable;
-use Rikudou\Unleash\Configuration\UnleashConfiguration;
-use Rikudou\Unleash\DTO\Feature;
-use Rikudou\Unleash\DTO\Variant;
-use Rikudou\Unleash\Enum\CacheKey;
+use Unleash\Client\Configuration\UnleashConfiguration;
+use Unleash\Client\DTO\Feature;
+use Unleash\Client\DTO\Variant;
+use Unleash\Client\Enum\CacheKey;
 
 final class DefaultMetricsHandler implements MetricsHandler
 {

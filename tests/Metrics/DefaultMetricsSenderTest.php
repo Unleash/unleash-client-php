@@ -1,16 +1,16 @@
 <?php
 
-namespace Rikudou\Tests\Unleash\Metrics;
+namespace Unleash\Client\Tests\Metrics;
 
 use DateTimeImmutable;
 use GuzzleHttp\Psr7\HttpFactory;
-use Rikudou\Tests\Unleash\AbstractHttpClientTest;
-use Rikudou\Unleash\Configuration\UnleashConfiguration;
-use Rikudou\Unleash\DTO\DefaultFeature;
-use Rikudou\Unleash\DTO\DefaultVariant;
-use Rikudou\Unleash\Metrics\DefaultMetricsSender;
-use Rikudou\Unleash\Metrics\MetricsBucket;
-use Rikudou\Unleash\Metrics\MetricsBucketToggle;
+use Unleash\Client\Configuration\UnleashConfiguration;
+use Unleash\Client\DTO\DefaultFeature;
+use Unleash\Client\DTO\DefaultVariant;
+use Unleash\Client\Metrics\DefaultMetricsSender;
+use Unleash\Client\Metrics\MetricsBucket;
+use Unleash\Client\Metrics\MetricsBucketToggle;
+use Unleash\Client\Tests\AbstractHttpClientTest;
 
 final class DefaultMetricsSenderTest extends AbstractHttpClientTest
 {

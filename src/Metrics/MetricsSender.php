@@ -1,6 +1,6 @@
 <?php
 
-namespace Rikudou\Unleash\Metrics;
+namespace Unleash\Client\Metrics;
 
 interface MetricsSender
 {

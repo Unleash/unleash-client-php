@@ -1,11 +1,11 @@
 <?php
 
-namespace Rikudou\Unleash\Metrics;
+namespace Unleash\Client\Metrics;
 
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
-use Rikudou\Unleash\Configuration\UnleashConfiguration;
-use Rikudou\Unleash\Helper\StringStream;
+use Unleash\Client\Configuration\UnleashConfiguration;
+use Unleash\Client\Helper\StringStream;
 
 final class DefaultMetricsSender implements MetricsSender
 {

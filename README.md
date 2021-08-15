@@ -1,6 +1,5 @@
-[![Tests](https://github.com/RikudouSage/UnleashSDK/actions/workflows/tests.yaml/badge.svg)](https://github.com/RikudouSage/UnleashSDK/actions/workflows/tests.yaml)
-[![Tests (7.x)](https://github.com/RikudouSage/UnleashSDK/actions/workflows/tests-7.x.yaml/badge.svg)](https://github.com/RikudouSage/UnleashSDK/actions/workflows/tests-7.x.yaml)
-[![Coverage Status](https://img.shields.io/coveralls/github/RikudouSage/UnleashSDK?label=Code%20Coverage)](https://coveralls.io/github/RikudouSage/UnleashSDK?branch=master)
+[![Tests](https://github.com/Unleash/UnleashSDK/actions/workflows/tests.yaml/badge.svg)](https://github.com/Unleash/UnleashSDK/actions/workflows/tests.yaml)
+[![Tests (7.x)](https://github.com/Unleash/UnleashSDK/actions/workflows/tests-7.x.yaml/badge.svg)](https://github.com/Unleash/UnleashSDK/actions/workflows/tests-7.x.yaml)
 
 A PHP implementation of the [Unleash protocol](https://www.getunleash.io/)
 aka [Feature Flags](https://docs.gitlab.com/ee/operations/feature_flags.html) in GitLab.
@@ -15,7 +14,7 @@ This implementation conforms to the official Unleash standards and implements al
 
 ## Installation
 
-`composer require rikudou/unleash-sdk`
+`composer require unleash/unleash-client`
 
 Requires PHP 7.3 or newer.
 
@@ -26,11 +25,11 @@ Requires PHP 7.3 or newer.
 > [Symfony Cache](https://packagist.org/packages/symfony/cache).
 > Example:
 
-`composer require rikudou/unleash-sdk guzzlehttp/guzzle symfony/cache`
+`composer require unleash/unleash-client guzzlehttp/guzzle symfony/cache`
 
 or
 
-`composer require rikudou/unleash-sdk symfony/http-client nyholm/psr7 symfony/cache`
+`composer require unleash/unleash-client symfony/http-client nyholm/psr7 symfony/cache`
 
 ## Usage
 
@@ -39,7 +38,7 @@ The basic usage is getting the `Unleash` object and checking for a feature:
 ```php
 <?php
 
-use Rikudou\Unleash\UnleashBuilder;
+use Unleash\Client\UnleashBuilder;
 
 $unleash = UnleashBuilder::create()
     ->withAppName('Some app name')
@@ -58,8 +57,8 @@ you will get `false` from `isEnabled()`, but you can change the default value to
 ```php
 <?php
 
-use Rikudou\Unleash\UnleashBuilder;
-use Rikudou\Unleash\Configuration\UnleashContext;
+use Unleash\Client\UnleashBuilder;
+use Unleash\Client\Configuration\UnleashContext;
 
 $unleash = UnleashBuilder::create()
     ->withAppName('Some app name')
@@ -100,7 +99,7 @@ The builder object can be created using the `create()` static method or by using
 ```php
 <?php
 
-use Rikudou\Unleash\UnleashBuilder;
+use Unleash\Client\UnleashBuilder;
 
 // both are the same
 $builder = new UnleashBuilder();
@@ -114,7 +113,7 @@ The app name, instance id and app url are required as per the specification.
 ```php
 <?php
 
-use Rikudou\Unleash\UnleashBuilder;
+use Unleash\Client\UnleashBuilder;
 
 $builder = UnleashBuilder::create()
     ->withAppName('Some app name')
@@ -127,7 +126,7 @@ If you're using Unleash v4 you also need to specify authorization key (API key),
 ```php
 <?php
 
-use Rikudou\Unleash\UnleashBuilder;
+use Unleash\Client\UnleashBuilder;
 
 $builder = UnleashBuilder::create()
     ->withAppName('Some app name')
@@ -164,12 +163,12 @@ use League\Flysystem\Adapter\Local;
 use League\Flysystem\Filesystem;
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\HttpFactory;
-use Rikudou\Unleash\Stickiness\MurmurHashCalculator;
-use Rikudou\Unleash\Strategy\DefaultStrategyHandler;
-use Rikudou\Unleash\Strategy\GradualRolloutStrategyHandler;
-use Rikudou\Unleash\Strategy\IpAddressStrategyHandler;
-use Rikudou\Unleash\Strategy\UserIdStrategyHandler;
-use Rikudou\Unleash\UnleashBuilder;
+use Unleash\Client\Stickiness\MurmurHashCalculator;
+use Unleash\Client\Strategy\DefaultStrategyHandler;
+use Unleash\Client\Strategy\GradualRolloutStrategyHandler;
+use Unleash\Client\Strategy\IpAddressStrategyHandler;
+use Unleash\Client\Strategy\UserIdStrategyHandler;
+use Unleash\Client\UnleashBuilder;
 
 $builder = UnleashBuilder::create()
     ->withAppName('Some app name')
@@ -220,7 +219,7 @@ Cache implementations supported out of the box (meaning you don't need to config
 use Cache\Adapter\Filesystem\FilesystemCachePool;
 use League\Flysystem\Adapter\Local;
 use League\Flysystem\Filesystem;
-use Rikudou\Unleash\UnleashBuilder;
+use Unleash\Client\UnleashBuilder;
 
 $builder = UnleashBuilder::create()
     ->withCacheHandler(new FilesystemCachePool( // example with using cache/filesystem-adapter
@@ -256,8 +255,8 @@ proxy and thus `REMOTE_ADDR` would return your proxy server's IP address instead
 ```php
 <?php
 
-use Rikudou\Unleash\UnleashBuilder;
-use Rikudou\Unleash\Configuration\UnleashContext;
+use Unleash\Client\UnleashBuilder;
+use Unleash\Client\Configuration\UnleashContext;
 
 $unleash = UnleashBuilder::create()
     ->withAppName('Some app name')
@@ -284,8 +283,8 @@ context.
 ```php
 <?php
 
-use Rikudou\Unleash\UnleashBuilder;
-use Rikudou\Unleash\Configuration\UnleashContext;
+use Unleash\Client\UnleashBuilder;
+use Unleash\Client\Configuration\UnleashContext;
 
 $unleash = UnleashBuilder::create()
     ->withAppName('Some app name')
@@ -307,13 +306,13 @@ User ID strategy. Session ID can also be provided via context, it defaults to th
 call.
 
 > This strategy requires a stickiness calculator that transforms the id (user, session or random) into a number between
-> 1 and 100. You can provide your own or use the default \Rikudou\Unleash\Stickiness\MurmurHashCalculator
+> 1 and 100. You can provide your own or use the default \Unleash\Client\Stickiness\MurmurHashCalculator
 
 ```php
 <?php
 
-use Rikudou\Unleash\UnleashBuilder;
-use Rikudou\Unleash\Configuration\UnleashContext;
+use Unleash\Client\UnleashBuilder;
+use Unleash\Client\Configuration\UnleashContext;
 
 $unleash = UnleashBuilder::create()
     ->withAppName('Some app name')
@@ -367,10 +366,10 @@ which contains some useful methods). Then you need to instruct the builder to us
 ```php
 <?php
 
-use Rikudou\Unleash\Strategy\AbstractStrategyHandler;
-use Rikudou\Unleash\DTO\Strategy;
-use Rikudou\Unleash\Configuration\Context;
-use Rikudou\Unleash\Strategy\DefaultStrategyHandler;
+use Unleash\Client\Strategy\AbstractStrategyHandler;
+use Unleash\Client\DTO\Strategy;
+use Unleash\Client\Configuration\Context;
+use Unleash\Client\Strategy\DefaultStrategyHandler;
 
 class AprilFoolsStrategy extends AbstractStrategyHandler
 {
@@ -400,8 +399,8 @@ Now you must instruct the builder to use your new strategy
 ```php
 <?php
 
-use Rikudou\Unleash\UnleashBuilder;
-use Rikudou\Unleash\Strategy\IpAddressStrategyHandler;
+use Unleash\Client\UnleashBuilder;
+use Unleash\Client\Strategy\IpAddressStrategyHandler;
 
 $unleash = UnleashBuilder::create()
     ->withAppName('Some app name')
@@ -432,11 +431,11 @@ Variant may or may not contain a payload.
 ```php
 <?php
 
-use Rikudou\Unleash\DTO\DefaultVariant;
-use Rikudou\Unleash\UnleashBuilder;
-use Rikudou\Unleash\Configuration\UnleashContext;
-use Rikudou\Unleash\Enum\VariantPayloadType;
-use Rikudou\Unleash\DTO\DefaultVariantPayload;
+use Unleash\Client\DTO\DefaultVariant;
+use Unleash\Client\UnleashBuilder;
+use Unleash\Client\Configuration\UnleashContext;
+use Unleash\Client\Enum\VariantPayloadType;
+use Unleash\Client\DTO\DefaultVariantPayload;
 
 $unleash = UnleashBuilder::create()
     ->withAppName('Some app name')
@@ -481,7 +480,7 @@ this, use `withAutomaticRegistrationEnabled(false)` in the builder.
 ```php
 <?php
 
-use Rikudou\Unleash\UnleashBuilder;
+use Unleash\Client\UnleashBuilder;
 
 $unleash = UnleashBuilder::create()
     ->withAppName('Some App Name')
@@ -523,7 +522,7 @@ the code.
 ```php
 <?php
 
-use Rikudou\Unleash\UnleashBuilder;
+use Unleash\Client\UnleashBuilder;
 
 $unleash = UnleashBuilder::create()
     ->withAppName('Some App Name')
@@ -558,7 +557,7 @@ Constraints are supported by this SDK and will be handled correctly by `Unleash:
 ```php
 <?php
 
-use Rikudou\Unleash\UnleashBuilder;
+use Unleash\Client\UnleashBuilder;
 
 $gitlabUnleash = UnleashBuilder::createForGitlab()
     ->withInstanceId('H9sU9yVHVAiWFiLsH2Mo') // generated in GitLab

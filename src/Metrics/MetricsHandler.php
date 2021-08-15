@@ -1,9 +1,9 @@
 <?php
 
-namespace Rikudou\Unleash\Metrics;
+namespace Unleash\Client\Metrics;
 
-use Rikudou\Unleash\DTO\Feature;
-use Rikudou\Unleash\DTO\Variant;
+use Unleash\Client\DTO\Feature;
+use Unleash\Client\DTO\Variant;
 
 interface MetricsHandler
 {

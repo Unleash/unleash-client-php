@@ -1,10 +1,10 @@
 <?php
 
-namespace Rikudou\Unleash\DTO;
+namespace Unleash\Client\DTO;
 
 use JetBrains\PhpStorm\ArrayShape;
 use JetBrains\PhpStorm\ExpectedValues;
-use Rikudou\Unleash\Enum\Stickiness;
+use Unleash\Client\Enum\Stickiness;
 
 final class DefaultVariant implements Variant
 {

@@ -1,6 +1,6 @@
 <?php
 
-namespace Rikudou\Unleash\Configuration;
+namespace Unleash\Client\Configuration;
 
 use JetBrains\PhpStorm\Pure;
 use LogicException;

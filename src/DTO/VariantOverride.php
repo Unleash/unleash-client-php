@@ -1,6 +1,6 @@
 <?php
 
-namespace Rikudou\Unleash\DTO;
+namespace Unleash\Client\DTO;
 
 interface VariantOverride
 {

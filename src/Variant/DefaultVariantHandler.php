@@ -1,14 +1,14 @@
 <?php
 
-namespace Rikudou\Unleash\Variant;
+namespace Unleash\Client\Variant;
 
 use JetBrains\PhpStorm\Pure;
-use Rikudou\Unleash\Configuration\Context;
-use Rikudou\Unleash\DTO\DefaultVariant;
-use Rikudou\Unleash\DTO\Feature;
-use Rikudou\Unleash\DTO\Variant;
-use Rikudou\Unleash\Enum\Stickiness;
-use Rikudou\Unleash\Stickiness\StickinessCalculator;
+use Unleash\Client\Configuration\Context;
+use Unleash\Client\DTO\DefaultVariant;
+use Unleash\Client\DTO\Feature;
+use Unleash\Client\DTO\Variant;
+use Unleash\Client\Enum\Stickiness;
+use Unleash\Client\Stickiness\StickinessCalculator;
 
 final class DefaultVariantHandler implements VariantHandler
 {

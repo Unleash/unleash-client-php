@@ -1,13 +1,13 @@
 <?php
 
-namespace Rikudou\Tests\Unleash\Strategy;
+namespace Unleash\Client\Tests\Strategy;
 
 use PHPUnit\Framework\TestCase;
-use Rikudou\Unleash\Configuration\UnleashContext;
-use Rikudou\Unleash\DTO\DefaultConstraint;
-use Rikudou\Unleash\DTO\DefaultStrategy;
-use Rikudou\Unleash\Enum\ConstraintOperator;
-use Rikudou\Unleash\Strategy\DefaultStrategyHandler;
+use Unleash\Client\Configuration\UnleashContext;
+use Unleash\Client\DTO\DefaultConstraint;
+use Unleash\Client\DTO\DefaultStrategy;
+use Unleash\Client\Enum\ConstraintOperator;
+use Unleash\Client\Strategy\DefaultStrategyHandler;
 
 final class DefaultStrategyHandlerTest extends TestCase
 {

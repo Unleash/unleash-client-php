@@ -1,10 +1,10 @@
 <?php
 
-namespace Rikudou\Unleash\Strategy;
+namespace Unleash\Client\Strategy;
 
-use Rikudou\Unleash\Configuration\Context;
-use Rikudou\Unleash\DTO\Strategy;
-use Rikudou\Unleash\Enum\ConstraintOperator;
+use Unleash\Client\Configuration\Context;
+use Unleash\Client\DTO\Strategy;
+use Unleash\Client\Enum\ConstraintOperator;
 
 abstract class AbstractStrategyHandler implements StrategyHandler
 {

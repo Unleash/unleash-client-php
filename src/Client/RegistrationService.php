@@ -1,8 +1,8 @@
 <?php
 
-namespace Rikudou\Unleash\Client;
+namespace Unleash\Client\Client;
 
-use Rikudou\Unleash\Strategy\StrategyHandler;
+use Unleash\Client\Strategy\StrategyHandler;
 
 interface RegistrationService
 {

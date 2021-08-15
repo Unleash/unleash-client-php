@@ -1,18 +1,18 @@
 <?php
 
-namespace Rikudou\Tests\Unleash\Repository;
+namespace Unleash\Client\Tests\Repository;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\HttpFactory;
 use GuzzleHttp\Psr7\Request;
-use Rikudou\Tests\Unleash\AbstractHttpClientTest;
-use Rikudou\Tests\Unleash\Traits\FakeCacheImplementationTrait;
-use Rikudou\Tests\Unleash\Traits\RealCacheImplementationTrait;
-use Rikudou\Unleash\Configuration\UnleashConfiguration;
-use Rikudou\Unleash\DTO\Feature;
-use Rikudou\Unleash\Exception\HttpResponseException;
-use Rikudou\Unleash\Repository\DefaultUnleashRepository;
+use Unleash\Client\Configuration\UnleashConfiguration;
+use Unleash\Client\DTO\Feature;
+use Unleash\Client\Exception\HttpResponseException;
+use Unleash\Client\Repository\DefaultUnleashRepository;
+use Unleash\Client\Tests\AbstractHttpClientTest;
+use Unleash\Client\Tests\Traits\FakeCacheImplementationTrait;
+use Unleash\Client\Tests\Traits\RealCacheImplementationTrait;
 
 final class DefaultUnleashRepositoryTest extends AbstractHttpClientTest
 {

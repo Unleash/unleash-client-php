@@ -1,12 +1,12 @@
 <?php
 
-namespace Rikudou\Unleash\Strategy;
+namespace Unleash\Client\Strategy;
 
 use JetBrains\PhpStorm\Deprecated;
-use Rikudou\Unleash\Configuration\Context;
-use Rikudou\Unleash\DTO\DefaultStrategy;
-use Rikudou\Unleash\DTO\Strategy;
-use Rikudou\Unleash\Enum\Stickiness;
+use Unleash\Client\Configuration\Context;
+use Unleash\Client\DTO\DefaultStrategy;
+use Unleash\Client\DTO\Strategy;
+use Unleash\Client\Enum\Stickiness;
 
 #[Deprecated(reason: 'The strategy has been deprecated, please use Gradual Rollout (flexibleRollout)')]
 final class GradualRolloutSessionIdStrategyHandler extends AbstractStrategyHandler

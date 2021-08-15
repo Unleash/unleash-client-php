@@ -1,31 +1,31 @@
 <?php
 
-namespace Rikudou\Unleash;
+namespace Unleash\Client;
 
 use JetBrains\PhpStorm\Immutable;
 use JetBrains\PhpStorm\Pure;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
 use Psr\SimpleCache\CacheInterface;
-use Rikudou\Unleash\Client\DefaultRegistrationService;
-use Rikudou\Unleash\Client\RegistrationService;
-use Rikudou\Unleash\Configuration\Context;
-use Rikudou\Unleash\Configuration\UnleashConfiguration;
-use Rikudou\Unleash\Exception\InvalidValueException;
-use Rikudou\Unleash\Helper\DefaultImplementationLocator;
-use Rikudou\Unleash\Metrics\DefaultMetricsHandler;
-use Rikudou\Unleash\Metrics\DefaultMetricsSender;
-use Rikudou\Unleash\Repository\DefaultUnleashRepository;
-use Rikudou\Unleash\Stickiness\MurmurHashCalculator;
-use Rikudou\Unleash\Strategy\DefaultStrategyHandler;
-use Rikudou\Unleash\Strategy\GradualRolloutRandomStrategyHandler;
-use Rikudou\Unleash\Strategy\GradualRolloutSessionIdStrategyHandler;
-use Rikudou\Unleash\Strategy\GradualRolloutStrategyHandler;
-use Rikudou\Unleash\Strategy\GradualRolloutUserIdStrategyHandler;
-use Rikudou\Unleash\Strategy\IpAddressStrategyHandler;
-use Rikudou\Unleash\Strategy\StrategyHandler;
-use Rikudou\Unleash\Strategy\UserIdStrategyHandler;
-use Rikudou\Unleash\Variant\DefaultVariantHandler;
+use Unleash\Client\Client\DefaultRegistrationService;
+use Unleash\Client\Client\RegistrationService;
+use Unleash\Client\Configuration\Context;
+use Unleash\Client\Configuration\UnleashConfiguration;
+use Unleash\Client\Exception\InvalidValueException;
+use Unleash\Client\Helper\DefaultImplementationLocator;
+use Unleash\Client\Metrics\DefaultMetricsHandler;
+use Unleash\Client\Metrics\DefaultMetricsSender;
+use Unleash\Client\Repository\DefaultUnleashRepository;
+use Unleash\Client\Stickiness\MurmurHashCalculator;
+use Unleash\Client\Strategy\DefaultStrategyHandler;
+use Unleash\Client\Strategy\GradualRolloutRandomStrategyHandler;
+use Unleash\Client\Strategy\GradualRolloutSessionIdStrategyHandler;
+use Unleash\Client\Strategy\GradualRolloutStrategyHandler;
+use Unleash\Client\Strategy\GradualRolloutUserIdStrategyHandler;
+use Unleash\Client\Strategy\IpAddressStrategyHandler;
+use Unleash\Client\Strategy\StrategyHandler;
+use Unleash\Client\Strategy\UserIdStrategyHandler;
+use Unleash\Client\Variant\DefaultVariantHandler;
 
 #[Immutable]
 final class UnleashBuilder

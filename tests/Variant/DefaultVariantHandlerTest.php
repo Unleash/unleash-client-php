@@ -1,14 +1,14 @@
 <?php
 
-namespace Rikudou\Tests\Unleash\Variant;
+namespace Unleash\Client\Tests\Variant;
 
 use PHPUnit\Framework\TestCase;
-use Rikudou\Unleash\Configuration\UnleashContext;
-use Rikudou\Unleash\DTO\DefaultFeature;
-use Rikudou\Unleash\DTO\DefaultVariant;
-use Rikudou\Unleash\Enum\Stickiness;
-use Rikudou\Unleash\Stickiness\MurmurHashCalculator;
-use Rikudou\Unleash\Variant\DefaultVariantHandler;
+use Unleash\Client\Configuration\UnleashContext;
+use Unleash\Client\DTO\DefaultFeature;
+use Unleash\Client\DTO\DefaultVariant;
+use Unleash\Client\Enum\Stickiness;
+use Unleash\Client\Stickiness\MurmurHashCalculator;
+use Unleash\Client\Variant\DefaultVariantHandler;
 
 final class DefaultVariantHandlerTest extends TestCase
 {

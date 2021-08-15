@@ -1,16 +1,16 @@
 <?php
 
-namespace Rikudou\Tests\Unleash\Metrics;
+namespace Unleash\Client\Tests\Metrics;
 
 use GuzzleHttp\Psr7\HttpFactory;
 use Psr\Http\Message\RequestInterface;
-use Rikudou\Tests\Unleash\AbstractHttpClientTest;
-use Rikudou\Tests\Unleash\Traits\FakeCacheImplementationTrait;
-use Rikudou\Tests\Unleash\Traits\RealCacheImplementationTrait;
-use Rikudou\Unleash\Configuration\UnleashConfiguration;
-use Rikudou\Unleash\DTO\DefaultFeature;
-use Rikudou\Unleash\Metrics\DefaultMetricsHandler;
-use Rikudou\Unleash\Metrics\DefaultMetricsSender;
+use Unleash\Client\Configuration\UnleashConfiguration;
+use Unleash\Client\DTO\DefaultFeature;
+use Unleash\Client\Metrics\DefaultMetricsHandler;
+use Unleash\Client\Metrics\DefaultMetricsSender;
+use Unleash\Client\Tests\AbstractHttpClientTest;
+use Unleash\Client\Tests\Traits\FakeCacheImplementationTrait;
+use Unleash\Client\Tests\Traits\RealCacheImplementationTrait;
 
 final class DefaultMetricsHandlerTest extends AbstractHttpClientTest
 {

@@ -1,6 +1,6 @@
 <?php
 
-namespace Rikudou\Unleash\Stickiness;
+namespace Unleash\Client\Stickiness;
 
 use lastguest\Murmur;
 

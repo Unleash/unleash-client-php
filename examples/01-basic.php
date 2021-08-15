@@ -1,6 +1,6 @@
 <?php
 
-use Rikudou\Unleash\UnleashBuilder;
+use Unleash\Client\UnleashBuilder;
 
 require __DIR__ . '/_common.php';
 

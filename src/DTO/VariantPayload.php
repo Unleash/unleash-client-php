@@ -1,11 +1,11 @@
 <?php
 
-namespace Rikudou\Unleash\DTO;
+namespace Unleash\Client\DTO;
 
 use JetBrains\PhpStorm\ExpectedValues;
 use JsonSerializable;
 use LogicException;
-use Rikudou\Unleash\Enum\VariantPayloadType;
+use Unleash\Client\Enum\VariantPayloadType;
 
 interface VariantPayload extends JsonSerializable
 {
