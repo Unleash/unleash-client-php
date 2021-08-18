@@ -12,17 +12,32 @@ interface Context
 
     public function getCustomProperty(string $name): string;
 
-    public function setCustomProperty(string $name, string $value): self;
+    /**
+     * @return $this
+     */
+    public function setCustomProperty(string $name, string $value);
 
     public function hasCustomProperty(string $name): bool;
 
-    public function removeCustomProperty(string $name, bool $silent = true): self;
+    /**
+     * @return $this
+     */
+    public function removeCustomProperty(string $name, bool $silent = true);
 
-    public function setCurrentUserId(?string $currentUserId): self;
+    /**
+     * @return $this
+     */
+    public function setCurrentUserId(?string $currentUserId);
 
-    public function setIpAddress(?string $ipAddress): self;
+    /**
+     * @return $this
+     */
+    public function setIpAddress(?string $ipAddress);
 
-    public function setSessionId(?string $sessionId): self;
+    /**
+     * @return $this
+     */
+    public function setSessionId(?string $sessionId);
 
     /**
      * @param array<string> $values
