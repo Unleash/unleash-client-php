@@ -47,9 +47,7 @@ final class DefaultUnleash implements Unleash
 
         $strategies = $feature->getStrategies();
         if (!is_countable($strategies)) {
-            // @codeCoverageIgnoreStart
             $strategies = iterator_to_array($strategies);
-            // @codeCoverageIgnoreEnd
         }
         if (!count($strategies)) {
             $this->metricsHandler->handleMetrics($feature, true);

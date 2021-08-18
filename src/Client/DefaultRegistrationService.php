@@ -34,9 +34,7 @@ final class DefaultRegistrationService implements RegistrationService
             return true;
         }
         if (!is_array($strategyHandlers)) {
-            // @codeCoverageIgnoreStart
             $strategyHandlers = iterator_to_array($strategyHandlers);
-            // @codeCoverageIgnoreEnd
         }
         $request = $this->requestFactory
             ->createRequest('POST', $this->configuration->getUrl() . 'client/register')
