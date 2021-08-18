@@ -2,12 +2,17 @@
 
 namespace Unleash\Client\Tests;
 
+use ArrayIterator;
+use LimitIterator;
 use Unleash\Client\Configuration\UnleashConfiguration;
 use Unleash\Client\Configuration\UnleashContext;
 use Unleash\Client\DefaultUnleash;
+use Unleash\Client\DTO\DefaultFeature;
+use Unleash\Client\DTO\DefaultStrategy;
 use Unleash\Client\DTO\Feature;
 use Unleash\Client\DTO\Variant;
 use Unleash\Client\Metrics\MetricsHandler;
+use Unleash\Client\Repository\UnleashRepository;
 use Unleash\Client\Stickiness\MurmurHashCalculator;
 use Unleash\Client\Strategy\DefaultStrategyHandler;
 use Unleash\Client\Strategy\GradualRolloutStrategyHandler;
@@ -450,6 +455,44 @@ final class DefaultUnleashTest extends AbstractHttpClientTest
             new DefaultVariantHandler(new MurmurHashCalculator())
         );
         self::assertCount(3, $this->requestHistory);
+    }
+
+    public function testIterators()
+    {
+        $repository = new class implements UnleashRepository {
+            private $cache = [];
+
+            public function findFeature(string $featureName): ?Feature
+            {
+                if (!isset($this->cache[$featureName])) {
+                    $this->cache[$featureName] = new DefaultFeature(
+                        $featureName,
+                        true,
+                        new LimitIterator(new ArrayIterator([new DefaultStrategy('default')])),
+                    );
+                }
+
+                return $this->cache[$featureName];
+            }
+
+            public function getFeatures(): iterable
+            {
+                return [];
+            }
+        };
+
+        $instance = new DefaultUnleash(
+            new ArrayIterator([new DefaultStrategyHandler()]),
+            $repository,
+            $this->registrationService,
+            (new UnleashConfiguration('', '', ''))
+                ->setAutoRegistrationEnabled(false)
+                ->setCache($this->getCache()),
+            $this->metricsHandler,
+            new DefaultVariantHandler(new MurmurHashCalculator())
+        );
+        self::assertTrue($instance->isEnabled('someFeature'));
+        self::assertTrue($instance->isEnabled('someFeature'));
     }
 
     private function getInstance(StrategyHandler ...$handlers): DefaultUnleash
