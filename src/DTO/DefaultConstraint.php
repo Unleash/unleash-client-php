@@ -7,16 +7,18 @@ use Unleash\Client\Enum\ConstraintOperator;
 
 final class DefaultConstraint implements Constraint
 {
+    private string $contextName;
+    private string $operator;
+    private array $values;
     /**
      * @param array<string> $values
      */
-    public function __construct(
-        private string $contextName,
-        private string $operator,
-        private array $values,
-    ) {
+    public function __construct(string $contextName, string $operator, array $values)
+    {
+        $this->contextName = $contextName;
+        $this->operator = $operator;
+        $this->values = $values;
     }
-
     public function getContextName(): string
     {
         return $this->contextName;

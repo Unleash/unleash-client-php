@@ -83,70 +83,103 @@ final class UnleashBuilder
         ];
     }
 
+    /**
+     * @return $this
+     */
     #[Pure]
-    public static function create(): self
+    public static function create()
     {
         return new self();
     }
 
+    /**
+     * @return $this
+     */
     #[Pure]
-    public static function createForGitlab(): self
+    public static function createForGitlab()
     {
         return self::create()
             ->withMetricsEnabled(false)
             ->withAutomaticRegistrationEnabled(false);
     }
 
+    /**
+     * @return $this
+     */
     #[Pure]
-    public function withAppUrl(string $appUrl): self
+    public function withAppUrl(string $appUrl)
     {
         return $this->with('appUrl', $appUrl);
     }
 
+    /**
+     * @return $this
+     */
     #[Pure]
-    public function withInstanceId(string $instanceId): self
+    public function withInstanceId(string $instanceId)
     {
         return $this->with('instanceId', $instanceId);
     }
 
+    /**
+     * @return $this
+     */
     #[Pure]
-    public function withAppName(string $appName): self
+    public function withAppName(string $appName)
     {
         return $this->with('appName', $appName);
     }
 
+    /**
+     * @return $this
+     */
     #[Pure]
-    public function withGitlabEnvironment(string $environment): self
+    public function withGitlabEnvironment(string $environment)
     {
         return $this->withAppName($environment);
     }
 
+    /**
+     * @return $this
+     */
     #[Pure]
-    public function withHttpClient(ClientInterface $client): self
+    public function withHttpClient(ClientInterface $client)
     {
         return $this->with('httpClient', $client);
     }
 
+    /**
+     * @return $this
+     */
     #[Pure]
-    public function withRequestFactory(RequestFactoryInterface $requestFactory): self
+    public function withRequestFactory(RequestFactoryInterface $requestFactory)
     {
         return $this->with('requestFactory', $requestFactory);
     }
 
+    /**
+     * @return $this
+     */
     #[Pure]
-    public function withStrategies(StrategyHandler ...$strategies): self
+    public function withStrategies(StrategyHandler ...$strategies)
     {
         return $this->with('strategies', $strategies);
     }
 
+    /**
+     * @return $this
+     */
     #[Pure]
-    public function withStrategy(StrategyHandler $strategy): self
+    public function withStrategy(StrategyHandler $strategy)
     {
         return $this->withStrategies(...array_merge($this->strategies, [$strategy]));
     }
 
+    /**
+     * @return $this
+     */
     #[Pure]
-    public function withCacheHandler(?CacheInterface $cache, ?int $timeToLive = null): self
+    public function withCacheHandler(?CacheInterface $cache, ?int $timeToLive = null)
     {
         $result = $this->with('cache', $cache);
         if ($timeToLive !== null) {
@@ -156,53 +189,75 @@ final class UnleashBuilder
         return $result;
     }
 
+    /**
+     * @return $this
+     */
     #[Pure]
-    public function withCacheTimeToLive(int $timeToLive): self
+    public function withCacheTimeToLive(int $timeToLive)
     {
         return $this->with('cacheTtl', $timeToLive);
     }
 
+    /**
+     * @return $this
+     */
     #[Pure]
-    public function withHeader(string $header, string $value): self
+    public function withHeader(string $header, string $value)
     {
         return $this->with('headers', array_merge($this->headers, [$header => $value]));
     }
 
     /**
      * @param array<string, string> $headers
+     * @return $this
      */
     #[Pure]
-    public function withHeaders(array $headers): self
+    public function withHeaders(array $headers)
     {
         return $this->with('headers', $headers);
     }
 
+    /**
+     * @return $this
+     */
     #[Pure]
-    public function withRegistrationService(RegistrationService $registrationService): self
+    public function withRegistrationService(RegistrationService $registrationService)
     {
         return $this->with('registrationService', $registrationService);
     }
 
+    /**
+     * @return $this
+     */
     #[Pure]
-    public function withAutomaticRegistrationEnabled(bool $enabled): self
+    public function withAutomaticRegistrationEnabled(bool $enabled)
     {
         return $this->with('autoregister', $enabled);
     }
 
+    /**
+     * @return $this
+     */
     #[Pure]
-    public function withMetricsEnabled(bool $enabled): self
+    public function withMetricsEnabled(bool $enabled)
     {
         return $this->with('metricsEnabled', $enabled);
     }
 
+    /**
+     * @return $this
+     */
     #[Pure]
-    public function withMetricsInterval(int $milliseconds): self
+    public function withMetricsInterval(int $milliseconds)
     {
         return $this->with('metricsInterval', $milliseconds);
     }
 
+    /**
+     * @return $this
+     */
     #[Pure]
-    public function withDefaultContext(?Context $context): self
+    public function withDefaultContext(?Context $context)
     {
         return $this->with('defaultContext', $context);
     }
@@ -283,24 +338,17 @@ final class UnleashBuilder
             $registrationService = new DefaultRegistrationService($httpClient, $requestFactory, $configuration);
         }
 
-        return new DefaultUnleash(
-            $this->strategies,
-            $repository,
-            $registrationService,
-            $configuration,
-            new DefaultMetricsHandler(
-                new DefaultMetricsSender(
-                    $httpClient,
-                    $requestFactory,
-                    $configuration,
-                ),
-                $configuration
-            ),
-            new DefaultVariantHandler($hashCalculator),
-        );
+        return new DefaultUnleash($this->strategies, $repository, $registrationService, $configuration, new DefaultMetricsHandler(
+            new DefaultMetricsSender($httpClient, $requestFactory, $configuration),
+            $configuration
+        ), new DefaultVariantHandler($hashCalculator));
     }
 
-    private function with(string $property, mixed $value): self
+    /**
+     * @param mixed $value
+     * @return $this
+     */
+    private function with(string $property, $value)
     {
         $copy = clone $this;
         $copy->{$property} = $value;

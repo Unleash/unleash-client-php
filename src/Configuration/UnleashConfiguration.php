@@ -8,23 +8,32 @@ use Psr\SimpleCache\CacheInterface;
 
 final class UnleashConfiguration
 {
+    private string $url;
+    private string $appName;
+    private string $instanceId;
+    private ?CacheInterface $cache = null;
+    private int $ttl = 30;
+    private int $metricsInterval = 30_000;
+    private bool $metricsEnabled = true;
+    private array $headers = [];
+    private bool $autoRegistrationEnabled = true;
+    private ?Context $defaultContext = null;
     /**
      * @param array<string,string> $headers
      */
-    public function __construct(
-        private string $url,
-        private string $appName,
-        private string $instanceId,
-        private ?CacheInterface $cache = null,
-        private int $ttl = 30,
-        private int $metricsInterval = 30_000,
-        private bool $metricsEnabled = true,
-        private array $headers = [],
-        private bool $autoRegistrationEnabled = true,
-        private ?Context $defaultContext = null,
-    ) {
+    public function __construct(string $url, string $appName, string $instanceId, ?CacheInterface $cache = null, int $ttl = 30, int $metricsInterval = 30_000, bool $metricsEnabled = true, array $headers = [], bool $autoRegistrationEnabled = true, ?Context $defaultContext = null)
+    {
+        $this->url = $url;
+        $this->appName = $appName;
+        $this->instanceId = $instanceId;
+        $this->cache = $cache;
+        $this->ttl = $ttl;
+        $this->metricsInterval = $metricsInterval;
+        $this->metricsEnabled = $metricsEnabled;
+        $this->headers = $headers;
+        $this->autoRegistrationEnabled = $autoRegistrationEnabled;
+        $this->defaultContext = $defaultContext;
     }
-
     public function getCache(): CacheInterface
     {
         if ($this->cache === null) {
@@ -37,7 +46,7 @@ final class UnleashConfiguration
     public function getUrl(): string
     {
         $url = $this->url;
-        if (!str_ends_with($url, '/')) {
+        if (substr_compare($url, '/', -strlen('/')) !== 0) {
             $url .= '/';
         }
 
@@ -59,14 +68,20 @@ final class UnleashConfiguration
         return $this->ttl;
     }
 
-    public function setCache(CacheInterface $cache): self
+    /**
+     * @return $this
+     */
+    public function setCache(CacheInterface $cache)
     {
         $this->cache = $cache;
 
         return $this;
     }
 
-    public function setTtl(int $ttl): self
+    /**
+     * @return $this
+     */
+    public function setTtl(int $ttl)
     {
         $this->ttl = $ttl;
 
@@ -83,7 +98,10 @@ final class UnleashConfiguration
         return $this->metricsEnabled;
     }
 
-    public function setUrl(string $url): self
+    /**
+     * @return $this
+     */
+    public function setUrl(string $url)
     {
         $this->url = $url;
 
@@ -92,8 +110,9 @@ final class UnleashConfiguration
 
     /**
      * @codeCoverageIgnore
+     * @return $this
      */
-    public function setAppName(string $appName): self
+    public function setAppName(string $appName)
     {
         $this->appName = $appName;
 
@@ -102,22 +121,29 @@ final class UnleashConfiguration
 
     /**
      * @codeCoverageIgnore
+     * @return $this
      */
-    public function setInstanceId(string $instanceId): self
+    public function setInstanceId(string $instanceId)
     {
         $this->instanceId = $instanceId;
 
         return $this;
     }
 
-    public function setMetricsInterval(int $metricsInterval): self
+    /**
+     * @return $this
+     */
+    public function setMetricsInterval(int $metricsInterval)
     {
         $this->metricsInterval = $metricsInterval;
 
         return $this;
     }
 
-    public function setMetricsEnabled(bool $metricsEnabled): self
+    /**
+     * @return $this
+     */
+    public function setMetricsEnabled(bool $metricsEnabled)
     {
         $this->metricsEnabled = $metricsEnabled;
 
@@ -134,8 +160,9 @@ final class UnleashConfiguration
 
     /**
      * @param array<string,string> $headers
+     * @return $this
      */
-    public function setHeaders(array $headers): self
+    public function setHeaders(array $headers)
     {
         $this->headers = $headers;
 
@@ -147,7 +174,10 @@ final class UnleashConfiguration
         return $this->autoRegistrationEnabled;
     }
 
-    public function setAutoRegistrationEnabled(bool $autoRegistrationEnabled): self
+    /**
+     * @return $this
+     */
+    public function setAutoRegistrationEnabled(bool $autoRegistrationEnabled)
     {
         $this->autoRegistrationEnabled = $autoRegistrationEnabled;
 
@@ -160,7 +190,10 @@ final class UnleashConfiguration
         return $this->defaultContext ?? new UnleashContext();
     }
 
-    public function setDefaultContext(?Context $defaultContext): self
+    /**
+     * @return $this
+     */
+    public function setDefaultContext(?Context $defaultContext)
     {
         $this->defaultContext = $defaultContext;
 
