@@ -2,6 +2,7 @@
 
 namespace Unleash\Client\Tests\Client;
 
+use ArrayIterator;
 use GuzzleHttp\Psr7\HttpFactory;
 use Unleash\Client\Client\DefaultRegistrationService;
 use Unleash\Client\Configuration\UnleashConfiguration;
@@ -27,10 +28,13 @@ final class DefaultRegistrationServiceTest extends AbstractHttpClientTest
             $configuration
         );
 
-        $this->pushResponse([], 1, 202);
+        $this->pushResponse([], 2, 202);
         self::assertTrue($instance->register([
             new DefaultStrategyHandler(),
         ]));
+        self::assertTrue($instance->register(new ArrayIterator([
+            new DefaultStrategyHandler(),
+        ])));
 
         $this->pushResponse([
             'type' => 'password',
