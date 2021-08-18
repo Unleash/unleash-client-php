@@ -15,7 +15,7 @@ This implementation conforms to the official Unleash standards and implements al
 
 ## Installation
 
-`composer require unleash/unleash-client`
+`composer require unleash/client`
 
 Requires PHP 7.3 or newer.
 
@@ -26,11 +26,11 @@ Requires PHP 7.3 or newer.
 > [Symfony Cache](https://packagist.org/packages/symfony/cache).
 > Example:
 
-`composer require unleash/unleash-client guzzlehttp/guzzle symfony/cache`
+`composer require unleash/client guzzlehttp/guzzle symfony/cache`
 
 or
 
-`composer require unleash/unleash-client symfony/http-client nyholm/psr7 symfony/cache`
+`composer require unleash/client symfony/http-client nyholm/psr7 symfony/cache`
 
 ## Usage
 
