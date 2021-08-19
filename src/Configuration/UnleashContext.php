@@ -16,7 +16,9 @@ final class UnleashContext implements Context
         private ?string $ipAddress = null,
         private ?string $sessionId = null,
         private array $customContext = [],
+        ?string $hostname = null,
     ) {
+        $this->setHostname($hostname);
     }
 
     public function getCurrentUserId(): ?string
@@ -83,6 +85,22 @@ final class UnleashContext implements Context
     public function setSessionId(?string $sessionId): self
     {
         $this->sessionId = $sessionId;
+
+        return $this;
+    }
+
+    public function getHostname(): ?string
+    {
+        return $this->findContextValue('hostname') ?? (gethostname() ?: null);
+    }
+
+    public function setHostname(?string $hostname): self
+    {
+        if ($hostname === null) {
+            $this->removeCustomProperty('hostname');
+        } else {
+            $this->setCustomProperty('hostname', $hostname);
+        }
 
         return $this;
     }

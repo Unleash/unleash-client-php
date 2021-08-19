@@ -12,6 +12,7 @@ final class DefaultConstraint implements Constraint
      */
     public function __construct(
         private string $contextName,
+        #[ExpectedValues(valuesFromClass: ConstraintOperator::class)]
         private string $operator,
         private array $values,
     ) {

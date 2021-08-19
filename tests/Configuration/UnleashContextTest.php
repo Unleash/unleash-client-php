@@ -85,4 +85,23 @@ final class UnleashContextTest extends TestCase
         self::assertFalse($context->hasMatchingFieldValue(ContextField::USER_ID, []));
         self::assertFalse($context->hasMatchingFieldValue('nonexistent', ['someValue']));
     }
+
+    public function testHostname()
+    {
+        // for most standard systems, the hostname should not be null
+        $context = new UnleashContext();
+        self::assertNotNull($context->getHostname());
+
+        $context = new UnleashContext(null, null, null, [], 'myCustomHostname');
+        self::assertEquals('myCustomHostname', $context->getHostname());
+
+        $context = new UnleashContext();
+        $context->setHostname('customHostname');
+        self::assertEquals('customHostname', $context->getHostname());
+        self::assertTrue($context->hasCustomProperty('hostname'));
+        self::assertEquals('customHostname', $context->findContextValue('hostname'));
+
+        $context->setHostname(null);
+        self::assertFalse($context->hasCustomProperty('hostname'));
+    }
 }
