@@ -239,7 +239,7 @@ $builder = $builder
 ## Strategies
 
 Unleash servers can use multiple strategies for enabling or disabling features. Which strategy gets used is defined
-on the server. This implementation supports all non-deprecated v4 strategies except hostnames. 
+on the server. This implementation supports all non-deprecated v4 strategies. 
 [More here](https://docs.getunleash.io/user_guide/activation_strategy).
 
 ### Default strategy
@@ -354,6 +354,33 @@ $unleash->isEnabled('some-feature'); // works because the session is started
 
 // lastly you can force the feature to use the random type which always works
 $unleash->isEnabled('some-feature');
+```
+
+### Hostname strategy
+
+This strategy allows you to match against a list of server hostnames (which are not the same as http hostnames).
+
+If you don't specify a hostname in context, it defaults to the current hostname using 
+[`gethostname()`](https://www.php.net/gethostname).
+
+```php
+<?php
+
+use Unleash\Client\UnleashBuilder;
+use Unleash\Client\Configuration\UnleashContext;
+
+$unleash = UnleashBuilder::create()
+    ->withAppName('Some app name')
+    ->withAppUrl('https://some-app-url.com')
+    ->withInstanceId('Some instance id')
+    ->build();
+
+// context with custom hostname
+$context = new UnleashContext(hostname: 'My-Cool-Hostname');
+$enabled = $unleash->isEnabled('some-feature', $context);
+
+// without custom hostname, defaults to gethostname() result or null
+$enabled = $unleash->isEnabled('some-feature');
 ```
 
 > Note: This library also implements some deprecated strategies, namely `gradualRolloutRandom`, `gradualRolloutSessionId`
