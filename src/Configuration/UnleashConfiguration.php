@@ -2,9 +2,11 @@
 
 namespace Unleash\Client\Configuration;
 
-use JetBrains\PhpStorm\Pure;
+use JetBrains\PhpStorm\Deprecated;
 use LogicException;
 use Psr\SimpleCache\CacheInterface;
+use Unleash\Client\ContextProvider\DefaultUnleashContextProvider;
+use Unleash\Client\ContextProvider\UnleashContextProvider;
 
 final class UnleashConfiguration
 {
@@ -21,7 +23,7 @@ final class UnleashConfiguration
         private bool $metricsEnabled = true,
         private array $headers = [],
         private bool $autoRegistrationEnabled = true,
-        private ?Context $defaultContext = null,
+        private ?UnleashContextProvider $contextProvider = null,
     ) {
     }
 
@@ -154,15 +156,36 @@ final class UnleashConfiguration
         return $this;
     }
 
-    #[Pure]
     public function getDefaultContext(): Context
     {
-        return $this->defaultContext ?? new UnleashContext();
+        return $this->getContextProvider()->getContext();
     }
 
+    /**
+     * @todo remove on next major version
+     */
+    #[Deprecated(reason: 'Support for context provider was added, default context logic should be handled in a provider')]
     public function setDefaultContext(?Context $defaultContext): self
     {
-        $this->defaultContext = $defaultContext;
+        if ($this->getContextProvider() instanceof DefaultUnleashContextProvider) {
+            $this->getContextProvider()->setDefaultContext($defaultContext ?? new UnleashContext());
+        } else {
+            throw new LogicException('Non-default context provider cannot be used to set default context');
+        }
+
+        return $this;
+    }
+
+    public function getContextProvider(): UnleashContextProvider
+    {
+        $this->contextProvider ??= new DefaultUnleashContextProvider();
+
+        return $this->contextProvider;
+    }
+
+    public function setContextProvider(UnleashContextProvider $contextProvider): self
+    {
+        $this->contextProvider = $contextProvider;
 
         return $this;
     }
