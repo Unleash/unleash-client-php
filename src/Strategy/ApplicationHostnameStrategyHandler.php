@@ -19,7 +19,7 @@ final class ApplicationHostnameStrategyHandler extends AbstractStrategyHandler
         }
 
         $hostnames = array_map('trim', explode(',', $hostnames));
-        $enabled = $context->hasMatchingFieldValue('hostname', $hostnames);
+        $enabled = in_array($context->getHostname(), $hostnames, true);
 
         if (!$enabled) {
             return false;
