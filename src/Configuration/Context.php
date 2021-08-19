@@ -2,6 +2,10 @@
 
 namespace Unleash\Client\Configuration;
 
+/**
+ * @method string|null getHostname()
+ * @method Context     setHostname(string|null $hostname)
+ */
 interface Context
 {
     public function getCurrentUserId(): ?string;

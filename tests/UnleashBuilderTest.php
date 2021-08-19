@@ -50,7 +50,7 @@ final class UnleashBuilderTest extends TestCase
         $strategiesProperty = (new ReflectionObject($this->instance))->getProperty('strategies');
         $strategiesProperty->setAccessible(true);
 
-        self::assertCount(7, $strategiesProperty->getValue($this->instance));
+        self::assertCount(8, $strategiesProperty->getValue($this->instance));
         $instance = $this->instance->withStrategies(new class implements StrategyHandler {
             public function supports(Strategy $strategy): bool
             {
@@ -140,7 +140,7 @@ final class UnleashBuilderTest extends TestCase
         self::assertEquals('test', $configuration->getInstanceId());
         self::assertNotNull($configuration->getCache());
         self::assertIsInt($configuration->getTtl());
-        self::assertCount(7, $strategies);
+        self::assertCount(8, $strategies);
 
         $requestFactory = new HttpFactory();
         $httpClient = new Client();
@@ -414,7 +414,7 @@ final class UnleashBuilderTest extends TestCase
         $strategiesProperty = (new ReflectionObject($this->instance))->getProperty('strategies');
         $strategiesProperty->setAccessible(true);
 
-        self::assertCount(7, $strategiesProperty->getValue($this->instance));
+        self::assertCount(8, $strategiesProperty->getValue($this->instance));
         $instance = $this->instance->withStrategy(new class implements StrategyHandler {
             public function supports(Strategy $strategy): bool
             {
@@ -431,7 +431,7 @@ final class UnleashBuilderTest extends TestCase
                 return false;
             }
         });
-        self::assertCount(8, $strategiesProperty->getValue($instance));
+        self::assertCount(9, $strategiesProperty->getValue($instance));
     }
 
     public function testWithDefaultContext()

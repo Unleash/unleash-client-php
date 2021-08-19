@@ -17,6 +17,7 @@ use Unleash\Client\Metrics\DefaultMetricsHandler;
 use Unleash\Client\Metrics\DefaultMetricsSender;
 use Unleash\Client\Repository\DefaultUnleashRepository;
 use Unleash\Client\Stickiness\MurmurHashCalculator;
+use Unleash\Client\Strategy\ApplicationHostnameStrategyHandler;
 use Unleash\Client\Strategy\DefaultStrategyHandler;
 use Unleash\Client\Strategy\GradualRolloutRandomStrategyHandler;
 use Unleash\Client\Strategy\GradualRolloutSessionIdStrategyHandler;
@@ -77,6 +78,7 @@ final class UnleashBuilder
             new IpAddressStrategyHandler(),
             new UserIdStrategyHandler(),
             $rolloutStrategyHandler,
+            new ApplicationHostnameStrategyHandler(),
             new GradualRolloutUserIdStrategyHandler($rolloutStrategyHandler),
             new GradualRolloutSessionIdStrategyHandler($rolloutStrategyHandler),
             new GradualRolloutRandomStrategyHandler($rolloutStrategyHandler),
