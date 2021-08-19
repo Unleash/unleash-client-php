@@ -16,7 +16,9 @@ final class UnleashContext implements Context
         private ?string $ipAddress = null,
         private ?string $sessionId = null,
         private array $customContext = [],
+        ?string $hostname = null,
     ) {
+        $this->setHostname($hostname);
     }
 
     public function getCurrentUserId(): ?string
