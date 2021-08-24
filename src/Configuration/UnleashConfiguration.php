@@ -6,6 +6,7 @@ use JetBrains\PhpStorm\Deprecated;
 use LogicException;
 use Psr\SimpleCache\CacheInterface;
 use Unleash\Client\ContextProvider\DefaultUnleashContextProvider;
+use Unleash\Client\ContextProvider\SettableUnleashContextProvider;
 use Unleash\Client\ContextProvider\UnleashContextProvider;
 
 final class UnleashConfiguration
@@ -167,10 +168,10 @@ final class UnleashConfiguration
     #[Deprecated(reason: 'Support for context provider was added, default context logic should be handled in a provider')]
     public function setDefaultContext(?Context $defaultContext): self
     {
-        if ($this->getContextProvider() instanceof DefaultUnleashContextProvider) {
+        if ($this->getContextProvider() instanceof SettableUnleashContextProvider) {
             $this->getContextProvider()->setDefaultContext($defaultContext ?? new UnleashContext());
         } else {
-            throw new LogicException('Non-default context provider cannot be used to set default context');
+            throw new LogicException("Default context cannot be set via configuration for a context provider that doesn't implement SettableUnleashContextProvider");
         }
 
         return $this;
