@@ -21,6 +21,21 @@ final class UnleashConfigurationTest extends TestCase
     {
         $instance = new UnleashConfiguration('https://www.example.com/test', '', '');
         self::assertEquals('https://www.example.com/test/', $instance->getUrl());
+
+        $context = new UnleashContext('147');
+        $instance = new UnleashConfiguration(
+            'https://www.example.com/test',
+            '',
+            '',
+            null,
+            0,
+            0,
+            false,
+            [],
+            false,
+            $context
+        );
+        self::assertEquals($context->getCurrentUserId(), $instance->getDefaultContext()->getCurrentUserId());
     }
 
     public function testSetUrl()
