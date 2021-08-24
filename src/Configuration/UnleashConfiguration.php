@@ -24,8 +24,13 @@ final class UnleashConfiguration
         private bool $metricsEnabled = true,
         private array $headers = [],
         private bool $autoRegistrationEnabled = true,
+        ?Context $defaultContext = null,
         private ?UnleashContextProvider $contextProvider = null,
     ) {
+        $this->contextProvider ??= new DefaultUnleashContextProvider();
+        if ($defaultContext !== null) {
+            $this->setDefaultContext($defaultContext);
+        }
     }
 
     public function getCache(): CacheInterface
@@ -179,7 +184,7 @@ final class UnleashConfiguration
 
     public function getContextProvider(): UnleashContextProvider
     {
-        $this->contextProvider ??= new DefaultUnleashContextProvider();
+        assert($this->contextProvider !== null);
 
         return $this->contextProvider;
     }
