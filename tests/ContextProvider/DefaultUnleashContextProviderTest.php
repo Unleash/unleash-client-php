@@ -10,6 +10,8 @@ final class DefaultUnleashContextProviderTest extends TestCase
 {
     public function testGetContext()
     {
+        unset($_SERVER['REMOTE_ADDR']);
+
         $instance = new DefaultUnleashContextProvider();
         self::assertInstanceOf(UnleashContext::class, $instance->getContext());
         self::assertNull($instance->getContext()->getCurrentUserId());
