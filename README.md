@@ -386,6 +386,42 @@ $enabled = $unleash->isEnabled('some-feature');
 > Note: This library also implements some deprecated strategies, namely `gradualRolloutRandom`, `gradualRolloutSessionId`
 > and `gradualRolloutUserId` which all alias to the Gradual rollout strategy.
 
+### Context provider
+
+Manually creating relevant context can get tiring real fast. Luckily you can create your own context provider that
+will do it for you!
+
+```php
+<?php
+
+use Unleash\Client\ContextProvider\UnleashContextProvider;
+use Unleash\Client\Configuration\UnleashContext;
+use Unleash\Client\UnleashBuilder;
+
+final class MyContextProvider implements UnleashContextProvider 
+{
+    public function getContext(): Context
+    {
+        $context = new UnleashContext();
+        $context->setCurrentUserId('user id from my app');
+        
+        return $context;     
+    }
+}
+
+$unleash = UnleashBuilder::create()
+    ->withAppName('Some app name')
+    ->withAppUrl('https://some-app-url.com')
+    ->withInstanceId('Some instance id')
+    // here we set the custom provider
+    ->withContextProvider(new MyContextProvider())
+    ->build();
+
+if ($unleash->isEnabled('someFeature')) { // this call will use your context provider with the provided user id
+
+}
+```
+
 ### Custom strategies
 
 To implement your own strategy you need to create a class implementing `StrategyHandler` (or `AbstractStrategyHandler`

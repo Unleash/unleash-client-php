@@ -13,6 +13,7 @@ use Unleash\Client\Client\DefaultRegistrationService;
 use Unleash\Client\Configuration\Context;
 use Unleash\Client\Configuration\UnleashConfiguration;
 use Unleash\Client\Configuration\UnleashContext;
+use Unleash\Client\ContextProvider\DefaultUnleashContextProvider;
 use Unleash\Client\DTO\Strategy;
 use Unleash\Client\Exception\InvalidValueException;
 use Unleash\Client\Strategy\DefaultStrategyHandler;
@@ -443,5 +444,38 @@ final class UnleashBuilderTest extends TestCase
         $defaultContextProperty = (new ReflectionObject($instance))->getProperty('defaultContext');
         $defaultContextProperty->setAccessible(true);
         self::assertSame($context, $defaultContextProperty->getValue($instance));
+    }
+
+    public function testWithContextProvider()
+    {
+        self::assertNotSame($this->instance, $this->instance->withContextProvider(new DefaultUnleashContextProvider()));
+
+        $provider = new DefaultUnleashContextProvider();
+        $instance = $this->instance->withContextProvider($provider);
+        $providerProperty = (new ReflectionObject($instance))->getProperty('contextProvider');
+        $providerProperty->setAccessible(true);
+        self::assertSame($provider, $providerProperty->getValue($instance));
+
+        // test that the deprecated withDefaultContext() works
+        $defaultContext = new UnleashContext('456');
+        $instance = $this->instance
+            ->withContextProvider($provider)
+            ->withDefaultContext($defaultContext)
+            ->withAutomaticRegistrationEnabled(false)
+            ->withMetricsEnabled(false)
+            ->withAppUrl('test')
+            ->withInstanceId('test')
+            ->withAppName('test')
+            ->build();
+
+        $configurationProperty = (new ReflectionObject($instance))->getProperty('configuration');
+        $configurationProperty->setAccessible(true);
+        $configuration = $configurationProperty->getValue($instance);
+
+        $providerProperty = (new ReflectionObject($configuration))->getProperty('contextProvider');
+        $providerProperty->setAccessible(true);
+        $provider = $providerProperty->getValue($configuration);
+        assert($provider instanceof DefaultUnleashContextProvider);
+        self::assertEquals('456', $provider->getContext()->getCurrentUserId());
     }
 }

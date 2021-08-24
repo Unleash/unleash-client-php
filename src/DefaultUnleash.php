@@ -32,7 +32,7 @@ final class DefaultUnleash implements Unleash
 
     public function isEnabled(string $featureName, ?Context $context = null, bool $default = false): bool
     {
-        $context ??= $this->configuration->getDefaultContext();
+        $context ??= $this->configuration->getContextProvider()->getContext();
 
         $feature = $this->repository->findFeature($featureName);
         if ($feature === null) {
@@ -77,7 +77,7 @@ final class DefaultUnleash implements Unleash
     public function getVariant(string $featureName, ?Context $context = null, ?Variant $fallbackVariant = null): Variant
     {
         $fallbackVariant ??= $this->variantHandler->getDefaultVariant();
-        $context ??= $this->configuration->getDefaultContext();
+        $context ??= $this->configuration->getContextProvider()->getContext();
 
         $feature = $this->repository->findFeature($featureName);
         if ($feature === null || !$feature->isEnabled() || !count($feature->getVariants())) {

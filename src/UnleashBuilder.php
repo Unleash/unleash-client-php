@@ -2,6 +2,7 @@
 
 namespace Unleash\Client;
 
+use JetBrains\PhpStorm\Deprecated;
 use JetBrains\PhpStorm\Immutable;
 use JetBrains\PhpStorm\Pure;
 use Psr\Http\Client\ClientInterface;
@@ -11,6 +12,9 @@ use Unleash\Client\Client\DefaultRegistrationService;
 use Unleash\Client\Client\RegistrationService;
 use Unleash\Client\Configuration\Context;
 use Unleash\Client\Configuration\UnleashConfiguration;
+use Unleash\Client\ContextProvider\DefaultUnleashContextProvider;
+use Unleash\Client\ContextProvider\SettableUnleashContextProvider;
+use Unleash\Client\ContextProvider\UnleashContextProvider;
 use Unleash\Client\Exception\InvalidValueException;
 use Unleash\Client\Helper\DefaultImplementationLocator;
 use Unleash\Client\Metrics\DefaultMetricsHandler;
@@ -56,6 +60,8 @@ final class UnleashBuilder
     private ?int $metricsInterval = null;
 
     private ?Context $defaultContext = null;
+
+    private ?UnleashContextProvider $contextProvider = null;
 
     /**
      * @var array<string,string>
@@ -204,9 +210,16 @@ final class UnleashBuilder
     }
 
     #[Pure]
+    #[Deprecated(reason: 'Context provider support was added, use custom context provider using withContextProvider()')]
     public function withDefaultContext(?Context $context): self
     {
         return $this->with('defaultContext', $context);
+    }
+
+    #[Pure]
+    public function withContextProvider(?UnleashContextProvider $contextProvider): self
+    {
+        return $this->with('contextProvider', $contextProvider);
     }
 
     public function build(): Unleash
@@ -237,6 +250,14 @@ final class UnleashBuilder
         }
         assert($cache instanceof CacheInterface);
 
+        $contextProvider = $this->contextProvider;
+        if ($contextProvider === null) {
+            $contextProvider = new DefaultUnleashContextProvider();
+        }
+        if ($this->defaultContext !== null && $contextProvider instanceof SettableUnleashContextProvider) {
+            $contextProvider->setDefaultContext($this->defaultContext);
+        }
+
         $configuration = new UnleashConfiguration($this->appUrl, $this->appName, $this->instanceId);
         $configuration
             ->setCache($cache)
@@ -245,7 +266,7 @@ final class UnleashBuilder
             ->setMetricsInterval($this->metricsInterval ?? $configuration->getMetricsInterval())
             ->setHeaders($this->headers)
             ->setAutoRegistrationEnabled($this->autoregister)
-            ->setDefaultContext($this->defaultContext)
+            ->setContextProvider($contextProvider)
         ;
 
         $httpClient = $this->httpClient;
