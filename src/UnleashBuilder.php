@@ -13,6 +13,7 @@ use Unleash\Client\Client\RegistrationService;
 use Unleash\Client\Configuration\Context;
 use Unleash\Client\Configuration\UnleashConfiguration;
 use Unleash\Client\ContextProvider\DefaultUnleashContextProvider;
+use Unleash\Client\ContextProvider\SettableUnleashContextProvider;
 use Unleash\Client\ContextProvider\UnleashContextProvider;
 use Unleash\Client\Exception\InvalidValueException;
 use Unleash\Client\Helper\DefaultImplementationLocator;
@@ -251,7 +252,7 @@ final class UnleashBuilder
         if ($contextProvider === null) {
             $contextProvider = new DefaultUnleashContextProvider();
         }
-        if ($this->defaultContext !== null && $contextProvider instanceof DefaultUnleashContextProvider) {
+        if ($this->defaultContext !== null && $contextProvider instanceof SettableUnleashContextProvider) {
             $contextProvider->setDefaultContext($this->defaultContext);
         }
 
