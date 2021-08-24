@@ -19,15 +19,7 @@ final class ApplicationHostnameStrategyHandler extends AbstractStrategyHandler
         }
 
         $hostnames = array_map('trim', explode(',', $hostnames));
-        // todo refactor once rector fixes a bug that prevents phpdoc methods from working
-        if (method_exists($context, 'getHostname')) {
-            $hostname = $context->getHostname();
-        } else {
-            // @codeCoverageIgnoreStart
-            $hostname = $context->findContextValue('hostname');
-            // @codeCoverageIgnoreEnd
-        }
-        $enabled = in_array($hostname, $hostnames, true);
+        $enabled = in_array($context->getHostname(), $hostnames, true);
 
         if (!$enabled) {
             return false;
