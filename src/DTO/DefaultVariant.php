@@ -8,20 +8,35 @@ use Unleash\Client\Enum\Stickiness;
 
 final class DefaultVariant implements Variant
 {
+    private string $name;
+    private bool $enabled;
+    private int $weight = 0;
+    private string $stickiness = Stickiness::DEFAULT;
+    private ?VariantPayload $payload = null;
+    /**
+     * @var \Unleash\Client\DTO\VariantOverride[]
+     */
+    private ?array $overrides = null;
     /**
      * @param array<VariantOverride> $overrides
      */
     public function __construct(
-        private string $name,
-        private bool $enabled,
-        private int $weight = 0,
-        #[ExpectedValues(valuesFromClass: Stickiness::class)]
-        private string $stickiness = Stickiness::DEFAULT,
-        private ?VariantPayload $payload = null,
-        private ?array $overrides = null,
-    ) {
+        string $name,
+        bool $enabled,
+        int $weight = 0,
+        #[\JetBrains\PhpStorm\ExpectedValues(valuesFromClass: \Unleash\Client\Enum\Stickiness::class)]
+        string $stickiness = Stickiness::DEFAULT,
+        ?VariantPayload $payload = null,
+        ?array $overrides = null
+    )
+    {
+        $this->name = $name;
+        $this->enabled = $enabled;
+        $this->weight = $weight;
+        $this->stickiness = $stickiness;
+        $this->payload = $payload;
+        $this->overrides = $overrides;
     }
-
     public function getName(): string
     {
         return $this->name;

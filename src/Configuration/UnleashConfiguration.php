@@ -11,28 +11,39 @@ use Unleash\Client\ContextProvider\UnleashContextProvider;
 
 final class UnleashConfiguration
 {
+    private string $url;
+    private string $appName;
+    private string $instanceId;
+    private ?CacheInterface $cache = null;
+    private int $ttl = 30;
+    private int $metricsInterval = 30_000;
+    private bool $metricsEnabled = true;
+    /**
+     * @var array<string, string>
+     */
+    private array $headers = [];
+    private bool $autoRegistrationEnabled = true;
+    private ?UnleashContextProvider $contextProvider = null;
     /**
      * @param array<string,string> $headers
      */
-    public function __construct(
-        private string $url,
-        private string $appName,
-        private string $instanceId,
-        private ?CacheInterface $cache = null,
-        private int $ttl = 30,
-        private int $metricsInterval = 30_000,
-        private bool $metricsEnabled = true,
-        private array $headers = [],
-        private bool $autoRegistrationEnabled = true,
-        ?Context $defaultContext = null,
-        private ?UnleashContextProvider $contextProvider = null,
-    ) {
+    public function __construct(string $url, string $appName, string $instanceId, ?CacheInterface $cache = null, int $ttl = 30, int $metricsInterval = 30_000, bool $metricsEnabled = true, array $headers = [], bool $autoRegistrationEnabled = true, ?Context $defaultContext = null, ?UnleashContextProvider $contextProvider = null)
+    {
+        $this->url = $url;
+        $this->appName = $appName;
+        $this->instanceId = $instanceId;
+        $this->cache = $cache;
+        $this->ttl = $ttl;
+        $this->metricsInterval = $metricsInterval;
+        $this->metricsEnabled = $metricsEnabled;
+        $this->headers = $headers;
+        $this->autoRegistrationEnabled = $autoRegistrationEnabled;
+        $this->contextProvider = $contextProvider;
         $this->contextProvider ??= new DefaultUnleashContextProvider();
         if ($defaultContext !== null) {
             $this->setDefaultContext($defaultContext);
         }
     }
-
     public function getCache(): CacheInterface
     {
         if ($this->cache === null) {
@@ -45,7 +56,7 @@ final class UnleashConfiguration
     public function getUrl(): string
     {
         $url = $this->url;
-        if (!str_ends_with($url, '/')) {
+        if (substr_compare($url, '/', -strlen('/')) !== 0) {
             $url .= '/';
         }
 

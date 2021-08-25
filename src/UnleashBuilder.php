@@ -306,24 +306,16 @@ final class UnleashBuilder
             $registrationService = new DefaultRegistrationService($httpClient, $requestFactory, $configuration);
         }
 
-        return new DefaultUnleash(
-            $this->strategies,
-            $repository,
-            $registrationService,
-            $configuration,
-            new DefaultMetricsHandler(
-                new DefaultMetricsSender(
-                    $httpClient,
-                    $requestFactory,
-                    $configuration,
-                ),
-                $configuration
-            ),
-            new DefaultVariantHandler($hashCalculator),
-        );
+        return new DefaultUnleash($this->strategies, $repository, $registrationService, $configuration, new DefaultMetricsHandler(
+            new DefaultMetricsSender($httpClient, $requestFactory, $configuration),
+            $configuration
+        ), new DefaultVariantHandler($hashCalculator));
     }
 
-    private function with(string $property, mixed $value): self
+    /**
+     * @param mixed $value
+     */
+    private function with(string $property, $value): self
     {
         $copy = clone $this;
         $copy->{$property} = $value;
