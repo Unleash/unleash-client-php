@@ -35,43 +35,85 @@ use Unleash\Client\Variant\DefaultVariantHandler;
 #[Immutable]
 final class UnleashBuilder
 {
-    private DefaultImplementationLocator $defaultImplementationLocator;
+    /**
+     * @var \Unleash\Client\Helper\DefaultImplementationLocator
+     */
+    private $defaultImplementationLocator;
 
-    private ?string $appUrl = null;
+    /**
+     * @var string|null
+     */
+    private $appUrl;
 
-    private ?string $instanceId = null;
+    /**
+     * @var string|null
+     */
+    private $instanceId;
 
-    private ?string $appName = null;
+    /**
+     * @var string|null
+     */
+    private $appName;
 
-    private ?ClientInterface $httpClient = null;
+    /**
+     * @var \Psr\Http\Client\ClientInterface|null
+     */
+    private $httpClient;
 
-    private ?RequestFactoryInterface $requestFactory = null;
+    /**
+     * @var \Psr\Http\Message\RequestFactoryInterface|null
+     */
+    private $requestFactory;
 
-    private ?CacheInterface $cache = null;
+    /**
+     * @var \Psr\SimpleCache\CacheInterface|null
+     */
+    private $cache;
 
-    private ?int $cacheTtl = null;
+    /**
+     * @var int|null
+     */
+    private $cacheTtl;
 
-    private ?RegistrationService $registrationService = null;
+    /**
+     * @var \Unleash\Client\Client\RegistrationService|null
+     */
+    private $registrationService;
 
-    private bool $autoregister = true;
+    /**
+     * @var bool
+     */
+    private $autoregister = true;
 
-    private ?bool $metricsEnabled = null;
+    /**
+     * @var bool|null
+     */
+    private $metricsEnabled;
 
-    private ?int $metricsInterval = null;
+    /**
+     * @var int|null
+     */
+    private $metricsInterval;
 
-    private ?Context $defaultContext = null;
+    /**
+     * @var \Unleash\Client\Configuration\Context|null
+     */
+    private $defaultContext;
 
-    private ?UnleashContextProvider $contextProvider = null;
+    /**
+     * @var \Unleash\Client\ContextProvider\UnleashContextProvider|null
+     */
+    private $contextProvider;
 
     /**
      * @var array<string,string>
      */
-    private array $headers = [];
+    private $headers = [];
 
     /**
      * @var array<StrategyHandler>
      */
-    private array $strategies;
+    private $strategies;
 
     #[Pure]
     public function __construct()
@@ -306,24 +348,16 @@ final class UnleashBuilder
             $registrationService = new DefaultRegistrationService($httpClient, $requestFactory, $configuration);
         }
 
-        return new DefaultUnleash(
-            $this->strategies,
-            $repository,
-            $registrationService,
-            $configuration,
-            new DefaultMetricsHandler(
-                new DefaultMetricsSender(
-                    $httpClient,
-                    $requestFactory,
-                    $configuration,
-                ),
-                $configuration
-            ),
-            new DefaultVariantHandler($hashCalculator),
-        );
+        return new DefaultUnleash($this->strategies, $repository, $registrationService, $configuration, new DefaultMetricsHandler(
+            new DefaultMetricsSender($httpClient, $requestFactory, $configuration),
+            $configuration
+        ), new DefaultVariantHandler($hashCalculator));
     }
 
-    private function with(string $property, mixed $value): self
+    /**
+     * @param mixed $value
+     */
+    private function with(string $property, $value): self
     {
         $copy = clone $this;
         $copy->{$property} = $value;
