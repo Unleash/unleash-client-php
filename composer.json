@@ -47,7 +47,7 @@
         "guzzlehttp/guzzle": "A http client implementation (PSR-17 and PSR-18)",
         "symfony/http-client": "A http client implementation (PSR-17 and PSR-18)",
         "nyholm/psr7": "Needed when you use symfony/http-client",
-        "rikudou/unleash-sdk-bundle": "The Symfony bundle for this library"
+        "unleash/symfony-client-bundle": "The Symfony bundle for this library"
     },
     "scripts": {
         "fixer": "php-cs-fixer fix --verbose --allow-risky=yes",
