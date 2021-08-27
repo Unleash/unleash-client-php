@@ -23,7 +23,7 @@ final class DefaultImplementationLocator
     /**
      * @var array<string,string[]>
      */
-    private array $supportedPackages = [
+    private $supportedPackages = [
         'client' => [
             'guzzlehttp/guzzle',
             'symfony/http-client',
@@ -41,7 +41,7 @@ final class DefaultImplementationLocator
     /**
      * @var array<string,array<string,array>>
      */
-    private array $defaultImplementations = [
+    private $defaultImplementations = [
         'client' => [
             Client::class => [],
             Psr18Client::class => [],
@@ -175,7 +175,7 @@ final class DefaultImplementationLocator
                 }
                 $resolvedParameters[] = $this->constructObject($parameter, $value);
             } else {
-                if (is_string($value) && str_contains($value, '{{tmpDir}}')) {
+                if (is_string($value) && strpos($value, '{{tmpDir}}') !== false) {
                     $value = str_replace('{{tmpDir}}', sys_get_temp_dir(), $value);
                 }
                 $resolvedParameters[] = $value;

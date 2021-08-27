@@ -15,13 +15,24 @@ use Unleash\Client\Unleash;
 
 final class DefaultRegistrationService implements RegistrationService
 {
-    public function __construct(
-        private ClientInterface $httpClient,
-        private RequestFactoryInterface $requestFactory,
-        private UnleashConfiguration $configuration,
-    ) {
+    /**
+     * @var \Psr\Http\Client\ClientInterface
+     */
+    private $httpClient;
+    /**
+     * @var \Psr\Http\Message\RequestFactoryInterface
+     */
+    private $requestFactory;
+    /**
+     * @var \Unleash\Client\Configuration\UnleashConfiguration
+     */
+    private $configuration;
+    public function __construct(ClientInterface $httpClient, RequestFactoryInterface $requestFactory, UnleashConfiguration $configuration)
+    {
+        $this->httpClient = $httpClient;
+        $this->requestFactory = $requestFactory;
+        $this->configuration = $configuration;
     }
-
     /**
      * @param iterable<StrategyHandler> $strategyHandlers
      *
