@@ -9,13 +9,15 @@ use Unleash\Client\Helper\StringStream;
 
 final class DefaultMetricsSender implements MetricsSender
 {
-    public function __construct(
-        private ClientInterface $httpClient,
-        private RequestFactoryInterface $requestFactory,
-        private UnleashConfiguration $configuration,
-    ) {
+    private ClientInterface $httpClient;
+    private RequestFactoryInterface $requestFactory;
+    private UnleashConfiguration $configuration;
+    public function __construct(ClientInterface $httpClient, RequestFactoryInterface $requestFactory, UnleashConfiguration $configuration)
+    {
+        $this->httpClient = $httpClient;
+        $this->requestFactory = $requestFactory;
+        $this->configuration = $configuration;
     }
-
     public function sendMetrics(MetricsBucket $bucket): void
     {
         if (!$this->configuration->isMetricsEnabled()) {
