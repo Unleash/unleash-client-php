@@ -17,6 +17,7 @@ final class UnleashContext implements Context
         private ?string $sessionId = null,
         private array $customContext = [],
         ?string $hostname = null,
+        private ?string $environment = null,
     ) {
         $this->setHostname($hostname);
     }
@@ -24,6 +25,11 @@ final class UnleashContext implements Context
     public function getCurrentUserId(): ?string
     {
         return $this->currentUserId;
+    }
+
+    public function getEnvironment(): ?string
+    {
+        return $this->environment;
     }
 
     public function getIpAddress(): ?string
@@ -89,6 +95,13 @@ final class UnleashContext implements Context
         return $this;
     }
 
+    public function setEnvironment(?string $environment): self
+    {
+        $this->environment = $environment;
+
+        return $this;
+    }
+
     public function getHostname(): ?string
     {
         return $this->findContextValue('hostname') ?? (gethostname() ?: null);
@@ -124,6 +137,7 @@ final class UnleashContext implements Context
             ContextField::USER_ID, Stickiness::USER_ID => $this->getCurrentUserId(),
             ContextField::SESSION_ID, Stickiness::SESSION_ID => $this->getSessionId(),
             ContextField::IP_ADDRESS => $this->getIpAddress(),
+            ContextField::ENVIRONMENT => $this->getEnvironment(),
             default => $this->customContext[$fieldName] ?? null,
         };
     }
