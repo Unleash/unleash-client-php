@@ -91,15 +91,15 @@ final class UnleashContext implements Context
 
     public function getHostname(): ?string
     {
-        return $this->findContextValue('hostname') ?? (gethostname() ?: null);
+        return $this->findContextValue(ContextField::HOSTNAME) ?? (gethostname() ?: null);
     }
 
     public function setHostname(?string $hostname): self
     {
         if ($hostname === null) {
-            $this->removeCustomProperty('hostname');
+            $this->removeCustomProperty(ContextField::HOSTNAME);
         } else {
-            $this->setCustomProperty('hostname', $hostname);
+            $this->setCustomProperty(ContextField::HOSTNAME, $hostname);
         }
 
         return $this;
