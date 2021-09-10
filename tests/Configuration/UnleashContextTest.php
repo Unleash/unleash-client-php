@@ -62,7 +62,7 @@ final class UnleashContextTest extends TestCase
     {
         unset($_SERVER['REMOTE_ADDR']);
 
-        $context = (new UnleashContext('123', '456', '789'))
+        $context = (new UnleashContext('123', '456', '789', [], null, 'dev'))
             ->setCustomProperty('someField', '012');
 
         self::assertTrue($context->hasMatchingFieldValue(ContextField::USER_ID, [
@@ -76,6 +76,10 @@ final class UnleashContextTest extends TestCase
         self::assertTrue($context->hasMatchingFieldValue(ContextField::SESSION_ID, [
             '852',
             '789',
+        ]));
+        self::assertTrue($context->hasMatchingFieldValue(ContextField::ENVIRONMENT, [
+            'dev',
+            'production',
         ]));
         self::assertTrue($context->hasMatchingFieldValue('someField', [
             '753',

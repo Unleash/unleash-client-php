@@ -94,6 +94,7 @@ final class ClientSpecificationTest extends AbstractHttpClientTest
         $contextObject = (new UnleashContext())
             ->setCurrentUserId($context['userId'] ?? null)
             ->setSessionId($context['sessionId'] ?? null)
+            ->setEnvironment($context['environment'] ?? null)
             ->setIpAddress($context['remoteAddress'] ?? '');
 
         if (isset($context['properties'])) {

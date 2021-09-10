@@ -4,7 +4,9 @@ namespace Unleash\Client\Configuration;
 
 /**
  * @method string|null getHostname()
+ * @method string|null getEnvironment()
  * @method Context     setHostname(string|null $hostname)
+ * @method Context     setEnvironment(string|null $environment)
  */
 interface Context
 {
