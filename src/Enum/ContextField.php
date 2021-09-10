@@ -11,4 +11,6 @@ final class ContextField
     public const IP_ADDRESS = 'remoteAddress';
 
     public const REMOTE_ADDRESS = self::IP_ADDRESS;
+
+    public const HOSTNAME = 'hostname';
 }

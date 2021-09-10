@@ -98,10 +98,10 @@ final class UnleashContextTest extends TestCase
         $context = new UnleashContext();
         $context->setHostname('customHostname');
         self::assertEquals('customHostname', $context->getHostname());
-        self::assertTrue($context->hasCustomProperty('hostname'));
-        self::assertEquals('customHostname', $context->findContextValue('hostname'));
+        self::assertTrue($context->hasCustomProperty(ContextField::HOSTNAME));
+        self::assertEquals('customHostname', $context->findContextValue(ContextField::HOSTNAME));
 
         $context->setHostname(null);
-        self::assertFalse($context->hasCustomProperty('hostname'));
+        self::assertFalse($context->hasCustomProperty(ContextField::HOSTNAME));
     }
 }
