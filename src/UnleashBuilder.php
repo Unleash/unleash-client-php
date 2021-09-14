@@ -286,6 +286,14 @@ final class UnleashBuilder
         $requestFactory = $this->requestFactory;
         if ($requestFactory === null) {
             $requestFactory = $this->defaultImplementationLocator->findRequestFactory();
+            /**
+             * This will only be thrown if a HTTP client was found, but a request factory is not.
+             * Due to how php-http/discovery works, this scenario is unlikely to happen.
+             * See linked comment for more info.
+             *
+             * https://github.com/Unleash/unleash-client-php/pull/27#issuecomment-920764416
+             */
+            // @codeCoverageIgnoreStart
             if ($requestFactory === null) {
                 throw new InvalidValueException(
                     sprintf(
@@ -294,6 +302,7 @@ final class UnleashBuilder
                     )
                 );
             }
+            // @codeCoverageIgnoreEnd
         }
         assert($requestFactory instanceof RequestFactoryInterface);
 
