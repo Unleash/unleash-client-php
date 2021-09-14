@@ -140,8 +140,8 @@ $builder = UnleashBuilder::create()
 
 Some optional parameters can be set, these include:
 
-- http client implementation
-- request factory implementation
+- http client implementation ([PSR-18](https://packagist.org/providers/psr/http-client-implementation))
+- request factory implementation ([PSR-17](https://packagist.org/providers/psr/http-factory-implementation))
 - cache implementation ([PSR-16](https://packagist.org/providers/psr/simple-cache-implementation))
 - cache ttl
 - available strategies
