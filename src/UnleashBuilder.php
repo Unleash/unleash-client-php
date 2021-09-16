@@ -274,10 +274,7 @@ final class UnleashBuilder
             $httpClient = $this->defaultImplementationLocator->findHttpClient();
             if ($httpClient === null) {
                 throw new InvalidValueException(
-                    sprintf(
-                        "No http client provided, please use 'withHttpClient()' method or install one of officially supported clients: '%s'",
-                        implode("', '", $this->defaultImplementationLocator->getHttpClientPackages())
-                    )
+                    "No http client provided, please use 'withHttpClient()' method or install a package providing 'psr/http-client-implementation'.",
                 );
             }
         }
@@ -296,10 +293,7 @@ final class UnleashBuilder
             // @codeCoverageIgnoreStart
             if ($requestFactory === null) {
                 throw new InvalidValueException(
-                    sprintf(
-                        "No request factory provided, please use 'withHttpClient()' method or install one of officially supported clients: '%s'",
-                        implode("', '", $this->defaultImplementationLocator->getRequestFactoryPackages())
-                    )
+                    "No request factory provided, please use 'withRequestFactory()' method or install a package providing 'psr/http-factory-implementation'.",
                 );
             }
             // @codeCoverageIgnoreEnd

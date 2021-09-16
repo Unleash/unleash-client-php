@@ -24,14 +24,6 @@ final class DefaultImplementationLocator
      * @var array<string,string[]>
      */
     private array $supportedPackages = [
-        'client' => [
-            'guzzlehttp/guzzle',
-            'symfony/http-client',
-        ],
-        'factory' => [
-            'guzzlehttp/guzzle',
-            'symfony/http-client',
-        ],
         'cache' => [
             'symfony/cache',
             'cache/filesystem-adapter',
@@ -109,22 +101,6 @@ final class DefaultImplementationLocator
         }
 
         return null;
-    }
-
-    /**
-     * @return string[]
-     */
-    public function getHttpClientPackages(): array
-    {
-        return $this->supportedPackages['client'];
-    }
-
-    /**
-     * @return string[]
-     */
-    public function getRequestFactoryPackages(): array
-    {
-        return $this->supportedPackages['factory'];
     }
 
     /**
