@@ -140,17 +140,18 @@ $builder = UnleashBuilder::create()
 
 Some optional parameters can be set, these include:
 
-- http client implementation
-- request factory implementation
+- http client implementation ([PSR-18](https://packagist.org/providers/psr/http-client-implementation))
+- request factory implementation ([PSR-17](https://packagist.org/providers/psr/http-factory-implementation))
 - cache implementation ([PSR-16](https://packagist.org/providers/psr/simple-cache-implementation))
 - cache ttl
 - available strategies
 - http headers
 
-If you use [guzzlehttp/guzzle](https://packagist.org/packages/guzzlehttp/guzzle) or
+The builder will attempt to load http client and request factory implementations automatically. Most implementations,
+such as [guzzlehttp/guzzle](https://packagist.org/packages/guzzlehttp/guzzle) or
 [symfony/http-client](https://packagist.org/packages/symfony/http-client) (in combination with 
-[nyholm/psr7](https://packagist.org/packages/nyholm/psr7)), the http client and request factory will be created 
-automatically, otherwise you need to provide an implementation on your own.
+[nyholm/psr7](https://packagist.org/packages/nyholm/psr7)), will be loaded automatically. If the builder is unable to
+locate a http client or request factory implementation, you will need to provide some implementation on your own.
 
 If you use [symfony/cache](https://packagist.org/packages/symfony/cache) or
 [cache/filesystem-adapter](https://packagist.org/packages/cache/filesystem-adapter) as your cache implementation, the

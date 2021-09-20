@@ -274,10 +274,7 @@ final class UnleashBuilder
             $httpClient = $this->defaultImplementationLocator->findHttpClient();
             if ($httpClient === null) {
                 throw new InvalidValueException(
-                    sprintf(
-                        "No http client provided, please use 'withHttpClient()' method or install one of officially supported clients: '%s'",
-                        implode("', '", $this->defaultImplementationLocator->getHttpClientPackages())
-                    )
+                    "No http client provided, please use 'withHttpClient()' method or install a package providing 'psr/http-client-implementation'.",
                 );
             }
         }
@@ -286,14 +283,20 @@ final class UnleashBuilder
         $requestFactory = $this->requestFactory;
         if ($requestFactory === null) {
             $requestFactory = $this->defaultImplementationLocator->findRequestFactory();
+            /**
+             * This will only be thrown if a HTTP client was found, but a request factory is not.
+             * Due to how php-http/discovery works, this scenario is unlikely to happen.
+             * See linked comment for more info.
+             *
+             * https://github.com/Unleash/unleash-client-php/pull/27#issuecomment-920764416
+             */
+            // @codeCoverageIgnoreStart
             if ($requestFactory === null) {
                 throw new InvalidValueException(
-                    sprintf(
-                        "No request factory provided, please use 'withHttpClient()' method or install one of officially supported clients: '%s'",
-                        implode("', '", $this->defaultImplementationLocator->getRequestFactoryPackages())
-                    )
+                    "No request factory provided, please use 'withRequestFactory()' method or install a package providing 'psr/http-factory-implementation'.",
                 );
             }
+            // @codeCoverageIgnoreEnd
         }
         assert($requestFactory instanceof RequestFactoryInterface);
 

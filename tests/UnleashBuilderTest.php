@@ -3,12 +3,12 @@
 namespace Unleash\Client\Tests;
 
 use Cache\Adapter\Filesystem\FilesystemCachePool;
-use GuzzleHttp\Client;
-use GuzzleHttp\Psr7\HttpFactory;
+use Http\Discovery\Psr18ClientDiscovery;
 use PHPUnit\Framework\TestCase;
+use Psr\Http\Client\ClientInterface;
+use Psr\Http\Message\RequestFactoryInterface;
 use ReflectionObject;
 use Symfony\Component\Cache\Psr16Cache;
-use Symfony\Component\HttpClient\Psr18Client;
 use Unleash\Client\Client\DefaultRegistrationService;
 use Unleash\Client\Configuration\Context;
 use Unleash\Client\Configuration\UnleashConfiguration;
@@ -42,7 +42,7 @@ final class UnleashBuilderTest extends TestCase
 
     public function testWithHttpClient()
     {
-        self::assertNotSame($this->instance, $this->instance->withHttpClient(new Client()));
+        self::assertNotSame($this->instance, $this->instance->withHttpClient($this->newHttpClient()));
     }
 
     public function testWithStrategies()
@@ -89,7 +89,7 @@ final class UnleashBuilderTest extends TestCase
 
     public function testWithRequestFactory()
     {
-        self::assertNotSame($this->instance, $this->instance->withRequestFactory(new HttpFactory()));
+        self::assertNotSame($this->instance, $this->instance->withRequestFactory($this->newRequestFactory()));
     }
 
     public function testBuild()
@@ -143,8 +143,8 @@ final class UnleashBuilderTest extends TestCase
         self::assertIsInt($configuration->getTtl());
         self::assertCount(8, $strategies);
 
-        $requestFactory = new HttpFactory();
-        $httpClient = new Client();
+        $requestFactory = $this->newRequestFactory();
+        $httpClient = $this->newHttpClient();
 
         $instance = $this->instance
             ->withAppUrl('https://example.com')
@@ -248,8 +248,8 @@ final class UnleashBuilderTest extends TestCase
     public function testWithRegistrationService()
     {
         self::assertNotSame($this->instance, $this->instance->withRegistrationService(new DefaultRegistrationService(
-            new Client(),
-            new HttpFactory(),
+            $this->newHttpClient(),
+            $this->newRequestFactory(),
             new UnleashConfiguration('', '', '')
         )));
     }
@@ -292,10 +292,6 @@ final class UnleashBuilderTest extends TestCase
         $locatorProperty->setAccessible(true);
         $locator = $locatorProperty->getValue($instance);
 
-        $defaultImplementationsProperty = (new ReflectionObject($locator))->getProperty('defaultImplementations');
-        $defaultImplementationsProperty->setAccessible(true);
-        $defaultImplementations = $defaultImplementationsProperty->getValue($locator);
-
         $repositoryProperty = (new ReflectionObject($unleash))->getProperty('repository');
         $repositoryProperty->setAccessible(true);
         $repository = $repositoryProperty->getValue($unleash);
@@ -304,21 +300,10 @@ final class UnleashBuilderTest extends TestCase
         $httpClientProperty->setAccessible(true);
         $httpClient = $httpClientProperty->getValue($repository);
 
-        self::assertInstanceOf(Client::class, $httpClient);
+        self::assertInstanceOf(ClientInterface::class, $httpClient);
 
-        $defaultImplementations['client'][Client::class . 2] = [];
-        unset($defaultImplementations['client'][Client::class]);
-        $defaultImplementationsProperty->setValue($locator, $defaultImplementations);
-
-        $unleash = $instance->build();
-        $repository = $repositoryProperty->getValue($unleash);
-        $httpClient = $httpClientProperty->getValue($repository);
-
-        self::assertInstanceOf(Psr18Client::class, $httpClient);
-
-        $defaultImplementations['client'][Psr18Client::class . 2] = [];
-        unset($defaultImplementations['client'][Psr18Client::class]);
-        $defaultImplementationsProperty->setValue($locator, $defaultImplementations);
+        $discoveryStrategies = Psr18ClientDiscovery::getStrategies();
+        Psr18ClientDiscovery::setStrategies([]);
 
         try {
             $instance->build();
@@ -326,40 +311,7 @@ final class UnleashBuilderTest extends TestCase
         } catch (InvalidValueException $e) {
         }
 
-        $defaultImplementations['client'][Psr18Client::class] = [];
-        $defaultImplementationsProperty->setValue($locator, $defaultImplementations);
-
-        $requestFactoryProperty = (new ReflectionObject($repository))->getProperty('requestFactory');
-        $requestFactoryProperty->setAccessible(true);
-
-        $unleash = $instance->build();
-        $repository = $repositoryProperty->getValue($unleash);
-        $requestFactory = $requestFactoryProperty->getValue($repository);
-
-        self::assertInstanceOf(HttpFactory::class, $requestFactory);
-
-        $defaultImplementations['factory'][HttpFactory::class . 2] = [];
-        unset($defaultImplementations['factory'][HttpFactory::class]);
-        $defaultImplementationsProperty->setValue($locator, $defaultImplementations);
-
-        $unleash = $instance->build();
-        $repository = $repositoryProperty->getValue($unleash);
-        $requestFactory = $requestFactoryProperty->getValue($repository);
-
-        self::assertInstanceOf(Psr18Client::class, $requestFactory);
-
-        $defaultImplementations['factory'][Psr18Client::class . 2] = [];
-        unset($defaultImplementations['factory'][Psr18Client::class]);
-        $defaultImplementationsProperty->setValue($locator, $defaultImplementations);
-
-        try {
-            $instance->build();
-            $this->fail('No default request factory is available, expected exception');
-        } catch (InvalidValueException $e) {
-        }
-
-        $defaultImplementations['factory'][Psr18Client::class] = [];
-        $defaultImplementationsProperty->setValue($locator, $defaultImplementations);
+        Psr18ClientDiscovery::setStrategies($discoveryStrategies);
 
         $configurationProperty = (new ReflectionObject($repository))->getProperty('configuration');
         $configurationProperty->setAccessible(true);
@@ -374,6 +326,10 @@ final class UnleashBuilderTest extends TestCase
         $cache = $cacheProperty->getValue($configuration);
 
         self::assertInstanceOf(FilesystemCachePool::class, $cache);
+
+        $defaultImplementationsProperty = (new ReflectionObject($locator))->getProperty('defaultImplementations');
+        $defaultImplementationsProperty->setAccessible(true);
+        $defaultImplementations = $defaultImplementationsProperty->getValue($locator);
 
         $defaultImplementations['cache'][FilesystemCachePool::class . 2] = [];
         unset($defaultImplementations['cache'][FilesystemCachePool::class]);
@@ -477,5 +433,15 @@ final class UnleashBuilderTest extends TestCase
         $provider = $providerProperty->getValue($configuration);
         assert($provider instanceof DefaultUnleashContextProvider);
         self::assertEquals('456', $provider->getContext()->getCurrentUserId());
+    }
+
+    private function newHttpClient(): ClientInterface
+    {
+        return $this->createMock(ClientInterface::class);
+    }
+
+    private function newRequestFactory(): RequestFactoryInterface
+    {
+        return $this->createMock(RequestFactoryInterface::class);
     }
 }

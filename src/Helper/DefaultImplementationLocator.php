@@ -3,8 +3,9 @@
 namespace Unleash\Client\Helper;
 
 use Cache\Adapter\Filesystem\FilesystemCachePool;
-use GuzzleHttp\Client;
-use GuzzleHttp\Psr7\HttpFactory;
+use Http\Discovery\Exception\NotFoundException;
+use Http\Discovery\Psr17FactoryDiscovery;
+use Http\Discovery\Psr18ClientDiscovery;
 use League\Flysystem\Adapter\Local;
 use League\Flysystem\Filesystem;
 use LogicException;
@@ -13,7 +14,6 @@ use Psr\Http\Message\RequestFactoryInterface;
 use Psr\SimpleCache\CacheInterface;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\Cache\Psr16Cache;
-use Symfony\Component\HttpClient\Psr18Client;
 
 /**
  * @internal
@@ -24,14 +24,6 @@ final class DefaultImplementationLocator
      * @var array<string,string[]>
      */
     private array $supportedPackages = [
-        'client' => [
-            'guzzlehttp/guzzle',
-            'symfony/http-client',
-        ],
-        'factory' => [
-            'guzzlehttp/guzzle',
-            'symfony/http-client',
-        ],
         'cache' => [
             'symfony/cache',
             'cache/filesystem-adapter',
@@ -42,14 +34,6 @@ final class DefaultImplementationLocator
      * @var array<string,array<string,array>>
      */
     private array $defaultImplementations = [
-        'client' => [
-            Client::class => [],
-            Psr18Client::class => [],
-        ],
-        'factory' => [
-            HttpFactory::class => [],
-            Psr18Client::class => [],
-        ],
         'cache' => [
             FilesystemCachePool::class => [
                 Filesystem::class => [
@@ -68,40 +52,35 @@ final class DefaultImplementationLocator
 
     public function findHttpClient(): ?ClientInterface
     {
-        foreach ($this->defaultImplementations['client'] as $class => $config) {
-            if (class_exists($class)) {
-                $result = $this->constructObject($class, $config);
-                if (!$result instanceof ClientInterface) {
-                    // @codeCoverageIgnoreStart
-                    throw new LogicException('The resulting object is not an instance of ' . ClientInterface::class);
-                    // @codeCoverageIgnoreEnd
-                }
-
-                return $result;
-            }
+        try {
+            /**
+             * Discovery triggers an error if symfony/http-client is installed
+             * and php-http/httplug is not, even if the intention is to find a
+             * PSR-18 client. Since the discovery will otherwise be successful,
+             * let's silence the error.
+             */
+            return @Psr18ClientDiscovery::find();
+        } catch (NotFoundException $e) {
+            return null;
         }
-
-        return null;
     }
 
     public function findRequestFactory(): ?RequestFactoryInterface
     {
-        foreach ($this->defaultImplementations['factory'] as $class => $config) {
-            if (class_exists($class)) {
-                $result = $this->constructObject($class, $config);
-                if (!$result instanceof RequestFactoryInterface) {
-                    // @codeCoverageIgnoreStart
-                    throw new LogicException(
-                        'The resulting object is not an instance of ' . RequestFactoryInterface::class
-                    );
-                    // @codeCoverageIgnoreEnd
-                }
-
-                return $result;
-            }
+        try {
+            return Psr17FactoryDiscovery::findRequestFactory();
+            // @codeCoverageIgnoreStart
+        } catch (NotFoundException $e) {
+            /**
+             * This will only be thrown if a HTTP client was found, but a request factory is not.
+             * Due to how php-http/discovery works, this scenario is unlikely to happen.
+             * See linked comment for more info.
+             *
+             * https://github.com/Unleash/unleash-client-php/pull/27#issuecomment-920764416
+             */
+            return null;
+            // @codeCoverageIgnoreEnd
         }
-
-        return null;
     }
 
     public function findCache(): ?CacheInterface
@@ -122,22 +101,6 @@ final class DefaultImplementationLocator
         }
 
         return null;
-    }
-
-    /**
-     * @return string[]
-     */
-    public function getHttpClientPackages(): array
-    {
-        return $this->supportedPackages['client'];
-    }
-
-    /**
-     * @return string[]
-     */
-    public function getRequestFactoryPackages(): array
-    {
-        return $this->supportedPackages['factory'];
     }
 
     /**
