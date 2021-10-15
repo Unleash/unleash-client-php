@@ -22,7 +22,7 @@ final class DefaultMetricsHandler implements MetricsHandler
             return;
         }
 
-        $bucket = $this->getOrCreateBucket($feature);
+        $bucket = $this->getOrCreateBucket();
         $bucket->addToggle(new MetricsBucketToggle($feature, $successful, $variant));
         if ($this->shouldSend($bucket)) {
             $this->send($bucket);
@@ -31,14 +31,17 @@ final class DefaultMetricsHandler implements MetricsHandler
         }
     }
 
-    private function getOrCreateBucket(Feature $feature): MetricsBucket
+    private function getOrCreateBucket(): MetricsBucket
     {
         $cache = $this->configuration->getCache();
+
+        $bucket = null;
         if ($cache->has(CacheKey::METRICS_BUCKET)) {
-            return $cache->get(CacheKey::METRICS_BUCKET);
+            $bucket = $cache->get(CacheKey::METRICS_BUCKET);
         }
 
-        return new MetricsBucket(new DateTimeImmutable());
+        $bucket ??= new MetricsBucket(new DateTimeImmutable());
+        return $bucket;
     }
 
     private function shouldSend(MetricsBucket $bucket): bool
