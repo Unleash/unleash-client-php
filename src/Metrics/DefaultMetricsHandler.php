@@ -41,6 +41,7 @@ final class DefaultMetricsHandler implements MetricsHandler
         }
 
         $bucket ??= new MetricsBucket(new DateTimeImmutable());
+
         return $bucket;
     }
 
