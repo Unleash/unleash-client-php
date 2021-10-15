@@ -21,13 +21,15 @@ use Unleash\Client\Exception\HttpResponseException;
 
 final class DefaultUnleashRepository implements UnleashRepository
 {
-    public function __construct(
-        private ClientInterface $httpClient,
-        private RequestFactoryInterface $requestFactory,
-        private UnleashConfiguration $configuration,
-    ) {
+    private ClientInterface $httpClient;
+    private RequestFactoryInterface $requestFactory;
+    private UnleashConfiguration $configuration;
+    public function __construct(ClientInterface $httpClient, RequestFactoryInterface $requestFactory, UnleashConfiguration $configuration)
+    {
+        $this->httpClient = $httpClient;
+        $this->requestFactory = $requestFactory;
+        $this->configuration = $configuration;
     }
-
     /**
      * @throws ClientExceptionInterface
      * @throws InvalidArgumentException
@@ -133,23 +135,11 @@ final class DefaultUnleashRepository implements UnleashRepository
                 foreach ($variant['overrides'] ?? [] as $override) {
                     $overrides[] = new DefaultVariantOverride($override['contextName'], $override['values']);
                 }
-                $variants[] = new DefaultVariant(
-                    $variant['name'],
-                    true,
-                    $variant['weight'],
-                    $variant['stickiness'] ?? Stickiness::DEFAULT,
-                    isset($variant['payload'])
-                        ? new DefaultVariantPayload($variant['payload']['type'], $variant['payload']['value'])
-                        : null,
-                    $overrides,
-                );
+                $variants[] = new DefaultVariant($variant['name'], true, $variant['weight'], $variant['stickiness'] ?? Stickiness::DEFAULT, isset($variant['payload'])
+                    ? new DefaultVariantPayload($variant['payload']['type'], $variant['payload']['value'])
+                    : null, $overrides);
             }
-            $features[$feature['name']] = new DefaultFeature(
-                $feature['name'],
-                $feature['enabled'],
-                $strategies,
-                $variants,
-            );
+            $features[$feature['name']] = new DefaultFeature($feature['name'], $feature['enabled'], $strategies, $variants);
         }
 
         return $features;
