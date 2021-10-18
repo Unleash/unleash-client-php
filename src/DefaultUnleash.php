@@ -15,24 +15,47 @@ use Unleash\Client\Variant\VariantHandler;
 final class DefaultUnleash implements Unleash
 {
     /**
+     * @var \Unleash\Client\Strategy\StrategyHandler[]
+     */
+    private $strategyHandlers;
+    /**
+     * @var \Unleash\Client\Repository\UnleashRepository
+     */
+    private $repository;
+    /**
+     * @var \Unleash\Client\Client\RegistrationService
+     */
+    private $registrationService;
+    /**
+     * @var \Unleash\Client\Configuration\UnleashConfiguration
+     */
+    private $configuration;
+    /**
+     * @var \Unleash\Client\Metrics\MetricsHandler
+     */
+    private $metricsHandler;
+    /**
+     * @var \Unleash\Client\Variant\VariantHandler
+     */
+    private $variantHandler;
+    /**
      * @param iterable<StrategyHandler> $strategyHandlers
      */
-    public function __construct(
-        private iterable $strategyHandlers,
-        private UnleashRepository $repository,
-        private RegistrationService $registrationService,
-        private UnleashConfiguration $configuration,
-        private MetricsHandler $metricsHandler,
-        private VariantHandler $variantHandler,
-    ) {
+    public function __construct(iterable $strategyHandlers, UnleashRepository $repository, RegistrationService $registrationService, UnleashConfiguration $configuration, MetricsHandler $metricsHandler, VariantHandler $variantHandler)
+    {
+        $this->strategyHandlers = $strategyHandlers;
+        $this->repository = $repository;
+        $this->registrationService = $registrationService;
+        $this->configuration = $configuration;
+        $this->metricsHandler = $metricsHandler;
+        $this->variantHandler = $variantHandler;
         if ($configuration->isAutoRegistrationEnabled()) {
             $this->register();
         }
     }
-
     public function isEnabled(string $featureName, ?Context $context = null, bool $default = false): bool
     {
-        $context ??= $this->configuration->getContextProvider()->getContext();
+        $context = $context ?? $this->configuration->getContextProvider()->getContext();
 
         $feature = $this->repository->findFeature($featureName);
         if ($feature === null) {
@@ -76,8 +99,8 @@ final class DefaultUnleash implements Unleash
 
     public function getVariant(string $featureName, ?Context $context = null, ?Variant $fallbackVariant = null): Variant
     {
-        $fallbackVariant ??= $this->variantHandler->getDefaultVariant();
-        $context ??= $this->configuration->getContextProvider()->getContext();
+        $fallbackVariant = $fallbackVariant ?? $this->variantHandler->getDefaultVariant();
+        $context = $context ?? $this->configuration->getContextProvider()->getContext();
 
         $feature = $this->repository->findFeature($featureName);
         if ($feature === null || !$feature->isEnabled() || !count($feature->getVariants())) {
