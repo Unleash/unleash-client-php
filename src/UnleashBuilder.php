@@ -273,9 +273,7 @@ final class UnleashBuilder
         if ($httpClient === null) {
             $httpClient = $this->defaultImplementationLocator->findHttpClient();
             if ($httpClient === null) {
-                throw new InvalidValueException(
-                    "No http client provided, please use 'withHttpClient()' method or install a package providing 'psr/http-client-implementation'.",
-                );
+                throw new InvalidValueException("No http client provided, please use 'withHttpClient()' method or install a package providing 'psr/http-client-implementation'.");
             }
         }
         assert($httpClient instanceof ClientInterface);
@@ -292,9 +290,7 @@ final class UnleashBuilder
              */
             // @codeCoverageIgnoreStart
             if ($requestFactory === null) {
-                throw new InvalidValueException(
-                    "No request factory provided, please use 'withRequestFactory()' method or install a package providing 'psr/http-factory-implementation'.",
-                );
+                throw new InvalidValueException("No request factory provided, please use 'withRequestFactory()' method or install a package providing 'psr/http-factory-implementation'.");
             }
             // @codeCoverageIgnoreEnd
         }
@@ -309,24 +305,16 @@ final class UnleashBuilder
             $registrationService = new DefaultRegistrationService($httpClient, $requestFactory, $configuration);
         }
 
-        return new DefaultUnleash(
-            $this->strategies,
-            $repository,
-            $registrationService,
-            $configuration,
-            new DefaultMetricsHandler(
-                new DefaultMetricsSender(
-                    $httpClient,
-                    $requestFactory,
-                    $configuration,
-                ),
-                $configuration
-            ),
-            new DefaultVariantHandler($hashCalculator),
-        );
+        return new DefaultUnleash($this->strategies, $repository, $registrationService, $configuration, new DefaultMetricsHandler(
+            new DefaultMetricsSender($httpClient, $requestFactory, $configuration),
+            $configuration
+        ), new DefaultVariantHandler($hashCalculator));
     }
 
-    private function with(string $property, mixed $value): self
+    /**
+     * @param mixed $value
+     */
+    private function with(string $property, $value): self
     {
         $copy = clone $this;
         $copy->{$property} = $value;
