@@ -67,7 +67,7 @@ final class DefaultRegistrationService implements RegistrationService
             return false;
         }
 
-        return $cache->get(CacheKey::REGISTRATION);
+        return $cache->get(CacheKey::REGISTRATION) ?? false;
     }
 
     private function storeCache(bool $result): void
