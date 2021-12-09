@@ -47,6 +47,8 @@ jobs:
           result-encoding: string
           script: |
             return context.payload.ref.replace(/refs\/tags\/release-/, '');
+      - name: Checkout Code
+        uses: actions/checkout@v2
       - name: Install Dependencies
         run: composer install
       - name: Transpile ${{ matrix.version }}
@@ -83,6 +85,8 @@ jobs:
           result-encoding: string
           script: |
             return context.payload.ref.replace(/refs\/tags\/release-/, '');
+      - name: Checkout Code
+        uses: actions/checkout@v2
       - name: Delete original tag
         env:
           VERSION: ${{ steps.extract_name.outputs.result }}
