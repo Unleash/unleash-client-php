@@ -1,0 +1,27 @@
+name: Tests (8.x)
+on:
+  repository_dispatch:
+    types:
+      - trigger-8x-tests
+
+jobs:
+  tests:
+    name: Tests
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        version: ['8.0']
+    steps:
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.version }}
+      - name: Checkout Code
+        uses: actions/checkout@v2
+        with:
+          ref: php-${{ matrix.version }}
+          submodules: true
+      - name: Install Dependencies
+        run: composer install
+      - name: Run tests
+        run: composer phpunit

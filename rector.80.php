@@ -5,6 +5,4 @@ use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigura
 
 return static function (ContainerConfigurator $containerConfigurator): void {
     $containerConfigurator->import(DowngradeSetList::PHP_81);
-    $containerConfigurator->import(DowngradeSetList::PHP_80);
-    $containerConfigurator->import(DowngradeSetList::PHP_74);
 };
