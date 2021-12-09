@@ -8,7 +8,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  release_latest:
+    name: Release latest PHP version
     runs-on: ubuntu-latest
     steps:
       - name: Extract Version Name
@@ -24,67 +25,64 @@ jobs:
         env:
           VERSION: ${{ steps.extract_name.outputs.result }}
         run: php tests/check-version.php $VERSION
-      - name: Create PHP 8 release tag
+      - name: Create latest release tag
         env:
           VERSION: ${{ steps.extract_name.outputs.result }}
-        run: git tag v${VERSION}80
-      - name: Push PHP 8 release tag
+        run: git tag v${VERSION}81
+      - name: Push latest release tag
         env:
           VERSION: ${{ steps.extract_name.outputs.result }}
-        run: git push origin v${VERSION}80
-
+        run: git push origin v${VERSION}81
+  release_older:
+    name: Release older PHP version
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        version: ['7.3', '7.4', '8.0']
+    steps:
+      - name: Extract Version Name
+        id: extract_name
+        uses: actions/github-script@v4
+        with:
+          result-encoding: string
+          script: |
+            return context.payload.ref.replace(/refs\/tags\/release-/, '');
       - name: Install Dependencies
         run: composer install
-      - name: Transpile 7.3
-        run: php vendor/bin/rector process --no-diffs --no-progress-bar --config rector.73.php src
+      - name: Transpile ${{ matrix.version }}
+        run: php vendor/bin/rector process --no-diffs --no-progress-bar --config rector.$(echo ${{ matrix.version }} | sed -e 's/\.//').php src
       - name: Update composer.json version
-        run: 'sed -i -e ''s/"php": "\^8.0"/"php": "\^7.3"/'' composer.json'
-      - name: Commit PHP 7.3 version
+        run: 'sed -i -e ''s/"php": "\^8.1"/"php": "\^${{ matrix.version }}"/'' composer.json'
+      - name: Commit PHP ${{ matrix.version }} version
         run: |
           git config user.email noreply@github.com && \
           git config user.name "GitHub Actions" && \
-          git checkout -b tmp-php-7.3-release && \
+          git checkout -b tmp-php-${{ matrix.version }}-release && \
           git add . -v && \
-          git commit -m "Transpile to PHP 7.3" && \
-          git push origin tmp-php-7.3-release
-      - name: Create PHP 7.3 release tag
+          git commit -m "Transpile to PHP ${{ matrix.version }}" && \
+          git push origin tmp-php-${{ matrix.version }}-release
+      - name: Create PHP ${{ matrix.version }} release tag
         env:
           VERSION: ${{ steps.extract_name.outputs.result }}
-        run: git tag v${VERSION}73
-      - name: Push PHP 7.3 release tag
+        run: git tag v${VERSION}$(echo ${{ matrix.version }} | sed -e 's/\.//')
+      - name: Push PHP ${{ matrix.version }} release tag
         env:
           VERSION: ${{ steps.extract_name.outputs.result }}
-        run: git push origin v${VERSION}73
+        run: git push origin v${VERSION}$(echo ${{ matrix.version }} | sed -e 's/\.//')
       - name: Delete temporary branch
-        run: git push origin --delete tmp-php-7.3-release
+        run: git push origin --delete tmp-php-${{ matrix.version }}-release
 
-      - name: Checkout Code
-        uses: actions/checkout@v2
-      - name: Install Dependencies
-        run: composer install
-      - name: Transpile 7.4
-        run: php vendor/bin/rector process --no-diffs --no-progress-bar --config rector.74.php src
-      - name: Update composer.json version
-        run: 'sed -i -e ''s/"php": "\^8.0"/"php": "\^7.4"/'' composer.json'
-      - name: Commit PHP 7.4 version
-        run: |
-          git config user.email noreply@github.com && \
-          git config user.name "GitHub Actions" && \
-          git checkout -b tmp-php-7.4-release && \
-          git add . -v && \
-          git commit -m "Transpile to PHP 7.4" && \
-          git push origin tmp-php-7.4-release
-      - name: Create PHP 7.4 release tag
-        env:
-          VERSION: ${{ steps.extract_name.outputs.result }}
-        run: git tag v${VERSION}74
-      - name: Push PHP 7.4 release tag
-        env:
-          VERSION: ${{ steps.extract_name.outputs.result }}
-        run: git push origin v${VERSION}74
-      - name: Delete temporary branch
-        run: git push origin --delete tmp-php-7.4-release
-
+  delete_tag:
+    name: Delete original tag
+    runs-on: ubuntu-latest
+    steps:
+      - name: Extract Version Name
+        id: extract_name
+        uses: actions/github-script@v4
+        with:
+          result-encoding: string
+          script: |
+            return context.payload.ref.replace(/refs\/tags\/release-/, '');
       - name: Delete original tag
         env:
           VERSION: ${{ steps.extract_name.outputs.result }}
