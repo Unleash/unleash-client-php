@@ -42,7 +42,7 @@ jobs:
     needs:
       - transpile
     steps:
-      - name: Trigger 7.x tests
+      - name: Trigger tests
         uses: peter-evans/repository-dispatch@v1
         with:
           token: ${{ secrets.REPO_TOKEN }}
