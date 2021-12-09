@@ -1,4 +1,4 @@
-name: Tests (8.x)
+name: Tests (8.1)
 on:
   push:
     branches:
@@ -14,7 +14,7 @@ jobs:
       PHP_CS_FIXER_IGNORE_ENV: 1
     strategy:
       matrix:
-        version: ['8.0', '8.1']
+        version: ['8.1']
     steps:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -31,7 +31,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        version: ['8.0', '8.1']
+        version: ['8.1']
     steps:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -48,7 +48,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        version: ['8.0', '8.1']
+        version: ['8.1']
     steps:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2

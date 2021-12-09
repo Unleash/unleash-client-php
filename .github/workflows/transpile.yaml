@@ -1,4 +1,4 @@
-name: Transpile to 7.x
+name: Transpile to older versions
 on:
   push:
     branches:
@@ -6,74 +6,53 @@ on:
   workflow_dispatch:
 
 jobs:
-  transpile_73:
-    name: Transpile to PHP 7.3
+  transpile:
+    name: Transpile to older versions of PHP
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        version: ['7.3', '7.4', '8.0']
     steps:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: 8.0
+          php-version: 8.1
       - name: Checkout Code
         uses: actions/checkout@v2
         with:
           ref: master
       - name: Install Dependencies
         run: composer install
-      - name: Transpile to 7.3
-        run: php vendor/bin/rector process --no-diffs --no-progress-bar --config rector.73.php src
+      - name: Transpile to ${{ matrix.version }}
+        run: php vendor/bin/rector process --no-diffs --no-progress-bar --config rector.$(echo ${{ matrix.version }} | sed -e 's/\.//').php src
       - name: Update composer.json version
-        run: 'sed -i -e ''s/"php": "\^8.0"/"php": "\^7.3"/'' composer.json'
+        run: 'sed -i -e ''s/"php": "\^8.1"/"php": "\^${{ matrix.version }}"/'' composer.json'
       - name: Update README
         run: sed -i '1s/^/# This branch is auto generated\n/' README.md
-      - name: Commit PHP 7.3 version
+      - name: Commit PHP ${{ matrix.version }} version
         uses: actions-x/commit@v2
         with:
           files: .
-          branch: php-7.3
+          branch: php-${{ matrix.version }}
           name: GitHub Actions
           email: noreply@github.com
-          message: Transpiled to PHP 7.3
-          force: true
-  transpile_74:
-    name: Transpile to PHP 7.4
-    runs-on: ubuntu-latest
-    steps:
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: 8.0
-      - name: Checkout Code
-        uses: actions/checkout@v2
-        with:
-          ref: master
-      - name: Install Dependencies
-        run: composer install
-      - name: Transpile to 7.4
-        run: php vendor/bin/rector process --no-diffs --no-progress-bar --config rector.74.php src
-      - name: Update composer.json version
-        run: 'sed -i -e ''s/"php": "\^8.0"/"php": "\^7.4"/'' composer.json'
-      - name: Update README
-        run: sed -i '1s/^/# This branch is auto generated\n/' README.md
-      - name: Commit PHP 7.4 version
-        uses: actions-x/commit@v2
-        with:
-          files: .
-          branch: php-7.4
-          name: GitHub Actions
-          email: noreply@github.com
-          message: Transpiled to PHP 7.4
+          message: Transpiled to PHP ${{ matrix.version }}
           force: true
   trigger_7x_tests:
     name: Trigger 7.x tests
     runs-on: ubuntu-latest
     needs:
-      - transpile_73
-      - transpile_74
+      - transpile
     steps:
       - name: Trigger 7.x tests
         uses: peter-evans/repository-dispatch@v1
         with:
           token: ${{ secrets.REPO_TOKEN }}
           event-type: trigger-7x-tests
+          client-payload: '{"ref": "${{ github.ref }}", "sha": "${{ github.sha }}"}'
+      - name: Trigger 8.x tests
+        uses: peter-evans/repository-dispatch@v1
+        with:
+          token: ${{ secrets.REPO_TOKEN }}
+          event-type: trigger-8x-tests
           client-payload: '{"ref": "${{ github.ref }}", "sha": "${{ github.sha }}"}'
