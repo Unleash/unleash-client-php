@@ -30,7 +30,7 @@ jobs:
       - name: Update README
         run: sed -i '1s/^/# This branch is auto generated\n/' README.md
       - name: Commit PHP ${{ matrix.version }} version
-        uses: actions-x/commit@v2
+        uses: actions-x/commit@v3
         with:
           files: .
           branch: php-${{ matrix.version }}
