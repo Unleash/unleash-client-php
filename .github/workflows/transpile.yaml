@@ -19,8 +19,6 @@ jobs:
           php-version: 8.1
       - name: Checkout Code
         uses: actions/checkout@v2
-#        with:
-#          ref: master
       - name: Install Dependencies
         run: composer install
       - name: Transpile to ${{ matrix.version }}
