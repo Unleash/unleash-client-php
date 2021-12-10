@@ -25,8 +25,9 @@ final class UnleashConfiguration
         private array $headers = [],
         private bool $autoRegistrationEnabled = true,
         ?Context $defaultContext = null,
-        private ?UnleashContextProvider $contextProvider = new DefaultUnleashContextProvider(),
+        private ?UnleashContextProvider $contextProvider = null,
     ) {
+        $this->contextProvider ??= new DefaultUnleashContextProvider();
         if ($defaultContext !== null) {
             $this->setDefaultContext($defaultContext);
         }
