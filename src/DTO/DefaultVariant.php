@@ -36,7 +36,7 @@ final class DefaultVariant implements Variant
     }
 
     /**
-     * @phpstan-return array<string|bool|array>
+     * @phpstan-return array<string|bool|array<string>>
      */
     #[ArrayShape(['name' => 'string', 'enabled' => 'bool', 'payload' => 'mixed'])]
     public function jsonSerialize(): array
@@ -47,6 +47,7 @@ final class DefaultVariant implements Variant
         ];
         if ($this->payload !== null) {
             $result['payload'] = $this->payload->jsonSerialize();
+            assert(is_array($result['payload']));
         }
 
         return $result;
