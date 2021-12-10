@@ -51,7 +51,7 @@ final class DefaultVariantPayload implements VariantPayload
             );
         }
 
-        return json_decode($this->value, true, 512, JSON_THROW_ON_ERROR);
+        return (array) json_decode($this->value, true, 512, JSON_THROW_ON_ERROR);
     }
 
     /**

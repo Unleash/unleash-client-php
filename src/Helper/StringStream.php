@@ -157,6 +157,9 @@ final class StringStream implements StreamInterface
         return true;
     }
 
+    /**
+     * @param int<0, max> $length
+     */
     public function read($length): string
     {
         if ($this->stream === null) {

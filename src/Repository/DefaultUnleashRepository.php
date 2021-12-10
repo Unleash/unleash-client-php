@@ -86,7 +86,10 @@ final class DefaultUnleashRepository implements UnleashRepository
             return null;
         }
 
-        return $cache->get(CacheKey::FEATURES, []);
+        $result = $cache->get(CacheKey::FEATURES, []);
+        assert(is_array($result));
+
+        return $result;
     }
 
     /**
@@ -109,6 +112,7 @@ final class DefaultUnleashRepository implements UnleashRepository
     {
         $features = [];
         $body = json_decode($rawBody, true, 512, JSON_THROW_ON_ERROR);
+        assert(is_array($body));
         foreach ($body['features'] as $feature) {
             $strategies = [];
             $variants = [];

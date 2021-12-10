@@ -31,7 +31,7 @@ final class DefaultImplementationLocator
     ];
 
     /**
-     * @var array<string,array<string,array>>
+     * @var array<string,array<string,array<mixed>>>
      */
     private array $defaultImplementations = [
         'cache' => [

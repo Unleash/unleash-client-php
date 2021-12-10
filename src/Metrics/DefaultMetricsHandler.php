@@ -38,6 +38,7 @@ final class DefaultMetricsHandler implements MetricsHandler
         $bucket = null;
         if ($cache->has(CacheKey::METRICS_BUCKET)) {
             $bucket = $cache->get(CacheKey::METRICS_BUCKET);
+            assert($bucket instanceof MetricsBucket || $bucket === null);
         }
 
         $bucket ??= new MetricsBucket(new DateTimeImmutable());
