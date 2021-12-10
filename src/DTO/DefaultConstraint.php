@@ -8,16 +8,32 @@ use Unleash\Client\Enum\ConstraintOperator;
 final class DefaultConstraint implements Constraint
 {
     /**
+     * @readonly
+     */
+    private string $contextName;
+    /**
+     * @readonly
+     */
+    private string $operator;
+    /**
+     * @var string[]
+     * @readonly
+     */
+    private array $values;
+    /**
      * @param array<string> $values
      */
     public function __construct(
-        private readonly string $contextName,
-        #[ExpectedValues(valuesFromClass: ConstraintOperator::class)]
-        private readonly string $operator,
-        private readonly array $values,
-    ) {
+        string $contextName,
+        #[\JetBrains\PhpStorm\ExpectedValues(valuesFromClass: \Unleash\Client\Enum\ConstraintOperator::class)]
+        string $operator,
+        array $values
+    )
+    {
+        $this->contextName = $contextName;
+        $this->operator = $operator;
+        $this->values = $values;
     }
-
     public function getContextName(): string
     {
         return $this->contextName;
