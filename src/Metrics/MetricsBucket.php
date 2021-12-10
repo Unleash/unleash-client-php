@@ -18,7 +18,7 @@ final class MetricsBucket implements JsonSerializable
     private array $toggles = [];
 
     public function __construct(
-        private DateTimeInterface $startDate,
+        private readonly DateTimeInterface $startDate,
         private ?DateTimeInterface $endDate = null,
     ) {
     }

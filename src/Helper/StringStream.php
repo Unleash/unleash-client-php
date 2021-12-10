@@ -15,7 +15,7 @@ final class StringStream implements StreamInterface
      */
     private $stream;
 
-    private int $size;
+    private readonly int $size;
 
     public function __construct(
         string $content

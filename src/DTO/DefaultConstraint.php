@@ -11,10 +11,10 @@ final class DefaultConstraint implements Constraint
      * @param array<string> $values
      */
     public function __construct(
-        private string $contextName,
+        private readonly string $contextName,
         #[ExpectedValues(valuesFromClass: ConstraintOperator::class)]
-        private string $operator,
-        private array $values,
+        private readonly string $operator,
+        private readonly array $values,
     ) {
     }
 

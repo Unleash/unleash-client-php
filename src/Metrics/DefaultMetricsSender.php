@@ -10,9 +10,9 @@ use Unleash\Client\Helper\StringStream;
 final class DefaultMetricsSender implements MetricsSender
 {
     public function __construct(
-        private ClientInterface $httpClient,
-        private RequestFactoryInterface $requestFactory,
-        private UnleashConfiguration $configuration,
+        private readonly ClientInterface $httpClient,
+        private readonly RequestFactoryInterface $requestFactory,
+        private readonly UnleashConfiguration $configuration,
     ) {
     }
 
