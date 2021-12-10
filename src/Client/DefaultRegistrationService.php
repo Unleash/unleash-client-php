@@ -16,9 +16,9 @@ use Unleash\Client\Unleash;
 final class DefaultRegistrationService implements RegistrationService
 {
     public function __construct(
-        private ClientInterface $httpClient,
-        private RequestFactoryInterface $requestFactory,
-        private UnleashConfiguration $configuration,
+        private readonly ClientInterface $httpClient,
+        private readonly RequestFactoryInterface $requestFactory,
+        private readonly UnleashConfiguration $configuration,
     ) {
     }
 

@@ -9,9 +9,9 @@ final class DefaultStrategy implements Strategy
      * @param array<Constraint>    $constraints
      */
     public function __construct(
-        private string $name,
-        private array $parameters = [],
-        private array $constraints = [],
+        private readonly string $name,
+        private readonly array $parameters = [],
+        private readonly array $constraints = [],
     ) {
     }
 

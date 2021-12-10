@@ -10,7 +10,7 @@ use Unleash\Client\Stickiness\StickinessCalculator;
 final class GradualRolloutStrategyHandler extends AbstractStrategyHandler
 {
     public function __construct(
-        private StickinessCalculator $stickinessCalculator
+        private readonly StickinessCalculator $stickinessCalculator
     ) {
     }
 

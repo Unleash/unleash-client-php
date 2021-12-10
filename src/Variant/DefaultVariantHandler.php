@@ -13,7 +13,7 @@ use Unleash\Client\Stickiness\StickinessCalculator;
 final class DefaultVariantHandler implements VariantHandler
 {
     public function __construct(
-        private StickinessCalculator $stickinessCalculator,
+        private readonly StickinessCalculator $stickinessCalculator,
     ) {
     }
 

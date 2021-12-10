@@ -15,8 +15,8 @@ final class DefaultVariantPayload implements VariantPayload
 {
     public function __construct(
         #[ExpectedValues(valuesFromClass: VariantPayloadType::class)]
-        private string $type,
-        private string $value,
+        private readonly string $type,
+        private readonly string $value,
     ) {
     }
 
