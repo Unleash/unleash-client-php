@@ -2,7 +2,6 @@
 
 namespace Unleash\Client;
 
-use JetBrains\PhpStorm\Deprecated;
 use JetBrains\PhpStorm\Immutable;
 use JetBrains\PhpStorm\Pure;
 use Psr\Http\Client\ClientInterface;
@@ -13,7 +12,6 @@ use Unleash\Client\Client\RegistrationService;
 use Unleash\Client\Configuration\Context;
 use Unleash\Client\Configuration\UnleashConfiguration;
 use Unleash\Client\ContextProvider\DefaultUnleashContextProvider;
-use Unleash\Client\ContextProvider\SettableUnleashContextProvider;
 use Unleash\Client\ContextProvider\UnleashContextProvider;
 use Unleash\Client\Exception\InvalidValueException;
 use Unleash\Client\Helper\DefaultImplementationLocator;
@@ -23,10 +21,7 @@ use Unleash\Client\Repository\DefaultUnleashRepository;
 use Unleash\Client\Stickiness\MurmurHashCalculator;
 use Unleash\Client\Strategy\ApplicationHostnameStrategyHandler;
 use Unleash\Client\Strategy\DefaultStrategyHandler;
-use Unleash\Client\Strategy\GradualRolloutRandomStrategyHandler;
-use Unleash\Client\Strategy\GradualRolloutSessionIdStrategyHandler;
 use Unleash\Client\Strategy\GradualRolloutStrategyHandler;
-use Unleash\Client\Strategy\GradualRolloutUserIdStrategyHandler;
 use Unleash\Client\Strategy\IpAddressStrategyHandler;
 use Unleash\Client\Strategy\StrategyHandler;
 use Unleash\Client\Strategy\UserIdStrategyHandler;
@@ -78,16 +73,12 @@ final class UnleashBuilder
     {
         $this->defaultImplementationLocator = new DefaultImplementationLocator();
 
-        $rolloutStrategyHandler = new GradualRolloutStrategyHandler(new MurmurHashCalculator());
         $this->strategies = [
             new DefaultStrategyHandler(),
             new IpAddressStrategyHandler(),
             new UserIdStrategyHandler(),
-            $rolloutStrategyHandler,
+            new GradualRolloutStrategyHandler(new MurmurHashCalculator()),
             new ApplicationHostnameStrategyHandler(),
-            new GradualRolloutUserIdStrategyHandler($rolloutStrategyHandler),
-            new GradualRolloutSessionIdStrategyHandler($rolloutStrategyHandler),
-            new GradualRolloutRandomStrategyHandler($rolloutStrategyHandler),
         ];
     }
 
@@ -210,13 +201,6 @@ final class UnleashBuilder
     }
 
     #[Pure]
-    #[Deprecated(reason: 'Context provider support was added, use custom context provider using withContextProvider()')]
-    public function withDefaultContext(?Context $context): self
-    {
-        return $this->with('defaultContext', $context);
-    }
-
-    #[Pure]
     public function withContextProvider(?UnleashContextProvider $contextProvider): self
     {
         return $this->with('contextProvider', $contextProvider);
@@ -253,9 +237,6 @@ final class UnleashBuilder
         $contextProvider = $this->contextProvider;
         if ($contextProvider === null) {
             $contextProvider = new DefaultUnleashContextProvider();
-        }
-        if ($this->defaultContext !== null && $contextProvider instanceof SettableUnleashContextProvider) {
-            $contextProvider->setDefaultContext($this->defaultContext);
         }
 
         $configuration = new UnleashConfiguration($this->appUrl, $this->appName, $this->instanceId);
