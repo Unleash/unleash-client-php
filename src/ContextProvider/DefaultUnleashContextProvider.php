@@ -8,10 +8,6 @@ use Unleash\Client\Configuration\UnleashContext;
 
 final class DefaultUnleashContextProvider implements UnleashContextProvider
 {
-    public function __construct()
-    {
-    }
-
     #[Pure]
     public function getContext(): Context
     {

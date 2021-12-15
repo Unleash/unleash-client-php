@@ -12,7 +12,6 @@ use Symfony\Component\Cache\Psr16Cache;
 use Unleash\Client\Client\DefaultRegistrationService;
 use Unleash\Client\Configuration\Context;
 use Unleash\Client\Configuration\UnleashConfiguration;
-use Unleash\Client\Configuration\UnleashContext;
 use Unleash\Client\ContextProvider\DefaultUnleashContextProvider;
 use Unleash\Client\DTO\Strategy;
 use Unleash\Client\Exception\InvalidValueException;
@@ -51,7 +50,7 @@ final class UnleashBuilderTest extends TestCase
         $strategiesProperty = (new ReflectionObject($this->instance))->getProperty('strategies');
         $strategiesProperty->setAccessible(true);
 
-        self::assertCount(8, $strategiesProperty->getValue($this->instance));
+        self::assertCount(5, $strategiesProperty->getValue($this->instance));
         $instance = $this->instance->withStrategies(new class implements StrategyHandler {
             public function supports(Strategy $strategy): bool
             {
@@ -141,7 +140,7 @@ final class UnleashBuilderTest extends TestCase
         self::assertEquals('test', $configuration->getInstanceId());
         self::assertNotNull($configuration->getCache());
         self::assertIsInt($configuration->getTtl());
-        self::assertCount(8, $strategies);
+        self::assertCount(5, $strategies);
 
         $requestFactory = $this->newRequestFactory();
         $httpClient = $this->newHttpClient();
@@ -371,7 +370,7 @@ final class UnleashBuilderTest extends TestCase
         $strategiesProperty = (new ReflectionObject($this->instance))->getProperty('strategies');
         $strategiesProperty->setAccessible(true);
 
-        self::assertCount(8, $strategiesProperty->getValue($this->instance));
+        self::assertCount(5, $strategiesProperty->getValue($this->instance));
         $instance = $this->instance->withStrategy(new class implements StrategyHandler {
             public function supports(Strategy $strategy): bool
             {
@@ -388,18 +387,7 @@ final class UnleashBuilderTest extends TestCase
                 return false;
             }
         });
-        self::assertCount(9, $strategiesProperty->getValue($instance));
-    }
-
-    public function testWithDefaultContext()
-    {
-        self::assertNotSame($this->instance, $this->instance->withDefaultContext(new UnleashContext()));
-
-        $context = new UnleashContext();
-        $instance = $this->instance->withDefaultContext($context);
-        $defaultContextProperty = (new ReflectionObject($instance))->getProperty('defaultContext');
-        $defaultContextProperty->setAccessible(true);
-        self::assertSame($context, $defaultContextProperty->getValue($instance));
+        self::assertCount(6, $strategiesProperty->getValue($instance));
     }
 
     public function testWithContextProvider()
@@ -411,28 +399,6 @@ final class UnleashBuilderTest extends TestCase
         $providerProperty = (new ReflectionObject($instance))->getProperty('contextProvider');
         $providerProperty->setAccessible(true);
         self::assertSame($provider, $providerProperty->getValue($instance));
-
-        // test that the deprecated withDefaultContext() works
-        $defaultContext = new UnleashContext('456');
-        $instance = $this->instance
-            ->withContextProvider($provider)
-            ->withDefaultContext($defaultContext)
-            ->withAutomaticRegistrationEnabled(false)
-            ->withMetricsEnabled(false)
-            ->withAppUrl('test')
-            ->withInstanceId('test')
-            ->withAppName('test')
-            ->build();
-
-        $configurationProperty = (new ReflectionObject($instance))->getProperty('configuration');
-        $configurationProperty->setAccessible(true);
-        $configuration = $configurationProperty->getValue($instance);
-
-        $providerProperty = (new ReflectionObject($configuration))->getProperty('contextProvider');
-        $providerProperty->setAccessible(true);
-        $provider = $providerProperty->getValue($configuration);
-        assert($provider instanceof DefaultUnleashContextProvider);
-        self::assertEquals('456', $provider->getContext()->getCurrentUserId());
     }
 
     private function newHttpClient(): ClientInterface

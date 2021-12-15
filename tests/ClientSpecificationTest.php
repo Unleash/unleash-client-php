@@ -2,18 +2,20 @@
 
 namespace Unleash\Client\Tests;
 
+use Unleash\Client\Configuration\Context;
 use Unleash\Client\Configuration\UnleashConfiguration;
 use Unleash\Client\Configuration\UnleashContext;
 use Unleash\Client\DefaultUnleash;
+use Unleash\Client\DTO\DefaultStrategy;
 use Unleash\Client\DTO\Feature;
+use Unleash\Client\DTO\Strategy;
 use Unleash\Client\DTO\Variant;
+use Unleash\Client\Enum\Stickiness;
 use Unleash\Client\Metrics\MetricsHandler;
 use Unleash\Client\Stickiness\MurmurHashCalculator;
+use Unleash\Client\Strategy\AbstractStrategyHandler;
 use Unleash\Client\Strategy\DefaultStrategyHandler;
-use Unleash\Client\Strategy\GradualRolloutRandomStrategyHandler;
-use Unleash\Client\Strategy\GradualRolloutSessionIdStrategyHandler;
 use Unleash\Client\Strategy\GradualRolloutStrategyHandler;
-use Unleash\Client\Strategy\GradualRolloutUserIdStrategyHandler;
 use Unleash\Client\Strategy\IpAddressStrategyHandler;
 use Unleash\Client\Strategy\UserIdStrategyHandler;
 use Unleash\Client\Tests\Traits\FakeCacheImplementationTrait;
@@ -27,14 +29,14 @@ final class ClientSpecificationTest extends AbstractHttpClientTest
     {
         $unleash = new DefaultUnleash(
             [
-            new DefaultStrategyHandler(),
-            new GradualRolloutStrategyHandler(new MurmurHashCalculator()),
-            new IpAddressStrategyHandler(),
-            new UserIdStrategyHandler(),
-            new GradualRolloutUserIdStrategyHandler(new GradualRolloutStrategyHandler(new MurmurHashCalculator())),
-            new GradualRolloutSessionIdStrategyHandler(new GradualRolloutStrategyHandler(new MurmurHashCalculator())),
-            new GradualRolloutRandomStrategyHandler(new GradualRolloutStrategyHandler(new MurmurHashCalculator())),
-        ],
+                ...[
+                    new DefaultStrategyHandler(),
+                    new GradualRolloutStrategyHandler(new MurmurHashCalculator()),
+                    new IpAddressStrategyHandler(),
+                    new UserIdStrategyHandler(),
+                ],
+                ...$this->getDeprecatedStrategies(),
+            ],
             $this->repository,
             $this->registrationService,
             (new UnleashConfiguration('', '', ''))
@@ -111,5 +113,89 @@ final class ClientSpecificationTest extends AbstractHttpClientTest
         }
 
         return $contextObject;
+    }
+
+    /**
+     * The deprecated strategies are moved here as anonymous classes temporarily until references to them
+     * are removed from upstream.
+     */
+    private function getDeprecatedStrategies(): iterable
+    {
+        $rolloutStrategy = new GradualRolloutStrategyHandler(new MurmurHashCalculator());
+
+        yield new class($rolloutStrategy) extends AbstractStrategyHandler {
+            public function __construct(private readonly GradualRolloutStrategyHandler $rolloutStrategyHandler)
+            {
+            }
+
+            public function isEnabled(Strategy $strategy, Context $context): bool
+            {
+                $transformedStrategy = new DefaultStrategy(
+                    $this->getStrategyName(),
+                    [
+                        'stickiness' => Stickiness::RANDOM,
+                        'groupId' => $strategy->getParameters()['groupId'] ?? '',
+                        'rollout' => $strategy->getParameters()['percentage'],
+                    ]
+                );
+
+                return $this->rolloutStrategyHandler->isEnabled($transformedStrategy, $context);
+            }
+
+            public function getStrategyName(): string
+            {
+                return 'gradualRolloutRandom';
+            }
+        };
+
+        yield new class($rolloutStrategy) extends AbstractStrategyHandler {
+            public function __construct(private readonly GradualRolloutStrategyHandler $rolloutStrategyHandler)
+            {
+            }
+
+            public function isEnabled(Strategy $strategy, Context $context): bool
+            {
+                $transformedStrategy = new DefaultStrategy(
+                    $this->getStrategyName(),
+                    [
+                        'stickiness' => Stickiness::SESSION_ID,
+                        'groupId' => $strategy->getParameters()['groupId'],
+                        'rollout' => $strategy->getParameters()['percentage'],
+                    ]
+                );
+
+                return $this->rolloutStrategyHandler->isEnabled($transformedStrategy, $context);
+            }
+
+            public function getStrategyName(): string
+            {
+                return 'gradualRolloutSessionId';
+            }
+        };
+
+        yield new class($rolloutStrategy) extends AbstractStrategyHandler {
+            public function __construct(private readonly GradualRolloutStrategyHandler $rolloutStrategyHandler)
+            {
+            }
+
+            public function isEnabled(Strategy $strategy, Context $context): bool
+            {
+                $transformedStrategy = new DefaultStrategy(
+                    $this->getStrategyName(),
+                    [
+                        'stickiness' => Stickiness::USER_ID,
+                        'groupId' => $strategy->getParameters()['groupId'],
+                        'rollout' => $strategy->getParameters()['percentage'],
+                    ]
+                );
+
+                return $this->rolloutStrategyHandler->isEnabled($transformedStrategy, $context);
+            }
+
+            public function getStrategyName(): string
+            {
+                return 'gradualRolloutUserId';
+            }
+        };
     }
 }
