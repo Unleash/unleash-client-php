@@ -2,12 +2,6 @@
 
 namespace Unleash\Client\Configuration;
 
-/**
- * @method string|null getHostname()
- * @method string|null getEnvironment()
- * @method Context     setHostname(string|null $hostname)
- * @method Context     setEnvironment(string|null $environment)
- */
 interface Context
 {
     public function getCurrentUserId(): ?string;
@@ -29,6 +23,14 @@ interface Context
     public function setIpAddress(?string $ipAddress): self;
 
     public function setSessionId(?string $sessionId): self;
+
+    public function getHostname(): ?string;
+
+    public function setHostname(?string $hostname): self;
+
+    public function getEnvironment(): ?string;
+
+    public function setEnvironment(?string $environment): self;
 
     /**
      * @param array<string> $values
