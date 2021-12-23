@@ -2,7 +2,7 @@ name: Transpile to older versions
 on:
   push:
     branches:
-      - master
+      - main
   workflow_dispatch:
 
 jobs:
