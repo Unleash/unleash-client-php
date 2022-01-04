@@ -9,19 +9,37 @@ use Unleash\Client\Exception\InvalidValueException;
 final class UnleashContext implements Context
 {
     /**
+     * @var string|null
+     */
+    private $currentUserId;
+    /**
+     * @var string|null
+     */
+    private $ipAddress;
+    /**
+     * @var string|null
+     */
+    private $sessionId;
+    /**
+     * @var array<string, string>
+     */
+    private $customContext = [];
+    /**
+     * @var string|null
+     */
+    private $environment;
+    /**
      * @param array<string,string> $customContext
      */
-    public function __construct(
-        private ?string $currentUserId = null,
-        private ?string $ipAddress = null,
-        private ?string $sessionId = null,
-        private array $customContext = [],
-        ?string $hostname = null,
-        private ?string $environment = null,
-    ) {
+    public function __construct(?string $currentUserId = null, ?string $ipAddress = null, ?string $sessionId = null, array $customContext = [], ?string $hostname = null, ?string $environment = null)
+    {
+        $this->currentUserId = $currentUserId;
+        $this->ipAddress = $ipAddress;
+        $this->sessionId = $sessionId;
+        $this->customContext = $customContext;
+        $this->environment = $environment;
         $this->setHostname($hostname);
     }
-
     public function getCurrentUserId(): ?string
     {
         return $this->currentUserId;
@@ -51,7 +69,7 @@ final class UnleashContext implements Context
         return $this->customContext[$name];
     }
 
-    public function setCustomProperty(string $name, string $value): self
+    public function setCustomProperty(string $name, string $value): \Unleash\Client\Configuration\Context
     {
         $this->customContext[$name] = $value;
 
@@ -63,7 +81,7 @@ final class UnleashContext implements Context
         return array_key_exists($name, $this->customContext);
     }
 
-    public function removeCustomProperty(string $name, bool $silent = true): self
+    public function removeCustomProperty(string $name, bool $silent = true): \Unleash\Client\Configuration\Context
     {
         if (!$this->hasCustomProperty($name) && !$silent) {
             throw new InvalidValueException("The custom context value '{$name}' does not exist");
@@ -74,21 +92,21 @@ final class UnleashContext implements Context
         return $this;
     }
 
-    public function setCurrentUserId(?string $currentUserId): self
+    public function setCurrentUserId(?string $currentUserId): \Unleash\Client\Configuration\Context
     {
         $this->currentUserId = $currentUserId;
 
         return $this;
     }
 
-    public function setIpAddress(?string $ipAddress): self
+    public function setIpAddress(?string $ipAddress): \Unleash\Client\Configuration\Context
     {
         $this->ipAddress = $ipAddress;
 
         return $this;
     }
 
-    public function setSessionId(?string $sessionId): self
+    public function setSessionId(?string $sessionId): \Unleash\Client\Configuration\Context
     {
         $this->sessionId = $sessionId;
 
@@ -133,12 +151,19 @@ final class UnleashContext implements Context
 
     public function findContextValue(string $fieldName): ?string
     {
-        return match ($fieldName) {
-            ContextField::USER_ID, Stickiness::USER_ID => $this->getCurrentUserId(),
-            ContextField::SESSION_ID, Stickiness::SESSION_ID => $this->getSessionId(),
-            ContextField::IP_ADDRESS => $this->getIpAddress(),
-            ContextField::ENVIRONMENT => $this->getEnvironment(),
-            default => $this->customContext[$fieldName] ?? null,
-        };
+        switch ($fieldName) {
+            case ContextField::USER_ID:
+            case Stickiness::USER_ID:
+                return $this->getCurrentUserId();
+            case ContextField::SESSION_ID:
+            case Stickiness::SESSION_ID:
+                return $this->getSessionId();
+            case ContextField::IP_ADDRESS:
+                return $this->getIpAddress();
+            case ContextField::ENVIRONMENT:
+                return $this->getEnvironment();
+            default:
+                return $this->customContext[$fieldName] ?? null;
+        }
     }
 }
