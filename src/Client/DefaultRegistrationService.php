@@ -19,7 +19,11 @@ final class DefaultRegistrationService implements RegistrationService
         private readonly ClientInterface $httpClient,
         private readonly RequestFactoryInterface $requestFactory,
         private readonly UnleashConfiguration $configuration,
+        private ?string $sdkName = null,
+        private ?string $sdkVersion = null,
     ) {
+        $this->sdkName ??= 'unleash-client-php';
+        $this->sdkVersion ??= Unleash::SDK_VERSION;
     }
 
     /**
@@ -42,7 +46,7 @@ final class DefaultRegistrationService implements RegistrationService
             ->withBody(new StringStream(json_encode([
                 'appName' => $this->configuration->getAppName(),
                 'instanceId' => $this->configuration->getInstanceId(),
-                'sdkVersion' => 'unleash-client-php:' . Unleash::SDK_VERSION,
+                'sdkVersion' => $this->sdkName . ':' . $this->sdkVersion,
                 'strategies' => array_map(function (StrategyHandler $strategyHandler): string {
                     return $strategyHandler->getStrategyName();
                 }, $strategyHandlers),
