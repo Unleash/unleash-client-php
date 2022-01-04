@@ -8,20 +8,26 @@ use Unleash\Client\Exception\InvalidValueException;
 
 final class UnleashContext implements Context
 {
+    private ?string $currentUserId = null;
+    private ?string $ipAddress = null;
+    private ?string $sessionId = null;
+    /**
+     * @var array<string, string>
+     */
+    private array $customContext = [];
+    private ?string $environment = null;
     /**
      * @param array<string,string> $customContext
      */
-    public function __construct(
-        private ?string $currentUserId = null,
-        private ?string $ipAddress = null,
-        private ?string $sessionId = null,
-        private array $customContext = [],
-        ?string $hostname = null,
-        private ?string $environment = null,
-    ) {
+    public function __construct(?string $currentUserId = null, ?string $ipAddress = null, ?string $sessionId = null, array $customContext = [], ?string $hostname = null, ?string $environment = null)
+    {
+        $this->currentUserId = $currentUserId;
+        $this->ipAddress = $ipAddress;
+        $this->sessionId = $sessionId;
+        $this->customContext = $customContext;
+        $this->environment = $environment;
         $this->setHostname($hostname);
     }
-
     public function getCurrentUserId(): ?string
     {
         return $this->currentUserId;
@@ -133,12 +139,19 @@ final class UnleashContext implements Context
 
     public function findContextValue(string $fieldName): ?string
     {
-        return match ($fieldName) {
-            ContextField::USER_ID, Stickiness::USER_ID => $this->getCurrentUserId(),
-            ContextField::SESSION_ID, Stickiness::SESSION_ID => $this->getSessionId(),
-            ContextField::IP_ADDRESS => $this->getIpAddress(),
-            ContextField::ENVIRONMENT => $this->getEnvironment(),
-            default => $this->customContext[$fieldName] ?? null,
-        };
+        switch ($fieldName) {
+            case ContextField::USER_ID:
+            case Stickiness::USER_ID:
+                return $this->getCurrentUserId();
+            case ContextField::SESSION_ID:
+            case Stickiness::SESSION_ID:
+                return $this->getSessionId();
+            case ContextField::IP_ADDRESS:
+                return $this->getIpAddress();
+            case ContextField::ENVIRONMENT:
+                return $this->getEnvironment();
+            default:
+                return $this->customContext[$fieldName] ?? null;
+        }
     }
 }
