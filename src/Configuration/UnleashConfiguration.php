@@ -3,8 +3,13 @@
 namespace Unleash\Client\Configuration;
 
 use JetBrains\PhpStorm\Deprecated;
+use JetBrains\PhpStorm\Pure;
 use LogicException;
 use Psr\SimpleCache\CacheInterface;
+use Unleash\Client\Bootstrap\BootstrapHandler;
+use Unleash\Client\Bootstrap\BootstrapProvider;
+use Unleash\Client\Bootstrap\DefaultBootstrapHandler;
+use Unleash\Client\Bootstrap\EmptyBootstrapProvider;
 use Unleash\Client\ContextProvider\DefaultUnleashContextProvider;
 use Unleash\Client\ContextProvider\SettableUnleashContextProvider;
 use Unleash\Client\ContextProvider\UnleashContextProvider;
@@ -24,8 +29,15 @@ final class UnleashConfiguration
         private bool $metricsEnabled = true,
         private array $headers = [],
         private bool $autoRegistrationEnabled = true,
+        // todo remove in next major version
         ?Context $defaultContext = null,
+        // todo remove nullability in next major version
         private ?UnleashContextProvider $contextProvider = null,
+        // todo remove nullability in next major version
+        private ?BootstrapHandler $bootstrapHandler = null,
+        // todo remove nullability in next major version
+        private ?BootstrapProvider $bootstrapProvider = null,
+        private bool $fetchingEnabled = true,
     ) {
         $this->contextProvider ??= new DefaultUnleashContextProvider();
         if ($defaultContext !== null) {
@@ -192,6 +204,44 @@ final class UnleashConfiguration
     public function setContextProvider(UnleashContextProvider $contextProvider): self
     {
         $this->contextProvider = $contextProvider;
+
+        return $this;
+    }
+
+    #[Pure]
+    public function getBootstrapHandler(): BootstrapHandler
+    {
+        return $this->bootstrapHandler ?? new DefaultBootstrapHandler();
+    }
+
+    public function setBootstrapHandler(BootstrapHandler $bootstrapHandler): self
+    {
+        $this->bootstrapHandler = $bootstrapHandler;
+
+        return $this;
+    }
+
+    #[Pure]
+    public function getBootstrapProvider(): BootstrapProvider
+    {
+        return $this->bootstrapProvider ?? new EmptyBootstrapProvider();
+    }
+
+    public function setBootstrapProvider(BootstrapProvider $bootstrapProvider): self
+    {
+        $this->bootstrapProvider = $bootstrapProvider;
+
+        return $this;
+    }
+
+    public function isFetchingEnabled(): bool
+    {
+        return $this->fetchingEnabled;
+    }
+
+    public function setFetchingEnabled(bool $fetchingEnabled): self
+    {
+        $this->fetchingEnabled = $fetchingEnabled;
 
         return $this;
     }

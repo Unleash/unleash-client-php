@@ -1,0 +1,18 @@
+{
+  "features": [
+    {
+      "enabled": true,
+      "name": "BootstrapDemo",
+      "description": "",
+      "project": "default",
+      "stale": false,
+      "type": "release",
+      "variants": [],
+      "strategies": [
+        {
+          "name": "default"
+        }
+      ]
+    }
+  ]
+}

@@ -50,5 +50,13 @@ final class DefaultRegistrationServiceTest extends AbstractHttpClientTest
         $this->pushResponse([]);
         self::assertTrue($instance->register([]));
         self::assertTrue($instance->register([]));
+
+        $configuration->setFetchingEnabled(false);
+        $instance = new DefaultRegistrationService(
+            $this->httpClient,
+            new HttpFactory(),
+            $configuration
+        );
+        self::assertFalse($instance->register([]));
     }
 }
