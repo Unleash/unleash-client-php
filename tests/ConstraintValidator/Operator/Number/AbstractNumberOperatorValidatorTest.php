@@ -3,23 +3,19 @@
 namespace Unleash\Client\Tests\ConstraintValidator\Operator\Number;
 
 use PHPUnit\Framework\TestCase;
-use Unleash\Client\ConstraintValidator\Operator\Number\AbstractNumberOperatorValidator;
+use Unleash\Client\Tests\TestHelpers\AbstractNumberOperatorValidatorImpl73;
+use Unleash\Client\Tests\TestHelpers\AbstractNumberOperatorValidatorImpl80;
 
 final class AbstractNumberOperatorValidatorTest extends TestCase
 {
     public function testConvert()
     {
-        $instance = new class extends AbstractNumberOperatorValidator {
-            protected function validate(string $currentValue, array|string $searchInValue): bool
-            {
-                return false;
-            }
-
-            public function convert(string $number): int|float
-            {
-                return parent::convert($number);
-            }
-        };
+        // these tests also run on php < 8 which doesn't support multiple types
+        if (PHP_VERSION_ID >= 80000) {
+            $instance = new AbstractNumberOperatorValidatorImpl80();
+        } else {
+            $instance = new AbstractNumberOperatorValidatorImpl73();
+        }
 
         self::assertIsInt($instance->convert('5'));
         self::assertIsFloat($instance->convert('5.0'));

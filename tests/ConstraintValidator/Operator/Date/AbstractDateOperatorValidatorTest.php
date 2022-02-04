@@ -10,12 +10,12 @@ final class AbstractDateOperatorValidatorTest extends TestCase
     public function testAcceptValues()
     {
         $instance = new class extends AbstractDateOperatorValidator {
-            public function acceptsValues(array|string $values): bool
+            public function acceptsValues($values): bool
             {
                 return parent::acceptsValues($values);
             }
 
-            protected function validate(string $currentValue, array|string $searchInValue): bool
+            protected function validate(string $currentValue, $searchInValue): bool
             {
                 return false;
             }
