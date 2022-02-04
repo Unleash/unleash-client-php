@@ -68,9 +68,7 @@ final class MetricsBucket implements JsonSerializable
 
             if ($toggle->getVariant() !== null) {
                 $variant = $toggle->getVariant();
-                if (!isset($togglesArray[$featureName]['variants'][$variant->getName()])) {
-                    $togglesArray[$featureName]['variants'][$variant->getName()] = 0;
-                }
+                $togglesArray[$featureName]['variants'][$variant->getName()] ??= 0;
                 ++$togglesArray[$featureName]['variants'][$variant->getName()];
             }
         }
