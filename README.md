@@ -416,6 +416,31 @@ $builder = UnleashBuilder::create()
     ->withBootstrapProvider(new MyBootstrapProvider());
 ```
 
+### Disabling communication with Unleash server
+
+It may be useful to disable communication with the Unleash server for local development and using a bootstrap instead.
+
+Note that when you disable communication with Unleash and don't provide a bootstrap, an exception will be thrown.
+
+> Tip: Set the cache interval to 0 to always have a fresh bootstrap content.
+
+> The usually required parameters (app name, instance id, app url) are not required when communication is disabled.
+
+```php
+<?php
+
+use Unleash\Client\UnleashBuilder;
+
+$unleash = UnleashBuilder::create()
+    ->withAppName('Some name') // 
+    ->withInstanceId('Some id')
+    ->withAppUrl('https://whatever-because-it-will-not-be-called.unleash')
+    ->withBootstrap('{}')
+    ->withFetchingEnabled(false) // here we disable communication with Unleash server
+    ->withCacheTimeToLive(0) // disable the caching layer to always get a fresh bootstrap
+    ->build();
+```
+
 ## Strategies
 
 Unleash servers can use multiple strategies for enabling or disabling features. Which strategy gets used is defined

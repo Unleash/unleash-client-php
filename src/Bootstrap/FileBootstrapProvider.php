@@ -32,7 +32,11 @@ final class FileBootstrapProvider implements BootstrapProvider
         $content = @file_get_contents($filePath);
         if ($content === false) {
             $error = error_get_last();
-            throw new RuntimeException("Failed to read the contents of file '{$filePath}': {$error['message']}");
+            throw new RuntimeException(sprintf(
+                "Failed to read the contents of file '%s': %s",
+                $filePath,
+                $error['message'] ?? 'Unknown error',
+            ));
         }
 
         $result = json_decode($content, true, flags: JSON_THROW_ON_ERROR);

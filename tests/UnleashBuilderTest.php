@@ -624,6 +624,9 @@ final class UnleashBuilderTest extends TestCase
         self::assertTrue(
             $this->getConfiguration($builder->withFetchingEnabled(true)->build())->isFetchingEnabled()
         );
+
+        // no exception should be thrown
+        $this->instance->withFetchingEnabled(false)->build();
     }
 
     private function getConfiguration(DefaultUnleash $unleash): UnleashConfiguration

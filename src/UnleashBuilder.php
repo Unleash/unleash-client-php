@@ -293,13 +293,23 @@ final class UnleashBuilder
 
     public function build(): Unleash
     {
-        if ($this->appUrl === null) {
+        $appUrl = $this->appUrl;
+        $instanceId = $this->instanceId;
+        $appName = $this->appName;
+
+        if (!$this->fetchingEnabled) {
+            $appUrl ??= 'http://127.0.0.1';
+            $instanceId ??= 'dev';
+            $appName ??= 'dev';
+        }
+
+        if ($appUrl === null) {
             throw new InvalidValueException("App url must be set, please use 'withAppUrl()' method");
         }
-        if ($this->instanceId === null) {
+        if ($instanceId === null) {
             throw new InvalidValueException("Instance ID must be set, please use 'withInstanceId()' method");
         }
-        if ($this->appName === null) {
+        if ($appName === null) {
             throw new InvalidValueException(
                 "App name must be set, please use 'withAppName()' or 'withGitlabEnvironment()' method"
             );
@@ -330,7 +340,7 @@ final class UnleashBuilder
         $bootstrapHandler = $this->bootstrapHandler ?? new DefaultBootstrapHandler();
         $bootstrapProvider = $this->bootstrapProvider ?? new EmptyBootstrapProvider();
 
-        $configuration = new UnleashConfiguration($this->appUrl, $this->appName, $this->instanceId);
+        $configuration = new UnleashConfiguration($appUrl, $appName, $instanceId);
         $configuration
             ->setCache($cache)
             ->setTtl($this->cacheTtl ?? $configuration->getTtl())
