@@ -24,6 +24,10 @@ abstract class AbstractOperatorValidator implements OperatorValidator
             foreach ($allowedValues as $allowedValue) {
                 assert(is_string($allowedValue) || is_array($allowedValue));
 
+                if (!$this->acceptsValues($allowedValue)) {
+                    throw new OperatorValidatorException('Invalid value have been passed in an array with values');
+                }
+
                 if ($this->validate($currentValue, $allowedValue)) {
                     return true;
                 }
