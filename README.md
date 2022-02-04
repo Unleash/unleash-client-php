@@ -432,9 +432,6 @@ Note that when you disable communication with Unleash and don't provide a bootst
 use Unleash\Client\UnleashBuilder;
 
 $unleash = UnleashBuilder::create()
-    ->withAppName('Some name') // 
-    ->withInstanceId('Some id')
-    ->withAppUrl('https://whatever-because-it-will-not-be-called.unleash')
     ->withBootstrap('{}')
     ->withFetchingEnabled(false) // here we disable communication with Unleash server
     ->withCacheTimeToLive(0) // disable the caching layer to always get a fresh bootstrap
