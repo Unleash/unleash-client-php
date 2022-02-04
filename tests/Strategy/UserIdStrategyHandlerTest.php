@@ -49,7 +49,7 @@ final class UserIdStrategyHandlerTest extends TestCase
         $strategy = new DefaultStrategy('whatever', [
             'userIds' => '123',
         ], [
-            new DefaultConstraint('something', ConstraintOperator::IN, ['test']),
+            new DefaultConstraint('something', ConstraintOperator::IN_LIST, ['test']),
         ]);
         self::assertFalse($instance->isEnabled($strategy, new UnleashContext('123')));
         self::assertTrue($instance->isEnabled(
@@ -60,7 +60,7 @@ final class UserIdStrategyHandlerTest extends TestCase
         $strategy = new DefaultStrategy('whatever', [
             'userIds' => '123',
         ], [
-            new DefaultConstraint('something', ConstraintOperator::NOT_IN, ['test']),
+            new DefaultConstraint('something', ConstraintOperator::NOT_IN_LIST, ['test']),
         ]);
         self::assertTrue($instance->isEnabled($strategy, new UnleashContext('123')));
         self::assertFalse($instance->isEnabled(

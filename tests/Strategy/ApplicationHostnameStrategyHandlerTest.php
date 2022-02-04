@@ -79,7 +79,7 @@ final class ApplicationHostnameStrategyHandlerTest extends TestCase
             new DefaultStrategy('applicationHostname', [
                 'hostNames' => 'test1,test2',
             ], [
-                new DefaultConstraint('something', ConstraintOperator::IN, ['test']),
+                new DefaultConstraint('something', ConstraintOperator::IN_LIST, ['test']),
             ]),
             (new UnleashContext())->setHostname('test2')
         ));
@@ -87,7 +87,7 @@ final class ApplicationHostnameStrategyHandlerTest extends TestCase
             new DefaultStrategy('applicationHostname', [
                 'hostNames' => 'test1,test2',
             ], [
-                new DefaultConstraint('something', ConstraintOperator::IN, ['test']),
+                new DefaultConstraint('something', ConstraintOperator::IN_LIST, ['test']),
             ]),
             (new UnleashContext())->setHostname('test2')->setCustomProperty('something', 'test')
         ));

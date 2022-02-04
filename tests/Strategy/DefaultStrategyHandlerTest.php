@@ -27,7 +27,7 @@ final class DefaultStrategyHandlerTest extends TestCase
         self::assertTrue($instance->isEnabled(new DefaultStrategy('whatever', []), new UnleashContext()));
 
         $strategy = new DefaultStrategy('whatever', [], [
-            new DefaultConstraint('something', ConstraintOperator::IN, ['test']),
+            new DefaultConstraint('something', ConstraintOperator::IN_LIST, ['test']),
         ]);
         self::assertFalse($instance->isEnabled($strategy, new UnleashContext()));
         self::assertTrue($instance->isEnabled(
@@ -36,7 +36,7 @@ final class DefaultStrategyHandlerTest extends TestCase
         ));
 
         $strategy = new DefaultStrategy('whatever', [], [
-            new DefaultConstraint('something', ConstraintOperator::NOT_IN, ['test']),
+            new DefaultConstraint('something', ConstraintOperator::NOT_IN_LIST, ['test']),
         ]);
         self::assertTrue($instance->isEnabled($strategy, new UnleashContext()));
         self::assertFalse($instance->isEnabled(

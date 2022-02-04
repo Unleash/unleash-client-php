@@ -128,7 +128,7 @@ final class GradualRolloutStrategyHandlerTest extends TestCase
         $this->instance->isEnabled($this->createStrategy(100, Stickiness::RANDOM), new UnleashContext());
 
         $strategy = $this->createStrategy(100, Stickiness::DEFAULT, [
-            new DefaultConstraint('something', ConstraintOperator::IN, ['test']),
+            new DefaultConstraint('something', ConstraintOperator::IN_LIST, ['test']),
         ]);
         self::assertFalse($this->instance->isEnabled($strategy, new UnleashContext()));
         self::assertTrue($this->instance->isEnabled(
@@ -137,7 +137,7 @@ final class GradualRolloutStrategyHandlerTest extends TestCase
         ));
 
         $strategy = $this->createStrategy(100, Stickiness::DEFAULT, [
-            new DefaultConstraint('something', ConstraintOperator::NOT_IN, ['test']),
+            new DefaultConstraint('something', ConstraintOperator::NOT_IN_LIST, ['test']),
         ]);
         self::assertTrue($this->instance->isEnabled($strategy, new UnleashContext()));
         self::assertFalse($this->instance->isEnabled(

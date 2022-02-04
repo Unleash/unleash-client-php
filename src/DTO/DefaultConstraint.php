@@ -14,7 +14,10 @@ final class DefaultConstraint implements Constraint
         private readonly string $contextName,
         #[ExpectedValues(valuesFromClass: ConstraintOperator::class)]
         private readonly string $operator,
-        private readonly array $values,
+        private readonly ?array $values = null,
+        private readonly ?string $singleValue = null,
+        private readonly bool $inverted = false,
+        private readonly bool $caseInsensitive = false,
     ) {
     }
 
@@ -30,10 +33,25 @@ final class DefaultConstraint implements Constraint
     }
 
     /**
-     * @return array<string>
+     * @return array<string>|null
      */
-    public function getValues(): array
+    public function getValues(): ?array
     {
         return $this->values;
+    }
+
+    public function getSingleValue(): ?string
+    {
+        return $this->singleValue;
+    }
+
+    public function isInverted(): bool
+    {
+        return $this->inverted;
+    }
+
+    public function isCaseInsensitive(): bool
+    {
+        return $this->caseInsensitive;
     }
 }

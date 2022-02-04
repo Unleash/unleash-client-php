@@ -46,7 +46,7 @@ final class IpAddressStrategyHandlerTest extends TestCase
         $strategy = new DefaultStrategy('whatever', [
             'IPs' => '192.168.0.1',
         ], [
-            new DefaultConstraint('something', ConstraintOperator::IN, ['test']),
+            new DefaultConstraint('something', ConstraintOperator::IN_LIST, ['test']),
         ]);
         self::assertFalse($instance->isEnabled($strategy, new UnleashContext()));
         self::assertTrue($instance->isEnabled(
@@ -57,7 +57,7 @@ final class IpAddressStrategyHandlerTest extends TestCase
         $strategy = new DefaultStrategy('whatever', [
             'IPs' => '192.168.0.1',
         ], [
-            new DefaultConstraint('something', ConstraintOperator::NOT_IN, ['test']),
+            new DefaultConstraint('something', ConstraintOperator::NOT_IN_LIST, ['test']),
         ]);
         self::assertTrue($instance->isEnabled($strategy, new UnleashContext()));
         self::assertFalse($instance->isEnabled(
