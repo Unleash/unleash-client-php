@@ -2,6 +2,8 @@
 
 namespace Unleash\Client\ConstraintValidator\Operator;
 
+use Unleash\Client\Exception\OperatorValidatorException;
+
 /**
  * @internal
  */
@@ -13,7 +15,7 @@ abstract class AbstractOperatorValidator implements OperatorValidator
     public function __invoke(string $currentValue, array|string|null $allowedValues): bool
     {
         if ($allowedValues === null) {
-            return false;
+            throw new OperatorValidatorException('No values to validate against have been found');
         }
 
         if ($this->isMultiple($allowedValues)) {
@@ -31,7 +33,7 @@ abstract class AbstractOperatorValidator implements OperatorValidator
         }
 
         if (!$this->acceptsValues($allowedValues)) {
-            return false;
+            throw new OperatorValidatorException('Values of unacceptable format have been passed');
         }
 
         return $this->validate($currentValue, $allowedValues);

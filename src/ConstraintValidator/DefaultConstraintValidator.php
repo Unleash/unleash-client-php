@@ -21,6 +21,7 @@ use Unleash\Client\ConstraintValidator\Operator\Version\VersionGreaterThanOperat
 use Unleash\Client\ConstraintValidator\Operator\Version\VersionLowerThanOperatorValidator;
 use Unleash\Client\DTO\Constraint;
 use Unleash\Client\Enum\ConstraintOperator;
+use Unleash\Client\Exception\OperatorValidatorException;
 
 final class DefaultConstraintValidator implements ConstraintValidator
 {
@@ -42,11 +43,17 @@ final class DefaultConstraintValidator implements ConstraintValidator
             $valueToPass = $valueToPass === null ? null : $this->makeCaseInsensitive($valueToPass);
         }
 
-        $result = $callback($currentValue, $valueToPass);
+        // Catch any possible validator exceptions to avoid inverting result that failed due to
+        // wrong data being passed to true.
+        try {
+            $result = $callback($currentValue, $valueToPass);
 
-        $isInverted = method_exists($constraint, 'isInverted') && $constraint->isInverted();
-        if ($isInverted) {
-            $result = !$result;
+            $isInverted = method_exists($constraint, 'isInverted') && $constraint->isInverted();
+            if ($isInverted) {
+                $result = !$result;
+            }
+        } catch (OperatorValidatorException) {
+            $result = false;
         }
 
         return $result;
