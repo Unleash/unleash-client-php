@@ -468,7 +468,7 @@ final class DefaultUnleashTest extends AbstractHttpClientTest
                     $this->cache[$featureName] = new DefaultFeature(
                         $featureName,
                         true,
-                        new LimitIterator(new ArrayIterator([new DefaultStrategy('default')])),
+                        new LimitIterator(new ArrayIterator([new DefaultStrategy('default')]))
                     );
                 }
 
