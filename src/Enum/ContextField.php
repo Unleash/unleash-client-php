@@ -15,4 +15,6 @@ final class ContextField
     public const REMOTE_ADDRESS = self::IP_ADDRESS;
 
     public const HOSTNAME = 'hostname';
+
+    public const CURRENT_TIME = 'currentTime';
 }

@@ -2,11 +2,17 @@
 
 namespace Unleash\Client\Configuration;
 
+use DateTimeInterface;
+
 /**
- * @method string|null getHostname()
- * @method string|null getEnvironment()
- * @method Context     setHostname(string|null $hostname)
- * @method Context     setEnvironment(string|null $environment)
+ * @todo move to required methods in next major
+ *
+ * @method string|null       getHostname()
+ * @method string|null       getEnvironment()
+ * @method DateTimeInterface getCurrentTime()
+ * @method Context           setHostname(string|null $hostname)
+ * @method Context           setEnvironment(string|null $environment)
+ * @method Context           setCurrentTime(DateTimeInterface|null $time)
  */
 interface Context
 {
