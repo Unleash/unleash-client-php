@@ -9,6 +9,13 @@ body:
   - type: markdown
     attributes:
       value: Thank you for helping us by submitting a feature request!
+  - type: checkboxes
+    attributes:
+      label: Is there an existing issue for this?
+      description: Please search to see if an issue already exists for the feature.
+      options:
+        - label: I have searched the existing issues
+          required: true
   - type: textarea
     attributes:
       label: Describe the new feature
