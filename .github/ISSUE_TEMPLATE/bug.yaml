@@ -1,0 +1,65 @@
+name: Bug Report
+description: Create a bug report to help us improve
+title: "[Bug]: "
+labels: ["bug"]
+assignees:
+  - RikudouSage
+body:
+  - type: markdown
+    attributes:
+      value: Thank you for helping is improve by filling a bug report!
+  - type: checkboxes
+    attributes:
+      label: Is there an existing issue for this?
+      description: Please search to see if an issue already exists for the bug you encountered.
+      options:
+        - label: I have searched the existing issues
+          required: true
+  - type: textarea
+    attributes:
+      label: Describe the bug
+      description: A clear and concise description of what the bug is.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: To reproduce
+      description: Steps to reproduce the behavior.
+      value: |
+        1. Go to '...'
+        2. Click on '....'
+        3. Scroll down to '....'
+        4. See error
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Sample code (optional)
+      description: Optinally provide a sample code that triggers the error.
+      render: php
+    validations:
+      required: false
+  - type: input
+    attributes:
+      label: Version
+      description: Provide the version you were using when the bug happened.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Expected behavior
+      description: A clear and concise description of what you expected to happen.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Logs (optional)
+      description: If applicable, add logs or output to help explain your problem.
+    validations:
+      required: false
+  - type: textarea
+    attributes:
+      label: Additional context (optional)
+      description: Add any other context about the problem here.
+    validations:
+      required: false
