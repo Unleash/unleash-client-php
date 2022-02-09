@@ -11,6 +11,7 @@ use Unleash\Client\Bootstrap\JsonSerializableBootstrapProvider;
 use Unleash\Client\Configuration\UnleashConfiguration;
 use Unleash\Client\DTO\Feature;
 use Unleash\Client\Exception\HttpResponseException;
+use Unleash\Client\Exception\InvalidValueException;
 use Unleash\Client\Repository\DefaultUnleashRepository;
 use Unleash\Client\Tests\AbstractHttpClientTest;
 use Unleash\Client\Tests\Traits\FakeCacheImplementationTrait;
@@ -211,6 +212,23 @@ final class DefaultUnleashRepositoryTest extends AbstractHttpClientTest
         );
 
         $this->expectException(LogicException::class);
+        $repository->getFeatures();
+    }
+
+    public function testBootstrapWithEmptyArray()
+    {
+        $repository = new DefaultUnleashRepository(
+            new Client([
+                'handler' => $this->handlerStack,
+            ]),
+            new HttpFactory(),
+            (new UnleashConfiguration('', '', ''))
+                ->setCache($this->getCache())
+                ->setFetchingEnabled(false)
+                ->setBootstrapProvider(new JsonSerializableBootstrapProvider([])),
+        );
+
+        $this->expectException(InvalidValueException::class);
         $repository->getFeatures();
     }
 }

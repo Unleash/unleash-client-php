@@ -20,6 +20,7 @@ use Unleash\Client\DTO\Feature;
 use Unleash\Client\Enum\CacheKey;
 use Unleash\Client\Enum\Stickiness;
 use Unleash\Client\Exception\HttpResponseException;
+use Unleash\Client\Exception\InvalidValueException;
 
 final class DefaultUnleashRepository implements UnleashRepository
 {
@@ -131,6 +132,11 @@ final class DefaultUnleashRepository implements UnleashRepository
         $features = [];
         $body = json_decode($rawBody, true, 512, JSON_THROW_ON_ERROR);
         assert(is_array($body));
+
+        if (!isset($body['features']) || !is_array($body['features'])) {
+            throw new InvalidValueException("The body isn't valid because it doesn't contain a 'features' key");
+        }
+
         foreach ($body['features'] as $feature) {
             $strategies = [];
             $variants = [];
