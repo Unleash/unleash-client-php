@@ -8,8 +8,8 @@ final class DefaultVariantOverride implements VariantOverride
      * @param array<string> $values
      */
     public function __construct(
-        private readonly string $field,
-        private readonly array $values,
+        private string $field,
+        private array $values,
     ) {
     }
 
