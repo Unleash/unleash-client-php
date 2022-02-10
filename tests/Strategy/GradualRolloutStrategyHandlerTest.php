@@ -81,12 +81,12 @@ final class GradualRolloutStrategyHandlerTest extends TestCase
 
         self::assertFalse($this->instance->isEnabled(
             $this->createStrategy(100, Stickiness::USER_ID),
-            new UnleashContext(),
+            new UnleashContext()
         ));
 
         self::assertFalse($this->instance->isEnabled(
             $this->createStrategy(100, Stickiness::USER_ID),
-            new UnleashContext(null, null, 'test'),
+            new UnleashContext(null, null, 'test')
         ));
 
         self::assertFalse(
@@ -104,12 +104,12 @@ final class GradualRolloutStrategyHandlerTest extends TestCase
 
         self::assertFalse($this->instance->isEnabled(
             $this->createStrategy(100, Stickiness::SESSION_ID),
-            new UnleashContext(),
+            new UnleashContext()
         ));
 
         self::assertFalse($this->instance->isEnabled(
             $this->createStrategy(100, Stickiness::SESSION_ID),
-            new UnleashContext('test'),
+            new UnleashContext('test')
         ));
 
         self::assertFalse(
@@ -133,7 +133,7 @@ final class GradualRolloutStrategyHandlerTest extends TestCase
         self::assertFalse($this->instance->isEnabled($strategy, new UnleashContext()));
         self::assertTrue($this->instance->isEnabled(
             $strategy,
-            (new UnleashContext())->setCustomProperty('something', 'test'),
+            (new UnleashContext())->setCustomProperty('something', 'test')
         ));
 
         $strategy = $this->createStrategy(100, Stickiness::DEFAULT, [
@@ -142,7 +142,7 @@ final class GradualRolloutStrategyHandlerTest extends TestCase
         self::assertTrue($this->instance->isEnabled($strategy, new UnleashContext()));
         self::assertFalse($this->instance->isEnabled(
             $strategy,
-            (new UnleashContext())->setCustomProperty('something', 'test'),
+            (new UnleashContext())->setCustomProperty('something', 'test')
         ));
     }
 

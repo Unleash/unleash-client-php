@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        version: ['7.3', '7.4', '8.0']
+        version: ['7.2', '7.3', '7.4', '8.0']
     steps:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -23,8 +23,20 @@ jobs:
         run: composer install
       - name: Transpile to ${{ matrix.version }}
         run: php vendor/bin/rector process --no-diffs --no-progress-bar --config rector.$(echo ${{ matrix.version }} | sed -e 's/\.//').php src
+      - name: Add polyfill
+        if: matrix.version == '7.2'
+        run: composer require symfony/polyfill-php73
       - name: Update composer.json version
         run: 'sed -i -e ''s/"php": "\^8.1"/"php": "\^${{ matrix.version }}"/'' composer.json'
+      - name: Downgrade phpunit
+        if: matrix.version == '7.2'
+        run: 'sed -i -e ''s/"phpunit\/phpunit": "\^9.5"/"phpunit\/phpunit": "\^8.5"/'' composer.json'
+      - name: Copy Bootstrap
+        if: matrix.version == '7.2'
+        run: cp .github/bootstrap-72.php src
+      - name: Load Bootstrap
+        if: matrix.version == '7.2'
+        run: 'cat composer.json | jq --argjson files ''["src/bootstrap-72.php"]'' ''.autoload += {files: $files}'' > tmp.json && mv tmp.json composer.json'
       - name: Update README
         run: sed -i '1s/^/# This branch is auto generated\n/' README.md
       - name: Commit PHP ${{ matrix.version }} version
