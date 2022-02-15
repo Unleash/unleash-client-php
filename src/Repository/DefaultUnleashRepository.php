@@ -81,7 +81,7 @@ final class DefaultUnleashRepository implements UnleashRepository
                     throw new HttpResponseException(sprintf(
                         'Got invalid response code when getting features and no default bootstrap provided: %s',
                         isset($response) ? $response->getStatusCode() : 'unknown response status code'
-                    ), previous: $exception ?? null);
+                    ), 0, $exception ?? null);
                 }
             }
 
