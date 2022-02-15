@@ -19,7 +19,10 @@ final class JsonBootstrapProvider implements BootstrapProvider
      */
     public function getBootstrap(): array
     {
-        $result = json_decode($this->json, true, flags: JSON_THROW_ON_ERROR);
+        $result = @json_decode($this->json, true);
+        if (json_last_error()) {
+            throw new JsonException(json_last_error_msg(), json_last_error());
+        }
         if (!is_array($result)) {
             throw new InvalidValueException(sprintf(
                 'The provided json string must be a valid json object, %s given.',
