@@ -28,6 +28,8 @@ use Unleash\Client\DTO\Strategy;
 use Unleash\Client\Exception\InvalidValueException;
 use Unleash\Client\Strategy\DefaultStrategyHandler;
 use Unleash\Client\Strategy\StrategyHandler;
+use Unleash\Client\Tests\TestHelpers\CustomBootstrapProviderImpl74;
+use Unleash\Client\Tests\TestHelpers\CustomBootstrapProviderImpl80;
 use Unleash\Client\Tests\Traits\RealCacheImplementationTrait;
 use Unleash\Client\UnleashBuilder;
 
@@ -499,12 +501,9 @@ final class UnleashBuilderTest extends TestCase
             $this->getBootstrapProvider($builder->withBootstrapProvider(new JsonBootstrapProvider('{}'))->build())
         );
 
-        $provider = new class implements BootstrapProvider {
-            public function getBootstrap(): array|JsonSerializable|Traversable|null
-            {
-                return null;
-            }
-        };
+        $provider = PHP_VERSION_ID < 8_00_00
+            ? new CustomBootstrapProviderImpl74()
+            : new CustomBootstrapProviderImpl80();
         self::assertInstanceOf(
             get_class($provider),
             $this->getBootstrapProvider($builder->withBootstrapProvider($provider)->build())
