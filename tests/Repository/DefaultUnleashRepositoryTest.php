@@ -225,7 +225,7 @@ final class DefaultUnleashRepositoryTest extends AbstractHttpClientTest
             (new UnleashConfiguration('', '', ''))
                 ->setCache($this->getCache())
                 ->setFetchingEnabled(false)
-                ->setBootstrapProvider(new JsonSerializableBootstrapProvider([])),
+                ->setBootstrapProvider(new JsonSerializableBootstrapProvider([]))
         );
 
         $this->expectException(InvalidValueException::class);
