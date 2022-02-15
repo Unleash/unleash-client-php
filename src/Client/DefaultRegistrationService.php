@@ -34,6 +34,9 @@ final class DefaultRegistrationService implements RegistrationService
      */
     public function register(iterable $strategyHandlers): bool
     {
+        if (!$this->configuration->isFetchingEnabled()) {
+            return false;
+        }
         if ($this->hasValidCacheRegistration()) {
             return true;
         }

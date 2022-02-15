@@ -5,9 +5,19 @@ namespace Unleash\Client;
 use JetBrains\PhpStorm\Deprecated;
 use JetBrains\PhpStorm\Immutable;
 use JetBrains\PhpStorm\Pure;
+use JsonSerializable;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
 use Psr\SimpleCache\CacheInterface;
+use SplFileInfo;
+use Traversable;
+use Unleash\Client\Bootstrap\BootstrapHandler;
+use Unleash\Client\Bootstrap\BootstrapProvider;
+use Unleash\Client\Bootstrap\DefaultBootstrapHandler;
+use Unleash\Client\Bootstrap\EmptyBootstrapProvider;
+use Unleash\Client\Bootstrap\FileBootstrapProvider;
+use Unleash\Client\Bootstrap\JsonBootstrapProvider;
+use Unleash\Client\Bootstrap\JsonSerializableBootstrapProvider;
 use Unleash\Client\Client\DefaultRegistrationService;
 use Unleash\Client\Client\RegistrationService;
 use Unleash\Client\Configuration\Context;
@@ -62,6 +72,12 @@ final class UnleashBuilder
     private ?Context $defaultContext = null;
 
     private ?UnleashContextProvider $contextProvider = null;
+
+    private ?BootstrapProvider $bootstrapProvider = null;
+
+    private ?BootstrapHandler $bootstrapHandler = null;
+
+    private bool $fetchingEnabled = true;
 
     /**
      * @var array<string,string>
@@ -222,15 +238,78 @@ final class UnleashBuilder
         return $this->with('contextProvider', $contextProvider);
     }
 
+    #[Pure]
+    public function withBootstrapHandler(?BootstrapHandler $handler): self
+    {
+        return $this->with('bootstrapHandler', $handler);
+    }
+
+    #[Pure]
+    public function withBootstrapProvider(?BootstrapProvider $provider): self
+    {
+        return $this->with('bootstrapProvider', $provider);
+    }
+
+    /**
+     * @param array<mixed>|Traversable<mixed>|JsonSerializable|null|string $bootstrap
+     */
+    #[Pure]
+    public function withBootstrap(array|Traversable|JsonSerializable|null|string $bootstrap): self
+    {
+        if ($bootstrap === null) {
+            $provider = new EmptyBootstrapProvider();
+        } elseif (is_string($bootstrap)) {
+            $provider = new JsonBootstrapProvider($bootstrap);
+        } else {
+            $provider = new JsonSerializableBootstrapProvider($bootstrap);
+        }
+
+        return $this->withBootstrapProvider($provider);
+    }
+
+    #[Pure]
+    public function withBootstrapFile(string|SplFileInfo|null $file): self
+    {
+        if ($file === null) {
+            $provider = new EmptyBootstrapProvider();
+        } else {
+            $provider = new FileBootstrapProvider($file);
+        }
+
+        return $this->withBootstrapProvider($provider);
+    }
+
+    #[Pure]
+    public function withBootstrapUrl(?string $url): self
+    {
+        return $this->withBootstrapFile($url);
+    }
+
+    #[Pure]
+    public function withFetchingEnabled(bool $enabled): self
+    {
+        return $this->with('fetchingEnabled', $enabled);
+    }
+
     public function build(): Unleash
     {
-        if ($this->appUrl === null) {
+        $appUrl = $this->appUrl;
+        $instanceId = $this->instanceId;
+        $appName = $this->appName;
+
+        if (!$this->fetchingEnabled) {
+            $appUrl ??= 'http://127.0.0.1';
+            $instanceId ??= 'dev';
+            $appName ??= 'dev';
+        }
+
+        if ($appUrl === null) {
             throw new InvalidValueException("App url must be set, please use 'withAppUrl()' method");
         }
-        if ($this->instanceId === null) {
+        if ($instanceId === null) {
             throw new InvalidValueException("Instance ID must be set, please use 'withInstanceId()' method");
         }
-        if ($this->appName === null) {
+        if ($appName === null) {
             throw new InvalidValueException(
                 "App name must be set, please use 'withAppName()' or 'withGitlabEnvironment()' method"
             );
@@ -258,7 +337,10 @@ final class UnleashBuilder
             $contextProvider->setDefaultContext($this->defaultContext);
         }
 
-        $configuration = new UnleashConfiguration($this->appUrl, $this->appName, $this->instanceId);
+        $bootstrapHandler = $this->bootstrapHandler ?? new DefaultBootstrapHandler();
+        $bootstrapProvider = $this->bootstrapProvider ?? new EmptyBootstrapProvider();
+
+        $configuration = new UnleashConfiguration($appUrl, $appName, $instanceId);
         $configuration
             ->setCache($cache)
             ->setTtl($this->cacheTtl ?? $configuration->getTtl())
@@ -267,6 +349,9 @@ final class UnleashBuilder
             ->setHeaders($this->headers)
             ->setAutoRegistrationEnabled($this->autoregister)
             ->setContextProvider($contextProvider)
+            ->setBootstrapHandler($bootstrapHandler)
+            ->setBootstrapProvider($bootstrapProvider)
+            ->setFetchingEnabled($this->fetchingEnabled)
         ;
 
         $httpClient = $this->httpClient;

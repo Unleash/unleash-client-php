@@ -4,16 +4,26 @@ namespace Unleash\Client\Tests;
 
 use Cache\Adapter\Filesystem\FilesystemCachePool;
 use Http\Discovery\Psr18ClientDiscovery;
+use JsonSerializable;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
 use ReflectionObject;
 use Symfony\Component\Cache\Psr16Cache;
+use Traversable;
+use Unleash\Client\Bootstrap\BootstrapHandler;
+use Unleash\Client\Bootstrap\BootstrapProvider;
+use Unleash\Client\Bootstrap\DefaultBootstrapHandler;
+use Unleash\Client\Bootstrap\EmptyBootstrapProvider;
+use Unleash\Client\Bootstrap\FileBootstrapProvider;
+use Unleash\Client\Bootstrap\JsonBootstrapProvider;
+use Unleash\Client\Bootstrap\JsonSerializableBootstrapProvider;
 use Unleash\Client\Client\DefaultRegistrationService;
 use Unleash\Client\Configuration\Context;
 use Unleash\Client\Configuration\UnleashConfiguration;
 use Unleash\Client\Configuration\UnleashContext;
 use Unleash\Client\ContextProvider\DefaultUnleashContextProvider;
+use Unleash\Client\DefaultUnleash;
 use Unleash\Client\DTO\Strategy;
 use Unleash\Client\Exception\InvalidValueException;
 use Unleash\Client\Strategy\DefaultStrategyHandler;
@@ -433,6 +443,203 @@ final class UnleashBuilderTest extends TestCase
         $provider = $providerProperty->getValue($configuration);
         assert($provider instanceof DefaultUnleashContextProvider);
         self::assertEquals('456', $provider->getContext()->getCurrentUserId());
+    }
+
+    public function testWithBootstrapHandler()
+    {
+        $builder = $this->instance
+            ->withAutomaticRegistrationEnabled(false)
+            ->withMetricsEnabled(false)
+            ->withAppUrl('test')
+            ->withInstanceId('test')
+            ->withAppName('test');
+
+        self::assertNotSame($builder, $builder->withBootstrapHandler(new DefaultBootstrapHandler()));
+
+        $instance = $builder->build();
+        self::assertInstanceOf(
+            DefaultBootstrapHandler::class,
+            $this->getConfiguration($instance)->getBootstrapHandler()
+        );
+
+        $instance = $builder->withBootstrapHandler(null)->build();
+        self::assertInstanceOf(
+            DefaultBootstrapHandler::class,
+            $this->getConfiguration($instance)->getBootstrapHandler()
+        );
+
+        $handler = new class implements BootstrapHandler {
+            public function getBootstrapContents(BootstrapProvider $provider): ?string
+            {
+                return null;
+            }
+        };
+        $instance = $builder->withBootstrapHandler($handler)->build();
+        self::assertInstanceOf(get_class($handler), $this->getConfiguration($instance)->getBootstrapHandler());
+    }
+
+    public function testWithBootstrapProvider()
+    {
+        $builder = $this->instance
+            ->withAutomaticRegistrationEnabled(false)
+            ->withMetricsEnabled(false)
+            ->withAppUrl('test')
+            ->withInstanceId('test')
+            ->withAppName('test');
+
+        self::assertNotSame($builder, $builder->withBootstrapProvider(new EmptyBootstrapProvider()));
+
+        self::assertInstanceOf(
+            EmptyBootstrapProvider::class,
+            $this->getBootstrapProvider($builder->build())
+        );
+
+        self::assertInstanceOf(
+            JsonBootstrapProvider::class,
+            $this->getBootstrapProvider($builder->withBootstrapProvider(new JsonBootstrapProvider('{}'))->build())
+        );
+
+        $provider = new class implements BootstrapProvider {
+            public function getBootstrap(): array|JsonSerializable|Traversable|null
+            {
+                return null;
+            }
+        };
+        self::assertInstanceOf(
+            get_class($provider),
+            $this->getBootstrapProvider($builder->withBootstrapProvider($provider)->build())
+        );
+    }
+
+    public function testWithBootstrap()
+    {
+        $builder = $this->instance
+            ->withAutomaticRegistrationEnabled(false)
+            ->withMetricsEnabled(false)
+            ->withAppUrl('test')
+            ->withInstanceId('test')
+            ->withAppName('test');
+
+        self::assertNotSame($builder, $builder->withBootstrap('{}'));
+
+        self::assertInstanceOf(
+            EmptyBootstrapProvider::class,
+            $this->getBootstrapProvider($builder->withBootstrap(null)->build())
+        );
+
+        self::assertInstanceOf(
+            JsonBootstrapProvider::class,
+            $this->getBootstrapProvider($builder->withBootstrap('{}')->build())
+        );
+
+        self::assertInstanceOf(
+            JsonSerializableBootstrapProvider::class,
+            $this->getBootstrapProvider($builder->withBootstrap([])->build())
+        );
+        self::assertInstanceOf(
+            JsonSerializableBootstrapProvider::class,
+            $this->getBootstrapProvider($builder->withBootstrap(
+                (function () {
+                    yield 1;
+                })() // traversable
+            )->build())
+        );
+        self::assertInstanceOf(
+            JsonSerializableBootstrapProvider::class,
+            $this->getBootstrapProvider($builder->withBootstrap(
+                new class implements JsonSerializable {
+                    public function jsonSerialize(): array
+                    {
+                        return [];
+                    }
+                }
+            )->build())
+        );
+    }
+
+    public function testWithBootstrapFile()
+    {
+        $builder = $this->instance
+            ->withAutomaticRegistrationEnabled(false)
+            ->withMetricsEnabled(false)
+            ->withAppUrl('test')
+            ->withInstanceId('test')
+            ->withAppName('test');
+
+        self::assertNotSame($builder, $builder->withBootstrapFile('/file'));
+
+        self::assertInstanceOf(
+            EmptyBootstrapProvider::class,
+            $this->getBootstrapProvider($builder->withBootstrapFile(null)->build())
+        );
+
+        self::assertInstanceOf(
+            FileBootstrapProvider::class,
+            $this->getBootstrapProvider($builder->withBootstrapFile('/file')->build())
+        );
+
+        self::assertInstanceOf(
+            FileBootstrapProvider::class,
+            $this->getBootstrapProvider($builder->withBootstrapFile(new \SplFileInfo('/file'))->build())
+        );
+    }
+
+    public function testWithBootstrapUrl()
+    {
+        $builder = $this->instance
+            ->withAutomaticRegistrationEnabled(false)
+            ->withMetricsEnabled(false)
+            ->withAppUrl('test')
+            ->withInstanceId('test')
+            ->withAppName('test');
+
+        self::assertNotSame($builder, $builder->withBootstrapUrl('https://getunleash.io'));
+
+        self::assertInstanceOf(
+            EmptyBootstrapProvider::class,
+            $this->getBootstrapProvider($builder->withBootstrapUrl(null)->build())
+        );
+
+        self::assertInstanceOf(
+            FileBootstrapProvider::class,
+            $this->getBootstrapProvider($builder->withBootstrapUrl('https://getunleash.io')->build())
+        );
+    }
+
+    public function testWithFetchingEnabled()
+    {
+        $builder = $this->instance
+            ->withAutomaticRegistrationEnabled(false)
+            ->withMetricsEnabled(false)
+            ->withAppUrl('test')
+            ->withInstanceId('test')
+            ->withAppName('test');
+
+        self::assertNotSame($builder, $builder->withFetchingEnabled(true));
+
+        self::assertTrue($this->getConfiguration($builder->build())->isFetchingEnabled());
+        self::assertFalse(
+            $this->getConfiguration($builder->withFetchingEnabled(false)->build())->isFetchingEnabled()
+        );
+        self::assertTrue(
+            $this->getConfiguration($builder->withFetchingEnabled(true)->build())->isFetchingEnabled()
+        );
+
+        // no exception should be thrown
+        $this->instance->withFetchingEnabled(false)->build();
+    }
+
+    private function getConfiguration(DefaultUnleash $unleash): UnleashConfiguration
+    {
+        $configurationProperty = (new ReflectionObject($unleash))->getProperty('configuration');
+        $configurationProperty->setAccessible(true);
+
+        return $configurationProperty->getValue($unleash);
+    }
+
+    private function getBootstrapProvider(DefaultUnleash $unleash): BootstrapProvider
+    {
+        return $this->getConfiguration($unleash)->getBootstrapProvider();
     }
 
     private function newHttpClient(): ClientInterface

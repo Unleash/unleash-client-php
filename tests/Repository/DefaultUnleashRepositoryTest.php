@@ -6,9 +6,12 @@ use GuzzleHttp\Client;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\HttpFactory;
 use GuzzleHttp\Psr7\Request;
+use LogicException;
+use Unleash\Client\Bootstrap\JsonSerializableBootstrapProvider;
 use Unleash\Client\Configuration\UnleashConfiguration;
 use Unleash\Client\DTO\Feature;
 use Unleash\Client\Exception\HttpResponseException;
+use Unleash\Client\Exception\InvalidValueException;
 use Unleash\Client\Repository\DefaultUnleashRepository;
 use Unleash\Client\Tests\AbstractHttpClientTest;
 use Unleash\Client\Tests\Traits\FakeCacheImplementationTrait;
@@ -134,5 +137,98 @@ final class DefaultUnleashRepositoryTest extends AbstractHttpClientTest
         self::assertEquals('some value', $headers['Custom-Header-1'][0]);
         self::assertEquals('some other value', $headers['Custom-Header-2'][0]);
         self::assertEquals('Some API key', $headers['Authorization'][0]);
+    }
+
+    public function testBootstrappingValid()
+    {
+        $repository = new DefaultUnleashRepository(
+            new Client([
+                'handler' => $this->handlerStack,
+            ]),
+            new HttpFactory(),
+            (new UnleashConfiguration('', '', ''))
+                ->setHeaders([
+                    'Custom-Header-1' => 'some value',
+                    'Custom-Header-2' => 'some other value',
+                    'Authorization' => 'Some API key',
+                ])
+                ->setCache($this->getCache())
+                ->setBootstrapProvider(new JsonSerializableBootstrapProvider($this->response))
+        );
+        $features = $repository->getFeatures();
+        self::assertEquals('test', $features[array_key_first($features)]->getName());
+        self::assertEquals('flexibleRollout', $features[array_key_first($features)]->getStrategies()[0]->getName());
+        self::assertEquals('test2', $features[array_key_last($features)]->getName());
+        self::assertEquals('userWithId', $features[array_key_last($features)]->getStrategies()[0]->getName());
+        $repository->getFeatures();
+    }
+
+    public function testBootstrappingWithoutFetch()
+    {
+        $repository = new DefaultUnleashRepository(
+            new Client([
+                'handler' => $this->handlerStack,
+            ]),
+            new HttpFactory(),
+            (new UnleashConfiguration('', '', ''))
+                ->setHeaders([
+                    'Custom-Header-1' => 'some value',
+                    'Custom-Header-2' => 'some other value',
+                    'Authorization' => 'Some API key',
+                ])
+                ->setCache($this->getCache())
+                ->setFetchingEnabled(false)
+                ->setBootstrapProvider(new JsonSerializableBootstrapProvider($this->response))
+        );
+        $features = $repository->getFeatures();
+        self::assertEquals('test', $features[array_key_first($features)]->getName());
+        self::assertEquals('flexibleRollout', $features[array_key_first($features)]->getStrategies()[0]->getName());
+        self::assertEquals('test2', $features[array_key_last($features)]->getName());
+        self::assertEquals('userWithId', $features[array_key_last($features)]->getStrategies()[0]->getName());
+    }
+
+    public function testBootstrappingNoBootstrapInvalidResponse()
+    {
+        $this->expectException(HttpResponseException::class);
+        $this->expectExceptionMessage('Got invalid response code when getting features and no default bootstrap provided: unknown response status code');
+        $this->repository->getFeatures();
+    }
+
+    public function testBootstrappingWithoutFetchNoBootstrap()
+    {
+        $repository = new DefaultUnleashRepository(
+            new Client([
+                'handler' => $this->handlerStack,
+            ]),
+            new HttpFactory(),
+            (new UnleashConfiguration('', '', ''))
+                ->setHeaders([
+                    'Custom-Header-1' => 'some value',
+                    'Custom-Header-2' => 'some other value',
+                    'Authorization' => 'Some API key',
+                ])
+                ->setCache($this->getCache())
+                ->setFetchingEnabled(false)
+        );
+
+        $this->expectException(LogicException::class);
+        $repository->getFeatures();
+    }
+
+    public function testBootstrapWithEmptyArray()
+    {
+        $repository = new DefaultUnleashRepository(
+            new Client([
+                'handler' => $this->handlerStack,
+            ]),
+            new HttpFactory(),
+            (new UnleashConfiguration('', '', ''))
+                ->setCache($this->getCache())
+                ->setFetchingEnabled(false)
+                ->setBootstrapProvider(new JsonSerializableBootstrapProvider([])),
+        );
+
+        $this->expectException(InvalidValueException::class);
+        $repository->getFeatures();
     }
 }

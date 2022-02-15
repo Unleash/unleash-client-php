@@ -239,6 +239,205 @@ $builder = $builder
     ->withCacheHandler(null);
 ```
 
+## Bootstrapping
+
+You can set a default response from the SDK in cases when for some reason contacting Unleash server fails.
+
+By default, you can bootstrap using:
+
+- json string
+- file (via path or instance of `SplFileInfo`)
+- URL address
+- custom [stream wrapper](https://www.php.net/manual/en/wrappers.php) path
+- `array`
+- instances of `Traversable`
+- instances of `JsonSerializable`
+
+These correspond to bootstrap providers:
+
+- `JsonBootstrapProvider` (json string)
+- `FileBootstrapProvider` (file, URL address, custom stream wrapper path)
+- `JsonSerializableBootstrapProvider` (array, Traversable, JsonSerializable)
+- `EmptyBootstrapProvider` (default provider that doesn't provide any bootstrap)
+- `CompoundBootstrapProvider` (can contain multiple bootstrap providers and tries them one by one)
+
+Examples of bootstraps:
+
+```php
+<?php
+
+use Unleash\Client\UnleashBuilder;
+
+$bootstrapJson = '{"features": []}';
+$bootstrapFile = 'path/to/my/file.json';
+$bootstrapSplFile = new SplFileInfo('path/to/my/file.json');
+$bootstrapUrl = 'https://example.com/unleash-bootstrap.json';
+$bootstrapStreamWrapper = 's3://my-bucket/bootstrap.json'; // assuming you have a custom stream wrapper called 's3'
+$bootstrapArray = [
+    'features' => [
+        [
+            'enabled' => true,
+            'name' => 'BootstrapDemo',
+            'description' => '',
+            'project' => 'default',
+            'stale' => false,
+            'type' => 'release',
+            'variants' => [],
+            'strategies' => [[ 'name' => 'default' ]],
+        ],
+    ],
+];
+$bootstrapTraversable = new class implements Iterator {
+    public function current(): mixed
+    {
+        // todo implement method
+    }
+    
+    public function next(): void
+    {
+        // todo implement method
+    }
+    
+    public function key(): mixed
+    {
+        // todo implement method
+    }
+    
+    public function valid(): bool
+    {
+        // todo implement method
+    }
+    
+    public function rewind(): void
+    {
+        // todo implement method
+    }
+};
+$bootstrapJsonSerializable = new class implements JsonSerializable {
+    public function jsonSerialize(): array {
+        // TODO: Implement jsonSerialize() method.
+    }
+}
+
+// now assign them to the builder, note that each withBootstrap* method call overrides the bootstrap
+
+$builder = UnleashBuilder::create()
+    ->withBootstrap($bootstrapJson)
+    ->withBootstrapFile($bootstrapFile)
+    ->withBootstrapFile($bootstrapSplFile)
+    ->withBootstrapUrl($bootstrapUrl)
+    ->withBootstrapFile($bootstrapStreamWrapper)
+    ->withBootstrap($bootstrapArray)
+    ->withBootstrap($bootstrapTraversable)
+    ->withBootstrap($bootstrapJsonSerializable)
+    ->withBootstrap(null) // empty bootstrap
+;
+```
+
+Using bootstrap providers directly:
+
+```php
+<?php
+
+use Unleash\Client\Bootstrap\EmptyBootstrapProvider;
+use Unleash\Client\Bootstrap\FileBootstrapProvider;
+use Unleash\Client\Bootstrap\JsonBootstrapProvider;
+use Unleash\Client\Bootstrap\JsonSerializableBootstrapProvider;
+use Unleash\Client\UnleashBuilder;
+
+// using variables defined in previous example, again each call overrides the last bootstrap provider
+
+$builder = UnleashBuilder::create()
+    ->withBootstrapProvider(new JsonBootstrapProvider($bootstrapJson))
+    ->withBootstrapProvider(new FileBootstrapProvider($bootstrapFile))
+    ->withBootstrapProvider(new FileBootstrapProvider($bootstrapSplFile))
+    ->withBootstrapProvider(new FileBootstrapProvider($bootstrapUrl))
+    ->withBootstrapProvider(new FileBootstrapProvider($bootstrapStreamWrapper))
+    ->withBootstrapProvider(new JsonSerializableBootstrapProvider($bootstrapArray))
+    ->withBootstrapProvider(new JsonSerializableBootstrapProvider($bootstrapTraversable))
+    ->withBootstrapProvider(new JsonSerializableBootstrapProvider($bootstrapJsonSerializable))
+    ->withBootstrapProvider(new EmptyBootstrapProvider()) // equivalent to ->withBootstrap(null)
+;
+```
+
+Using multiple bootstrap providers:
+
+```php
+<?php
+
+use Unleash\Client\Bootstrap\CompoundBootstrapProvider;
+use Unleash\Client\Bootstrap\FileBootstrapProvider;
+use Unleash\Client\Bootstrap\JsonSerializableBootstrapProvider;
+use Unleash\Client\UnleashBuilder;
+
+// using variables defined in first example
+
+$provider = new CompoundBootstrapProvider(
+    new FileBootstrapProvider($bootstrapUrl),
+    new FileBootstrapProvider($bootstrapFile),
+    new JsonSerializableBootstrapProvider($bootstrapArray),
+);
+
+// All providers in compound bootstrap provider will be tried one by one in the order they were assigned until
+// at least one returns something.
+
+// If no provider returns non-null value, the compound provider itself returns null.
+
+// If an exception is thrown in any of the inner providers it's ignored and next provider is tried.
+
+// If an exception was thrown in any of the inner providers and no other provider returned any value, the exceptions
+// from inner providers are thrown using a CompoundException, you can get the exceptions by calling ->getExceptions()
+// on it.
+
+$builder = UnleashBuilder::create()
+    ->withBootstrapProvider($provider);
+```
+
+### Custom bootstrap provider
+
+Creating a custom bootstrap provider is very simple, just implement the `BootstrapProvider` interface and use your
+class in the builder:
+
+```php
+<?php
+
+use Unleash\Client\UnleashBuilder;
+use Unleash\Client\Bootstrap\BootstrapProvider;
+
+final class MyBootstrapProvider implements BootstrapProvider
+{
+    public function getBootstrap() : array|JsonSerializable|Traversable|null
+    {
+        // TODO: Implement getBootstrap() method.
+    }
+}
+
+$builder = UnleashBuilder::create()
+    ->withBootstrapProvider(new MyBootstrapProvider());
+```
+
+### Disabling communication with Unleash server
+
+It may be useful to disable communication with the Unleash server for local development and using a bootstrap instead.
+
+Note that when you disable communication with Unleash and don't provide a bootstrap, an exception will be thrown.
+
+> Tip: Set the cache interval to 0 to always have a fresh bootstrap content.
+
+> The usually required parameters (app name, instance id, app url) are not required when communication is disabled.
+
+```php
+<?php
+
+use Unleash\Client\UnleashBuilder;
+
+$unleash = UnleashBuilder::create()
+    ->withBootstrap('{}')
+    ->withFetchingEnabled(false) // here we disable communication with Unleash server
+    ->withCacheTimeToLive(0) // disable the caching layer to always get a fresh bootstrap
+    ->build();
+```
+
 ## Strategies
 
 Unleash servers can use multiple strategies for enabling or disabling features. Which strategy gets used is defined

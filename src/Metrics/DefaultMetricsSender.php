@@ -18,7 +18,7 @@ final class DefaultMetricsSender implements MetricsSender
 
     public function sendMetrics(MetricsBucket $bucket): void
     {
-        if (!$this->configuration->isMetricsEnabled()) {
+        if (!$this->configuration->isMetricsEnabled() || !$this->configuration->isFetchingEnabled()) {
             return;
         }
 

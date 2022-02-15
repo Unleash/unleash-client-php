@@ -2,7 +2,9 @@
 
 namespace Unleash\Client\Repository;
 
+use Exception;
 use JsonException;
+use LogicException;
 use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
@@ -18,6 +20,7 @@ use Unleash\Client\DTO\Feature;
 use Unleash\Client\Enum\CacheKey;
 use Unleash\Client\Enum\Stickiness;
 use Unleash\Client\Exception\HttpResponseException;
+use Unleash\Client\Exception\InvalidValueException;
 
 final class DefaultUnleashRepository implements UnleashRepository
 {
@@ -51,22 +54,38 @@ final class DefaultUnleashRepository implements UnleashRepository
     public function getFeatures(): iterable
     {
         if (!$features = $this->getCachedFeatures()) {
-            $request = $this->requestFactory
-                ->createRequest('GET', $this->configuration->getUrl() . 'client/features')
-                ->withHeader('UNLEASH-APPNAME', $this->configuration->getAppName())
-                ->withHeader('UNLEASH-INSTANCEID', $this->configuration->getInstanceId());
+            if (!$this->configuration->isFetchingEnabled()) {
+                if (!$data = $this->getBootstrappedResponse()) {
+                    throw new LogicException('Fetching of Unleash api is disabled but no bootstrap is provided');
+                }
+            } else {
+                $request = $this->requestFactory
+                    ->createRequest('GET', $this->configuration->getUrl() . 'client/features')
+                    ->withHeader('UNLEASH-APPNAME', $this->configuration->getAppName())
+                    ->withHeader('UNLEASH-INSTANCEID', $this->configuration->getInstanceId());
 
-            foreach ($this->configuration->getHeaders() as $name => $value) {
-                $request = $request->withHeader($name, $value);
+                foreach ($this->configuration->getHeaders() as $name => $value) {
+                    $request = $request->withHeader($name, $value);
+                }
+
+                try {
+                    $response = $this->httpClient->sendRequest($request);
+                    if ($response->getStatusCode() === 200) {
+                        $data = $response->getBody()->getContents();
+                    }
+                } catch (Exception $exception) {
+                    // empty catch, $data does not exist and will be handled below
+                }
+                $data ??= $this->getBootstrappedResponse();
+                if ($data === null) {
+                    throw new HttpResponseException(sprintf(
+                        'Got invalid response code when getting features and no default bootstrap provided: %s',
+                        isset($response) ? $response->getStatusCode() : 'unknown response status code'
+                    ), previous: $exception ?? null);
+                }
             }
 
-            $response = $this->httpClient->sendRequest($request);
-            if ($response->getStatusCode() !== 200) {
-                throw new HttpResponseException(
-                    'Got invalid response code when getting features: ' . $response->getStatusCode()
-                );
-            }
-            $features = $this->parseFeatures($response->getBody()->getContents());
+            $features = $this->parseFeatures($data);
             $this->setCache($features);
         }
 
@@ -113,6 +132,11 @@ final class DefaultUnleashRepository implements UnleashRepository
         $features = [];
         $body = json_decode($rawBody, true, 512, JSON_THROW_ON_ERROR);
         assert(is_array($body));
+
+        if (!isset($body['features']) || !is_array($body['features'])) {
+            throw new InvalidValueException("The body isn't valid because it doesn't contain a 'features' key");
+        }
+
         foreach ($body['features'] as $feature) {
             $strategies = [];
             $variants = [];
@@ -157,5 +181,12 @@ final class DefaultUnleashRepository implements UnleashRepository
         }
 
         return $features;
+    }
+
+    private function getBootstrappedResponse(): ?string
+    {
+        return $this->configuration->getBootstrapHandler()->getBootstrapContents(
+            $this->configuration->getBootstrapProvider(),
+        );
     }
 }
