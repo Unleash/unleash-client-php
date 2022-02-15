@@ -54,7 +54,10 @@ final class FileBootstrapProvider implements BootstrapProvider
     private function getFilePath(string|SplFileInfo $file): string
     {
         if ($file instanceof SplFileInfo) {
-            return $file->getRealPath() ?: throw new InvalidArgumentException("The file '{$file}' does not exist.");
+            if ($path = $file->getRealPath()) {
+                return $path;
+            }
+            throw new InvalidArgumentException("The file '{$file}' does not exist.");
         }
 
         return $file;

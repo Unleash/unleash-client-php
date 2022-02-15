@@ -501,7 +501,7 @@ final class UnleashBuilderTest extends TestCase
             $this->getBootstrapProvider($builder->withBootstrapProvider(new JsonBootstrapProvider('{}'))->build())
         );
 
-        $provider = PHP_VERSION_ID < 8_00_00
+        $provider = PHP_VERSION_ID < 80000
             ? new CustomBootstrapProviderImpl74()
             : new CustomBootstrapProviderImpl80();
         self::assertInstanceOf(
