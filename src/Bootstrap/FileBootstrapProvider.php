@@ -39,7 +39,10 @@ final class FileBootstrapProvider implements BootstrapProvider
             ));
         }
 
-        $result = json_decode($content, true, flags: JSON_THROW_ON_ERROR);
+        $result = @json_decode($content, true);
+        if (json_last_error()) {
+            throw new JsonException(json_last_error_msg(), json_last_error());
+        }
         if (!is_array($result)) {
             throw new InvalidValueException(sprintf(
                 "The file '%s' must contain a valid json object, '%s' given.",
