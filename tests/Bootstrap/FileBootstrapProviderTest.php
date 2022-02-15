@@ -50,6 +50,13 @@ final class FileBootstrapProviderTest extends TestCase
         $instance->getBootstrap();
     }
 
+    public function testGetBootstrapNonexistentFileSpl()
+    {
+        $instance = new FileBootstrapProvider(new SplFileInfo('/nonexistent-path'));
+        $this->expectException(InvalidArgumentException::class);
+        $instance->getBootstrap();
+    }
+
     public function testInvalidContent()
     {
         $instance = new FileBootstrapProvider('data://application/json;base64,abcde');
