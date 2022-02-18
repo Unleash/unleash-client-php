@@ -48,7 +48,7 @@ final class AbstractOperatorValidatorTest extends AbstractHttpClientTest
             [new DefaultStrategyHandler()],
             $this->repository,
             $this->registrationService,
-            (new UnleashConfiguration('', '', '', ))
+            (new UnleashConfiguration('', '', ''))
                 ->setCache($this->getCache())
                 ->setMetricsEnabled(false)
                 ->setAutoRegistrationEnabled(false),
