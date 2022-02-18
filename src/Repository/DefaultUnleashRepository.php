@@ -147,7 +147,10 @@ final class DefaultUnleashRepository implements UnleashRepository
                     $constraints[] = new DefaultConstraint(
                         $constraint['contextName'],
                         $constraint['operator'],
-                        $constraint['values']
+                        $constraint['values'] ?? null,
+                        $constraint['value'] ?? null,
+                        $constraint['inverted'] ?? false,
+                        $constraint['caseInsensitive'] ?? false,
                     );
                 }
                 $strategies[] = new DefaultStrategy(

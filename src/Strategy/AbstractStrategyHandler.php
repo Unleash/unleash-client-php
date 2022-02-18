@@ -4,10 +4,12 @@ namespace Unleash\Client\Strategy;
 
 use Unleash\Client\Configuration\Context;
 use Unleash\Client\DTO\Strategy;
-use Unleash\Client\Enum\ConstraintOperator;
+use Unleash\Client\Helper\ConstraintValidatorTrait;
 
 abstract class AbstractStrategyHandler implements StrategyHandler
 {
+    use ConstraintValidatorTrait;
+
     public function supports(Strategy $strategy): bool
     {
         return $strategy->getName() === $this->getStrategyName();
@@ -24,15 +26,7 @@ abstract class AbstractStrategyHandler implements StrategyHandler
     {
         $constraints = $strategy->getConstraints();
         foreach ($constraints as $constraint) {
-            $field = $constraint->getContextName();
-            $currentValue = $context->findContextValue($field) ?? '';
-
-            $result = in_array($currentValue, $constraint->getValues(), true);
-            if ($constraint->getOperator() === ConstraintOperator::NOT_IN) {
-                $result = !$result;
-            }
-
-            if (!$result) {
+            if (!$this->getValidator()->validateConstraint($constraint, $context)) {
                 return false;
             }
         }

@@ -2,6 +2,8 @@
 
 namespace Unleash\Client\Configuration;
 
+use DateTimeImmutable;
+use DateTimeInterface;
 use Unleash\Client\Enum\ContextField;
 use Unleash\Client\Enum\Stickiness;
 use Unleash\Client\Exception\InvalidValueException;
@@ -18,8 +20,10 @@ final class UnleashContext implements Context
         private array $customContext = [],
         ?string $hostname = null,
         private ?string $environment = null,
+        DateTimeInterface|string|null $currentTime = null,
     ) {
         $this->setHostname($hostname);
+        $this->setCurrentTime($currentTime);
     }
 
     public function getCurrentUserId(): ?string
@@ -138,7 +142,29 @@ final class UnleashContext implements Context
             ContextField::SESSION_ID, Stickiness::SESSION_ID => $this->getSessionId(),
             ContextField::IP_ADDRESS => $this->getIpAddress(),
             ContextField::ENVIRONMENT => $this->getEnvironment(),
+            ContextField::CURRENT_TIME => $this->getCurrentTime()->format(DateTimeInterface::ISO8601),
             default => $this->customContext[$fieldName] ?? null,
         };
+    }
+
+    public function getCurrentTime(): DateTimeInterface
+    {
+        if (!$this->hasCustomProperty('currentTime')) {
+            return new DateTimeImmutable();
+        }
+
+        return new DateTimeImmutable($this->getCustomProperty('currentTime'));
+    }
+
+    public function setCurrentTime(DateTimeInterface|string|null $time): self
+    {
+        if ($time === null) {
+            $this->removeCustomProperty('currentTime');
+        } else {
+            $value = is_string($time) ? $time : $time->format(DateTimeInterface::ISO8601);
+            $this->setCustomProperty('currentTime', $value);
+        }
+
+        return $this;
     }
 }
