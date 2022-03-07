@@ -9,8 +9,6 @@ aka [Feature Flags](https://docs.gitlab.com/ee/operations/feature_flags.html) in
 
 You may also be interested in the [Symfony Bundle](https://github.com/Unleash/unleash-client-symfony) for this package.
 
-This implementation conforms to the official Unleash standards and implements all of Unleash features.
-
 > Unleash allows you to gradually release your app's feature before doing a full release based on multiple strategies
 > like releasing to only specific users or releasing to a percentage of your user base. Read more in the above linked
 > documentations.
@@ -441,7 +439,7 @@ $unleash = UnleashBuilder::create()
 ## Strategies
 
 Unleash servers can use multiple strategies for enabling or disabling features. Which strategy gets used is defined
-on the server. This implementation supports all non-deprecated v4 strategies. 
+on the server. This implementation supports all v4 strategies. 
 [More here](https://docs.getunleash.io/user_guide/activation_strategy).
 
 ### Default strategy
