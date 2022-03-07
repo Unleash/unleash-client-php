@@ -7,6 +7,7 @@
 /.php-cs-fixer.dist.php export-ignore
 /phpstan.neon.dist export-ignore
 /phpunit.xml export-ignore
+/rector.72.php export-ignore
 /rector.73.php export-ignore
 /rector.74.php export-ignore
 /rector.80.php export-ignore
