@@ -822,6 +822,9 @@ use GuzzleHttp\Middleware;
 use Psr\Http\Message\RequestInterface;
 use Unleash\Client\UnleashBuilder;
 
+// any callable is valid, it may be a function reference, anonymous function or an invokable class
+
+// example invokable class
 final class AddHeaderMiddleware
 {
     public function __construct(
@@ -836,10 +839,17 @@ final class AddHeaderMiddleware
     }
 }
 
+// example anonymous function
+$addHeaderMiddleware = fn (string $headerName, string $headerValue)
+    => fn(RequestInterface $request)
+        => $request->withHeader($headerName, $headerValue);
+
 // create a handler stack that holds information about all middlewares
 $stack = HandlerStack::create(new CurlHandler());
 // mapRequest is a helper that simplifies modifying request
 $stack->push(Middleware::mapRequest(new AddHeaderMiddleware('X-My-Header', 'Some-Value')));
+// or with lambda
+$stack->push(Middleware::mapRequest($addHeaderMiddleware('X-My-Header2', 'Some-Value')));
 // assign the stack with middlewares as a handler
 $httpClient = new Client(['handler' => $stack]);
 
