@@ -804,6 +804,66 @@ sleep(10);
 $unleash->isEnabled('test');
 ```
 
+## Custom headers via middleware
+
+While middlewares for http client are not natively supported by this SDK, you can pass your own http client which 
+supports them.
+
+The most popular http client, guzzle, supports them out of the box and here's an example of how to pass custom headers
+automatically (for more information visit [official guzzle documentation on middlewares](https://docs.guzzlephp.org/en/stable/handlers-and-middleware.html)):
+
+```php
+<?php
+
+use GuzzleHttp\Client;
+use GuzzleHttp\Handler\CurlHandler;
+use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Middleware;
+use Psr\Http\Message\RequestInterface;
+use Unleash\Client\UnleashBuilder;
+
+// any callable is valid, it may be a function reference, anonymous function or an invokable class
+
+// example invokable class
+final class AddHeaderMiddleware
+{
+    public function __construct(
+        private readonly string $headerName,
+        private readonly string $value,
+    ) {
+    }
+
+    public function __invoke(RequestInterface $request): RequestInterface
+    {
+        return $request->withHeader($this->headerName, $this->value);
+    }
+}
+
+// example anonymous function
+$addHeaderMiddleware = fn (string $headerName, string $headerValue)
+    => fn(RequestInterface $request)
+        => $request->withHeader($headerName, $headerValue);
+
+// create a handler stack that holds information about all middlewares
+$stack = HandlerStack::create(new CurlHandler());
+// mapRequest is a helper that simplifies modifying request
+$stack->push(Middleware::mapRequest(new AddHeaderMiddleware('X-My-Header', 'Some-Value')));
+// or with lambda
+$stack->push(Middleware::mapRequest($addHeaderMiddleware('X-My-Header2', 'Some-Value')));
+// assign the stack with middlewares as a handler
+$httpClient = new Client(['handler' => $stack]);
+
+$unleash = UnleashBuilder::create()
+    ->withHttpClient($httpClient) // assign the custom http client
+    ->withAppName('My-App')
+    ->withInstanceId('My-Instance')
+    ->withAppUrl('http://localhost:4242')
+    ->build();
+
+// now every http request will have X-My-Header header with value Some-Value
+$unleash->isEnabled('some-feature');
+```
+
 ## Constraints
 
 Constraints are supported by this SDK and will be handled correctly by `Unleash::isEnabled()` if present.
