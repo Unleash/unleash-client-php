@@ -10,8 +10,6 @@ use Unleash\Client\DefaultUnleash;
 use Unleash\Client\DTO\DefaultFeature;
 use Unleash\Client\DTO\DefaultStrategy;
 use Unleash\Client\DTO\Feature;
-use Unleash\Client\DTO\Variant;
-use Unleash\Client\Metrics\MetricsHandler;
 use Unleash\Client\Repository\UnleashRepository;
 use Unleash\Client\Stickiness\MurmurHashCalculator;
 use Unleash\Client\Strategy\DefaultStrategyHandler;
@@ -25,21 +23,6 @@ use Unleash\Client\Variant\DefaultVariantHandler;
 final class DefaultUnleashTest extends AbstractHttpClientTest
 {
     use FakeCacheImplementationTrait;
-
-    /**
-     * @var MetricsHandler
-     */
-    private $metricsHandler;
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->metricsHandler = new class implements MetricsHandler {
-            public function handleMetrics(Feature $feature, bool $successful, Variant $variant = null): void
-            {
-            }
-        };
-    }
 
     public function testIsEnabled()
     {
