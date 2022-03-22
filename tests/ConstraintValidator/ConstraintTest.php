@@ -25,7 +25,7 @@ final class ConstraintTest extends AbstractHttpClientTest
                 ->setAutoRegistrationEnabled(false)
                 ->setCache($this->getCache()),
             $this->metricsHandler,
-            new DefaultVariantHandler(new MurmurHashCalculator()),
+            new DefaultVariantHandler(new MurmurHashCalculator())
         );
 
         $this->pushResponse([
@@ -66,7 +66,7 @@ final class ConstraintTest extends AbstractHttpClientTest
                 ->setAutoRegistrationEnabled(false)
                 ->setCache($this->getCache()),
             $this->metricsHandler,
-            new DefaultVariantHandler(new MurmurHashCalculator()),
+            new DefaultVariantHandler(new MurmurHashCalculator())
         );
 
         $this->pushResponse([
