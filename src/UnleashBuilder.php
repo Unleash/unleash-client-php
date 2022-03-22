@@ -254,7 +254,7 @@ final class UnleashBuilder
      * @param array<mixed>|Traversable<mixed>|JsonSerializable|null|string $bootstrap
      */
     #[Pure]
-    public function withBootstrap(array|Traversable|JsonSerializable|null|string $bootstrap): self
+    public function withBootstrap($bootstrap): self
     {
         if ($bootstrap === null) {
             $provider = new EmptyBootstrapProvider();
@@ -267,8 +267,11 @@ final class UnleashBuilder
         return $this->withBootstrapProvider($provider);
     }
 
+    /**
+     * @param \SplFileInfo|string|null $file
+     */
     #[Pure]
-    public function withBootstrapFile(string|SplFileInfo|null $file): self
+    public function withBootstrapFile($file): self
     {
         if ($file === null) {
             $provider = new EmptyBootstrapProvider();
@@ -358,9 +361,7 @@ final class UnleashBuilder
         if ($httpClient === null) {
             $httpClient = $this->defaultImplementationLocator->findHttpClient();
             if ($httpClient === null) {
-                throw new InvalidValueException(
-                    "No http client provided, please use 'withHttpClient()' method or install a package providing 'psr/http-client-implementation'.",
-                );
+                throw new InvalidValueException("No http client provided, please use 'withHttpClient()' method or install a package providing 'psr/http-client-implementation'.");
             }
         }
         assert($httpClient instanceof ClientInterface);
@@ -377,9 +378,7 @@ final class UnleashBuilder
              */
             // @codeCoverageIgnoreStart
             if ($requestFactory === null) {
-                throw new InvalidValueException(
-                    "No request factory provided, please use 'withRequestFactory()' method or install a package providing 'psr/http-factory-implementation'.",
-                );
+                throw new InvalidValueException("No request factory provided, please use 'withRequestFactory()' method or install a package providing 'psr/http-factory-implementation'.");
             }
             // @codeCoverageIgnoreEnd
         }
@@ -394,24 +393,16 @@ final class UnleashBuilder
             $registrationService = new DefaultRegistrationService($httpClient, $requestFactory, $configuration);
         }
 
-        return new DefaultUnleash(
-            $this->strategies,
-            $repository,
-            $registrationService,
-            $configuration,
-            new DefaultMetricsHandler(
-                new DefaultMetricsSender(
-                    $httpClient,
-                    $requestFactory,
-                    $configuration,
-                ),
-                $configuration
-            ),
-            new DefaultVariantHandler($hashCalculator),
-        );
+        return new DefaultUnleash($this->strategies, $repository, $registrationService, $configuration, new DefaultMetricsHandler(
+            new DefaultMetricsSender($httpClient, $requestFactory, $configuration),
+            $configuration
+        ), new DefaultVariantHandler($hashCalculator));
     }
 
-    private function with(string $property, mixed $value): self
+    /**
+     * @param mixed $value
+     */
+    private function with(string $property, $value): self
     {
         $copy = clone $this;
         $copy->{$property} = $value;
