@@ -2,7 +2,6 @@
 
 namespace Unleash\Client\ConstraintValidator;
 
-use LogicException;
 use Unleash\Client\Configuration\Context;
 use Unleash\Client\ConstraintValidator\Operator\Date\DateAfterOperatorValidator;
 use Unleash\Client\ConstraintValidator\Operator\Date\DateBeforeOperatorValidator;
@@ -106,7 +105,7 @@ final class DefaultConstraintValidator implements ConstraintValidator
             ConstraintOperator::VERSION_GREATER_THAN => new VersionGreaterThanOperatorValidator(),
             ConstraintOperator::VERSION_LOWER_THAN => new VersionLowerThanOperatorValidator(),
 
-            default => throw new LogicException("Unsupported operator: {$operator}"),
+            default => fn () => false,
         };
     }
 }
