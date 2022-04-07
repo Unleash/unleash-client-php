@@ -11,8 +11,9 @@ final class CompoundBootstrapProvider implements BootstrapProvider
 {
     /**
      * @var BootstrapProvider[]
+     * @readonly
      */
-    private readonly array $bootstrapProviders;
+    private array $bootstrapProviders;
 
     public function __construct(
         BootstrapProvider ...$bootstrapProviders
@@ -21,9 +22,9 @@ final class CompoundBootstrapProvider implements BootstrapProvider
     }
 
     /**
-     * @return array<mixed>|JsonSerializable|Traversable<mixed>|null
+     * @return mixed[]|\JsonSerializable|\Traversable|null
      */
-    public function getBootstrap(): array|JsonSerializable|Traversable|null
+    public function getBootstrap()
     {
         $exceptions = [];
 
@@ -52,8 +53,9 @@ final class CompoundBootstrapProvider implements BootstrapProvider
      * @param array<Exception> $exceptions
      *
      * @throws CompoundException
+     * @return never
      */
-    private function throwExceptions(array $exceptions): never
+    private function throwExceptions(array $exceptions)
     {
         assert(count($exceptions) > 0);
         throw new CompoundException(...$exceptions);
