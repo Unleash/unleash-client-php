@@ -179,6 +179,37 @@ final class DefaultUnleashTest extends AbstractHttpClientTest
         self::assertTrue($instance->isEnabled('test', $context));
     }
 
+    public function testIsEnabledIpAdressRange()
+    {
+        $instance = $this->getInstance(new IpAddressStrategyHandler());
+
+        $this->pushResponse([
+            'version' => 1,
+            'features' => [
+                [
+                    'name' => 'test',
+                    'description' => '',
+                    'enabled' => true,
+                    'strategies' => [
+                        [
+                            'name' => 'remoteAddress',
+                            'parameters' => [
+                                'IPs' => '192.168.0.0/16',
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ], 3);
+
+        $_SERVER['REMOTE_ADDR'] = '192.168.86.50';
+        self::assertTrue($instance->isEnabled('test'));
+        $_SERVER['REMOTE_ADDR'] = '192.168.0.1';
+        self::assertTrue($instance->isEnabled('test'));
+        $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
+        self::assertFalse($instance->isEnabled('test'));
+    }
+
     public function testIsEnabledUserId()
     {
         $instance = $this->getInstance(new UserIdStrategyHandler());
