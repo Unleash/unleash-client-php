@@ -22,15 +22,17 @@ final class IpAddressStrategyHandler extends AbstractStrategyHandler
 
         $enabled = false;
         $currentIpAddress = $context->getIpAddress();
-        foreach ($ipAddresses as $ipAddress) {
-            try {
-                $calculator = NetworkCalculator::fromString($ipAddress);
-            } catch (InvalidIpAddressException) {
-                continue;
-            }
-            if ($calculator->isInRange($currentIpAddress)) {
-                $enabled = true;
-                break;
+        if ($currentIpAddress !== null) {
+            foreach ($ipAddresses as $ipAddress) {
+                try {
+                    $calculator = NetworkCalculator::fromString($ipAddress);
+                } catch (InvalidIpAddressException) {
+                    continue;
+                }
+                if ($calculator->isInRange($currentIpAddress)) {
+                    $enabled = true;
+                    break;
+                }
             }
         }
 

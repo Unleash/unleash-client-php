@@ -9,11 +9,6 @@ use Unleash\Client\Exception\InvalidIpAddressException;
  */
 final class NetworkCalculator
 {
-    /**
-     * @var array<string>
-     */
-    private array $boundaries = [];
-
     public function __construct(
         private readonly string $ipAddress,
         private readonly int $networkSize
