@@ -33,14 +33,6 @@ final class NetworkCalculatorTest extends TestCase
         );
     }
 
-    private function fromStringData(): array
-    {
-        return [
-            ['127.0.0.1', '127.0.0.1', 32],
-            ['192.168.0.0/8', '192.168.0.0', 8],
-        ];
-    }
-
     public function isInRangeData(): array
     {
         return [
@@ -80,6 +72,14 @@ final class NetworkCalculatorTest extends TestCase
         $property->setAccessible(true);
 
         return $property->getValue($calculator);
+    }
+
+    private function fromStringData(): array
+    {
+        return [
+            ['127.0.0.1', '127.0.0.1', 32],
+            ['192.168.0.0/8', '192.168.0.0', 8],
+        ];
     }
 
     private function getNetworkSize(NetworkCalculator $calculator): int
