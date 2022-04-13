@@ -136,6 +136,22 @@ $builder = UnleashBuilder::create()
     ->withHeader('Authorization', 'my-api-key');
 ```
 
+To filter feature toggles by tag or name prefix you can use the `Url` helper:
+
+```php
+<?php
+
+use Unleash\Client\UnleashBuilder;
+use Unleash\Client\Helper\Url;
+
+$builder = UnleashBuilder::create()
+    ->withAppName('Some app name')
+    ->withAppUrl(new Url('https://some-app-url.com', namePrefix: 'somePrefix.', tags: [
+        'myTag' => 'myValue',
+    ]))
+    ->withInstanceId('Some instance id');
+```
+
 #### Optional parameters
 
 Some optional parameters can be set, these include:
@@ -171,10 +187,12 @@ use Unleash\Client\Strategy\GradualRolloutStrategyHandler;
 use Unleash\Client\Strategy\IpAddressStrategyHandler;
 use Unleash\Client\Strategy\UserIdStrategyHandler;
 use Unleash\Client\UnleashBuilder;
+use Unleash\Client\Helper\Url;
 
 $builder = UnleashBuilder::create()
     ->withAppName('Some app name')
-    ->withAppUrl('https://some-app-url.com')
+    ->withAppUrl('https://some-app-url.com') // as a string
+    ->withAppUrl(new Url('https://some-app-url.com', tags: ['myTag' => 'myValue'])) // or as Url instance
     ->withInstanceId('Some instance id')
     // now the optional ones
     ->withHttpClient(new Client())
