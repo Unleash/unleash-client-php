@@ -453,6 +453,8 @@ Enables feature based on the IP address. Takes current user's IP address from th
 own IP address or use the default (`$_SERVER['REMOTE_ADDR']`). Providing your own is especially useful if you're behind
 proxy and thus `REMOTE_ADDR` would return your proxy server's IP address instead.
 
+> As of 1.4.0 the CIDR notation is supported
+
 ```php
 <?php
 
