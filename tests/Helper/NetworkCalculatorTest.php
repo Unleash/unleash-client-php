@@ -65,7 +65,7 @@ final class NetworkCalculatorTest extends TestCase
         ];
     }
 
-    public function getIpAddress(NetworkCalculator $calculator): string
+    private function getIpAddress(NetworkCalculator $calculator): string
     {
         $reflection = new ReflectionObject($calculator);
         $property = $reflection->getProperty('ipAddress');
@@ -74,7 +74,7 @@ final class NetworkCalculatorTest extends TestCase
         return $property->getValue($calculator);
     }
 
-    private function fromStringData(): array
+    public function fromStringData(): array
     {
         return [
             ['127.0.0.1', '127.0.0.1', 32],
