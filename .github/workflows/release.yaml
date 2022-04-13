@@ -76,6 +76,7 @@ jobs:
         run: 'cat composer.json | jq --argjson files ''["src/bootstrap-72.php"]'' ''.autoload += {files: $files}'' > tmp.json && mv tmp.json composer.json'
       - name: Commit PHP ${{ matrix.version }} version
         run: |
+          git config --global --add safe.directory /github/workspace && \
           git config user.email noreply@github.com && \
           git config user.name "GitHub Actions" && \
           git checkout -b tmp-php-${{ matrix.version }}-release && \
