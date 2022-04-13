@@ -65,6 +65,14 @@ final class NetworkCalculatorTest extends TestCase
         ];
     }
 
+    public function fromStringData(): array
+    {
+        return [
+            ['127.0.0.1', '127.0.0.1', 32],
+            ['192.168.0.0/8', '192.168.0.0', 8],
+        ];
+    }
+
     private function getIpAddress(NetworkCalculator $calculator): string
     {
         $reflection = new ReflectionObject($calculator);
@@ -72,14 +80,6 @@ final class NetworkCalculatorTest extends TestCase
         $property->setAccessible(true);
 
         return $property->getValue($calculator);
-    }
-
-    public function fromStringData(): array
-    {
-        return [
-            ['127.0.0.1', '127.0.0.1', 32],
-            ['192.168.0.0/8', '192.168.0.0', 8],
-        ];
     }
 
     private function getNetworkSize(NetworkCalculator $calculator): int
