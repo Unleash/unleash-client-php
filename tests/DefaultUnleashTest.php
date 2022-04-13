@@ -179,7 +179,7 @@ final class DefaultUnleashTest extends AbstractHttpClientTest
         self::assertTrue($instance->isEnabled('test', $context));
     }
 
-    public function testIsEnabledIpAdressRange()
+    public function testIsEnabledIpAdressCidr()
     {
         $instance = $this->getInstance(new IpAddressStrategyHandler());
 
@@ -201,12 +201,31 @@ final class DefaultUnleashTest extends AbstractHttpClientTest
                 ],
             ],
         ], 3);
+        $this->pushResponse([
+            'version' => 1,
+            'features' => [
+                [
+                    'name' => 'test',
+                    'description' => '',
+                    'enabled' => true,
+                    'strategies' => [
+                        [
+                            'name' => 'remoteAddress',
+                            'parameters' => [
+                                'IPs' => '192.168', // invalid ip
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ]);
 
         $_SERVER['REMOTE_ADDR'] = '192.168.86.50';
         self::assertTrue($instance->isEnabled('test'));
         $_SERVER['REMOTE_ADDR'] = '192.168.0.1';
         self::assertTrue($instance->isEnabled('test'));
         $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
+        self::assertFalse($instance->isEnabled('test'));
         self::assertFalse($instance->isEnabled('test'));
     }
 
