@@ -29,7 +29,7 @@ final class NetworkCalculatorTest extends TestCase
         self::assertEquals(
             $result,
             $calculator->isInRange($ip),
-            "Failed asserting that {$ip} is{$not} in CIDR {$cidr}",
+            "Failed asserting that {$ip} is{$not} in CIDR {$cidr}"
         );
     }
 
