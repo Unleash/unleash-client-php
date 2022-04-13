@@ -4,7 +4,9 @@ namespace Unleash\Client\Strategy;
 
 use Unleash\Client\Configuration\Context;
 use Unleash\Client\DTO\Strategy;
+use Unleash\Client\Exception\InvalidIpAddressException;
 use Unleash\Client\Exception\MissingArgumentException;
+use Unleash\Client\Helper\NetworkCalculator;
 
 final class IpAddressStrategyHandler extends AbstractStrategyHandler
 {
@@ -18,7 +20,21 @@ final class IpAddressStrategyHandler extends AbstractStrategyHandler
         }
         $ipAddresses = array_map('trim', explode(',', $ipAddresses));
 
-        $enabled = in_array($context->getIpAddress(), $ipAddresses, true);
+        $enabled = false;
+        $currentIpAddress = $context->getIpAddress();
+        if ($currentIpAddress !== null) {
+            foreach ($ipAddresses as $ipAddress) {
+                try {
+                    $calculator = NetworkCalculator::fromString($ipAddress);
+                } catch (InvalidIpAddressException) {
+                    continue;
+                }
+                if ($calculator->isInRange($currentIpAddress)) {
+                    $enabled = true;
+                    break;
+                }
+            }
+        }
 
         if (!$enabled) {
             return false;
