@@ -16,35 +16,64 @@ use Unleash\Client\ContextProvider\UnleashContextProvider;
 
 final class UnleashConfiguration
 {
+    private string $url;
+    private string $appName;
+    private string $instanceId;
+    private ?CacheInterface $cache = null;
+    private int $ttl = 30;
+    private int $metricsInterval = 30_000;
+    private bool $metricsEnabled = true;
+    /**
+     * @var array<string, string>
+     */
+    private array $headers = [];
+    private bool $autoRegistrationEnabled = true;
+    private ?UnleashContextProvider $contextProvider = null;
+    private ?BootstrapHandler $bootstrapHandler = null;
+    private ?BootstrapProvider $bootstrapProvider = null;
+    private bool $fetchingEnabled = true;
     /**
      * @param array<string,string> $headers
      */
     public function __construct(
-        private string $url,
-        private string $appName,
-        private string $instanceId,
-        private ?CacheInterface $cache = null,
-        private int $ttl = 30,
-        private int $metricsInterval = 30_000,
-        private bool $metricsEnabled = true,
-        private array $headers = [],
-        private bool $autoRegistrationEnabled = true,
+        string $url,
+        string $appName,
+        string $instanceId,
+        ?CacheInterface $cache = null,
+        int $ttl = 30,
+        int $metricsInterval = 30_000,
+        bool $metricsEnabled = true,
+        array $headers = [],
+        bool $autoRegistrationEnabled = true,
         // todo remove in next major version
         ?Context $defaultContext = null,
+        ?UnleashContextProvider $contextProvider = null,
+        ?BootstrapHandler $bootstrapHandler = null,
+        ?BootstrapProvider $bootstrapProvider = null,
+        bool $fetchingEnabled = true
+    )
+    {
+        $this->url = $url;
+        $this->appName = $appName;
+        $this->instanceId = $instanceId;
+        $this->cache = $cache;
+        $this->ttl = $ttl;
+        $this->metricsInterval = $metricsInterval;
+        $this->metricsEnabled = $metricsEnabled;
+        $this->headers = $headers;
+        $this->autoRegistrationEnabled = $autoRegistrationEnabled;
         // todo remove nullability in next major version
-        private ?UnleashContextProvider $contextProvider = null,
+        $this->contextProvider = $contextProvider;
         // todo remove nullability in next major version
-        private ?BootstrapHandler $bootstrapHandler = null,
+        $this->bootstrapHandler = $bootstrapHandler;
         // todo remove nullability in next major version
-        private ?BootstrapProvider $bootstrapProvider = null,
-        private bool $fetchingEnabled = true,
-    ) {
+        $this->bootstrapProvider = $bootstrapProvider;
+        $this->fetchingEnabled = $fetchingEnabled;
         $this->contextProvider ??= new DefaultUnleashContextProvider();
         if ($defaultContext !== null) {
             $this->setDefaultContext($defaultContext);
         }
     }
-
     public function getCache(): CacheInterface
     {
         if ($this->cache === null) {
@@ -57,7 +86,7 @@ final class UnleashConfiguration
     public function getUrl(): string
     {
         $url = $this->url;
-        if (!str_ends_with($url, '/')) {
+        if (substr_compare($url, '/', -strlen('/')) !== 0) {
             $url .= '/';
         }
 
