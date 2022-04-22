@@ -5,11 +5,14 @@ namespace Unleash\Client\Tests;
 use Cache\Adapter\Filesystem\FilesystemCachePool;
 use Http\Discovery\Psr18ClientDiscovery;
 use JsonSerializable;
+use PHPUnit\Framework\Constraint\IsIdentical;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
 use ReflectionObject;
 use Symfony\Component\Cache\Psr16Cache;
+use Symfony\Component\EventDispatcher\EventDispatcher as SymfonyEventDispatcher;
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Traversable;
 use Unleash\Client\Bootstrap\BootstrapHandler;
 use Unleash\Client\Bootstrap\BootstrapProvider;
@@ -25,7 +28,11 @@ use Unleash\Client\Configuration\UnleashContext;
 use Unleash\Client\ContextProvider\DefaultUnleashContextProvider;
 use Unleash\Client\DefaultUnleash;
 use Unleash\Client\DTO\Strategy;
+use Unleash\Client\Event\FeatureToggleDisabledEvent;
+use Unleash\Client\Event\FeatureToggleNotFoundEvent;
+use Unleash\Client\Event\UnleashEvents;
 use Unleash\Client\Exception\InvalidValueException;
+use Unleash\Client\Helper\EventDispatcher;
 use Unleash\Client\Strategy\DefaultStrategyHandler;
 use Unleash\Client\Strategy\StrategyHandler;
 use Unleash\Client\Tests\TestHelpers\CustomBootstrapProviderImpl74;
@@ -628,6 +635,90 @@ final class UnleashBuilderTest extends TestCase
         $this->instance->withFetchingEnabled(false)->build();
     }
 
+    public function testWithEventDispatcher()
+    {
+        $eventDispatcher = new SymfonyEventDispatcher();
+        $instance = $this->instance->withEventDispatcher($eventDispatcher);
+
+        $property = $this->getProperty($instance, 'eventDispatcher');
+        self::assertInstanceOf(SymfonyEventDispatcher::class, $property);
+        self::assertSame($eventDispatcher, $property);
+
+        $unleash = $instance->withFetchingEnabled(false)->build();
+        $configuredEventDispatcher = $this->getConfiguration($unleash)->getEventDispatcher();
+        self::assertInstanceOf(EventDispatcher::class, $configuredEventDispatcher);
+
+        $innerEventDispatcher = $this->getProperty($configuredEventDispatcher, 'eventDispatcher');
+        self::assertInstanceOf(SymfonyEventDispatcher::class, $innerEventDispatcher);
+        self::assertSame($eventDispatcher, $innerEventDispatcher);
+
+        $unleash = $this->instance->withFetchingEnabled(false)->build();
+        $configuredEventDispatcher = $this->getConfiguration($unleash)->getEventDispatcher();
+        self::assertInstanceOf(EventDispatcher::class, $configuredEventDispatcher);
+
+        $innerEventDispatcher = $this->getProperty($configuredEventDispatcher, 'eventDispatcher');
+        self::assertInstanceOf(SymfonyEventDispatcher::class, $innerEventDispatcher);
+
+        $unleash = $this->instance->withFetchingEnabled(false)->withEventDispatcher(null)->build();
+        $configuredEventDispatcher = $this->getConfiguration($unleash)->getEventDispatcher();
+        self::assertInstanceOf(EventDispatcher::class, $configuredEventDispatcher);
+
+        $innerEventDispatcher = $this->getProperty($configuredEventDispatcher, 'eventDispatcher');
+        self::assertNull($innerEventDispatcher);
+    }
+
+    public function testWithEventSubscriber()
+    {
+        $eventSubscriber1 = new class implements EventSubscriberInterface {
+            public static function getSubscribedEvents(): array
+            {
+                return [UnleashEvents::FEATURE_TOGGLE_DISABLED => 'onDisabled'];
+            }
+
+            public function onDisabled(FeatureToggleDisabledEvent $event): void
+            {
+            }
+        };
+        $eventSubscriber2 = new class implements EventSubscriberInterface {
+            public static function getSubscribedEvents(): array
+            {
+                return [UnleashEvents::FEATURE_TOGGLE_NOT_FOUND => 'onNotFound'];
+            }
+
+            public function onNotFound(FeatureToggleNotFoundEvent $event): void
+            {
+            }
+        };
+
+        $instance = $this->instance
+            ->withFetchingEnabled(false)
+            ->withEventSubscriber($eventSubscriber1)
+            ->withEventSubscriber($eventSubscriber2);
+
+        $subscribers = $this->getProperty($instance, 'eventSubscribers');
+        self::assertIsArray($subscribers);
+        self::assertCount(2, $subscribers);
+
+        self::assertThat($subscribers[0], self::logicalOr(
+            new IsIdentical($eventSubscriber1),
+            new IsIdentical($eventSubscriber2),
+        ));
+        self::assertThat($subscribers[1], self::logicalOr(
+            new IsIdentical($eventSubscriber1),
+            new IsIdentical($eventSubscriber2),
+        ));
+
+        $unleash = $instance->build();
+        $eventDispatcher = $this->getProperty(
+            $this->getConfiguration($unleash)->getEventDispatcher(),
+            'eventDispatcher',
+        );
+        self::assertInstanceOf(SymfonyEventDispatcher::class, $eventDispatcher);
+        self::assertCount(2, $eventDispatcher->getListeners());
+        self::assertCount(1, $eventDispatcher->getListeners(UnleashEvents::FEATURE_TOGGLE_NOT_FOUND));
+        self::assertCount(1, $eventDispatcher->getListeners(UnleashEvents::FEATURE_TOGGLE_DISABLED));
+    }
+
     private function getConfiguration(DefaultUnleash $unleash): UnleashConfiguration
     {
         $configurationProperty = (new ReflectionObject($unleash))->getProperty('configuration');
@@ -649,5 +740,18 @@ final class UnleashBuilderTest extends TestCase
     private function newRequestFactory(): RequestFactoryInterface
     {
         return $this->createMock(RequestFactoryInterface::class);
+    }
+
+    private function getReflection(object $object): ReflectionObject
+    {
+        return new ReflectionObject($object);
+    }
+
+    private function getProperty(object $object, string $property): mixed
+    {
+        $property = $this->getReflection($object)->getProperty($property);
+        $property->setAccessible(true);
+
+        return $property->getValue($object);
     }
 }
