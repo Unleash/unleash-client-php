@@ -619,9 +619,9 @@ final class DefaultUnleashTest extends AbstractHttpClientTest
         // check that passing context works
         self::assertFalse(
             $instance->isEnabled(
-            'test',
-            (new UnleashContext())->setCustomProperty('disabled', 'yes')
-        ),
+                'test',
+                (new UnleashContext())->setCustomProperty('disabled', 'yes')
+            ),
         );
         // check that passing feature name works
         self::assertFalse($instance->isEnabled('disabled'));
