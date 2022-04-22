@@ -7,6 +7,11 @@ use Unleash\Client\Configuration\Context;
 use Unleash\Client\Configuration\UnleashConfiguration;
 use Unleash\Client\DTO\Strategy;
 use Unleash\Client\DTO\Variant;
+use Unleash\Client\Event\FeatureToggleDisabledEvent;
+use Unleash\Client\Event\FeatureToggleNoStrategyHandlerEvent;
+use Unleash\Client\Event\FeatureToggleNotFoundEvent;
+use Unleash\Client\Event\FeatureVariantBeforeFallbackReturnedEvent;
+use Unleash\Client\Event\UnleashEvents;
 use Unleash\Client\Metrics\MetricsHandler;
 use Unleash\Client\Repository\UnleashRepository;
 use Unleash\Client\Strategy\StrategyHandler;
@@ -36,13 +41,36 @@ final class DefaultUnleash implements Unleash
 
         $feature = $this->repository->findFeature($featureName);
         if ($feature === null) {
-            return $default;
+            $event = new FeatureToggleNotFoundEvent($context);
+            $event = $this->configuration->getEventDispatcher()->dispatch(
+                $event,
+                UnleashEvents::FEATURE_TOGGLE_NOT_FOUND,
+            );
+            assert($event instanceof FeatureToggleNotFoundEvent);
+            if ($event->isEnabled() !== null) {
+                return $event->isEnabled();
+            }
+
+            if ($event->getFeature() === null) {
+                return $default;
+            }
+            $feature = $event->getFeature();
         }
 
         if (!$feature->isEnabled()) {
-            $this->metricsHandler->handleMetrics($feature, false);
+            $event = new FeatureToggleDisabledEvent($feature, $context);
+            $event = $this->configuration->getEventDispatcher()->dispatch(
+                $event,
+                UnleashEvents::FEATURE_TOGGLE_DISABLED,
+            );
+            assert($event instanceof FeatureToggleDisabledEvent);
+            $feature = $event->getFeature();
 
-            return false;
+            if (!$feature->isEnabled()) {
+                $this->metricsHandler->handleMetrics($feature, false);
+
+                return false;
+            }
         }
 
         $strategies = $feature->getStrategies();
@@ -55,16 +83,38 @@ final class DefaultUnleash implements Unleash
             return true;
         }
 
+        $handlersFound = false;
         foreach ($strategies as $strategy) {
             $handlers = $this->findStrategyHandlers($strategy);
             if (!count($handlers)) {
                 continue;
             }
+            $handlersFound = true;
             foreach ($handlers as $handler) {
                 if ($handler->isEnabled($strategy, $context)) {
                     $this->metricsHandler->handleMetrics($feature, true);
 
                     return true;
+                }
+            }
+        }
+
+        if (!$handlersFound) {
+            $event = new FeatureToggleNoStrategyHandlerEvent($context);
+            $event = $this->configuration->getEventDispatcher()->dispatch(
+                $event,
+                UnleashEvents::FEATURE_TOGGLE_NO_STRATEGY_HANDLER,
+            );
+            assert($event instanceof FeatureToggleNoStrategyHandlerEvent);
+
+            $strategyHandler = $event->getStrategyHandler();
+            if ($strategyHandler !== null) {
+                foreach ($strategies as $strategy) {
+                    if ($strategyHandler->isEnabled($strategy, $context)) {
+                        $this->metricsHandler->handleMetrics($feature, true);
+
+                        return true;
+                    }
                 }
             }
         }
@@ -81,15 +131,39 @@ final class DefaultUnleash implements Unleash
 
         $feature = $this->repository->findFeature($featureName);
         if ($feature === null || !$feature->isEnabled() || !count($feature->getVariants())) {
-            return $fallbackVariant;
+            $event = new FeatureVariantBeforeFallbackReturnedEvent(
+                $fallbackVariant,
+                $feature,
+                $context,
+            );
+            $event = $this->configuration->getEventDispatcher()->dispatch(
+                $event,
+                UnleashEvents::FEATURE_VARIANT_BEFORE_FALLBACK_RETURNED,
+            );
+            assert($event instanceof FeatureVariantBeforeFallbackReturnedEvent);
+
+            return $event->getFallbackVariant();
         }
 
         $variant = $this->variantHandler->selectVariant($feature, $context);
         if ($variant !== null) {
             $this->metricsHandler->handleMetrics($feature, true, $variant);
+        } else {
+            $event = new FeatureVariantBeforeFallbackReturnedEvent(
+                $fallbackVariant,
+                $feature,
+                $context,
+            );
+            $event = $this->configuration->getEventDispatcher()->dispatch(
+                $event,
+                UnleashEvents::FEATURE_VARIANT_BEFORE_FALLBACK_RETURNED,
+            );
+            assert($event instanceof FeatureVariantBeforeFallbackReturnedEvent);
+
+            return $event->getFallbackVariant();
         }
 
-        return $variant  ?? $fallbackVariant;
+        return $variant;
     }
 
     public function register(): bool

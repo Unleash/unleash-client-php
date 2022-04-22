@@ -13,6 +13,7 @@ use Unleash\Client\Bootstrap\EmptyBootstrapProvider;
 use Unleash\Client\ContextProvider\DefaultUnleashContextProvider;
 use Unleash\Client\ContextProvider\SettableUnleashContextProvider;
 use Unleash\Client\ContextProvider\UnleashContextProvider;
+use Unleash\Client\Helper\EventDispatcher;
 
 final class UnleashConfiguration
 {
@@ -38,8 +39,11 @@ final class UnleashConfiguration
         // todo remove nullability in next major version
         private ?BootstrapProvider $bootstrapProvider = null,
         private bool $fetchingEnabled = true,
+        // todo remove nullability in next major version
+        private ?EventDispatcher $eventDispatcher = null,
     ) {
         $this->contextProvider ??= new DefaultUnleashContextProvider();
+        $this->eventDispatcher ??= new EventDispatcher(null);
         if ($defaultContext !== null) {
             $this->setDefaultContext($defaultContext);
         }
@@ -242,6 +246,19 @@ final class UnleashConfiguration
     public function setFetchingEnabled(bool $fetchingEnabled): self
     {
         $this->fetchingEnabled = $fetchingEnabled;
+
+        return $this;
+    }
+
+    public function getEventDispatcher(): EventDispatcher
+    {
+        return $this->eventDispatcher ?? new EventDispatcher(null);
+    }
+
+    public function setEventDispatcher(?EventDispatcher $eventDispatcher): self
+    {
+        $eventDispatcher ??= new EventDispatcher(null);
+        $this->eventDispatcher = $eventDispatcher;
 
         return $this;
     }
