@@ -41,7 +41,7 @@ final class DefaultUnleash implements Unleash
 
         $feature = $this->repository->findFeature($featureName);
         if ($feature === null) {
-            $event = new FeatureToggleNotFoundEvent($context);
+            $event = new FeatureToggleNotFoundEvent($context, $featureName);
             $event = $this->configuration->getEventDispatcher()->dispatch(
                 $event,
                 UnleashEvents::FEATURE_TOGGLE_NOT_FOUND,

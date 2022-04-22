@@ -17,6 +17,7 @@ final class FeatureToggleNotFoundEvent extends Event
      */
     public function __construct(
         private readonly Context $context,
+        private readonly string $featureName,
     ) {
     }
 
@@ -43,5 +44,10 @@ final class FeatureToggleNotFoundEvent extends Event
     public function getContext(): Context
     {
         return $this->context;
+    }
+
+    public function getFeatureName(): string
+    {
+        return $this->featureName;
     }
 }
