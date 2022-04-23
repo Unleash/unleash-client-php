@@ -100,7 +100,7 @@ final class DefaultUnleash implements Unleash
         }
 
         if (!$handlersFound) {
-            $event = new FeatureToggleNoStrategyHandlerEvent($context);
+            $event = new FeatureToggleNoStrategyHandlerEvent($context, $feature);
             $event = $this->configuration->getEventDispatcher()->dispatch(
                 $event,
                 UnleashEvents::FEATURE_TOGGLE_NO_STRATEGY_HANDLER,

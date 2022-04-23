@@ -3,6 +3,7 @@
 namespace Unleash\Client\Event;
 
 use Unleash\Client\Configuration\Context;
+use Unleash\Client\DTO\Feature;
 use Unleash\Client\Strategy\StrategyHandler;
 
 final class FeatureToggleNoStrategyHandlerEvent
@@ -14,12 +15,18 @@ final class FeatureToggleNoStrategyHandlerEvent
      */
     public function __construct(
         private readonly Context $context,
+        private readonly Feature $feature,
     ) {
     }
 
     public function getContext(): Context
     {
         return $this->context;
+    }
+
+    public function getFeature(): Feature
+    {
+        return $this->feature;
     }
 
     public function getStrategyHandler(): ?StrategyHandler

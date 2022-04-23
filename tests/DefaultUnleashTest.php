@@ -12,6 +12,8 @@ use Unleash\Client\DefaultUnleash;
 use Unleash\Client\DTO\DefaultFeature;
 use Unleash\Client\DTO\DefaultStrategy;
 use Unleash\Client\DTO\Feature;
+use Unleash\Client\DTO\Strategy;
+use Unleash\Client\Event\FeatureToggleNoStrategyHandlerEvent;
 use Unleash\Client\Event\FeatureToggleNotFoundEvent;
 use Unleash\Client\Event\UnleashEvents;
 use Unleash\Client\Repository\UnleashRepository;
@@ -576,6 +578,7 @@ final class DefaultUnleashTest extends AbstractHttpClientTest
 
         $builder = UnleashBuilder::create()
             ->withFetchingEnabled(false)
+            ->withCacheHandler($this->getCache())
             ->withBootstrap([
                 'features' => [],
             ]);
@@ -625,6 +628,63 @@ final class DefaultUnleashTest extends AbstractHttpClientTest
         );
         // check that passing feature name works
         self::assertFalse($instance->isEnabled('disabled'));
+    }
+
+    public function testEventStrategyHandlerNotFound()
+    {
+        $eventDispatcher = new EventDispatcher();
+        $builder = UnleashBuilder::create()
+            ->withFetchingEnabled(false)
+            ->withCacheHandler($this->getCache())
+            ->withBootstrap([
+                'features' => [
+                    [
+                        'name' => 'test',
+                        'enabled' => true,
+                        'strategies' => [
+                            [
+                                'name' => 'unknownStrategy',
+                            ],
+                        ],
+                    ],
+                    [
+                        'name' => 'test2',
+                        'enabled' => true,
+                        'strategies' => [
+                            [
+                                'name' => 'disabledStrategy',
+                            ],
+                        ],
+                    ],
+                ],
+            ]);
+        $subscriber = new class implements EventSubscriberInterface {
+            public static function getSubscribedEvents()
+            {
+                return [UnleashEvents::FEATURE_TOGGLE_NO_STRATEGY_HANDLER => 'onNoStrategyHandler'];
+            }
+
+            public function onNoStrategyHandler(FeatureToggleNoStrategyHandlerEvent $event): void
+            {
+                $strategyNames = array_map(
+                    fn (Strategy $strategy) => $strategy->getName(),
+                    $event->getFeature()->getStrategies(),
+                );
+                if (in_array('disabledStrategy', $strategyNames, true)) {
+                    return;
+                }
+
+                $event->setStrategyHandler(new DefaultStrategyHandler());
+            }
+        };
+
+        $instance = $builder->withEventDispatcher(clone $eventDispatcher)->withEventSubscriber($subscriber)->build();
+        // check that nonexistent features won't trigger the event
+        self::assertFalse($instance->isEnabled('test3'));
+        // check that event gets triggered and default strategy gets injected
+        self::assertTrue($instance->isEnabled('test'));
+        // check that the event is correctly provided the feature object
+        self::assertFalse($instance->isEnabled('test2'));
     }
 
     private function getInstance(StrategyHandler ...$handlers): DefaultUnleash
