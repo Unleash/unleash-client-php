@@ -1,4 +1,5 @@
 /.github export-ignore
+/doc export-ignore
 /examples export-ignore
 /tests export-ignore
 /.gitattributes export-ignore
@@ -7,6 +8,7 @@
 /.php-cs-fixer.dist.php export-ignore
 /phpstan.neon.dist export-ignore
 /phpunit.xml export-ignore
+/README.md export-ignore
 /rector.72.php export-ignore
 /rector.73.php export-ignore
 /rector.74.php export-ignore
