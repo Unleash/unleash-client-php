@@ -725,6 +725,11 @@ final class DefaultUnleashTest extends AbstractHttpClientTest
                             ],
                         ],
                     ],
+                    [
+                        'name' => 'ignored',
+                        'enabled' => true,
+                        'strategies' => [],
+                    ],
                 ],
             ]);
 
@@ -736,6 +741,18 @@ final class DefaultUnleashTest extends AbstractHttpClientTest
 
             public function beforeFallback(FeatureVariantBeforeFallbackReturnedEvent $event): void
             {
+                $feature = $event->getFeature();
+                $context = $event->getContext();
+
+                if ($feature !== null && $feature->getName() === 'ignored') {
+                    return;
+                }
+                if ($event->getFeatureName() === 'ignored2') {
+                    return;
+                }
+                if ($context->findContextValue('ignored')) {
+                    return;
+                }
                 $event->setFallbackVariant(new DefaultVariant('test', true));
             }
         };
@@ -744,6 +761,12 @@ final class DefaultUnleashTest extends AbstractHttpClientTest
         self::assertTrue($instance->getVariant('nonexistent')->isEnabled());
         self::assertTrue($instance->getVariant('noVariants')->isEnabled());
         self::assertTrue($instance->getVariant('disabled')->isEnabled());
+        self::assertFalse($instance->getVariant('ignored')->isEnabled());
+        self::assertFalse($instance->getVariant(
+            'noVariants',
+            (new UnleashContext())->setCustomProperty('ignored', 'yes')
+        )->isEnabled());
+        self::assertFalse($instance->getVariant('ignored2')->isEnabled());
     }
 
     private function getInstance(StrategyHandler ...$handlers): DefaultUnleash

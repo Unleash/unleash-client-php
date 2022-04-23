@@ -135,6 +135,7 @@ final class DefaultUnleash implements Unleash
                 $fallbackVariant,
                 $feature,
                 $context,
+                $featureName,
             );
             $event = $this->configuration->getEventDispatcher()->dispatch(
                 $event,
@@ -155,6 +156,7 @@ final class DefaultUnleash implements Unleash
                 $fallbackVariant,
                 $feature,
                 $context,
+                $featureName,
             );
             $event = $this->configuration->getEventDispatcher()->dispatch(
                 $event,

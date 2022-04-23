@@ -15,6 +15,7 @@ final class FeatureVariantBeforeFallbackReturnedEvent
         private Variant $fallbackVariant,
         private readonly ?Feature $feature,
         private readonly Context $context,
+        private readonly string $featureName,
     ) {
     }
 
@@ -36,5 +37,10 @@ final class FeatureVariantBeforeFallbackReturnedEvent
     public function getContext(): Context
     {
         return $this->context;
+    }
+
+    public function getFeatureName(): string
+    {
+        return $this->featureName;
     }
 }
