@@ -676,6 +676,10 @@ final class DefaultUnleashTest extends AbstractHttpClientTest
                     return;
                 }
 
+                if ($event->getContext()->findContextValue('ignore')) {
+                    return;
+                }
+
                 $event->setStrategyHandler(new DefaultStrategyHandler());
             }
         };
@@ -687,6 +691,12 @@ final class DefaultUnleashTest extends AbstractHttpClientTest
         self::assertTrue($instance->isEnabled('test'));
         // check that the event is correctly provided the feature object
         self::assertFalse($instance->isEnabled('test2'));
+        self::assertFalse(
+            $instance->isEnabled(
+            'test',
+            (new UnleashContext())->setCustomProperty('ignore', 'yes')
+        )
+        );
     }
 
     public function testEventFallbackVariant()
