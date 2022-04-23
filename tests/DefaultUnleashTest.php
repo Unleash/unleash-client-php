@@ -11,10 +11,12 @@ use Unleash\Client\Configuration\UnleashContext;
 use Unleash\Client\DefaultUnleash;
 use Unleash\Client\DTO\DefaultFeature;
 use Unleash\Client\DTO\DefaultStrategy;
+use Unleash\Client\DTO\DefaultVariant;
 use Unleash\Client\DTO\Feature;
 use Unleash\Client\DTO\Strategy;
 use Unleash\Client\Event\FeatureToggleNoStrategyHandlerEvent;
 use Unleash\Client\Event\FeatureToggleNotFoundEvent;
+use Unleash\Client\Event\FeatureVariantBeforeFallbackReturnedEvent;
 use Unleash\Client\Event\UnleashEvents;
 use Unleash\Client\Repository\UnleashRepository;
 use Unleash\Client\Stickiness\MurmurHashCalculator;
@@ -685,6 +687,53 @@ final class DefaultUnleashTest extends AbstractHttpClientTest
         self::assertTrue($instance->isEnabled('test'));
         // check that the event is correctly provided the feature object
         self::assertFalse($instance->isEnabled('test2'));
+    }
+
+    public function testEventFallbackVariant()
+    {
+        $eventDispatcher = new EventDispatcher();
+        $builder = UnleashBuilder::create()
+            ->withFetchingEnabled(false)
+            ->withCacheHandler($this->getCache())
+            ->withBootstrap([
+                'features' => [
+                    [
+                        'name' => 'noVariants',
+                        'enabled' => true,
+                        'strategies' => [
+                            [
+                                'name' => 'default',
+                            ],
+                        ],
+                    ],
+                    [
+                        'name' => 'disabled',
+                        'enabled' => false,
+                        'strategies' => [
+                            [
+                                'name' => 'default',
+                            ],
+                        ],
+                    ],
+                ],
+            ]);
+
+        $subscriber = new class implements EventSubscriberInterface {
+            public static function getSubscribedEvents(): array
+            {
+                return [UnleashEvents::FEATURE_VARIANT_BEFORE_FALLBACK_RETURNED => 'beforeFallback'];
+            }
+
+            public function beforeFallback(FeatureVariantBeforeFallbackReturnedEvent $event): void
+            {
+                $event->setFallbackVariant(new DefaultVariant('test', true));
+            }
+        };
+
+        $instance = $builder->withEventDispatcher(clone $eventDispatcher)->withEventSubscriber($subscriber)->build();
+        self::assertTrue($instance->getVariant('nonexistent')->isEnabled());
+        self::assertTrue($instance->getVariant('noVariants')->isEnabled());
+        self::assertTrue($instance->getVariant('disabled')->isEnabled());
     }
 
     private function getInstance(StrategyHandler ...$handlers): DefaultUnleash

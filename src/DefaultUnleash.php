@@ -149,6 +149,8 @@ final class DefaultUnleash implements Unleash
         if ($variant !== null) {
             $this->metricsHandler->handleMetrics($feature, true, $variant);
         } else {
+            // this path shouldn't really happen
+            // @codeCoverageIgnoreStart
             $event = new FeatureVariantBeforeFallbackReturnedEvent(
                 $fallbackVariant,
                 $feature,
@@ -161,6 +163,7 @@ final class DefaultUnleash implements Unleash
             assert($event instanceof FeatureVariantBeforeFallbackReturnedEvent);
 
             return $event->getFallbackVariant();
+            // @codeCoverageIgnoreEnd
         }
 
         return $variant;
