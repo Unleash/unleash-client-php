@@ -14,6 +14,7 @@ use Unleash\Client\DTO\DefaultStrategy;
 use Unleash\Client\DTO\DefaultVariant;
 use Unleash\Client\DTO\Feature;
 use Unleash\Client\DTO\Strategy;
+use Unleash\Client\Event\FeatureToggleDisabledEvent;
 use Unleash\Client\Event\FeatureToggleNoStrategyHandlerEvent;
 use Unleash\Client\Event\FeatureToggleNotFoundEvent;
 use Unleash\Client\Event\FeatureVariantBeforeFallbackReturnedEvent;
@@ -767,6 +768,70 @@ final class DefaultUnleashTest extends AbstractHttpClientTest
             (new UnleashContext())->setCustomProperty('ignored', 'yes')
         )->isEnabled());
         self::assertFalse($instance->getVariant('ignored2')->isEnabled());
+    }
+
+    public function testEventDisabledFeature()
+    {
+        $subscriber = new class implements EventSubscriberInterface {
+            public static function getSubscribedEvents(): array
+            {
+                return [UnleashEvents::FEATURE_TOGGLE_DISABLED => 'onDisabled'];
+            }
+
+            public function onDisabled(FeatureToggleDisabledEvent $event): void
+            {
+                if ($event->getContext()->findContextValue('ignored')) {
+                    return;
+                }
+                $feature = $event->getFeature();
+                if ($feature->getName() === 'ignored') {
+                    return;
+                }
+
+                $newFeature = new DefaultFeature(
+                    $feature->getName(),
+                    true,
+                    $feature->getStrategies(),
+                    $feature->getVariants()
+                );
+                $event->setFeature($newFeature);
+            }
+        };
+
+        $unleash = UnleashBuilder::create()
+            ->withCacheHandler($this->getCache())
+            ->withFetchingEnabled(false)
+            ->withEventSubscriber($subscriber)
+            ->withBootstrap([
+                'features' => [
+                    [
+                        'name' => 'test',
+                        'enabled' => false,
+                        'strategies' => [
+                            [
+                                'name' => 'default',
+                            ],
+                        ],
+                    ],
+                    [
+                        'name' => 'ignored',
+                        'enabled' => false,
+                        'strategies' => [
+                            [
+                                'name' => 'default',
+                            ],
+                        ],
+                    ],
+                ],
+            ])
+            ->build();
+
+        self::assertTrue($unleash->isEnabled('test'));
+        self::assertFalse($unleash->isEnabled('ignored'));
+        self::assertFalse($unleash->isEnabled(
+            'test',
+            (new UnleashContext())->setCustomProperty('ignored', 'yes')
+        ));
     }
 
     private function getInstance(StrategyHandler ...$handlers): DefaultUnleash
