@@ -24,8 +24,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Unleash\\Client\\": "src/",
-            "Symfony\\Component\\EventDispatcher\\": "stubs/event-dispatcher/"
+            "Unleash\\Client\\": "src/"
         }
     },
     "require-dev": {
