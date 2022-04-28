@@ -301,7 +301,8 @@ $unleash = UnleashBuilder::create()
     ->build();
 ```
 
-> Tip for PhpStorm users: Use the [Symfony plugin] for help with autocompletion of events, afterwards it looks like this:
+> Tip for PhpStorm users: Use the [Symfony plugin](https://plugins.jetbrains.com/plugin/7219-symfony-support)
+> for help with autocompletion of events, afterwards it looks like this:
 
 ![Symfony plugin events autocompletion](symfony-plugin-events.gif)
 
