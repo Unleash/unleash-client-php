@@ -15,7 +15,7 @@ use Unleash\Client\DTO\DefaultVariant;
 use Unleash\Client\DTO\Feature;
 use Unleash\Client\DTO\Strategy;
 use Unleash\Client\Event\FeatureToggleDisabledEvent;
-use Unleash\Client\Event\FeatureToggleNoStrategyHandlerEvent;
+use Unleash\Client\Event\FeatureToggleMissingStrategyHandlerEvent;
 use Unleash\Client\Event\FeatureToggleNotFoundEvent;
 use Unleash\Client\Event\FeatureVariantBeforeFallbackReturnedEvent;
 use Unleash\Client\Event\UnleashEvents;
@@ -664,10 +664,10 @@ final class DefaultUnleashTest extends AbstractHttpClientTest
         $subscriber = new class implements EventSubscriberInterface {
             public static function getSubscribedEvents()
             {
-                return [UnleashEvents::FEATURE_TOGGLE_NO_STRATEGY_HANDLER => 'onNoStrategyHandler'];
+                return [UnleashEvents::FEATURE_TOGGLE_MISSING_STRATEGY_HANDLER => 'onNoStrategyHandler'];
             }
 
-            public function onNoStrategyHandler(FeatureToggleNoStrategyHandlerEvent $event): void
+            public function onNoStrategyHandler(FeatureToggleMissingStrategyHandlerEvent $event): void
             {
                 $strategyNames = array_map(
                     fn (Strategy $strategy) => $strategy->getName(),

@@ -8,7 +8,7 @@ use Unleash\Client\Configuration\UnleashConfiguration;
 use Unleash\Client\DTO\Strategy;
 use Unleash\Client\DTO\Variant;
 use Unleash\Client\Event\FeatureToggleDisabledEvent;
-use Unleash\Client\Event\FeatureToggleNoStrategyHandlerEvent;
+use Unleash\Client\Event\FeatureToggleMissingStrategyHandlerEvent;
 use Unleash\Client\Event\FeatureToggleNotFoundEvent;
 use Unleash\Client\Event\FeatureVariantBeforeFallbackReturnedEvent;
 use Unleash\Client\Event\UnleashEvents;
@@ -100,12 +100,12 @@ final class DefaultUnleash implements Unleash
         }
 
         if (!$handlersFound) {
-            $event = new FeatureToggleNoStrategyHandlerEvent($context, $feature);
+            $event = new FeatureToggleMissingStrategyHandlerEvent($context, $feature);
             $event = $this->configuration->getEventDispatcher()->dispatch(
                 $event,
-                UnleashEvents::FEATURE_TOGGLE_NO_STRATEGY_HANDLER,
+                UnleashEvents::FEATURE_TOGGLE_MISSING_STRATEGY_HANDLER,
             );
-            assert($event instanceof FeatureToggleNoStrategyHandlerEvent);
+            assert($event instanceof FeatureToggleMissingStrategyHandlerEvent);
 
             $strategyHandler = $event->getStrategyHandler();
             if ($strategyHandler !== null) {

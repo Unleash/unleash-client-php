@@ -27,9 +27,9 @@ final class UnleashEvents
      * Allows you to explicitly set a strategy handler that will be used regardless of actual support
      * for the strategy.
      *
-     * @Event("Unleash\Client\Event\FeatureToggleNoStrategyHandlerEvent")
+     * @Event("Unleash\Client\Event\FeatureToggleMissingStrategyHandlerEvent")
      */
-    public const FEATURE_TOGGLE_NO_STRATEGY_HANDLER = 'unleash.event.toggle.no_strategy_handler';
+    public const FEATURE_TOGGLE_MISSING_STRATEGY_HANDLER = 'unleash.event.toggle.missing_strategy_handler';
 
     /**
      * Triggered before a fallback variant would be returned. Allows you to set a different variant.

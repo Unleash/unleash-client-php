@@ -6,7 +6,7 @@ use Unleash\Client\Configuration\Context;
 use Unleash\Client\DTO\Feature;
 use Unleash\Client\Strategy\StrategyHandler;
 
-final class FeatureToggleNoStrategyHandlerEvent
+final class FeatureToggleMissingStrategyHandlerEvent
 {
     private ?StrategyHandler $strategyHandler = null;
 
