@@ -46,6 +46,9 @@ final class EventDispatcher implements EventDispatcherInterface
         $this->eventDispatcher?->removeSubscriber($subscriber);
     }
 
+    /**
+     * @phpstan-return array<callable[]|callable>
+     */
     public function getListeners(string $eventName = null): array
     {
         if (is_string($eventName)) {
