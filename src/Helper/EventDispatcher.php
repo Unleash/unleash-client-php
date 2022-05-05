@@ -9,9 +9,11 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Unleash\Client\Event\UnleashEvents;
 
+// @codeCoverageIgnoreStart
 if (!interface_exists(EventDispatcherInterface::class)) {
     require_once __DIR__ . '/../../stubs/event-dispatcher/EventDispatcherInterface.php';
 }
+// @codeCoverageIgnoreEnd
 
 /**
  * @internal
