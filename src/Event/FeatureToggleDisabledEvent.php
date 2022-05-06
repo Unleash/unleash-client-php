@@ -11,21 +11,22 @@ final class FeatureToggleDisabledEvent
      * @internal
      */
     public function __construct(
-        private Feature $feature,
+        private readonly Feature $feature,
         private readonly Context $context,
     ) {
     }
 
+    /**
+     * @codeCoverageIgnore
+     */
     public function getFeature(): Feature
     {
         return $this->feature;
     }
 
-    public function setFeature(Feature $feature): void
-    {
-        $this->feature = $feature;
-    }
-
+    /**
+     * @codeCoverageIgnore
+     */
     public function getContext(): Context
     {
         return $this->context;

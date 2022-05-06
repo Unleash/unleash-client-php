@@ -11,13 +11,10 @@ use Unleash\Client\Configuration\UnleashContext;
 use Unleash\Client\DefaultUnleash;
 use Unleash\Client\DTO\DefaultFeature;
 use Unleash\Client\DTO\DefaultStrategy;
-use Unleash\Client\DTO\DefaultVariant;
 use Unleash\Client\DTO\Feature;
-use Unleash\Client\DTO\Strategy;
 use Unleash\Client\Event\FeatureToggleDisabledEvent;
 use Unleash\Client\Event\FeatureToggleMissingStrategyHandlerEvent;
 use Unleash\Client\Event\FeatureToggleNotFoundEvent;
-use Unleash\Client\Event\FeatureVariantBeforeFallbackReturnedEvent;
 use Unleash\Client\Event\UnleashEvents;
 use Unleash\Client\Repository\UnleashRepository;
 use Unleash\Client\Stickiness\MurmurHashCalculator;
@@ -543,98 +540,62 @@ final class DefaultUnleashTest extends AbstractHttpClientTest
         $triggeredCount = 0;
 
         $eventDispatcher = new EventDispatcher();
-        $enabledFactory = function (?bool $result) use (&$triggeredCount) {
-            return new class($result, $triggeredCount) implements EventSubscriberInterface {
-                /**
-                 * @var bool|null
-                 */
-                private $result;
+        $subscriber = new class($triggeredCount) implements EventSubscriberInterface {
+            /**
+             * @var int
+             */
+            private $triggeredCount;
 
-                /**
-                 * @var int
-                 */
-                private $triggeredCount;
+            public function __construct(int &$triggeredCount)
+            {
+                $this->triggeredCount = &$triggeredCount;
+            }
 
-                public function __construct(?bool $result, int &$triggeredCount)
-                {
-                    $this->result = $result;
-                    $this->triggeredCount = &$triggeredCount;
-                }
-
-                public static function getSubscribedEvents(): array
-                {
-                    return [UnleashEvents::FEATURE_TOGGLE_NOT_FOUND => 'onNotFound'];
-                }
-
-                public function onNotFound(FeatureToggleNotFoundEvent $event)
-                {
-                    ++$this->triggeredCount;
-                    if ($this->result !== null) {
-                        $event->setEnabled($this->result);
-                    }
-                }
-            };
-        };
-        $enabledTrue = $enabledFactory(true);
-        $enabledFalse = $enabledFactory(false);
-        $enabledNull = $enabledFactory(null);
-
-        $builder = UnleashBuilder::create()
-            ->withFetchingEnabled(false)
-            ->withCacheHandler($this->getCache())
-            ->withBootstrap([
-                'features' => [],
-            ]);
-
-        $instance = $builder->withEventDispatcher(clone $eventDispatcher)->withEventSubscriber($enabledTrue)->build();
-        self::assertTrue($instance->isEnabled('test'));
-
-        $instance = $builder->withEventDispatcher(clone $eventDispatcher)->withEventSubscriber($enabledFalse)->build();
-        self::assertFalse($instance->isEnabled('test'));
-
-        $instance = $builder->withEventDispatcher(clone $eventDispatcher)->withEventSubscriber($enabledNull)->build();
-        self::assertFalse($instance->isEnabled('test'));
-
-        self::assertEquals(3, $triggeredCount);
-
-        $featureHandler = new class implements EventSubscriberInterface {
-            public static function getSubscribedEvents()
+            public static function getSubscribedEvents(): array
             {
                 return [UnleashEvents::FEATURE_TOGGLE_NOT_FOUND => 'onNotFound'];
             }
 
             public function onNotFound(FeatureToggleNotFoundEvent $event)
             {
-                $context = $event->getContext();
-                if (
-                    !$context->findContextValue('disabled')
-                    && $event->getFeatureName() !== 'disabled'
-                ) {
-                    $event->setFeature(new DefaultFeature(
-                        'test',
-                        true,
-                        [new DefaultStrategy('default')],
-                    ));
-                }
+                ++$this->triggeredCount;
             }
         };
-        $instance = $builder->withEventDispatcher(clone $eventDispatcher)->withEventSubscriber($featureHandler)->build();
+
+        $builder = UnleashBuilder::create()
+            ->withFetchingEnabled(false)
+            ->withCacheHandler($this->getCache())
+            ->withEventSubscriber($subscriber)
+            ->withBootstrap([
+                'features' => [
+                    [
+                        'name' => 'test',
+                        'enabled' => true,
+                        'strategies' => [
+                            [
+                                'name' => 'default',
+                            ],
+                        ],
+                    ],
+                ],
+            ]);
+
+        $instance = $builder->withEventDispatcher(clone $eventDispatcher)->build();
         self::assertTrue($instance->isEnabled('test'));
-        // the feature is overridden manually in event so regardless of name it should return true
-        self::assertTrue($instance->isEnabled('test2'));
-        // check that passing context works
-        self::assertFalse(
-            $instance->isEnabled(
-                'test',
-                (new UnleashContext())->setCustomProperty('disabled', 'yes')
-            ),
-        );
-        // check that passing feature name works
-        self::assertFalse($instance->isEnabled('disabled'));
+
+        $instance = $builder->withEventDispatcher(clone $eventDispatcher)->build();
+        self::assertFalse($instance->isEnabled('test2'));
+
+        $instance = $builder->withEventDispatcher(clone $eventDispatcher)->build();
+        self::assertFalse($instance->isEnabled('test3'));
+
+        self::assertEquals(2, $triggeredCount);
     }
 
     public function testEventStrategyHandlerNotFound()
     {
+        $calledCount = 0;
+
         $eventDispatcher = new EventDispatcher();
         $builder = UnleashBuilder::create()
             ->withFetchingEnabled(false)
@@ -661,7 +622,17 @@ final class DefaultUnleashTest extends AbstractHttpClientTest
                     ],
                 ],
             ]);
-        $subscriber = new class implements EventSubscriberInterface {
+        $subscriber = new class($calledCount) implements EventSubscriberInterface {
+            /**
+             * @var int
+             */
+            private $calledCount;
+
+            public function __construct(int &$calledCount)
+            {
+                $this->calledCount = &$calledCount;
+            }
+
             public static function getSubscribedEvents()
             {
                 return [UnleashEvents::FEATURE_TOGGLE_MISSING_STRATEGY_HANDLER => 'onNoStrategyHandler'];
@@ -669,110 +640,34 @@ final class DefaultUnleashTest extends AbstractHttpClientTest
 
             public function onNoStrategyHandler(FeatureToggleMissingStrategyHandlerEvent $event): void
             {
-                $strategyNames = array_map(
-                    fn (Strategy $strategy) => $strategy->getName(),
-                    $event->getFeature()->getStrategies(),
-                );
-                if (in_array('disabledStrategy', $strategyNames, true)) {
-                    return;
-                }
-
-                if ($event->getContext()->findContextValue('ignore')) {
-                    return;
-                }
-
-                $event->setStrategyHandler(new DefaultStrategyHandler());
+                ++$this->calledCount;
             }
         };
 
         $instance = $builder->withEventDispatcher(clone $eventDispatcher)->withEventSubscriber($subscriber)->build();
         // check that nonexistent features won't trigger the event
-        self::assertFalse($instance->isEnabled('test3'));
-        // check that event gets triggered and default strategy gets injected
-        self::assertTrue($instance->isEnabled('test'));
-        // check that the event is correctly provided the feature object
-        self::assertFalse($instance->isEnabled('test2'));
-        self::assertFalse(
-            $instance->isEnabled(
-                'test',
-                (new UnleashContext())->setCustomProperty('ignore', 'yes')
-            )
-        );
-    }
-
-    public function testEventFallbackVariant()
-    {
-        $eventDispatcher = new EventDispatcher();
-        $builder = UnleashBuilder::create()
-            ->withFetchingEnabled(false)
-            ->withCacheHandler($this->getCache())
-            ->withBootstrap([
-                'features' => [
-                    [
-                        'name' => 'noVariants',
-                        'enabled' => true,
-                        'strategies' => [
-                            [
-                                'name' => 'default',
-                            ],
-                        ],
-                    ],
-                    [
-                        'name' => 'disabled',
-                        'enabled' => false,
-                        'strategies' => [
-                            [
-                                'name' => 'default',
-                            ],
-                        ],
-                    ],
-                    [
-                        'name' => 'ignored',
-                        'enabled' => true,
-                        'strategies' => [],
-                    ],
-                ],
-            ]);
-
-        $subscriber = new class implements EventSubscriberInterface {
-            public static function getSubscribedEvents(): array
-            {
-                return [UnleashEvents::FEATURE_VARIANT_BEFORE_FALLBACK_RETURNED => 'beforeFallback'];
-            }
-
-            public function beforeFallback(FeatureVariantBeforeFallbackReturnedEvent $event): void
-            {
-                $feature = $event->getFeature();
-                $context = $event->getContext();
-
-                if ($feature !== null && $feature->getName() === 'ignored') {
-                    return;
-                }
-                if ($event->getFeatureName() === 'ignored2') {
-                    return;
-                }
-                if ($context->findContextValue('ignored')) {
-                    return;
-                }
-                $event->setFallbackVariant(new DefaultVariant('test', true));
-            }
-        };
-
-        $instance = $builder->withEventDispatcher(clone $eventDispatcher)->withEventSubscriber($subscriber)->build();
-        self::assertTrue($instance->getVariant('nonexistent')->isEnabled());
-        self::assertTrue($instance->getVariant('noVariants')->isEnabled());
-        self::assertTrue($instance->getVariant('disabled')->isEnabled());
-        self::assertFalse($instance->getVariant('ignored')->isEnabled());
-        self::assertFalse($instance->getVariant(
-            'noVariants',
-            (new UnleashContext())->setCustomProperty('ignored', 'yes')
-        )->isEnabled());
-        self::assertFalse($instance->getVariant('ignored2')->isEnabled());
+        $instance->isEnabled('test3');
+        self::assertSame(0, $calledCount);
+        $instance->isEnabled('test2');
+        self::assertSame(1, $calledCount);
+        $instance->isEnabled('test');
+        self::assertSame(2, $calledCount);
     }
 
     public function testEventDisabledFeature()
     {
-        $subscriber = new class implements EventSubscriberInterface {
+        $calledCount = 0;
+        $subscriber = new class($calledCount) implements EventSubscriberInterface {
+            /**
+             * @var int
+             */
+            private $calledCount;
+
+            public function __construct(int &$calledCount)
+            {
+                $this->calledCount = &$calledCount;
+            }
+
             public static function getSubscribedEvents(): array
             {
                 return [UnleashEvents::FEATURE_TOGGLE_DISABLED => 'onDisabled'];
@@ -780,21 +675,7 @@ final class DefaultUnleashTest extends AbstractHttpClientTest
 
             public function onDisabled(FeatureToggleDisabledEvent $event): void
             {
-                if ($event->getContext()->findContextValue('ignored')) {
-                    return;
-                }
-                $feature = $event->getFeature();
-                if ($feature->getName() === 'ignored') {
-                    return;
-                }
-
-                $newFeature = new DefaultFeature(
-                    $feature->getName(),
-                    true,
-                    $feature->getStrategies(),
-                    $feature->getVariants()
-                );
-                $event->setFeature($newFeature);
+                ++$this->calledCount;
             }
         };
 
@@ -814,7 +695,7 @@ final class DefaultUnleashTest extends AbstractHttpClientTest
                         ],
                     ],
                     [
-                        'name' => 'ignored',
+                        'name' => 'test2',
                         'enabled' => false,
                         'strategies' => [
                             [
@@ -826,12 +707,11 @@ final class DefaultUnleashTest extends AbstractHttpClientTest
             ])
             ->build();
 
-        self::assertTrue($unleash->isEnabled('test'));
-        self::assertFalse($unleash->isEnabled('ignored'));
-        self::assertFalse($unleash->isEnabled(
-            'test',
-            (new UnleashContext())->setCustomProperty('ignored', 'yes')
-        ));
+        self::assertFalse($unleash->isEnabled('test'));
+        self::assertFalse($unleash->isEnabled('test2'));
+        self::assertFalse($unleash->isEnabled('test3'));
+
+        self::assertSame(2, $calledCount);
     }
 
     private function getInstance(StrategyHandler ...$handlers): DefaultUnleash

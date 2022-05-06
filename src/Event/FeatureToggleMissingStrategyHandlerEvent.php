@@ -4,12 +4,9 @@ namespace Unleash\Client\Event;
 
 use Unleash\Client\Configuration\Context;
 use Unleash\Client\DTO\Feature;
-use Unleash\Client\Strategy\StrategyHandler;
 
 final class FeatureToggleMissingStrategyHandlerEvent
 {
-    private ?StrategyHandler $strategyHandler = null;
-
     /**
      * @internal
      */
@@ -19,23 +16,19 @@ final class FeatureToggleMissingStrategyHandlerEvent
     ) {
     }
 
+    /**
+     * @codeCoverageIgnore
+     */
     public function getContext(): Context
     {
         return $this->context;
     }
 
+    /**
+     * @codeCoverageIgnore
+     */
     public function getFeature(): Feature
     {
         return $this->feature;
-    }
-
-    public function getStrategyHandler(): ?StrategyHandler
-    {
-        return $this->strategyHandler;
-    }
-
-    public function setStrategyHandler(?StrategyHandler $strategyHandler): void
-    {
-        $this->strategyHandler = $strategyHandler;
     }
 }

@@ -4,14 +4,9 @@ namespace Unleash\Client\Event;
 
 use Symfony\Contracts\EventDispatcher\Event;
 use Unleash\Client\Configuration\Context;
-use Unleash\Client\DTO\Feature;
 
 final class FeatureToggleNotFoundEvent extends Event
 {
-    private ?Feature $feature = null;
-
-    private ?bool $enabled = null;
-
     /**
      * @internal
      */
@@ -21,31 +16,17 @@ final class FeatureToggleNotFoundEvent extends Event
     ) {
     }
 
-    public function getFeature(): ?Feature
-    {
-        return $this->feature;
-    }
-
-    public function setFeature(?Feature $feature): void
-    {
-        $this->feature = $feature;
-    }
-
-    public function isEnabled(): ?bool
-    {
-        return $this->enabled;
-    }
-
-    public function setEnabled(bool $enabled): void
-    {
-        $this->enabled = $enabled;
-    }
-
+    /**
+     * @codeCoverageIgnore
+     */
     public function getContext(): Context
     {
         return $this->context;
     }
 
+    /**
+     * @codeCoverageIgnore
+     */
     public function getFeatureName(): string
     {
         return $this->featureName;

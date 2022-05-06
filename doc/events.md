@@ -31,7 +31,6 @@ class MyEventSubscriber implements EventSubscriberInterface
             UnleashEvents::FEATURE_TOGGLE_DISABLED => 'onFeatureDisabled',
             UnleashEvents::FEATURE_TOGGLE_MISSING_STRATEGY_HANDLER => 'onNoStrategyHandler',
             UnleashEvents::FEATURE_TOGGLE_NOT_FOUND => 'onFeatureNotFound',
-            UnleashEvents::FEATURE_VARIANT_BEFORE_FALLBACK_RETURNED => 'onVariantNotFound',
         ];
     }
     
@@ -46,11 +45,6 @@ class MyEventSubscriber implements EventSubscriberInterface
     }
     
     public function onFeatureNotFound(FeatureToggleNotFoundEvent $event)
-    {
-        // todo
-    }
-    
-    public function onVariantNotFound(FeatureVariantBeforeFallbackReturnedEvent $event)
     {
         // todo
     }
@@ -76,12 +70,8 @@ The relevant methods will be called in the above example when their respective e
   Event object: Unleash\Client\Event\FeatureToggleDisabledEvent
 - `\Unleash\Client\Event\UnleashEvents::FEATURE_TOGGLE_MISSING_STRATEGY_HANDLER` - when there is no suitable strategy handler
   implemented for any of the feature's strategies. Event object: `Unleash\Client\Event\FeatureToggleMissingStrategyHandlerEvent`
-- `\Unleash\Client\Event\UnleashEvents::FEATURE_VARIANT_BEFORE_FALLBACK_RETURNED` - triggered before the fallback variant
-  would be returned in the `getVariant()` call. Event object: `Unleash\Client\Event\FeatureVariantBeforeFallbackReturnedEvent`
 
 ## FEATURE_TOGGLE_NOT_FOUND event
-
-You can set a feature that will be evaluated further or set a default value that will be returned.
 
 Example:
 
@@ -105,34 +95,18 @@ final class MyEventSubscriber implements EventSubscriberInterface
     
     public function onNotFound(FeatureToggleNotFoundEvent $event): void
     {
-        if ($event->getFeatureName() === 'someFeature') {
-            // the call to Unleash::isEnabled() will return true
-            $event->setEnabled(true);
-        }
-        
-        if ($event->getFeatureName() === 'someOtherFeature') {
-            $feature = new DefaultFeature(name: 'someExistingFeature', enabled: true);
-            // the call to Unleash::isEnabled() will continue as if this feature was found
-            $event->setFeature($feature);
-        }
-        
-        if ($event->getContext()->getIpAddress() === '127.0.0.1') {
-            $event->setEnabled(true);
-        }
+        // methods:
+        $event->getFeatureName(); // string
+        $event->getContext(); // instance of Context
     }
 }
 
 $unleash = UnleashBuilder::create()
     ->withEventSubscriber(new MyEventSubscriber())
     ->build();
-
-$unleash->isEnabled('someFeature'); // true
-$unleash->isEnabled('someOtherFeature'); // true, assuming the strategies for 'someExistingFeature' evaluate to true
 ```
 
 ## FEATURE_TOGGLE_DISABLED event
-
-You can set a different feature that will be evaluated afterwards.
 
 Example:
 
@@ -156,13 +130,9 @@ final class MyEventSubscriber implements EventSubscriberInterface
     
     public function onFeatureDisabled(FeatureToggleDisabledEvent $event): void
     {
-        $feature = $event->getFeature();
-        if ($feature->getName() === 'someFeature') {
-            $feature = new DefaultFeature('someFeature', true, [
-                new DefaultStrategy('default'),
-            ]);
-            $event->setFeature($feature);
-        }
+        // methods:
+        $event->getContext(); // instance of Context
+        $event->getFeature(); // instance of Feature
     }
 }
 ```
@@ -193,66 +163,11 @@ final class MyEventSubscriber implements EventSubscriberInterface
     
     public function onMissingStrategyHandler(FeatureToggleMissingStrategyHandlerEvent $event): void
     {
-        $context = $event->getContext();
-        $feature = $event->getFeature();
-        // todo log the failure
-        
-        $event->setStrategyHandler(new DefaultStrategyHandler());
-    }
-}
-```
-
-## FEATURE_VARIANT_BEFORE_FALLBACK_RETURNED event
-
-Triggered before the fallback variant would be returned. You can set a different fallback variant.
-
-```php
-<?php
-
-use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use Unleash\Client\Event\UnleashEvents;
-use Unleash\Client\Event\FeatureVariantBeforeFallbackReturnedEvent;
-use Unleash\Client\DTO\DefaultVariant;
-use Unleash\Client\Enum\Stickiness;
-use Unleash\Client\DTO\DefaultVariantPayload;
-use Unleash\Client\Enum\VariantPayloadType;
-use Unleash\Client\DTO\DefaultVariantOverride;
-
-final class MyEventSubscriber implements EventSubscriberInterface
-{
-    public static function getSubscribedEvents()
-    {
-        return [
-            UnleashEvents::FEATURE_VARIANT_BEFORE_FALLBACK_RETURNED => 'beforeFallbackVariant',
-        ];
-    }
-
-    public function beforeFallbackVariant(FeatureVariantBeforeFallbackReturnedEvent $event): void
-    {
-        $feature = $event->getFeature();
-        if ($feature === null) {
-            // the fallback would be returned because the feature does not exist
-            $featureName = $event->getFeatureName();
-            // todo log this
-            return;
-        }
-        $context = $event->getContext();
-        $originalFallbackVariant = $event->getFallbackVariant();
-        
-        $newFallbackVariant = new DefaultVariant(
-            name: 'someVariant',
-            enabled: true,
-            weight: 100,
-            stickiness: Stickiness::DEFAULT,
-            payload: new DefaultVariantPayload(
-                type: VariantPayloadType::STRING,
-                value: 'someValue',
-            ),
-            overrides: [
-                new DefaultVariantOverride(field: 'someField', values: ['someValue']),
-            ],
-        );
-        $event->setFallbackVariant($newFallbackVariant);
+        // methods:
+        $event->getContext(); // instance of Context
+        $event->getFeature(); // instance of Feature
+        // get strategies
+        $event->getFeature()->getStrategies(); // iterable of Strategy instances
     }
 }
 ```
