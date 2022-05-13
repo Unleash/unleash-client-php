@@ -15,7 +15,9 @@ final class EventDispatcherTest extends TestCase
     {
         $instance = new EventDispatcher(null);
 
-        $listener = fn () => true;
+        $listener = function () {
+            return true;
+        };
         $subscriber = new class implements EventSubscriberInterface {
             public static function getSubscribedEvents(): array
             {
