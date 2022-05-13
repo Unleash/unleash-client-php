@@ -32,6 +32,9 @@ or
 
 `composer require unleash/client symfony/http-client nyholm/psr7 symfony/cache`
 
+If you want to make use of events you also need to install `symfony/event-dispatcher`. 
+See [event documentation here](doc/events.md).
+
 ## Usage
 
 The basic usage is getting the `Unleash` object and checking for a feature:

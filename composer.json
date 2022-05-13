@@ -37,7 +37,8 @@
         "phpunit/phpunit": "^9.5",
         "symfony/http-client": "^5.0 | ^6.0",
         "nyholm/psr7": "^1.0",
-        "symfony/cache": "^5.0 | ^6.0"
+        "symfony/cache": "^5.0 | ^6.0",
+        "symfony/event-dispatcher": "^5.0 | ^6.0"
     },
     "autoload-dev": {
         "psr-4": {
@@ -48,7 +49,8 @@
         "guzzlehttp/guzzle": "A http client implementation (PSR-17 and PSR-18)",
         "symfony/http-client": "A http client implementation (PSR-17 and PSR-18)",
         "nyholm/psr7": "Needed when you use symfony/http-client",
-        "unleash/symfony-client-bundle": "The Symfony bundle for this library"
+        "unleash/symfony-client-bundle": "The Symfony bundle for this library",
+        "symfony/event-dispatcher": "Needed when you want to react to events from Unleash"
     },
     "scripts": {
         "fixer": "php-cs-fixer fix --verbose --allow-risky=yes",

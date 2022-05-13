@@ -4,12 +4,18 @@ namespace Unleash\Client\Tests;
 
 use ArrayIterator;
 use LimitIterator;
+use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Unleash\Client\Configuration\UnleashConfiguration;
 use Unleash\Client\Configuration\UnleashContext;
 use Unleash\Client\DefaultUnleash;
 use Unleash\Client\DTO\DefaultFeature;
 use Unleash\Client\DTO\DefaultStrategy;
 use Unleash\Client\DTO\Feature;
+use Unleash\Client\Event\FeatureToggleDisabledEvent;
+use Unleash\Client\Event\FeatureToggleMissingStrategyHandlerEvent;
+use Unleash\Client\Event\FeatureToggleNotFoundEvent;
+use Unleash\Client\Event\UnleashEvents;
 use Unleash\Client\Repository\UnleashRepository;
 use Unleash\Client\Stickiness\MurmurHashCalculator;
 use Unleash\Client\Strategy\DefaultStrategyHandler;
@@ -18,6 +24,7 @@ use Unleash\Client\Strategy\IpAddressStrategyHandler;
 use Unleash\Client\Strategy\StrategyHandler;
 use Unleash\Client\Strategy\UserIdStrategyHandler;
 use Unleash\Client\Tests\Traits\FakeCacheImplementationTrait;
+use Unleash\Client\UnleashBuilder;
 use Unleash\Client\Variant\DefaultVariantHandler;
 
 final class DefaultUnleashTest extends AbstractHttpClientTest
@@ -526,6 +533,185 @@ final class DefaultUnleashTest extends AbstractHttpClientTest
         );
         self::assertTrue($instance->isEnabled('someFeature'));
         self::assertTrue($instance->isEnabled('someFeature'));
+    }
+
+    public function testEventToggleNotFound()
+    {
+        $triggeredCount = 0;
+
+        $eventDispatcher = new EventDispatcher();
+        $subscriber = new class($triggeredCount) implements EventSubscriberInterface {
+            /**
+             * @var int
+             */
+            private $triggeredCount;
+
+            public function __construct(int &$triggeredCount)
+            {
+                $this->triggeredCount = &$triggeredCount;
+            }
+
+            public static function getSubscribedEvents(): array
+            {
+                return [UnleashEvents::FEATURE_TOGGLE_NOT_FOUND => 'onNotFound'];
+            }
+
+            public function onNotFound(FeatureToggleNotFoundEvent $event)
+            {
+                ++$this->triggeredCount;
+            }
+        };
+
+        $builder = UnleashBuilder::create()
+            ->withFetchingEnabled(false)
+            ->withCacheHandler($this->getCache())
+            ->withEventSubscriber($subscriber)
+            ->withBootstrap([
+                'features' => [
+                    [
+                        'name' => 'test',
+                        'enabled' => true,
+                        'strategies' => [
+                            [
+                                'name' => 'default',
+                            ],
+                        ],
+                    ],
+                ],
+            ]);
+
+        $instance = $builder->withEventDispatcher(clone $eventDispatcher)->build();
+        self::assertTrue($instance->isEnabled('test'));
+
+        $instance = $builder->withEventDispatcher(clone $eventDispatcher)->build();
+        self::assertFalse($instance->isEnabled('test2'));
+
+        $instance = $builder->withEventDispatcher(clone $eventDispatcher)->build();
+        self::assertFalse($instance->isEnabled('test3'));
+
+        self::assertEquals(2, $triggeredCount);
+    }
+
+    public function testEventStrategyHandlerNotFound()
+    {
+        $calledCount = 0;
+
+        $eventDispatcher = new EventDispatcher();
+        $builder = UnleashBuilder::create()
+            ->withFetchingEnabled(false)
+            ->withCacheHandler($this->getCache())
+            ->withBootstrap([
+                'features' => [
+                    [
+                        'name' => 'test',
+                        'enabled' => true,
+                        'strategies' => [
+                            [
+                                'name' => 'unknownStrategy',
+                            ],
+                        ],
+                    ],
+                    [
+                        'name' => 'test2',
+                        'enabled' => true,
+                        'strategies' => [
+                            [
+                                'name' => 'disabledStrategy',
+                            ],
+                        ],
+                    ],
+                ],
+            ]);
+        $subscriber = new class($calledCount) implements EventSubscriberInterface {
+            /**
+             * @var int
+             */
+            private $calledCount;
+
+            public function __construct(int &$calledCount)
+            {
+                $this->calledCount = &$calledCount;
+            }
+
+            public static function getSubscribedEvents()
+            {
+                return [UnleashEvents::FEATURE_TOGGLE_MISSING_STRATEGY_HANDLER => 'onNoStrategyHandler'];
+            }
+
+            public function onNoStrategyHandler(FeatureToggleMissingStrategyHandlerEvent $event): void
+            {
+                ++$this->calledCount;
+            }
+        };
+
+        $instance = $builder->withEventDispatcher(clone $eventDispatcher)->withEventSubscriber($subscriber)->build();
+        // check that nonexistent features won't trigger the event
+        $instance->isEnabled('test3');
+        self::assertSame(0, $calledCount);
+        $instance->isEnabled('test2');
+        self::assertSame(1, $calledCount);
+        $instance->isEnabled('test');
+        self::assertSame(2, $calledCount);
+    }
+
+    public function testEventDisabledFeature()
+    {
+        $calledCount = 0;
+        $subscriber = new class($calledCount) implements EventSubscriberInterface {
+            /**
+             * @var int
+             */
+            private $calledCount;
+
+            public function __construct(int &$calledCount)
+            {
+                $this->calledCount = &$calledCount;
+            }
+
+            public static function getSubscribedEvents(): array
+            {
+                return [UnleashEvents::FEATURE_TOGGLE_DISABLED => 'onDisabled'];
+            }
+
+            public function onDisabled(FeatureToggleDisabledEvent $event): void
+            {
+                ++$this->calledCount;
+            }
+        };
+
+        $unleash = UnleashBuilder::create()
+            ->withCacheHandler($this->getCache())
+            ->withFetchingEnabled(false)
+            ->withEventSubscriber($subscriber)
+            ->withBootstrap([
+                'features' => [
+                    [
+                        'name' => 'test',
+                        'enabled' => false,
+                        'strategies' => [
+                            [
+                                'name' => 'default',
+                            ],
+                        ],
+                    ],
+                    [
+                        'name' => 'test2',
+                        'enabled' => false,
+                        'strategies' => [
+                            [
+                                'name' => 'default',
+                            ],
+                        ],
+                    ],
+                ],
+            ])
+            ->build();
+
+        self::assertFalse($unleash->isEnabled('test'));
+        self::assertFalse($unleash->isEnabled('test2'));
+        self::assertFalse($unleash->isEnabled('test3'));
+
+        self::assertSame(2, $calledCount);
     }
 
     private function getInstance(StrategyHandler ...$handlers): DefaultUnleash

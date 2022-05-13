@@ -10,6 +10,8 @@ use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
 use Psr\SimpleCache\CacheInterface;
 use SplFileInfo;
+use Symfony\Component\EventDispatcher\EventDispatcher as SymfonyEventDispatcher;
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Traversable;
 use Unleash\Client\Bootstrap\BootstrapHandler;
 use Unleash\Client\Bootstrap\BootstrapProvider;
@@ -27,6 +29,7 @@ use Unleash\Client\ContextProvider\SettableUnleashContextProvider;
 use Unleash\Client\ContextProvider\UnleashContextProvider;
 use Unleash\Client\Exception\InvalidValueException;
 use Unleash\Client\Helper\DefaultImplementationLocator;
+use Unleash\Client\Helper\EventDispatcher;
 use Unleash\Client\Metrics\DefaultMetricsHandler;
 use Unleash\Client\Metrics\DefaultMetricsSender;
 use Unleash\Client\Repository\DefaultUnleashRepository;
@@ -89,10 +92,23 @@ final class UnleashBuilder
      */
     private array $strategies;
 
-    #[Pure]
+    /**
+     * @var SymfonyEventDispatcher|null
+     * @noinspection PhpDocFieldTypeMismatchInspection
+     */
+    private ?object $eventDispatcher = null;
+
+    /**
+     * @var array<EventSubscriberInterface>
+     */
+    private array $eventSubscribers = [];
+
     public function __construct()
     {
         $this->defaultImplementationLocator = new DefaultImplementationLocator();
+        if (class_exists(SymfonyEventDispatcher::class)) {
+            $this->eventDispatcher = new SymfonyEventDispatcher();
+        }
 
         $rolloutStrategyHandler = new GradualRolloutStrategyHandler(new MurmurHashCalculator());
         $this->strategies = [
@@ -107,13 +123,11 @@ final class UnleashBuilder
         ];
     }
 
-    #[Pure]
     public static function create(): self
     {
         return new self();
     }
 
-    #[Pure]
     public static function createForGitlab(): self
     {
         return self::create()
@@ -291,6 +305,20 @@ final class UnleashBuilder
         return $this->with('fetchingEnabled', $enabled);
     }
 
+    #[Pure]
+    public function withEventDispatcher(?SymfonyEventDispatcher $eventDispatcher): self
+    {
+        return $this->with('eventDispatcher', $eventDispatcher);
+    }
+
+    public function withEventSubscriber(EventSubscriberInterface $eventSubscriber): self
+    {
+        $subscribers = $this->eventSubscribers;
+        $subscribers[] = $eventSubscriber;
+
+        return $this->with('eventSubscribers', $subscribers);
+    }
+
     public function build(): Unleash
     {
         $appUrl = $this->appUrl;
@@ -339,6 +367,10 @@ final class UnleashBuilder
 
         $bootstrapHandler = $this->bootstrapHandler ?? new DefaultBootstrapHandler();
         $bootstrapProvider = $this->bootstrapProvider ?? new EmptyBootstrapProvider();
+        $eventDispatcher = new EventDispatcher($this->eventDispatcher);
+        foreach ($this->eventSubscribers as $eventSubscriber) {
+            $eventDispatcher->addSubscriber($eventSubscriber);
+        }
 
         $configuration = new UnleashConfiguration($appUrl, $appName, $instanceId);
         $configuration
@@ -352,6 +384,7 @@ final class UnleashBuilder
             ->setBootstrapHandler($bootstrapHandler)
             ->setBootstrapProvider($bootstrapProvider)
             ->setFetchingEnabled($this->fetchingEnabled)
+            ->setEventDispatcher($eventDispatcher)
         ;
 
         $httpClient = $this->httpClient;

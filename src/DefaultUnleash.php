@@ -7,6 +7,10 @@ use Unleash\Client\Configuration\Context;
 use Unleash\Client\Configuration\UnleashConfiguration;
 use Unleash\Client\DTO\Strategy;
 use Unleash\Client\DTO\Variant;
+use Unleash\Client\Event\FeatureToggleDisabledEvent;
+use Unleash\Client\Event\FeatureToggleMissingStrategyHandlerEvent;
+use Unleash\Client\Event\FeatureToggleNotFoundEvent;
+use Unleash\Client\Event\UnleashEvents;
 use Unleash\Client\Metrics\MetricsHandler;
 use Unleash\Client\Repository\UnleashRepository;
 use Unleash\Client\Strategy\StrategyHandler;
@@ -36,10 +40,22 @@ final class DefaultUnleash implements Unleash
 
         $feature = $this->repository->findFeature($featureName);
         if ($feature === null) {
+            $event = new FeatureToggleNotFoundEvent($context, $featureName);
+            $this->configuration->getEventDispatcher()->dispatch(
+                $event,
+                UnleashEvents::FEATURE_TOGGLE_NOT_FOUND,
+            );
+
             return $default;
         }
 
         if (!$feature->isEnabled()) {
+            $event = new FeatureToggleDisabledEvent($feature, $context);
+            $this->configuration->getEventDispatcher()->dispatch(
+                $event,
+                UnleashEvents::FEATURE_TOGGLE_DISABLED,
+            );
+
             $this->metricsHandler->handleMetrics($feature, false);
 
             return false;
@@ -55,11 +71,13 @@ final class DefaultUnleash implements Unleash
             return true;
         }
 
+        $handlersFound = false;
         foreach ($strategies as $strategy) {
             $handlers = $this->findStrategyHandlers($strategy);
             if (!count($handlers)) {
                 continue;
             }
+            $handlersFound = true;
             foreach ($handlers as $handler) {
                 if ($handler->isEnabled($strategy, $context)) {
                     $this->metricsHandler->handleMetrics($feature, true);
@@ -67,6 +85,14 @@ final class DefaultUnleash implements Unleash
                     return true;
                 }
             }
+        }
+
+        if (!$handlersFound) {
+            $event = new FeatureToggleMissingStrategyHandlerEvent($context, $feature);
+            $this->configuration->getEventDispatcher()->dispatch(
+                $event,
+                UnleashEvents::FEATURE_TOGGLE_MISSING_STRATEGY_HANDLER,
+            );
         }
 
         $this->metricsHandler->handleMetrics($feature, false);
@@ -89,7 +115,7 @@ final class DefaultUnleash implements Unleash
             $this->metricsHandler->handleMetrics($feature, true, $variant);
         }
 
-        return $variant  ?? $fallbackVariant;
+        return $variant ?? $fallbackVariant;
     }
 
     public function register(): bool
