@@ -8,14 +8,21 @@ use Unleash\Client\Configuration\Context;
 final class FeatureToggleNotFoundEvent extends Event
 {
     /**
+     * @readonly
+     */
+    private Context $context;
+    /**
+     * @readonly
+     */
+    private string $featureName;
+    /**
      * @internal
      */
-    public function __construct(
-        private readonly Context $context,
-        private readonly string $featureName,
-    ) {
+    public function __construct(Context $context, string $featureName)
+    {
+        $this->context = $context;
+        $this->featureName = $featureName;
     }
-
     /**
      * @codeCoverageIgnore
      */
