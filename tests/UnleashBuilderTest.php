@@ -747,7 +747,7 @@ final class UnleashBuilderTest extends TestCase
         return new ReflectionObject($object);
     }
 
-    private function getProperty(object $object, string $property): mixed
+    private function getProperty(object $object, string $property)
     {
         $property = $this->getReflection($object)->getProperty($property);
         $property->setAccessible(true);
