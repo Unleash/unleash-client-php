@@ -9,10 +9,10 @@ final class DefaultFeature implements Feature
      * @param array<Variant>     $variants
      */
     public function __construct(
-        private readonly string $name,
-        private readonly bool $enabled,
-        private readonly iterable $strategies,
-        private readonly array $variants = [],
+        private string $name,
+        private bool $enabled,
+        private iterable $strategies,
+        private array $variants = [],
     ) {
     }
 

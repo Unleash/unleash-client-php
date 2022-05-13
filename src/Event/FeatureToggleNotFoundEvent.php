@@ -11,8 +11,8 @@ final class FeatureToggleNotFoundEvent extends Event
      * @internal
      */
     public function __construct(
-        private readonly Context $context,
-        private readonly string $featureName,
+        private Context $context,
+        private string $featureName,
     ) {
     }
 
