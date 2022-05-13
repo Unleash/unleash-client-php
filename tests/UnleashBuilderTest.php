@@ -701,17 +701,17 @@ final class UnleashBuilderTest extends TestCase
 
         self::assertThat($subscribers[0], self::logicalOr(
             new IsIdentical($eventSubscriber1),
-            new IsIdentical($eventSubscriber2),
+            new IsIdentical($eventSubscriber2)
         ));
         self::assertThat($subscribers[1], self::logicalOr(
             new IsIdentical($eventSubscriber1),
-            new IsIdentical($eventSubscriber2),
+            new IsIdentical($eventSubscriber2)
         ));
 
         $unleash = $instance->build();
         $eventDispatcher = $this->getProperty(
             $this->getConfiguration($unleash)->getEventDispatcher(),
-            'eventDispatcher',
+            'eventDispatcher'
         );
         self::assertInstanceOf(SymfonyEventDispatcher::class, $eventDispatcher);
         self::assertCount(2, $eventDispatcher->getListeners());
