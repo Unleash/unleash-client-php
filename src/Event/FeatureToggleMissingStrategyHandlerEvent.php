@@ -13,14 +13,23 @@ if (!class_exists(Event::class)) {
 final class FeatureToggleMissingStrategyHandlerEvent extends Event
 {
     /**
+     * @readonly
+     * @var \Unleash\Client\Configuration\Context
+     */
+    private $context;
+    /**
+     * @readonly
+     * @var \Unleash\Client\DTO\Feature
+     */
+    private $feature;
+    /**
      * @internal
      */
-    public function __construct(
-        private readonly Context $context,
-        private readonly Feature $feature,
-    ) {
+    public function __construct(Context $context, Feature $feature)
+    {
+        $this->context = $context;
+        $this->feature = $feature;
     }
-
     /**
      * @codeCoverageIgnore
      */
