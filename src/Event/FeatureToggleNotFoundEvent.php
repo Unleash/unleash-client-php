@@ -5,6 +5,10 @@ namespace Unleash\Client\Event;
 use Symfony\Contracts\EventDispatcher\Event;
 use Unleash\Client\Configuration\Context;
 
+if (!class_exists(Event::class)) {
+    require __DIR__ . '/../../stubs/event-dispatcher/Event.php';
+}
+
 final class FeatureToggleNotFoundEvent extends Event
 {
     /**
