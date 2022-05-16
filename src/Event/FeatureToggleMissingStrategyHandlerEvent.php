@@ -2,10 +2,15 @@
 
 namespace Unleash\Client\Event;
 
+use Symfony\Contracts\EventDispatcher\Event;
 use Unleash\Client\Configuration\Context;
 use Unleash\Client\DTO\Feature;
 
-final class FeatureToggleMissingStrategyHandlerEvent
+if (!class_exists(Event::class)) {
+    require __DIR__ . '/../../stubs/event-dispatcher/Event.php';
+}
+
+final class FeatureToggleMissingStrategyHandlerEvent extends Event
 {
     /**
      * @internal
