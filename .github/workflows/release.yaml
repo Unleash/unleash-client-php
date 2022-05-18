@@ -59,7 +59,7 @@ jobs:
         run: php vendor/bin/rector process --no-diffs --no-progress-bar --config rector.$(echo ${{ matrix.version }} | sed -e 's/\.//').php src
       - name: Add polyfill for 7.3
         if: matrix.version == '7.2'
-        run: composer require symfony/polyfill-php73
+        run: composer require symfony/polyfill-php73:^1.0
       - name: Add polyfill for 8.1
         if: matrix.version == '7.2' || matrix.version == '7.3' || matrix.version == '7.4' || matrix.version == '8.0'
         run: composer require symfony/polyfill-php81
