@@ -7,7 +7,6 @@ use Unleash\Client\Configuration\UnleashContext;
 use Unleash\Client\DTO\DefaultConstraint;
 use Unleash\Client\DTO\DefaultStrategy;
 use Unleash\Client\Enum\ConstraintOperator;
-use Unleash\Client\Exception\MissingArgumentException;
 use Unleash\Client\Strategy\UserIdStrategyHandler;
 
 final class UserIdStrategyHandlerTest extends TestCase
@@ -31,13 +30,9 @@ final class UserIdStrategyHandlerTest extends TestCase
             'userIds' => '123',
         ]), new UnleashContext()));
 
-        try {
-            $instance->isEnabled(new DefaultStrategy('userWithId', [
-                'userIds' => '',
-            ]), new UnleashContext());
-            $this->fail('Expected exception of class ' . MissingArgumentException::class);
-        } catch (MissingArgumentException $ignored) {
-        }
+        self::assertFalse($instance->isEnabled(new DefaultStrategy('userWithId', [
+            'userIds' => '',
+        ]), new UnleashContext()));
 
         self::assertTrue($instance->isEnabled(new DefaultStrategy('userWithId', [
             'userIds' => '123,456',
