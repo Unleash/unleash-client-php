@@ -25,7 +25,7 @@ jobs:
         run: php vendor/bin/rector process --no-diffs --no-progress-bar --config rector.$(echo ${{ matrix.version }} | sed -e 's/\.//').php src
       - name: Add polyfill for 7.3
         if: matrix.version == '7.2'
-        run: composer require symfony/polyfill-php73
+        run: composer require symfony/polyfill-php73:^1.0
       - name: Update composer.json version
         run: 'sed -i -e ''s/"php": "\^8.1"/"php": "\^${{ matrix.version }}"/'' composer.json'
       - name: Downgrade phpunit
