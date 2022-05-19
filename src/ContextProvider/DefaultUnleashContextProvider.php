@@ -8,8 +8,10 @@ use Unleash\Client\Configuration\UnleashContext;
 
 final class DefaultUnleashContextProvider implements UnleashContextProvider, SettableUnleashContextProvider
 {
-    public function __construct(private ?Context $defaultContext = null)
+    private ?Context $defaultContext = null;
+    public function __construct(?Context $defaultContext = null)
     {
+        $this->defaultContext = $defaultContext;
     }
 
     #[Pure]
