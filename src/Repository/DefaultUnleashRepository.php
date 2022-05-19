@@ -180,6 +180,7 @@ final class DefaultUnleashRepository implements UnleashRepository
                 $feature['enabled'],
                 $strategies,
                 $variants,
+                $feature['impressionData'] ?? false,
             );
         }
 

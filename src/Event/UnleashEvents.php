@@ -24,4 +24,11 @@ final class UnleashEvents
      * @Event("Unleash\Client\Event\FeatureToggleMissingStrategyHandlerEvent")
      */
     public const FEATURE_TOGGLE_MISSING_STRATEGY_HANDLER = 'unleash.event.toggle.missing_strategy_handler';
+
+    /**
+     * Triggered when feature has impression data enabled.
+     *
+     * @Event("Unleash\Client\Event\ImpressionDataEvent")
+     */
+    public const IMPRESSION_DATA = 'unleash.events.impression_data';
 }

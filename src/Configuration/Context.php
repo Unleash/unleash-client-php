@@ -13,6 +13,7 @@ use DateTimeInterface;
  * @method Context           setHostname(string|null $hostname)
  * @method Context           setEnvironment(string|null $environment)
  * @method Context           setCurrentTime(DateTimeInterface|null $time)
+ * @method array<string,     string> getCustomProperties()
  */
 interface Context
 {

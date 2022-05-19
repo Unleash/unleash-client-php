@@ -2,6 +2,9 @@
 
 namespace Unleash\Client\DTO;
 
+/**
+ * @method bool hasImpressionData()
+ */
 interface Feature
 {
     public function getName(): string;

@@ -13,6 +13,7 @@ final class DefaultFeature implements Feature
         private readonly bool $enabled,
         private readonly iterable $strategies,
         private readonly array $variants = [],
+        private readonly bool $impressionData = false,
     ) {
     }
 
@@ -40,5 +41,10 @@ final class DefaultFeature implements Feature
     public function getVariants(): array
     {
         return $this->variants;
+    }
+
+    public function hasImpressionData(): bool
+    {
+        return $this->impressionData;
     }
 }
