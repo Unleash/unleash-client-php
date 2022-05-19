@@ -60,9 +60,6 @@ jobs:
       - name: Add polyfill for 7.3
         if: matrix.version == '7.2'
         run: composer require symfony/polyfill-php73:^1.0
-      - name: Add polyfill for 8.1
-        if: matrix.version == '7.2' || matrix.version == '7.3' || matrix.version == '7.4' || matrix.version == '8.0'
-        run: composer require symfony/polyfill-php81
       - name: Update composer.json version
         run: 'sed -i -e ''s/"php": "\^8.1"/"php": "\^${{ matrix.version }}"/'' composer.json'
       - name: Downgrade phpunit
