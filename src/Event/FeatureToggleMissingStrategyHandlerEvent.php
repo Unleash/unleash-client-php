@@ -16,8 +16,8 @@ final class FeatureToggleMissingStrategyHandlerEvent extends Event
      * @internal
      */
     public function __construct(
-        private readonly Context $context,
-        private readonly Feature $feature,
+        private Context $context,
+        private Feature $feature,
     ) {
     }
 
