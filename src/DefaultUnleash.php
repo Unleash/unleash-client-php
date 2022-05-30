@@ -19,21 +19,45 @@ use Unleash\Client\Variant\VariantHandler;
 final class DefaultUnleash implements Unleash
 {
     /**
+     * @var iterable<StrategyHandler>
+     * @readonly
+     */
+    private iterable $strategyHandlers;
+    /**
+     * @readonly
+     */
+    private UnleashRepository $repository;
+    /**
+     * @readonly
+     */
+    private RegistrationService $registrationService;
+    /**
+     * @readonly
+     */
+    private UnleashConfiguration $configuration;
+    /**
+     * @readonly
+     */
+    private MetricsHandler $metricsHandler;
+    /**
+     * @readonly
+     */
+    private VariantHandler $variantHandler;
+    /**
      * @param iterable<StrategyHandler> $strategyHandlers
      */
-    public function __construct(
-        private readonly iterable $strategyHandlers,
-        private readonly UnleashRepository $repository,
-        private readonly RegistrationService $registrationService,
-        private readonly UnleashConfiguration $configuration,
-        private readonly MetricsHandler $metricsHandler,
-        private readonly VariantHandler $variantHandler,
-    ) {
+    public function __construct(iterable $strategyHandlers, UnleashRepository $repository, RegistrationService $registrationService, UnleashConfiguration $configuration, MetricsHandler $metricsHandler, VariantHandler $variantHandler)
+    {
+        $this->strategyHandlers = $strategyHandlers;
+        $this->repository = $repository;
+        $this->registrationService = $registrationService;
+        $this->configuration = $configuration;
+        $this->metricsHandler = $metricsHandler;
+        $this->variantHandler = $variantHandler;
         if ($configuration->isAutoRegistrationEnabled()) {
             $this->register();
         }
     }
-
     public function isEnabled(string $featureName, ?Context $context = null, bool $default = false): bool
     {
         $context ??= $this->configuration->getContextProvider()->getContext();
@@ -41,20 +65,14 @@ final class DefaultUnleash implements Unleash
         $feature = $this->repository->findFeature($featureName);
         if ($feature === null) {
             $event = new FeatureToggleNotFoundEvent($context, $featureName);
-            $this->configuration->getEventDispatcher()->dispatch(
-                $event,
-                UnleashEvents::FEATURE_TOGGLE_NOT_FOUND,
-            );
+            $this->configuration->getEventDispatcher()->dispatch($event, UnleashEvents::FEATURE_TOGGLE_NOT_FOUND);
 
             return $default;
         }
 
         if (!$feature->isEnabled()) {
             $event = new FeatureToggleDisabledEvent($feature, $context);
-            $this->configuration->getEventDispatcher()->dispatch(
-                $event,
-                UnleashEvents::FEATURE_TOGGLE_DISABLED,
-            );
+            $this->configuration->getEventDispatcher()->dispatch($event, UnleashEvents::FEATURE_TOGGLE_DISABLED);
 
             $this->metricsHandler->handleMetrics($feature, false);
 
@@ -89,10 +107,7 @@ final class DefaultUnleash implements Unleash
 
         if (!$handlersFound) {
             $event = new FeatureToggleMissingStrategyHandlerEvent($context, $feature);
-            $this->configuration->getEventDispatcher()->dispatch(
-                $event,
-                UnleashEvents::FEATURE_TOGGLE_MISSING_STRATEGY_HANDLER,
-            );
+            $this->configuration->getEventDispatcher()->dispatch($event, UnleashEvents::FEATURE_TOGGLE_MISSING_STRATEGY_HANDLER);
         }
 
         $this->metricsHandler->handleMetrics($feature, false);
