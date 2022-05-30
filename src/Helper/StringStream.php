@@ -190,8 +190,7 @@ final class StringStream implements StreamInterface
         return $result;
     }
 
-    /** @return mixed */
-    public function getMetadata($key = null)
+    public function getMetadata($key = null): mixed
     {
         if ($this->stream === null) {
             throw new StreamException('The stream is detached');
