@@ -25,7 +25,7 @@ final class EventDispatcher implements EventDispatcherInterface
      * @noinspection PhpDocSignatureInspection
      */
     public function __construct(
-        private readonly ?object $eventDispatcher,
+        private ?object $eventDispatcher,
     ) {
         if ($this->eventDispatcher !== null && !$this->eventDispatcher instanceof SymfonyEventDispatcher) { // @phpstan-ignore-line
             throw new InvalidArgumentException('The dispatcher must either be null or an instance of ' . SymfonyEventDispatcher::class);
