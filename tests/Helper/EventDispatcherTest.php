@@ -2,7 +2,6 @@
 
 namespace Unleash\Client\Tests\Helper;
 
-use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use stdClass;
 use Symfony\Component\EventDispatcher\EventDispatcher as SymfonyEventDispatcher;
@@ -96,13 +95,5 @@ final class EventDispatcherTest extends TestCase
         self::assertTrue($instance->hasListeners('test'));
         self::assertTrue($instance->hasListeners('test2'));
         self::assertFalse($instance->hasListeners('test3'));
-    }
-
-    public function testInvalidClass()
-    {
-        $this->expectException(InvalidArgumentException::class);
-        // it's typehinted as any object due to event dispatcher being non-mandatory,
-        // but it shouldn't really accept any class
-        new EventDispatcher(new stdClass());
     }
 }

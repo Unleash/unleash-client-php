@@ -11,6 +11,7 @@ use Psr\Http\Message\RequestFactoryInterface;
 use Psr\SimpleCache\CacheInterface;
 use SplFileInfo;
 use Symfony\Component\EventDispatcher\EventDispatcher as SymfonyEventDispatcher;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Traversable;
 use Unleash\Client\Bootstrap\BootstrapHandler;
@@ -93,7 +94,7 @@ final class UnleashBuilder
     private array $strategies;
 
     /**
-     * @var SymfonyEventDispatcher|null
+     * @var EventDispatcherInterface|null
      * @noinspection PhpDocFieldTypeMismatchInspection
      */
     private ?object $eventDispatcher = null;
@@ -306,7 +307,7 @@ final class UnleashBuilder
     }
 
     #[Pure]
-    public function withEventDispatcher(?SymfonyEventDispatcher $eventDispatcher): self
+    public function withEventDispatcher(?EventDispatcherInterface $eventDispatcher): self
     {
         return $this->with('eventDispatcher', $eventDispatcher);
     }

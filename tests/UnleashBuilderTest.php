@@ -304,6 +304,7 @@ final class UnleashBuilderTest extends TestCase
             ->withAppUrl('http://example.com')
             ->withInstanceId('test')
             ->withAppName('test')
+            ->withAutomaticRegistrationEnabled(false)
         ;
         $unleash = $instance->build();
 
