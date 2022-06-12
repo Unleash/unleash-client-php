@@ -2,7 +2,6 @@
 
 namespace Unleash\Client\Tests\Helper;
 
-use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use stdClass;
 use Symfony\Component\EventDispatcher\EventDispatcher as SymfonyEventDispatcher;
