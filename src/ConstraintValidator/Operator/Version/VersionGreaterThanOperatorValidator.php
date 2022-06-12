@@ -7,7 +7,10 @@ namespace Unleash\Client\ConstraintValidator\Operator\Version;
  */
 final class VersionGreaterThanOperatorValidator extends AbstractVersionOperatorValidator
 {
-    protected function validate(string $currentValue, array|string $searchInValue): bool
+    /**
+     * @param mixed[]|string $searchInValue
+     */
+    protected function validate(string $currentValue, $searchInValue): bool
     {
         assert(is_string($searchInValue));
 

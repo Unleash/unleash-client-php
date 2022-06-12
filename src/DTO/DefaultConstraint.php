@@ -8,19 +8,55 @@ use Unleash\Client\Enum\ConstraintOperator;
 final class DefaultConstraint implements Constraint
 {
     /**
+     * @readonly
+     * @var string
+     */
+    private $contextName;
+    /**
+     * @readonly
+     * @var string
+     */
+    private $operator;
+    /**
+     * @var array<string>
+     * @readonly
+     */
+    private $values;
+    /**
+     * @readonly
+     * @var string|null
+     */
+    private $singleValue;
+    /**
+     * @readonly
+     * @var bool
+     */
+    private $inverted = false;
+    /**
+     * @readonly
+     * @var bool
+     */
+    private $caseInsensitive = false;
+    /**
      * @param array<string> $values
      */
     public function __construct(
-        private readonly string $contextName,
-        #[ExpectedValues(valuesFromClass: ConstraintOperator::class)]
-        private readonly string $operator,
-        private readonly ?array $values = null,
-        private readonly ?string $singleValue = null,
-        private readonly bool $inverted = false,
-        private readonly bool $caseInsensitive = false,
-    ) {
+        string $contextName,
+        #[\JetBrains\PhpStorm\ExpectedValues(valuesFromClass: \Unleash\Client\Enum\ConstraintOperator::class)]
+        string $operator,
+        ?array $values = null,
+        ?string $singleValue = null,
+        bool $inverted = false,
+        bool $caseInsensitive = false
+    )
+    {
+        $this->contextName = $contextName;
+        $this->operator = $operator;
+        $this->values = $values;
+        $this->singleValue = $singleValue;
+        $this->inverted = $inverted;
+        $this->caseInsensitive = $caseInsensitive;
     }
-
     public function getContextName(): string
     {
         return $this->contextName;

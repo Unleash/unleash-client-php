@@ -9,10 +9,20 @@ use Unleash\Client\Exception\InvalidIpAddressException;
  */
 final class NetworkCalculator
 {
-    public function __construct(
-        private readonly string $ipAddress,
-        private readonly int $networkSize
-    ) {
+    /**
+     * @readonly
+     * @var string
+     */
+    private $ipAddress;
+    /**
+     * @readonly
+     * @var int
+     */
+    private $networkSize;
+    public function __construct(string $ipAddress, int $networkSize)
+    {
+        $this->ipAddress = $ipAddress;
+        $this->networkSize = $networkSize;
     }
 
     public static function fromString(string $ipAddressAndNetwork): self
@@ -30,11 +40,6 @@ final class NetworkCalculator
 
     public function isInRange(string $ipAddress): bool
     {
-        return substr_compare(
-            sprintf('%032b', ip2long($ipAddress)),
-            sprintf('%032b', ip2long($this->ipAddress)),
-            0,
-            $this->networkSize,
-        ) === 0;
+        return substr_compare(sprintf('%032b', ip2long($ipAddress)), sprintf('%032b', ip2long($this->ipAddress)), 0, $this->networkSize) === 0;
     }
 }
