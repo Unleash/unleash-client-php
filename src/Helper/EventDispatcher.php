@@ -2,9 +2,7 @@
 
 namespace Unleash\Client\Helper;
 
-use InvalidArgumentException;
 use JetBrains\PhpStorm\ExpectedValues;
-use Symfony\Component\EventDispatcher\EventDispatcher as SymfonyEventDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Unleash\Client\Event\UnleashEvents;
@@ -21,15 +19,11 @@ if (!interface_exists(EventDispatcherInterface::class)) {
 final class EventDispatcher implements EventDispatcherInterface
 {
     /**
-     * @param SymfonyEventDispatcher|null $eventDispatcher
-     * @noinspection PhpDocSignatureInspection
+     * @param EventDispatcherInterface|null $eventDispatcher
      */
     public function __construct(
-        private readonly ?object $eventDispatcher,
+        private readonly ?EventDispatcherInterface $eventDispatcher,
     ) {
-        if ($this->eventDispatcher !== null && !$this->eventDispatcher instanceof SymfonyEventDispatcher) { // @phpstan-ignore-line
-            throw new InvalidArgumentException('The dispatcher must either be null or an instance of ' . SymfonyEventDispatcher::class);
-        }
     }
 
     public function addListener(string $eventName, callable $listener, int $priority = 0): void
