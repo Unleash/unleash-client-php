@@ -11,8 +11,8 @@ use Unleash\Client\Enum\CacheKey;
 final class DefaultMetricsHandler implements MetricsHandler
 {
     public function __construct(
-        private readonly MetricsSender $metricsSender,
-        private readonly UnleashConfiguration $configuration
+        private MetricsSender $metricsSender,
+        private UnleashConfiguration $configuration
     ) {
     }
 
