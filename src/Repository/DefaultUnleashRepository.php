@@ -19,6 +19,8 @@ use Unleash\Client\DTO\DefaultVariantPayload;
 use Unleash\Client\DTO\Feature;
 use Unleash\Client\Enum\CacheKey;
 use Unleash\Client\Enum\Stickiness;
+use Unleash\Client\Event\FetchingDataFailedEvent;
+use Unleash\Client\Event\UnleashEvents;
 use Unleash\Client\Exception\HttpResponseException;
 use Unleash\Client\Exception\InvalidValueException;
 
@@ -74,7 +76,11 @@ final class DefaultUnleashRepository implements UnleashRepository
                         $data = $response->getBody()->getContents();
                     }
                 } catch (Exception $exception) {
-                    // empty catch, $data does not exist and will be handled below
+                    $this->configuration->getEventDispatcher()->dispatch(
+                        new FetchingDataFailedEvent($exception),
+                        UnleashEvents::FETCHING_DATA_FAILED,
+                    );
+                    $data = $this->getLastValidState();
                 }
                 $data ??= $this->getBootstrappedResponse();
                 if ($data === null) {
@@ -83,6 +89,7 @@ final class DefaultUnleashRepository implements UnleashRepository
                         isset($response) ? $response->getStatusCode() : 'unknown response status code'
                     ), 0, $exception ?? null);
                 }
+                $this->setLastValidState($data);
             }
 
             $features = $this->parseFeatures($data);
@@ -190,6 +197,27 @@ final class DefaultUnleashRepository implements UnleashRepository
     {
         return $this->configuration->getBootstrapHandler()->getBootstrapContents(
             $this->configuration->getBootstrapProvider(),
+        );
+    }
+
+    private function getLastValidState(): ?string
+    {
+        if (!$this->configuration->getCache()->has(CacheKey::FEATURES_RESPONSE)) {
+            return null;
+        }
+
+        $value = $this->configuration->getCache()->get(CacheKey::FEATURES_RESPONSE);
+        assert(is_string($value));
+
+        return $value;
+    }
+
+    private function setLastValidState(string $data): void
+    {
+        $this->configuration->getCache()->set(
+            CacheKey::FEATURES_RESPONSE,
+            $data,
+            $this->configuration->getStaleTtl(),
         );
     }
 }

@@ -7,11 +7,15 @@ use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\HttpFactory;
 use GuzzleHttp\Psr7\Request;
 use LogicException;
+use Symfony\Component\EventDispatcher\EventDispatcher as SymfonyEventDispatcher;
 use Unleash\Client\Bootstrap\JsonSerializableBootstrapProvider;
 use Unleash\Client\Configuration\UnleashConfiguration;
 use Unleash\Client\DTO\Feature;
+use Unleash\Client\Event\FetchingDataFailedEvent;
+use Unleash\Client\Event\UnleashEvents;
 use Unleash\Client\Exception\HttpResponseException;
 use Unleash\Client\Exception\InvalidValueException;
+use Unleash\Client\Helper\EventDispatcher;
 use Unleash\Client\Repository\DefaultUnleashRepository;
 use Unleash\Client\Tests\AbstractHttpClientTest;
 use Unleash\Client\Tests\Traits\FakeCacheImplementationTrait;
@@ -229,6 +233,41 @@ final class DefaultUnleashRepositoryTest extends AbstractHttpClientTest
         );
 
         $this->expectException(InvalidValueException::class);
+        $repository->getFeatures();
+    }
+
+    public function testFallbackStaleCache()
+    {
+        $failCount = 0;
+
+        $eventDispatcher = new EventDispatcher(new SymfonyEventDispatcher());
+        $eventDispatcher->addListener(
+            UnleashEvents::FETCHING_DATA_FAILED,
+            function (FetchingDataFailedEvent $event) use (&$failCount): void {
+                $event->getException(); // just to cover the line
+                ++$failCount;
+            }
+        );
+
+        $repository = new DefaultUnleashRepository(
+            new Client([
+                'handler' => $this->handlerStack,
+            ]),
+            new HttpFactory(),
+            (new UnleashConfiguration('', '', ''))
+                ->setCache($this->getRealCache())
+                ->setEventDispatcher($eventDispatcher)
+                ->setTtl(0)
+                ->setStaleTtl(3)
+        );
+
+        $this->pushResponse($this->response);
+        $features = $repository->getFeatures();
+        self::assertEquals($features, $repository->getFeatures());
+        self::assertSame(1, $failCount);
+
+        sleep(3);
+        $this->expectException(HttpResponseException::class);
         $repository->getFeatures();
     }
 }

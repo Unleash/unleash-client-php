@@ -65,6 +65,8 @@ final class UnleashBuilder
 
     private ?int $cacheTtl = null;
 
+    private ?int $staleTtl = null;
+
     private ?RegistrationService $registrationService = null;
 
     private bool $autoregister = true;
@@ -320,6 +322,12 @@ final class UnleashBuilder
         return $this->with('eventSubscribers', $subscribers);
     }
 
+    #[Pure]
+    public function withStaleTtl(?int $ttl): self
+    {
+        return $this->with('staleTtl', $ttl);
+    }
+
     public function build(): Unleash
     {
         $appUrl = $this->appUrl;
@@ -377,6 +385,7 @@ final class UnleashBuilder
         $configuration
             ->setCache($cache)
             ->setTtl($this->cacheTtl ?? $configuration->getTtl())
+            ->setStaleTtl($this->staleTtl ?? $configuration->getStaleTtl())
             ->setMetricsEnabled($this->metricsEnabled ?? $configuration->isMetricsEnabled())
             ->setMetricsInterval($this->metricsInterval ?? $configuration->getMetricsInterval())
             ->setHeaders($this->headers)
