@@ -270,4 +270,31 @@ final class DefaultUnleashRepositoryTest extends AbstractHttpClientTest
         $this->expectException(HttpResponseException::class);
         $repository->getFeatures();
     }
+
+    /**
+     * Tests that the cache doesn't get refreshed on its own
+     */
+    public function testFallbackStaleCacheNotRefreshing()
+    {
+        $repository = new DefaultUnleashRepository(
+            new Client([
+                'handler' => $this->handlerStack,
+            ]),
+            new HttpFactory(),
+            (new UnleashConfiguration('', '', ''))
+                ->setCache($this->getRealCache())
+                ->setTtl(0)
+                ->setStaleTtl(5)
+        );
+
+        $this->pushResponse($this->response);
+
+        $repository->getFeatures();
+
+        $this->expectException(HttpResponseException::class);
+        for ($i = 0; $i <= 5; ++$i) { // one more iteration than is the ttl
+            $repository->getFeatures();
+            sleep(1);
+        }
+    }
 }

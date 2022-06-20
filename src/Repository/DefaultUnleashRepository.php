@@ -74,6 +74,7 @@ final class DefaultUnleashRepository implements UnleashRepository
                     $response = $this->httpClient->sendRequest($request);
                     if ($response->getStatusCode() === 200) {
                         $data = $response->getBody()->getContents();
+                        $this->setLastValidState($data);
                     }
                 } catch (Exception $exception) {
                     $this->configuration->getEventDispatcher()->dispatch(
@@ -89,7 +90,6 @@ final class DefaultUnleashRepository implements UnleashRepository
                         isset($response) ? $response->getStatusCode() : 'unknown response status code'
                     ), 0, $exception ?? null);
                 }
-                $this->setLastValidState($data);
             }
 
             $features = $this->parseFeatures($data);
