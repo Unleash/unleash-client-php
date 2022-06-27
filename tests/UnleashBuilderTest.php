@@ -726,14 +726,14 @@ final class UnleashBuilderTest extends TestCase
         self::assertNull($this->getProperty($this->instance, 'staleTtl'));
         self::assertEquals(
             30 * 60,
-            $this->getConfiguration($instance->build())->getStaleTtl(),
+            $this->getConfiguration($instance->build())->getStaleTtl()
         );
 
         $instance = $this->instance->withFetchingEnabled(false)->withStaleTtl(60 * 60);
         self::assertNull($this->getProperty($this->instance, 'staleTtl'));
         self::assertEquals(
             60 * 60,
-            $this->getConfiguration($instance->build())->getStaleTtl(),
+            $this->getConfiguration($instance->build())->getStaleTtl()
         );
     }
 
