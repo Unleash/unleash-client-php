@@ -26,13 +26,24 @@ use Unleash\Client\Exception\InvalidValueException;
 
 final class DefaultUnleashRepository implements UnleashRepository
 {
-    public function __construct(
-        private readonly ClientInterface $httpClient,
-        private readonly RequestFactoryInterface $requestFactory,
-        private readonly UnleashConfiguration $configuration,
-    ) {
+    /**
+     * @readonly
+     */
+    private ClientInterface $httpClient;
+    /**
+     * @readonly
+     */
+    private RequestFactoryInterface $requestFactory;
+    /**
+     * @readonly
+     */
+    private UnleashConfiguration $configuration;
+    public function __construct(ClientInterface $httpClient, RequestFactoryInterface $requestFactory, UnleashConfiguration $configuration)
+    {
+        $this->httpClient = $httpClient;
+        $this->requestFactory = $requestFactory;
+        $this->configuration = $configuration;
     }
-
     /**
      * @throws ClientExceptionInterface
      * @throws InvalidArgumentException
@@ -77,10 +88,7 @@ final class DefaultUnleashRepository implements UnleashRepository
                         $this->setLastValidState($data);
                     }
                 } catch (Exception $exception) {
-                    $this->configuration->getEventDispatcher()->dispatch(
-                        new FetchingDataFailedEvent($exception),
-                        UnleashEvents::FETCHING_DATA_FAILED,
-                    );
+                    $this->configuration->getEventDispatcher()->dispatch(new FetchingDataFailedEvent($exception), UnleashEvents::FETCHING_DATA_FAILED);
                     $data = $this->getLastValidState();
                 }
                 $data ??= $this->getBootstrappedResponse();
@@ -151,14 +159,7 @@ final class DefaultUnleashRepository implements UnleashRepository
             foreach ($feature['strategies'] as $strategy) {
                 $constraints = [];
                 foreach ($strategy['constraints'] ?? [] as $constraint) {
-                    $constraints[] = new DefaultConstraint(
-                        $constraint['contextName'],
-                        $constraint['operator'],
-                        $constraint['values'] ?? null,
-                        $constraint['value'] ?? null,
-                        $constraint['inverted'] ?? false,
-                        $constraint['caseInsensitive'] ?? false,
-                    );
+                    $constraints[] = new DefaultConstraint($constraint['contextName'], $constraint['operator'], $constraint['values'] ?? null, $constraint['value'] ?? null, $constraint['inverted'] ?? false, $constraint['caseInsensitive'] ?? false);
                 }
                 $strategies[] = new DefaultStrategy(
                     $strategy['name'],
@@ -171,23 +172,11 @@ final class DefaultUnleashRepository implements UnleashRepository
                 foreach ($variant['overrides'] ?? [] as $override) {
                     $overrides[] = new DefaultVariantOverride($override['contextName'], $override['values']);
                 }
-                $variants[] = new DefaultVariant(
-                    $variant['name'],
-                    true,
-                    $variant['weight'],
-                    $variant['stickiness'] ?? Stickiness::DEFAULT,
-                    isset($variant['payload'])
-                        ? new DefaultVariantPayload($variant['payload']['type'], $variant['payload']['value'])
-                        : null,
-                    $overrides,
-                );
+                $variants[] = new DefaultVariant($variant['name'], true, $variant['weight'], $variant['stickiness'] ?? Stickiness::DEFAULT, isset($variant['payload'])
+                    ? new DefaultVariantPayload($variant['payload']['type'], $variant['payload']['value'])
+                    : null, $overrides);
             }
-            $features[$feature['name']] = new DefaultFeature(
-                $feature['name'],
-                $feature['enabled'],
-                $strategies,
-                $variants,
-            );
+            $features[$feature['name']] = new DefaultFeature($feature['name'], $feature['enabled'], $strategies, $variants);
         }
 
         return $features;
@@ -195,9 +184,7 @@ final class DefaultUnleashRepository implements UnleashRepository
 
     private function getBootstrappedResponse(): ?string
     {
-        return $this->configuration->getBootstrapHandler()->getBootstrapContents(
-            $this->configuration->getBootstrapProvider(),
-        );
+        return $this->configuration->getBootstrapHandler()->getBootstrapContents($this->configuration->getBootstrapProvider());
     }
 
     private function getLastValidState(): ?string
@@ -214,10 +201,6 @@ final class DefaultUnleashRepository implements UnleashRepository
 
     private function setLastValidState(string $data): void
     {
-        $this->configuration->getCache()->set(
-            CacheKey::FEATURES_RESPONSE,
-            $data,
-            $this->configuration->getStaleTtl(),
-        );
+        $this->configuration->getCache()->set(CacheKey::FEATURES_RESPONSE, $data, $this->configuration->getStaleTtl());
     }
 }
