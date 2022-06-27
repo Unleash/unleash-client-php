@@ -22,7 +22,7 @@ final class EventDispatcher implements EventDispatcherInterface
      * @param EventDispatcherInterface|null $eventDispatcher
      */
     public function __construct(
-        private readonly ?EventDispatcherInterface $eventDispatcher,
+        private ?EventDispatcherInterface $eventDispatcher,
     ) {
     }
 
