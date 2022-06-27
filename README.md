@@ -229,7 +229,11 @@ It would be slow to perform a http request every time you check if a feature is 
 apps. That's why this library has built-in support for PSR-16 cache implementations.
 
 If you don't provide any implementation and default implementation exists, it's used, otherwise you'll get an exception.
-You can also provide a TTL which defaults to 30 seconds.
+You can also provide a TTL which defaults to 30 seconds for standard cache and 30 minutes for stale data cache.
+
+> Stale data cache is used when http communication fails while fetching feature list from the server. In that case
+> the latest valid version is used until the TTL expires or server starts responding again. An event gets emitted
+> when this happens, for more information see [events documentation](doc/events.md).
 
 Cache implementations supported out of the box (meaning you don't need to configure anything):
 
@@ -250,7 +254,9 @@ $builder = UnleashBuilder::create()
             new Local(sys_get_temp_dir()),
         ),
     ))
-    ->withCacheTimeToLive(120);
+    ->withCacheTimeToLive(120)
+    ->withStaleTtl(300)
+;
 
 // you can set the cache handler explicitly to null to revert back to autodetection
 

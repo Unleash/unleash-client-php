@@ -20,6 +20,7 @@ use Unleash\Client\Event\FeatureToggleDisabledEvent;
 use Unleash\Client\Event\FeatureToggleMissingStrategyHandlerEvent;
 use Unleash\Client\Event\FeatureToggleNotFoundEvent;
 use Unleash\Client\Event\FeatureVariantBeforeFallbackReturnedEvent;
+use Unleash\Client\Event\FetchingDataFailedEvent;
 use Unleash\Client\UnleashBuilder;
 use Unleash\Client\Event\UnleashEvents;
 
@@ -31,6 +32,7 @@ class MyEventSubscriber implements EventSubscriberInterface
             UnleashEvents::FEATURE_TOGGLE_DISABLED => 'onFeatureDisabled',
             UnleashEvents::FEATURE_TOGGLE_MISSING_STRATEGY_HANDLER => 'onNoStrategyHandler',
             UnleashEvents::FEATURE_TOGGLE_NOT_FOUND => 'onFeatureNotFound',
+            UnleashEvents::FETCHING_DATA_FAILED => 'onFetchingDataFailed',
         ];
     }
     
@@ -45,6 +47,11 @@ class MyEventSubscriber implements EventSubscriberInterface
     }
     
     public function onFeatureNotFound(FeatureToggleNotFoundEvent $event)
+    {
+        // todo
+    }
+    
+    public function onFetchingDataFailed(FetchingDataFailedEvent $event)
     {
         // todo
     }
@@ -70,6 +77,8 @@ The relevant methods will be called in the above example when their respective e
   Event object: Unleash\Client\Event\FeatureToggleDisabledEvent
 - `\Unleash\Client\Event\UnleashEvents::FEATURE_TOGGLE_MISSING_STRATEGY_HANDLER` - when there is no suitable strategy handler
   implemented for any of the feature's strategies. Event object: `Unleash\Client\Event\FeatureToggleMissingStrategyHandlerEvent`
+- `\Unleash\Client\Event\UnleashEvents::FETCHING_DATA_FAILED` - when http communication with the Unleash server fails
+  when fetching features. Event object: `Unleash\Client\Event\FetchingDataFailedEvent`
 
 ## FEATURE_TOGGLE_NOT_FOUND event
 
@@ -168,6 +177,37 @@ final class MyEventSubscriber implements EventSubscriberInterface
         $event->getFeature(); // instance of Feature
         // get strategies
         $event->getFeature()->getStrategies(); // iterable of Strategy instances
+    }
+}
+```
+
+## FETCHING_DATA_FAILED event
+
+Triggered when http communication with the Unleash server fails when fetching features.
+
+Example:
+
+```php
+<?php
+
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Unleash\Client\Event\UnleashEvents;
+use Unleash\Client\UnleashBuilder;
+use Unleash\Client\Event\FetchingDataFailedEvent;
+use Unleash\Client\Strategy\DefaultStrategyHandler;
+
+final class MyEventSubscriber implements EventSubscriberInterface
+{
+    public static function getSubscribedEvents()
+    {
+        return [
+            UnleashEvents::FETCHING_DATA_FAILED => 'onFetchingDataFailed',
+        ];
+    }
+    
+    public function onFetchingDataFailed(FetchingDataFailedEvent $event): void
+    {
+        $event->getException(); // returns the exception that caused the failure
     }
 }
 ```
