@@ -9,7 +9,7 @@ if (!class_exists(Event::class)) {
     require __DIR__ . '/../../stubs/event-dispatcher/Event.php';
 }
 
-final class FeatureToggleNotFoundEvent extends Event
+final class FeatureToggleNotFoundEvent extends AbstractEvent
 {
     /**
      * @internal
