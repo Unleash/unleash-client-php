@@ -11,6 +11,7 @@ use Psr\Http\Message\RequestFactoryInterface;
 use Psr\SimpleCache\CacheInterface;
 use SplFileInfo;
 use Symfony\Component\EventDispatcher\EventDispatcher as SymfonyEventDispatcher;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Traversable;
 use Unleash\Client\Bootstrap\BootstrapHandler;
@@ -64,6 +65,8 @@ final class UnleashBuilder
 
     private ?int $cacheTtl = null;
 
+    private ?int $staleTtl = null;
+
     private ?RegistrationService $registrationService = null;
 
     private bool $autoregister = true;
@@ -93,7 +96,7 @@ final class UnleashBuilder
     private array $strategies;
 
     /**
-     * @var SymfonyEventDispatcher|null
+     * @var EventDispatcherInterface|null
      * @noinspection PhpDocFieldTypeMismatchInspection
      */
     private ?object $eventDispatcher = null;
@@ -306,7 +309,7 @@ final class UnleashBuilder
     }
 
     #[Pure]
-    public function withEventDispatcher(?SymfonyEventDispatcher $eventDispatcher): self
+    public function withEventDispatcher(?EventDispatcherInterface $eventDispatcher): self
     {
         return $this->with('eventDispatcher', $eventDispatcher);
     }
@@ -317,6 +320,12 @@ final class UnleashBuilder
         $subscribers[] = $eventSubscriber;
 
         return $this->with('eventSubscribers', $subscribers);
+    }
+
+    #[Pure]
+    public function withStaleTtl(?int $ttl): self
+    {
+        return $this->with('staleTtl', $ttl);
     }
 
     public function build(): Unleash
@@ -376,6 +385,7 @@ final class UnleashBuilder
         $configuration
             ->setCache($cache)
             ->setTtl($this->cacheTtl ?? $configuration->getTtl())
+            ->setStaleTtl($this->staleTtl ?? $configuration->getStaleTtl())
             ->setMetricsEnabled($this->metricsEnabled ?? $configuration->isMetricsEnabled())
             ->setMetricsInterval($this->metricsInterval ?? $configuration->getMetricsInterval())
             ->setHeaders($this->headers)

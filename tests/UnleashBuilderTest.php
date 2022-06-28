@@ -304,6 +304,7 @@ final class UnleashBuilderTest extends TestCase
             ->withAppUrl('http://example.com')
             ->withInstanceId('test')
             ->withAppName('test')
+            ->withAutomaticRegistrationEnabled(false)
         ;
         $unleash = $instance->build();
 
@@ -717,6 +718,23 @@ final class UnleashBuilderTest extends TestCase
         self::assertCount(2, $eventDispatcher->getListeners());
         self::assertCount(1, $eventDispatcher->getListeners(UnleashEvents::FEATURE_TOGGLE_NOT_FOUND));
         self::assertCount(1, $eventDispatcher->getListeners(UnleashEvents::FEATURE_TOGGLE_DISABLED));
+    }
+
+    public function testWithStaleTtl()
+    {
+        $instance = $this->instance->withFetchingEnabled(false);
+        self::assertNull($this->getProperty($this->instance, 'staleTtl'));
+        self::assertEquals(
+            30 * 60,
+            $this->getConfiguration($instance->build())->getStaleTtl()
+        );
+
+        $instance = $this->instance->withFetchingEnabled(false)->withStaleTtl(60 * 60);
+        self::assertNull($this->getProperty($this->instance, 'staleTtl'));
+        self::assertEquals(
+            60 * 60,
+            $this->getConfiguration($instance->build())->getStaleTtl()
+        );
     }
 
     private function getConfiguration(DefaultUnleash $unleash): UnleashConfiguration

@@ -26,6 +26,13 @@ final class UnleashEvents
     public const FEATURE_TOGGLE_MISSING_STRATEGY_HANDLER = 'unleash.event.toggle.missing_strategy_handler';
 
     /**
+     * Triggered when fetching features from server fails.
+     *
+     * @Event("Unleash\Client\Event\FetchingDataFailedEvent")
+     */
+    public const FETCHING_DATA_FAILED = 'unleash.event.server.fetching_failed';
+
+    /**
      * Triggered when feature has impression data enabled.
      *
      * @Event("Unleash\Client\Event\ImpressionDataEvent")

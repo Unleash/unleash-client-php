@@ -41,6 +41,7 @@ final class UnleashConfiguration
         private bool $fetchingEnabled = true,
         // todo remove nullability in next major version
         private ?EventDispatcher $eventDispatcher = null,
+        private int $staleTtl = 30 * 60,
     ) {
         $this->contextProvider ??= new DefaultUnleashContextProvider();
         $this->eventDispatcher ??= new EventDispatcher(null);
@@ -259,6 +260,18 @@ final class UnleashConfiguration
     {
         $eventDispatcher ??= new EventDispatcher(null);
         $this->eventDispatcher = $eventDispatcher;
+
+        return $this;
+    }
+
+    public function getStaleTtl(): int
+    {
+        return $this->staleTtl;
+    }
+
+    public function setStaleTtl(int $staleTtl): self
+    {
+        $this->staleTtl = $staleTtl;
 
         return $this;
     }
