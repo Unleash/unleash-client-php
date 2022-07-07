@@ -10,13 +10,16 @@ use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
 use Psr\SimpleCache\InvalidArgumentException;
 use Unleash\Client\Configuration\UnleashConfiguration;
+use Unleash\Client\DTO\Constraint;
 use Unleash\Client\DTO\DefaultConstraint;
 use Unleash\Client\DTO\DefaultFeature;
+use Unleash\Client\DTO\DefaultSegment;
 use Unleash\Client\DTO\DefaultStrategy;
 use Unleash\Client\DTO\DefaultVariant;
 use Unleash\Client\DTO\DefaultVariantOverride;
 use Unleash\Client\DTO\DefaultVariantPayload;
 use Unleash\Client\DTO\Feature;
+use Unleash\Client\DTO\Segment;
 use Unleash\Client\Enum\CacheKey;
 use Unleash\Client\Enum\Stickiness;
 use Unleash\Client\Event\FetchingDataFailedEvent;
@@ -24,6 +27,16 @@ use Unleash\Client\Event\UnleashEvents;
 use Unleash\Client\Exception\HttpResponseException;
 use Unleash\Client\Exception\InvalidValueException;
 
+/**
+ * @phpstan-type ConstraintArray array{
+ *     contextName: string,
+ *     operator: string,
+ *     values?: array<string>,
+ *     value?: string,
+ *     inverted?: bool,
+ *     caseInsensitive?: bool
+ * }
+ */
 final class DefaultUnleashRepository implements UnleashRepository
 {
     public function __construct(
@@ -140,6 +153,8 @@ final class DefaultUnleashRepository implements UnleashRepository
         $body = json_decode($rawBody, true, 512, JSON_THROW_ON_ERROR);
         assert(is_array($body));
 
+        $globalSegments = $this->parseSegments($body['segments'] ?? []);
+
         if (!isset($body['features']) || !is_array($body['features'])) {
             throw new InvalidValueException("The body isn't valid because it doesn't contain a 'features' key");
         }
@@ -149,21 +164,24 @@ final class DefaultUnleashRepository implements UnleashRepository
             $variants = [];
 
             foreach ($feature['strategies'] as $strategy) {
-                $constraints = [];
-                foreach ($strategy['constraints'] ?? [] as $constraint) {
-                    $constraints[] = new DefaultConstraint(
-                        $constraint['contextName'],
-                        $constraint['operator'],
-                        $constraint['values'] ?? null,
-                        $constraint['value'] ?? null,
-                        $constraint['inverted'] ?? false,
-                        $constraint['caseInsensitive'] ?? false,
-                    );
+                $constraints = $this->parseConstraints($strategy['constraints'] ?? []);
+
+                $hasNonexistentSegments = false;
+                $segments = [];
+                foreach ($strategy['segments'] ?? [] as $segment) {
+                    if (isset($globalSegments[$segment])) {
+                        $segments[] = $globalSegments[$segment];
+                    } else {
+                        $hasNonexistentSegments = true;
+                        break;
+                    }
                 }
                 $strategies[] = new DefaultStrategy(
                     $strategy['name'],
                     $strategy['parameters'] ?? [],
-                    $constraints
+                    $constraints,
+                    $segments,
+                    $hasNonexistentSegments,
                 );
             }
             foreach ($feature['variants'] ?? [] as $variant) {
@@ -182,6 +200,7 @@ final class DefaultUnleashRepository implements UnleashRepository
                     $overrides,
                 );
             }
+
             $features[$feature['name']] = new DefaultFeature(
                 $feature['name'],
                 $feature['enabled'],
@@ -219,5 +238,46 @@ final class DefaultUnleashRepository implements UnleashRepository
             $data,
             $this->configuration->getStaleTtl(),
         );
+    }
+
+    /**
+     * @param array<array{id: int, constraints: array<ConstraintArray>}> $segmentsRaw
+     *
+     * @return array<Segment>
+     */
+    private function parseSegments(array $segmentsRaw): array
+    {
+        $result = [];
+        foreach ($segmentsRaw as $segmentRaw) {
+            $result[$segmentRaw['id']] = new DefaultSegment(
+                $segmentRaw['id'],
+                $this->parseConstraints($segmentRaw['constraints']),
+            );
+        }
+
+        return $result;
+    }
+
+    /**
+     * @param array<ConstraintArray> $constraintsRaw
+     *
+     * @return array<Constraint>
+     */
+    private function parseConstraints(array $constraintsRaw): array
+    {
+        $constraints = [];
+
+        foreach ($constraintsRaw as $constraint) {
+            $constraints[] = new DefaultConstraint(
+                $constraint['contextName'],
+                $constraint['operator'],
+                $constraint['values'] ?? null,
+                $constraint['value'] ?? null,
+                $constraint['inverted'] ?? false,
+                $constraint['caseInsensitive'] ?? false,
+            );
+        }
+
+        return $constraints;
     }
 }

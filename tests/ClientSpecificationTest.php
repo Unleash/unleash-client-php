@@ -50,9 +50,7 @@ final class ClientSpecificationTest extends AbstractHttpClientTest
 
         $specificationList = $this->getJson('index.json');
 
-        $disabledFeatureTests = [
-            '15-global-constraints.json',
-        ];
+        $disabledFeatureTests = [];
 
         foreach ($specificationList as $specificationFilename) {
             if (in_array($specificationFilename, $disabledFeatureTests, true)) {
