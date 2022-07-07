@@ -169,6 +169,8 @@ final class UnleashContext implements Context
     }
 
     /**
+     * @codeCoverageIgnore
+     *
      * @return array<string, string>
      */
     public function getCustomProperties(): array

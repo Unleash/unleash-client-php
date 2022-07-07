@@ -12,9 +12,11 @@ use Unleash\Client\DefaultUnleash;
 use Unleash\Client\DTO\DefaultFeature;
 use Unleash\Client\DTO\DefaultStrategy;
 use Unleash\Client\DTO\Feature;
+use Unleash\Client\Enum\ImpressionDataEventType;
 use Unleash\Client\Event\FeatureToggleDisabledEvent;
 use Unleash\Client\Event\FeatureToggleMissingStrategyHandlerEvent;
 use Unleash\Client\Event\FeatureToggleNotFoundEvent;
+use Unleash\Client\Event\ImpressionDataEvent;
 use Unleash\Client\Event\UnleashEvents;
 use Unleash\Client\Repository\UnleashRepository;
 use Unleash\Client\Stickiness\MurmurHashCalculator;
@@ -712,6 +714,88 @@ final class DefaultUnleashTest extends AbstractHttpClientTest
         self::assertFalse($unleash->isEnabled('test3'));
 
         self::assertSame(2, $calledCount);
+    }
+
+    public function testImpressionData()
+    {
+        $triggeredCount = 0;
+
+        $dispatcher = new EventDispatcher();
+
+        $dispatcher->addListener(UnleashEvents::IMPRESSION_DATA, function (ImpressionDataEvent $event) use (&$triggeredCount) {
+            // trigger these to have complete code coverage
+            $event->getEventId();
+            $event->getContext();
+            $event->jsonSerialize();
+
+            if ($event->getFeatureName() === 'test') {
+                self::assertSame(ImpressionDataEventType::IS_ENABLED, $event->getEventType());
+                self::assertFalse($event->isEnabled());
+                self::assertNull($event->getVariant());
+            } else {
+                self::assertTrue($event->isEnabled());
+                if ($event->getEventType() === ImpressionDataEventType::GET_VARIANT) {
+                    self::assertNotNull($event->getVariant());
+                }
+            }
+
+            ++$triggeredCount;
+        });
+
+        $instance = UnleashBuilder::create()
+            ->withCacheHandler($this->getCache())
+            ->withEventDispatcher($dispatcher)
+            ->withFetchingEnabled(false)
+            ->withBootstrap([
+                'version' => 1,
+                'features' => [
+                    [
+                        'name' => 'test',
+                        'description' => '',
+                        'enabled' => false,
+                        'impressionData' => true,
+                        'strategies' => [
+                            [
+                                'name' => 'default',
+                            ],
+                        ],
+                    ],
+                    [
+                        'name' => 'test2',
+                        'description' => '',
+                        'enabled' => true,
+                        'impressionData' => true,
+                        'strategies' => [
+                            [
+                                'name' => 'default',
+                            ],
+                        ],
+                        'variants' => [
+                            [
+                                'name' => 'variant1',
+                                'weight' => 1,
+                                'payload' => [
+                                    'type' => 'string',
+                                    'value' => 'val1',
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ])
+            ->build();
+
+        $instance->isEnabled('nonexistent');
+        self::assertSame(0, $triggeredCount);
+
+        $instance->isEnabled('test');
+        self::assertSame(1, $triggeredCount);
+
+        $instance->getVariant('test');
+        self::assertSame(1, $triggeredCount);
+
+        $instance->getVariant('test2');
+        self::assertSame(2, $triggeredCount);
     }
 
     private function getInstance(StrategyHandler ...$handlers): DefaultUnleash
