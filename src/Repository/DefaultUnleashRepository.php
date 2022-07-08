@@ -55,7 +55,8 @@ final class DefaultUnleashRepository implements UnleashRepository
      */
     public function getFeatures(): iterable
     {
-        if (!$features = $this->getCachedFeatures()) {
+        $features = $this->getCachedFeatures();
+        if ($features === null) {
             if (!$this->configuration->isFetchingEnabled()) {
                 if (!$data = $this->getBootstrappedResponse()) {
                     throw new LogicException('Fetching of Unleash api is disabled but no bootstrap is provided');
