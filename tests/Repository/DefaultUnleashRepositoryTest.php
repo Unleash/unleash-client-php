@@ -112,6 +112,35 @@ final class DefaultUnleashRepositoryTest extends AbstractHttpClientTest
         self::assertEquals($feature->getName(), $repository->findFeature('test')->getName());
     }
 
+    public function testCacheWithNoFeatures()
+    {
+        $response = [
+            'version' => 1,
+            'features' => [],
+        ];
+
+        $cache = $this->getRealCache();
+
+        $repository = new DefaultUnleashRepository(
+            new Client([
+                'handler' => $this->handlerStack,
+            ]),
+            new HttpFactory(),
+            (new UnleashConfiguration('', '', ''))
+                ->setCache($cache)
+                ->setTtl(5)
+        );
+
+        $this->pushResponse($response, 2);
+        $repository->getFeatures();
+        $repository->getFeatures();
+        self::assertEquals(1, $this->mockHandler->count());
+        $cache->clear();
+
+        $this->pushResponse($response);
+        self::assertNull($repository->findFeature('test'));
+    }
+
     public function testCustomHeaders()
     {
         $this->pushResponse($this->response);
