@@ -5,16 +5,30 @@ namespace Unleash\Client\DTO;
 final class DefaultStrategy implements Strategy
 {
     /**
+     * @readonly
+     * @var string
+     */
+    private $name;
+    /**
+     * @var array<string, string>
+     * @readonly
+     */
+    private $parameters = [];
+    /**
+     * @var array<Constraint>
+     * @readonly
+     */
+    private $constraints = [];
+    /**
      * @param array<string,string> $parameters
      * @param array<Constraint>    $constraints
      */
-    public function __construct(
-        private readonly string $name,
-        private readonly array $parameters = [],
-        private readonly array $constraints = [],
-    ) {
+    public function __construct(string $name, array $parameters = [], array $constraints = [])
+    {
+        $this->name = $name;
+        $this->parameters = $parameters;
+        $this->constraints = $constraints;
     }
-
     public function getName(): string
     {
         return $this->name;
