@@ -78,7 +78,7 @@ final class DefaultUnleashRepository implements UnleashRepository
                     ->createRequest('GET', $this->configuration->getUrl() . 'client/features')
                     ->withHeader('UNLEASH-APPNAME', $this->configuration->getAppName())
                     ->withHeader('UNLEASH-INSTANCEID', $this->configuration->getInstanceId())
-                    ->withHeader('Unleash-Client-Spec', '4.2.0')
+                    ->withHeader('Unleash-Client-Spec', '4.2.2')
                 ;
 
                 foreach ($this->configuration->getHeaders() as $name => $value) {
