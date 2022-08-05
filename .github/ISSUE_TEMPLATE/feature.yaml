@@ -4,7 +4,7 @@ assignees:
   - RikudouSage
 labels:
   - feature
-title: '[Feature]: '
+title: 'Feat: '
 body:
   - type: markdown
     attributes:
