@@ -31,4 +31,11 @@ final class UnleashEvents
      * @Event("Unleash\Client\Event\FetchingDataFailedEvent")
      */
     public const FETCHING_DATA_FAILED = 'unleash.event.server.fetching_failed';
+
+    /**
+     * Triggered when feature has impression data enabled.
+     *
+     * @Event("Unleash\Client\Event\ImpressionDataEvent")
+     */
+    public const IMPRESSION_DATA = 'unleash.events.impression_data';
 }

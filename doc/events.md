@@ -20,6 +20,7 @@ use Unleash\Client\Event\FeatureToggleDisabledEvent;
 use Unleash\Client\Event\FeatureToggleMissingStrategyHandlerEvent;
 use Unleash\Client\Event\FeatureToggleNotFoundEvent;
 use Unleash\Client\Event\FeatureVariantBeforeFallbackReturnedEvent;
+use Unleash\Client\Event\ImpressionDataEvent;
 use Unleash\Client\Event\FetchingDataFailedEvent;
 use Unleash\Client\UnleashBuilder;
 use Unleash\Client\Event\UnleashEvents;
@@ -33,6 +34,7 @@ class MyEventSubscriber implements EventSubscriberInterface
             UnleashEvents::FEATURE_TOGGLE_MISSING_STRATEGY_HANDLER => 'onNoStrategyHandler',
             UnleashEvents::FEATURE_TOGGLE_NOT_FOUND => 'onFeatureNotFound',
             UnleashEvents::FETCHING_DATA_FAILED => 'onFetchingDataFailed',
+            UnleashEvents::IMPRESSION_DATA => 'onImpressionData',
         ];
     }
     
@@ -52,6 +54,11 @@ class MyEventSubscriber implements EventSubscriberInterface
     }
     
     public function onFetchingDataFailed(FetchingDataFailedEvent $event)
+    {
+        // todo
+    }
+    
+    public function onImpressionData(ImpressionDataEvent $event)
     {
         // todo
     }
@@ -79,6 +86,8 @@ The relevant methods will be called in the above example when their respective e
   implemented for any of the feature's strategies. Event object: `Unleash\Client\Event\FeatureToggleMissingStrategyHandlerEvent`
 - `\Unleash\Client\Event\UnleashEvents::FETCHING_DATA_FAILED` - when http communication with the Unleash server fails
   when fetching features. Event object: `Unleash\Client\Event\FetchingDataFailedEvent`
+- `\Unleash\Client\Event\UnleashEvents::IMPRESSION_DATA` - when the feature has impressions enabled.
+  Event object: `Unleash\Client\Event\ImpressionDataEvent`
 
 ## FEATURE_TOGGLE_NOT_FOUND event
 
@@ -208,6 +217,42 @@ final class MyEventSubscriber implements EventSubscriberInterface
     public function onFetchingDataFailed(FetchingDataFailedEvent $event): void
     {
         $event->getException(); // returns the exception that caused the failure
+    }
+}
+```
+
+## IMPRESSION_DATA event
+
+When the feature has impressions enabled.
+
+Example:
+
+```php
+<?php
+
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Unleash\Client\Event\UnleashEvents;
+use Unleash\Client\UnleashBuilder;
+use Unleash\Client\Event\ImpressionDataEvent;
+use Unleash\Client\Strategy\DefaultStrategyHandler;
+
+final class MyEventSubscriber implements EventSubscriberInterface
+{
+    public static function getSubscribedEvents()
+    {
+        return [
+            UnleashEvents::IMPRESSION_DATA => 'onImpressionData',
+        ];
+    }
+    
+    public function onImpressionData(ImpressionDataEvent $event): void
+    {
+        $event->getContext(); // returns an array of context values
+        $event->getFeatureName(); // returns the name of the feature
+        $event->getEventId(); // returns the event id
+        $event->isEnabled(); // returns true if the feature is enabled
+        $event->getEventType(); // returns the event type, either \Unleash\Client\Enum\ImpressionDataEventType::IS_ENABLED or \Unleash\Client\Enum\ImpressionDataEventType::GET_VARIANT
+        $event->getVariant(); // returns the variant name if the event type is \Unleash\Client\Enum\ImpressionDataEventType::GET_VARIANT
     }
 }
 ```

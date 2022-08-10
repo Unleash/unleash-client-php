@@ -167,4 +167,14 @@ final class UnleashContext implements Context
 
         return $this;
     }
+
+    /**
+     * @codeCoverageIgnore
+     *
+     * @return array<string, string>
+     */
+    public function getCustomProperties(): array
+    {
+        return $this->customContext;
+    }
 }

@@ -7,10 +7,13 @@ use Unleash\Client\Configuration\Context;
 use Unleash\Client\Configuration\UnleashConfiguration;
 use Unleash\Client\DTO\Strategy;
 use Unleash\Client\DTO\Variant;
+use Unleash\Client\Enum\ImpressionDataEventType;
 use Unleash\Client\Event\FeatureToggleDisabledEvent;
 use Unleash\Client\Event\FeatureToggleMissingStrategyHandlerEvent;
 use Unleash\Client\Event\FeatureToggleNotFoundEvent;
+use Unleash\Client\Event\ImpressionDataEvent;
 use Unleash\Client\Event\UnleashEvents;
+use Unleash\Client\Helper\Uuid;
 use Unleash\Client\Metrics\MetricsHandler;
 use Unleash\Client\Repository\UnleashRepository;
 use Unleash\Client\Strategy\StrategyHandler;
@@ -47,6 +50,18 @@ final class DefaultUnleash implements Unleash
             );
 
             return $default;
+        }
+
+        if (method_exists($feature, 'hasImpressionData') && $feature->hasImpressionData()) {
+            $event = new ImpressionDataEvent(
+                ImpressionDataEventType::IS_ENABLED,
+                Uuid::v4(),
+                clone $this->configuration,
+                clone $context,
+                clone $feature,
+                null,
+            );
+            $this->configuration->getEventDispatcher()->dispatch($event, UnleashEvents::IMPRESSION_DATA);
         }
 
         if (!$feature->isEnabled()) {
@@ -113,6 +128,18 @@ final class DefaultUnleash implements Unleash
         $variant = $this->variantHandler->selectVariant($feature, $context);
         if ($variant !== null) {
             $this->metricsHandler->handleMetrics($feature, true, $variant);
+
+            if (method_exists($feature, 'hasImpressionData') && $feature->hasImpressionData()) {
+                $event = new ImpressionDataEvent(
+                    ImpressionDataEventType::GET_VARIANT,
+                    Uuid::v4(),
+                    clone $this->configuration,
+                    clone $context,
+                    clone $feature,
+                    clone $variant,
+                );
+                $this->configuration->getEventDispatcher()->dispatch($event, UnleashEvents::IMPRESSION_DATA);
+            }
         }
 
         return $variant ?? $fallbackVariant;
