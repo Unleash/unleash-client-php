@@ -27,6 +27,7 @@ trait TemporaryFileHelper
                 }
             }
         });
+        $this->_tfh_ShutdownFunctionRegistered = true;
     }
 
     private function deleteLater(string $filePath): void
