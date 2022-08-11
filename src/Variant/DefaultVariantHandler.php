@@ -12,22 +12,19 @@ use Unleash\Client\Stickiness\StickinessCalculator;
 
 final class DefaultVariantHandler implements VariantHandler
 {
-    public function __construct(
-        private readonly StickinessCalculator $stickinessCalculator,
-    ) {
+    /**
+     * @readonly
+     * @var \Unleash\Client\Stickiness\StickinessCalculator
+     */
+    private $stickinessCalculator;
+    public function __construct(StickinessCalculator $stickinessCalculator)
+    {
+        $this->stickinessCalculator = $stickinessCalculator;
     }
-
     #[Pure]
     public function getDefaultVariant(): Variant
     {
-        return new DefaultVariant(
-            'disabled',
-            false,
-            0,
-            Stickiness::DEFAULT,
-            null,
-            null,
-        );
+        return new DefaultVariant('disabled', false, 0, Stickiness::DEFAULT, null, null);
     }
 
     public function selectVariant(Feature $feature, Context $context): ?Variant
@@ -44,11 +41,7 @@ final class DefaultVariantHandler implements VariantHandler
             return $overridden;
         }
 
-        $stickiness = $this->calculateStickiness(
-            $feature,
-            $context,
-            $totalWeight,
-        );
+        $stickiness = $this->calculateStickiness($feature, $context, $totalWeight);
 
         $counter = 0;
         foreach ($feature->getVariants() as $variant) {
@@ -99,6 +92,6 @@ final class DefaultVariantHandler implements VariantHandler
 
     private function randomString(): string
     {
-        return (string) random_int(1, 100_000);
+        return (string) random_int(1, 100000);
     }
 }

@@ -19,31 +19,35 @@ if (!interface_exists(EventDispatcherInterface::class)) {
 final class EventDispatcher implements EventDispatcherInterface
 {
     /**
+     * @var EventDispatcherInterface|null
+     * @readonly
+     */
+    private $eventDispatcher;
+    /**
      * @param EventDispatcherInterface|null $eventDispatcher
      */
-    public function __construct(
-        private readonly ?EventDispatcherInterface $eventDispatcher,
-    ) {
+    public function __construct(?EventDispatcherInterface $eventDispatcher)
+    {
+        $this->eventDispatcher = $eventDispatcher;
     }
-
     public function addListener(string $eventName, callable $listener, int $priority = 0): void
     {
-        $this->eventDispatcher?->addListener($eventName, $listener, $priority);
+        ($eventDispatcher = $this->eventDispatcher) ? $eventDispatcher->addListener($eventName, $listener, $priority) : null;
     }
 
     public function addSubscriber(EventSubscriberInterface $subscriber): void
     {
-        $this->eventDispatcher?->addSubscriber($subscriber);
+        ($eventDispatcher = $this->eventDispatcher) ? $eventDispatcher->addSubscriber($subscriber) : null;
     }
 
     public function removeListener(string $eventName, callable $listener): void
     {
-        $this->eventDispatcher?->removeListener($eventName, $listener);
+        ($eventDispatcher = $this->eventDispatcher) ? $eventDispatcher->removeListener($eventName, $listener) : null;
     }
 
     public function removeSubscriber(EventSubscriberInterface $subscriber): void
     {
-        $this->eventDispatcher?->removeSubscriber($subscriber);
+        ($eventDispatcher = $this->eventDispatcher) ? $eventDispatcher->removeSubscriber($subscriber) : null;
     }
 
     /**
@@ -52,37 +56,34 @@ final class EventDispatcher implements EventDispatcherInterface
     public function getListeners(string $eventName = null): array
     {
         if (is_string($eventName)) {
-            return $this->eventDispatcher?->getListeners($eventName) ?? [];
+            return (($eventDispatcher = $this->eventDispatcher) ? $eventDispatcher->getListeners($eventName) : null) ?? [];
         }
 
-        return $this->eventDispatcher?->getListeners() ?? [];
+        return (($eventDispatcher = $this->eventDispatcher) ? $eventDispatcher->getListeners() : null) ?? [];
     }
 
-    public function dispatch(
-        object $event,
-        #[ExpectedValues(valuesFromClass: UnleashEvents::class)]
-        string $eventName = null,
-    ): object {
+    public function dispatch(object $event, #[ExpectedValues(valuesFromClass: UnleashEvents::class)]
+    string $eventName = null) : object
+    {
         if (is_string($eventName)) {
-            $result = $this->eventDispatcher?->dispatch($event, $eventName) ?? $event;
+            $result = (($eventDispatcher = $this->eventDispatcher) ? $eventDispatcher->dispatch($event, $eventName) : null) ?? $event;
         } else {
-            $result = $this->eventDispatcher?->dispatch($event) ?? $event;
+            $result = (($eventDispatcher = $this->eventDispatcher) ? $eventDispatcher->dispatch($event) : null) ?? $event;
         }
-
         return $result;
     }
 
     public function getListenerPriority(string $eventName, callable $listener): ?int
     {
-        return $this->eventDispatcher?->getListenerPriority($eventName, $listener);
+        return ($eventDispatcher = $this->eventDispatcher) ? $eventDispatcher->getListenerPriority($eventName, $listener) : null;
     }
 
     public function hasListeners(string $eventName = null): bool
     {
         if (is_string($eventName)) {
-            return $this->eventDispatcher?->hasListeners($eventName) ?? false;
+            return (($eventDispatcher = $this->eventDispatcher) ? $eventDispatcher->hasListeners($eventName) : null) ?? false;
         }
 
-        return $this->eventDispatcher?->hasListeners() ?? false;
+        return (($eventDispatcher = $this->eventDispatcher) ? $eventDispatcher->hasListeners() : null) ?? false;
     }
 }
