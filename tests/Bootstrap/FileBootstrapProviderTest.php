@@ -9,9 +9,12 @@ use RuntimeException;
 use SplFileInfo;
 use Unleash\Client\Bootstrap\FileBootstrapProvider;
 use Unleash\Client\Exception\InvalidValueException;
+use Unleash\Client\Tests\TestHelpers\TemporaryFileHelper;
 
 final class FileBootstrapProviderTest extends TestCase
 {
+    use TemporaryFileHelper;
+
     public function testGetBootstrap()
     {
         $instance = new FileBootstrapProvider(__DIR__ . '/../data/bootstrap-file.json');
@@ -60,6 +63,15 @@ final class FileBootstrapProviderTest extends TestCase
     public function testInvalidContent()
     {
         $instance = new FileBootstrapProvider('data://application/json;base64,abcde');
+        $this->expectException(RuntimeException::class);
+        $instance->getBootstrap();
+    }
+
+    public function testUnreadableFile()
+    {
+        $file = $this->createTemporaryFile();
+        chmod($file, 0222);
+        $instance = new FileBootstrapProvider($file);
         $this->expectException(RuntimeException::class);
         $instance->getBootstrap();
     }
