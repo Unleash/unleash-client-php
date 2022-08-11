@@ -55,9 +55,9 @@ final class UnleashContext implements Context
         return $this->customContext[$name];
     }
 
-    public function setCustomProperty(string $name, string $value): self
+    public function setCustomProperty(string $name, ?string $value): self
     {
-        $this->customContext[$name] = $value;
+        $this->customContext[$name] = $value ?? '';
 
         return $this;
     }

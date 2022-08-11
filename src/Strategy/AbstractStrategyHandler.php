@@ -3,6 +3,7 @@
 namespace Unleash\Client\Strategy;
 
 use Unleash\Client\Configuration\Context;
+use Unleash\Client\DTO\Constraint;
 use Unleash\Client\DTO\Strategy;
 use Unleash\Client\Helper\ConstraintValidatorTrait;
 
@@ -24,13 +25,32 @@ abstract class AbstractStrategyHandler implements StrategyHandler
 
     protected function validateConstraints(Strategy $strategy, Context $context): bool
     {
-        $constraints = $strategy->getConstraints();
+        if (method_exists($strategy, 'hasNonexistentSegments') && $strategy->hasNonexistentSegments()) {
+            return false;
+        }
+
+        $validator = $this->getValidator();
+        $constraints = $this->getConstraintsForStrategy($strategy);
+
         foreach ($constraints as $constraint) {
-            if (!$this->getValidator()->validateConstraint($constraint, $context)) {
+            if (!$validator->validateConstraint($constraint, $context)) {
                 return false;
             }
         }
 
         return true;
+    }
+
+    /**
+     * @return iterable<Constraint>
+     */
+    private function getConstraintsForStrategy(Strategy $strategy): iterable
+    {
+        yield from $strategy->getConstraints();
+
+        $segments = method_exists($strategy, 'getSegments') ? $strategy->getSegments() : [];
+        foreach ($segments as $segment) {
+            yield from $segment->getConstraints();
+        }
     }
 }

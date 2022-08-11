@@ -25,6 +25,9 @@ interface Context
 
     public function getCustomProperty(string $name): string;
 
+    /**
+     * @todo make $value nullable
+     */
     public function setCustomProperty(string $name, string $value): self;
 
     public function hasCustomProperty(string $name): bool;
