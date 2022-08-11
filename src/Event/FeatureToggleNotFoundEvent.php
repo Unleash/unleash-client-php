@@ -15,17 +15,11 @@ final class FeatureToggleNotFoundEvent extends AbstractEvent
     ) {
     }
 
-    /**
-     * @codeCoverageIgnore
-     */
     public function getContext(): Context
     {
         return $this->context;
     }
 
-    /**
-     * @codeCoverageIgnore
-     */
     public function getFeatureName(): string
     {
         return $this->featureName;

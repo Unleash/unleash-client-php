@@ -27,9 +27,6 @@ final class DefaultVariant implements Variant
         return $this->name;
     }
 
-    /**
-     * @codeCoverageIgnore
-     */
     public function getPayload(): ?VariantPayload
     {
         return $this->payload;

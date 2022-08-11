@@ -61,6 +61,9 @@ final class DefaultVariantHandler implements VariantHandler
             }
         }
 
+        // while this is in theory possible to happen, it really cannot happen unless the Unleash server is misconfigured
+        // and in that case there are bigger problems than missing code coverage
+
         // @codeCoverageIgnoreStart
         return null;
         // @codeCoverageIgnoreEnd

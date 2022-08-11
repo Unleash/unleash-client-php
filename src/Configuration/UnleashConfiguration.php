@@ -115,9 +115,6 @@ final class UnleashConfiguration
         return $this;
     }
 
-    /**
-     * @codeCoverageIgnore
-     */
     public function setAppName(string $appName): self
     {
         $this->appName = $appName;
@@ -125,9 +122,6 @@ final class UnleashConfiguration
         return $this;
     }
 
-    /**
-     * @codeCoverageIgnore
-     */
     public function setInstanceId(string $instanceId): self
     {
         $this->instanceId = $instanceId;

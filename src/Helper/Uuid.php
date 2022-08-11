@@ -4,7 +4,6 @@ namespace Unleash\Client\Helper;
 
 /**
  * @internal
- * @codeCoverageIgnore
  */
 final class Uuid
 {
