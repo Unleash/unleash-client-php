@@ -79,9 +79,7 @@ final class FileBootstrapProvider implements BootstrapProvider
             return new InvalidArgumentException("The file '{$path}' does not exist.");
         }
         if (!is_readable($path)) {
-            // @codeCoverageIgnoreStart
             return new RuntimeException("The file '{$path}' is not readable.");
-            // @codeCoverageIgnoreEnd
         }
 
         return null;

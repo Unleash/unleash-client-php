@@ -20,7 +20,6 @@ final class CompoundException extends Exception
 
     /**
      * @return Throwable[]
-     * @codeCoverageIgnore
      */
     public function getExceptions(): array
     {

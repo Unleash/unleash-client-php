@@ -20,9 +20,6 @@ final class DefaultVariantPayload implements VariantPayload
     ) {
     }
 
-    /**
-     * @codeCoverageIgnore
-     */
     #[ExpectedValues(valuesFromClass: VariantPayloadType::class)]
     public function getType(): string
     {

@@ -16,17 +16,11 @@ final class FeatureToggleMissingStrategyHandlerEvent extends AbstractEvent
     ) {
     }
 
-    /**
-     * @codeCoverageIgnore
-     */
     public function getContext(): Context
     {
         return $this->context;
     }
 
-    /**
-     * @codeCoverageIgnore
-     */
     public function getFeature(): Feature
     {
         return $this->feature;
