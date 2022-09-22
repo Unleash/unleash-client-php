@@ -6,6 +6,7 @@ use JetBrains\PhpStorm\Deprecated;
 use JetBrains\PhpStorm\Pure;
 use LogicException;
 use Psr\SimpleCache\CacheInterface;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Unleash\Client\Bootstrap\BootstrapHandler;
 use Unleash\Client\Bootstrap\BootstrapProvider;
 use Unleash\Client\Bootstrap\DefaultBootstrapHandler;
@@ -40,11 +41,10 @@ final class UnleashConfiguration
         private ?BootstrapProvider $bootstrapProvider = null,
         private bool $fetchingEnabled = true,
         // todo remove nullability in next major version
-        private ?EventDispatcher $eventDispatcher = null,
+        private ?EventDispatcherInterface $eventDispatcher = null,
         private int $staleTtl = 30 * 60,
     ) {
         $this->contextProvider ??= new DefaultUnleashContextProvider();
-        $this->eventDispatcher ??= new EventDispatcher(null);
         if ($defaultContext !== null) {
             $this->setDefaultContext($defaultContext);
         }
@@ -245,14 +245,29 @@ final class UnleashConfiguration
         return $this;
     }
 
+    #[Deprecated('This method has been deprecated and will be removed in next major version')]
     public function getEventDispatcher(): EventDispatcher
     {
-        return $this->eventDispatcher ?? new EventDispatcher(null);
+        if ($this->eventDispatcher === null) {
+            return new EventDispatcher(null);
+        }
+        if ($this->eventDispatcher instanceof EventDispatcher) {
+            return $this->eventDispatcher;
+        }
+
+        return new EventDispatcher($this->eventDispatcher);
     }
 
-    public function setEventDispatcher(?EventDispatcher $eventDispatcher): self
+    /**
+     * @internal
+     */
+    public function getEventDispatcherOrNull(): ?EventDispatcherInterface
     {
-        $eventDispatcher ??= new EventDispatcher(null);
+        return $this->eventDispatcher;
+    }
+
+    public function setEventDispatcher(?EventDispatcherInterface $eventDispatcher): self
+    {
         $this->eventDispatcher = $eventDispatcher;
 
         return $this;

@@ -64,6 +64,7 @@ final class DefaultConstraintValidator implements ConstraintValidator
      * @param T $value
      *
      * @return T
+     *
      * @noinspection PhpDocSignatureInspection
      */
     private function makeCaseInsensitive(string|array $value): string|array

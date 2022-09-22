@@ -18,6 +18,7 @@ interface VariantPayload extends JsonSerializable
      * @throws LogicException
      *
      * @return array<mixed>
+     *
      * @noinspection PhpPluralMixedCanBeReplacedWithArrayInspection
      */
     public function fromJson(): array;
