@@ -30,7 +30,6 @@ use Unleash\Client\ContextProvider\SettableUnleashContextProvider;
 use Unleash\Client\ContextProvider\UnleashContextProvider;
 use Unleash\Client\Exception\InvalidValueException;
 use Unleash\Client\Helper\DefaultImplementationLocator;
-use Unleash\Client\Helper\EventDispatcher;
 use Unleash\Client\Metrics\DefaultMetricsHandler;
 use Unleash\Client\Metrics\DefaultMetricsSender;
 use Unleash\Client\Repository\DefaultUnleashRepository;
@@ -97,6 +96,7 @@ final class UnleashBuilder
 
     /**
      * @var EventDispatcherInterface|null
+     *
      * @noinspection PhpDocFieldTypeMismatchInspection
      */
     private ?object $eventDispatcher = null;
@@ -376,9 +376,9 @@ final class UnleashBuilder
 
         $bootstrapHandler = $this->bootstrapHandler ?? new DefaultBootstrapHandler();
         $bootstrapProvider = $this->bootstrapProvider ?? new EmptyBootstrapProvider();
-        $eventDispatcher = new EventDispatcher($this->eventDispatcher);
+        $eventDispatcher = $this->eventDispatcher;
         foreach ($this->eventSubscribers as $eventSubscriber) {
-            $eventDispatcher->addSubscriber($eventSubscriber);
+            $eventDispatcher?->addSubscriber($eventSubscriber);
         }
 
         $configuration = new UnleashConfiguration($appUrl, $appName, $instanceId);

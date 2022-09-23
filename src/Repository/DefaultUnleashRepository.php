@@ -93,7 +93,7 @@ final class DefaultUnleashRepository implements UnleashRepository
                         $this->setLastValidState($data);
                     }
                 } catch (Exception $exception) {
-                    $this->configuration->getEventDispatcher()->dispatch(
+                    $this->configuration->getEventDispatcherOrNull()?->dispatch(
                         new FetchingDataFailedEvent($exception),
                         UnleashEvents::FETCHING_DATA_FAILED,
                     );

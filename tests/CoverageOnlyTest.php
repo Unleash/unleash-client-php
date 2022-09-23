@@ -3,6 +3,7 @@
 namespace Unleash\Client\Tests;
 
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 use Unleash\Client\Configuration\UnleashConfiguration;
 use Unleash\Client\Configuration\UnleashContext;
 use Unleash\Client\DTO\DefaultFeature;
@@ -14,6 +15,7 @@ use Unleash\Client\Event\FeatureToggleDisabledEvent;
 use Unleash\Client\Event\FeatureToggleMissingStrategyHandlerEvent;
 use Unleash\Client\Event\FeatureToggleNotFoundEvent;
 use Unleash\Client\Exception\CompoundException;
+use Unleash\Client\Helper\EventDispatcher as HelperEventDispatcher;
 
 /**
  * This class is only for triggering code that doesn't really make sense to test and is here to achieve 100% code coverage.
@@ -97,5 +99,19 @@ final class CoverageOnlyTest extends TestCase
         $instance = new CompoundException();
 
         $instance->getExceptions();
+    }
+
+    public function testGetEventDispatcher()
+    {
+        $configuration = fn () => new UnleashConfiguration('', '', '', fetchingEnabled: false);
+
+        $configurationNull = $configuration()->setEventDispatcher(null);
+        $configurationNull->getEventDispatcher();
+
+        $configurationHelper = $configuration()->setEventDispatcher(new HelperEventDispatcher(null));
+        $configurationHelper->getEventDispatcher();
+
+        $configurationEventDispatcher = $configuration()->setEventDispatcher(new EventDispatcher());
+        $configurationEventDispatcher->getEventDispatcher();
     }
 }

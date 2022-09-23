@@ -2,6 +2,7 @@
 
 namespace Unleash\Client\Helper;
 
+use JetBrains\PhpStorm\Deprecated;
 use JetBrains\PhpStorm\ExpectedValues;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -13,6 +14,7 @@ if (!interface_exists(EventDispatcherInterface::class)) {
 }
 // @codeCoverageIgnoreEnd
 
+#[Deprecated('This class was deprecated and will be removed in next major version')]
 /**
  * @internal
  */

@@ -32,7 +32,6 @@ use Unleash\Client\Event\FeatureToggleDisabledEvent;
 use Unleash\Client\Event\FeatureToggleNotFoundEvent;
 use Unleash\Client\Event\UnleashEvents;
 use Unleash\Client\Exception\InvalidValueException;
-use Unleash\Client\Helper\EventDispatcher;
 use Unleash\Client\Strategy\DefaultStrategyHandler;
 use Unleash\Client\Strategy\StrategyHandler;
 use Unleash\Client\Tests\TestHelpers\CustomBootstrapProviderImpl74;
@@ -646,26 +645,16 @@ final class UnleashBuilderTest extends TestCase
         self::assertSame($eventDispatcher, $property);
 
         $unleash = $instance->withFetchingEnabled(false)->build();
-        $configuredEventDispatcher = $this->getConfiguration($unleash)->getEventDispatcher();
-        self::assertInstanceOf(EventDispatcher::class, $configuredEventDispatcher);
-
-        $innerEventDispatcher = $this->getProperty($configuredEventDispatcher, 'eventDispatcher');
-        self::assertInstanceOf(SymfonyEventDispatcher::class, $innerEventDispatcher);
-        self::assertSame($eventDispatcher, $innerEventDispatcher);
+        $configuredEventDispatcher = $this->getConfiguration($unleash)->getEventDispatcherOrNull();
+        self::assertInstanceOf(SymfonyEventDispatcher::class, $configuredEventDispatcher);
 
         $unleash = $this->instance->withFetchingEnabled(false)->build();
-        $configuredEventDispatcher = $this->getConfiguration($unleash)->getEventDispatcher();
-        self::assertInstanceOf(EventDispatcher::class, $configuredEventDispatcher);
-
-        $innerEventDispatcher = $this->getProperty($configuredEventDispatcher, 'eventDispatcher');
-        self::assertInstanceOf(SymfonyEventDispatcher::class, $innerEventDispatcher);
+        $configuredEventDispatcher = $this->getConfiguration($unleash)->getEventDispatcherOrNull();
+        self::assertInstanceOf(SymfonyEventDispatcher::class, $configuredEventDispatcher);
 
         $unleash = $this->instance->withFetchingEnabled(false)->withEventDispatcher(null)->build();
-        $configuredEventDispatcher = $this->getConfiguration($unleash)->getEventDispatcher();
-        self::assertInstanceOf(EventDispatcher::class, $configuredEventDispatcher);
-
-        $innerEventDispatcher = $this->getProperty($configuredEventDispatcher, 'eventDispatcher');
-        self::assertNull($innerEventDispatcher);
+        $configuredEventDispatcher = $this->getConfiguration($unleash)->getEventDispatcherOrNull();
+        self::assertNull($configuredEventDispatcher);
     }
 
     public function testWithEventSubscriber()
@@ -710,10 +699,7 @@ final class UnleashBuilderTest extends TestCase
         ));
 
         $unleash = $instance->build();
-        $eventDispatcher = $this->getProperty(
-            $this->getConfiguration($unleash)->getEventDispatcher(),
-            'eventDispatcher'
-        );
+        $eventDispatcher = $this->getConfiguration($unleash)->getEventDispatcherOrNull();
         self::assertInstanceOf(SymfonyEventDispatcher::class, $eventDispatcher);
         self::assertCount(2, $eventDispatcher->getListeners());
         self::assertCount(1, $eventDispatcher->getListeners(UnleashEvents::FEATURE_TOGGLE_NOT_FOUND));

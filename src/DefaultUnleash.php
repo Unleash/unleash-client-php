@@ -44,7 +44,7 @@ final class DefaultUnleash implements Unleash
         $feature = $this->repository->findFeature($featureName);
         if ($feature === null) {
             $event = new FeatureToggleNotFoundEvent($context, $featureName);
-            $this->configuration->getEventDispatcher()->dispatch(
+            $this->configuration->getEventDispatcherOrNull()?->dispatch(
                 $event,
                 UnleashEvents::FEATURE_TOGGLE_NOT_FOUND,
             );
@@ -61,12 +61,12 @@ final class DefaultUnleash implements Unleash
                 clone $feature,
                 null,
             );
-            $this->configuration->getEventDispatcher()->dispatch($event, UnleashEvents::IMPRESSION_DATA);
+            $this->configuration->getEventDispatcherOrNull()?->dispatch($event, UnleashEvents::IMPRESSION_DATA);
         }
 
         if (!$feature->isEnabled()) {
             $event = new FeatureToggleDisabledEvent($feature, $context);
-            $this->configuration->getEventDispatcher()->dispatch(
+            $this->configuration->getEventDispatcherOrNull()?->dispatch(
                 $event,
                 UnleashEvents::FEATURE_TOGGLE_DISABLED,
             );
@@ -104,7 +104,7 @@ final class DefaultUnleash implements Unleash
 
         if (!$handlersFound) {
             $event = new FeatureToggleMissingStrategyHandlerEvent($context, $feature);
-            $this->configuration->getEventDispatcher()->dispatch(
+            $this->configuration->getEventDispatcherOrNull()?->dispatch(
                 $event,
                 UnleashEvents::FEATURE_TOGGLE_MISSING_STRATEGY_HANDLER,
             );
@@ -138,7 +138,7 @@ final class DefaultUnleash implements Unleash
                     clone $feature,
                     clone $variant,
                 );
-                $this->configuration->getEventDispatcher()->dispatch($event, UnleashEvents::IMPRESSION_DATA);
+                $this->configuration->getEventDispatcherOrNull()?->dispatch($event, UnleashEvents::IMPRESSION_DATA);
             }
         }
 
