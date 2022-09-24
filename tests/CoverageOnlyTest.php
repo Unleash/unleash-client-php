@@ -67,7 +67,7 @@ final class CoverageOnlyTest extends TestCase
     {
         $instance = new FeatureToggleDisabledEvent(
             new DefaultFeature('test', false, []),
-            new UnleashContext(),
+            new UnleashContext()
         );
         $instance->getFeature();
         $instance->getContext();
@@ -77,7 +77,7 @@ final class CoverageOnlyTest extends TestCase
     {
         $instance = new FeatureToggleMissingStrategyHandlerEvent(
             new UnleashContext(),
-            new DefaultFeature('test', false, []),
+            new DefaultFeature('test', false, [])
         );
         $instance->getContext();
         $instance->getFeature();
@@ -87,7 +87,7 @@ final class CoverageOnlyTest extends TestCase
     {
         $instance = new FeatureToggleNotFoundEvent(
             new UnleashContext(),
-            'test',
+            'test'
         );
 
         $instance->getContext();
