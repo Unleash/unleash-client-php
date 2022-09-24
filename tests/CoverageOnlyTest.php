@@ -103,7 +103,9 @@ final class CoverageOnlyTest extends TestCase
 
     public function testGetEventDispatcher()
     {
-        $configuration = fn () => new UnleashConfiguration('', '', '', fetchingEnabled: false);
+        $configuration = function () {
+            return new UnleashConfiguration('', '', '', fetchingEnabled: false);
+        };
 
         $configurationNull = $configuration()->setEventDispatcher(null);
         $configurationNull->getEventDispatcher();
