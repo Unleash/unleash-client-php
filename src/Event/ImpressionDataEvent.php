@@ -13,17 +13,47 @@ use Unleash\Client\Enum\ImpressionDataEventType;
 
 final class ImpressionDataEvent extends AbstractEvent implements JsonSerializable
 {
+    /**
+     * @readonly
+     */
+    private string $eventType;
+    /**
+     * @readonly
+     */
+    private string $eventId;
+    /**
+     * @readonly
+     */
+    private UnleashConfiguration $configuration;
+    /**
+     * @readonly
+     */
+    private Context $context;
+    /**
+     * @readonly
+     */
+    private Feature $feature;
+    /**
+     * @readonly
+     */
+    private ?Variant $variant;
     public function __construct(
-        #[ExpectedValues(valuesFromClass: ImpressionDataEventType::class)]
-        private readonly string $eventType,
-        private readonly string $eventId,
-        private readonly UnleashConfiguration $configuration,
-        private readonly Context $context,
-        private readonly Feature $feature,
-        private readonly ?Variant $variant,
-    ) {
+        #[\JetBrains\PhpStorm\ExpectedValues(valuesFromClass: \Unleash\Client\Enum\ImpressionDataEventType::class)]
+        string $eventType,
+        string $eventId,
+        UnleashConfiguration $configuration,
+        Context $context,
+        Feature $feature,
+        ?Variant $variant
+    )
+    {
+        $this->eventType = $eventType;
+        $this->eventId = $eventId;
+        $this->configuration = $configuration;
+        $this->context = $context;
+        $this->feature = $feature;
+        $this->variant = $variant;
     }
-
     #[ExpectedValues(valuesFromClass: ImpressionDataEventType::class)]
     public function getEventType(): string
     {
@@ -71,7 +101,7 @@ final class ImpressionDataEvent extends AbstractEvent implements JsonSerializabl
 
     public function getVariant(): ?string
     {
-        return $this->variant?->getName();
+        return ($variant = $this->variant) ? $variant->getName() : null;
     }
 
     /**
