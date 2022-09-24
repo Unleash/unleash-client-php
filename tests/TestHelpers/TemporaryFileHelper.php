@@ -4,12 +4,15 @@ namespace Unleash\Client\Tests\TestHelpers;
 
 trait TemporaryFileHelper
 {
-    private bool $_tfh_ShutdownFunctionRegistered = false;
+    /**
+     * @var bool
+     */
+    private $_tfh_ShutdownFunctionRegistered = false;
 
     /**
      * @var array<string>
      */
-    private array $_tfh_DeleteLaterList = [];
+    private $_tfh_DeleteLaterList = [];
 
     private function _registerShutdownFunction(): void
     {
