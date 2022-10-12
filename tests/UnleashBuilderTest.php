@@ -339,21 +339,27 @@ final class UnleashBuilderTest extends TestCase
         $cacheProperty = (new ReflectionObject($configuration))->getProperty('cache');
         $cacheProperty->setAccessible(true);
 
-        $unleash = $instance->build();
-        $repository = $repositoryProperty->getValue($unleash);
-        $configuration = $configurationProperty->getValue($repository);
-        $cache = $cacheProperty->getValue($configuration);
-
-        self::assertInstanceOf(FilesystemCachePool::class, $cache);
-
         $defaultImplementationsProperty = (new ReflectionObject($locator))->getProperty('defaultImplementations');
         $defaultImplementationsProperty->setAccessible(true);
         $defaultImplementations = $defaultImplementationsProperty->getValue($locator);
 
-        $defaultImplementations['cache'][FilesystemCachePool::class . 2] = [];
-        unset($defaultImplementations['cache'][FilesystemCachePool::class]);
-        $defaultImplementationsProperty->setValue($locator, $defaultImplementations);
+        // cache/filesystem-adapter should be used by default if it's installed
+        if (class_exists(FilesystemCachePool::class)) {
+            $unleash = $instance->build();
+            $repository = $repositoryProperty->getValue($unleash);
+            $configuration = $configurationProperty->getValue($repository);
+            $cache = $cacheProperty->getValue($configuration);
 
+            self::assertInstanceOf(FilesystemCachePool::class, $cache);
+
+            // Remove cache/filesystem-adapter from the list of available implementations
+            // so we can test what happens when it's missing.
+            $defaultImplementations['cache'][FilesystemCachePool::class . 2] = [];
+            unset($defaultImplementations['cache'][FilesystemCachePool::class]);
+            $defaultImplementationsProperty->setValue($locator, $defaultImplementations);
+        }
+
+        // symfony/cache should be used by default if it's installed and cache/filesystem-adapter is unavailable
         $unleash = $instance->build();
         $repository = $repositoryProperty->getValue($unleash);
         $configuration = $configurationProperty->getValue($repository);
@@ -361,6 +367,8 @@ final class UnleashBuilderTest extends TestCase
 
         self::assertInstanceOf(Psr16Cache::class, $cache);
 
+        // Remove symfony/cache from the list of available implementations
+        // so we can test what happens when it's missing.
         $defaultImplementations['cache'][Psr16Cache::class . 2] = [];
         unset($defaultImplementations['cache'][Psr16Cache::class]);
         $defaultImplementationsProperty->setValue($locator, $defaultImplementations);

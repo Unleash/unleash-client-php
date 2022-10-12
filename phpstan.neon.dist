@@ -1,4 +1,13 @@
 parameters:
   ignoreErrors:
-    - '#@throws with type .+ is not subtype of Throwable#'
+    -
+      message: '#@throws with type .+SimpleCache.+ is not subtype of Throwable#'
+      path: src/Repository/DefaultUnleashRepository.php
+      reportUnmatched: false
+    -
+      messages:
+        - '#Class .+Filesystem.* not found#'
+        - '#Class .+Flysystem.* not found#'
+      path: src/Helper/DefaultImplementationLocator.php
+      reportUnmatched: false
   treatPhpDocTypesAsCertain: false
