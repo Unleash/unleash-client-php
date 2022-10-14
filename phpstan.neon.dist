@@ -1,8 +1,7 @@
 parameters:
   ignoreErrors:
     -
-      message: '#@throws with type .+SimpleCache.+ is not subtype of Throwable#'
-      path: src/Repository/DefaultUnleashRepository.php
+      message: '#@throws with type .+ is not subtype of Throwable#'
       reportUnmatched: false
     -
       messages:
