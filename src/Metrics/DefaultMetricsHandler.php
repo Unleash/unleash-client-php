@@ -10,10 +10,18 @@ use Unleash\Client\Enum\CacheKey;
 
 final class DefaultMetricsHandler implements MetricsHandler
 {
-    public function __construct(
-        private readonly MetricsSender $metricsSender,
-        private readonly UnleashConfiguration $configuration
-    ) {
+    /**
+     * @readonly
+     */
+    private MetricsSender $metricsSender;
+    /**
+     * @readonly
+     */
+    private UnleashConfiguration $configuration;
+    public function __construct(MetricsSender $metricsSender, UnleashConfiguration $configuration)
+    {
+        $this->metricsSender = $metricsSender;
+        $this->configuration = $configuration;
     }
 
     public function handleMetrics(Feature $feature, bool $successful, Variant $variant = null): void
