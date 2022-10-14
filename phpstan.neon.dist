@@ -1,4 +1,12 @@
 parameters:
   ignoreErrors:
-    - '#@throws with type .+ is not subtype of Throwable#'
+    -
+      message: '#@throws with type .+ is not subtype of Throwable#'
+      reportUnmatched: false
+    -
+      messages:
+        - '#Class .+Filesystem.* not found#'
+        - '#Class .+Flysystem.* not found#'
+      path: src/Helper/DefaultImplementationLocator.php
+      reportUnmatched: false
   treatPhpDocTypesAsCertain: false

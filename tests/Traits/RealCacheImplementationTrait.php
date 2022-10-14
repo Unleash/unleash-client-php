@@ -2,10 +2,9 @@
 
 namespace Unleash\Client\Tests\Traits;
 
-use Cache\Adapter\Filesystem\FilesystemCachePool;
-use League\Flysystem\Adapter\Local;
-use League\Flysystem\Filesystem;
 use Psr\SimpleCache\CacheInterface;
+use Symfony\Component\Cache\Adapter\ArrayAdapter;
+use Symfony\Component\Cache\Psr16Cache;
 
 trait RealCacheImplementationTrait
 {
@@ -24,11 +23,7 @@ trait RealCacheImplementationTrait
     private function getCache(): CacheInterface
     {
         if ($this->_cache === null) {
-            $this->_cache = new FilesystemCachePool(
-                new Filesystem(
-                    new Local(sys_get_temp_dir() . '/unleash-sdk-tests')
-                )
-            );
+            $this->_cache = new Psr16Cache(new ArrayAdapter());
         }
 
         return $this->_cache;
