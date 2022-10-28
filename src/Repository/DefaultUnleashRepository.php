@@ -89,7 +89,7 @@ final class DefaultUnleashRepository implements UnleashRepository
                 try {
                     $response = $this->httpClient->sendRequest($request);
                     if ($response->getStatusCode() === 200) {
-                        $data = $response->getBody()->getContents();
+                        $data = (string) $response->getBody();
                         $this->setLastValidState($data);
                     }
                 } catch (Exception $exception) {

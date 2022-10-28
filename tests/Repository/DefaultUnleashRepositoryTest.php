@@ -4,9 +4,11 @@ namespace Unleash\Client\Tests\Repository;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\HttpFactory;
 use GuzzleHttp\Psr7\Request;
 use LogicException;
+use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher as SymfonyEventDispatcher;
 use Unleash\Client\Bootstrap\JsonSerializableBootstrapProvider;
 use Unleash\Client\Configuration\UnleashConfiguration;
@@ -85,6 +87,27 @@ final class DefaultUnleashRepositoryTest extends AbstractHttpClientTest
         $this->pushResponse([], 1, 401);
         $this->expectException(HttpResponseException::class);
         $this->repository->getFeatures();
+    }
+
+    public function testGetFeaturesWhenResponseBodyAlreadyRead()
+    {
+        $this->pushResponse($this->response);
+
+        // Add middleware that simply reads the response body
+        $this->handlerStack->push(
+            Middleware::mapResponse(
+                static function (ResponseInterface $response) {
+                    // Cause the response body to be read until the end
+                    $response->getBody()->getContents();
+                    self::assertTrue($response->getBody()->eof());
+
+                    return $response;
+                }
+            )
+        );
+
+        $features = $this->repository->getFeatures();
+        self::assertCount(2, $features);
     }
 
     public function testCache()
