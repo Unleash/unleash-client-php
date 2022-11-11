@@ -14,7 +14,7 @@ jobs:
       PHP_CS_FIXER_IGNORE_ENV: 1
     strategy:
       matrix:
-        version: ['8.1']
+        version: ['8.1', '8.2']
     steps:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -31,7 +31,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        version: ['8.1']
+        version: ['8.1', '8.2']
     steps:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -48,7 +48,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        version: ['8.1']
+        version: ['8.1', '8.2']
         optional-deps: ['', 'cache/filesystem-adapter:^1.1']
 
     steps:
