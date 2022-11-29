@@ -1,8 +1,10 @@
 <?php
 
-use Rector\Set\ValueObject\DowngradeSetList;
-use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
+use Rector\Config\RectorConfig;
+use Rector\Set\ValueObject\DowngradeLevelSetList;
 
-return static function (ContainerConfigurator $containerConfigurator): void {
-    $containerConfigurator->import(DowngradeSetList::PHP_81);
+return static function (RectorConfig $config): void {
+    $config->sets([
+        DowngradeLevelSetList::DOWN_TO_PHP_80,
+    ]);
 };
