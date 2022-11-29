@@ -38,7 +38,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        version: ['7.2', '7.3', '7.4', '8.0']
+        version: ['7.2', '7.3', '7.4', '8.0', '8.1']
     steps:
       - name: Extract Version Name
         id: extract_name
@@ -50,7 +50,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: 8.1
+          php-version: 8.2
       - name: Checkout Code
         uses: actions/checkout@v2
       - name: Install Dependencies
@@ -61,7 +61,7 @@ jobs:
         if: matrix.version == '7.2'
         run: composer require symfony/polyfill-php73:^1.0
       - name: Update composer.json version
-        run: 'sed -i -e ''s/"php": "\^8.1"/"php": "\^${{ matrix.version }}"/'' composer.json'
+        run: 'sed -i -e ''s/"php": "\^8.2"/"php": "\^${{ matrix.version }}"/'' composer.json'
       - name: Downgrade phpunit
         if: matrix.version == '7.2'
         run: 'sed -i -e ''s/"phpunit\/phpunit": "\^9.5"/"phpunit\/phpunit": "\^8.5"/'' composer.json'
