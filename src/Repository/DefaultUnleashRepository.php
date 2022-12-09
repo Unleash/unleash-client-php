@@ -91,6 +91,8 @@ final class DefaultUnleashRepository implements UnleashRepository
                     if ($response->getStatusCode() === 200) {
                         $data = (string) $response->getBody();
                         $this->setLastValidState($data);
+                    } else {
+                        throw new HttpResponseException("Invalid status code: '{$response->getStatusCode()}'");
                     }
                 } catch (Exception $exception) {
                     $this->configuration->getEventDispatcherOrNull()?->dispatch(
