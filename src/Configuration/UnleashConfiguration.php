@@ -43,6 +43,7 @@ final class UnleashConfiguration
         // todo remove nullability in next major version
         private ?EventDispatcherInterface $eventDispatcher = null,
         private int $staleTtl = 30 * 60,
+        private ?CacheInterface $staleCache = null,
     ) {
         $this->contextProvider ??= new DefaultUnleashContextProvider();
         if ($defaultContext !== null) {
@@ -57,6 +58,11 @@ final class UnleashConfiguration
         }
 
         return $this->cache;
+    }
+
+    public function getStaleCache(): CacheInterface
+    {
+        return $this->staleCache ?? $this->getCache();
     }
 
     public function getUrl(): string
@@ -88,6 +94,12 @@ final class UnleashConfiguration
     {
         $this->cache = $cache;
 
+        return $this;
+    }
+
+    public function setStaleCache(CacheInterface $cache): self
+    {
+        $this->staleCache = $cache;
         return $this;
     }
 
