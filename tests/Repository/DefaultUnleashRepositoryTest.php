@@ -349,4 +349,39 @@ final class DefaultUnleashRepositoryTest extends AbstractHttpClientTest
             sleep(1);
         }
     }
+
+    /**
+     * @see https://github.com/Unleash/unleash-client-php/issues/129
+     */
+    public function testFallbackStaleCacheNoException()
+    {
+        $eventEmittedCount = 0;
+
+        $eventDispatcher = new EventDispatcher(new SymfonyEventDispatcher());
+        $eventDispatcher->addListener(
+            UnleashEvents::FETCHING_DATA_FAILED,
+            function (FetchingDataFailedEvent $event) use (&$eventEmittedCount): void {
+                $event->getException(); // just to cover the line
+                ++$eventEmittedCount;
+            }
+        );
+
+        $repository = new DefaultUnleashRepository(
+            new Client([
+                'handler' => $this->handlerStack,
+            ]),
+            new HttpFactory(),
+            (new UnleashConfiguration('', '', ''))
+                ->setCache($this->getRealCache())
+                ->setEventDispatcher($eventDispatcher)
+                ->setTtl(0)
+                ->setStaleTtl(3)
+        );
+
+        $this->pushResponse($this->response);
+        $this->pushResponse($this->response, 1, 401);
+        $features = $repository->getFeatures();
+        self::assertEquals($features, $repository->getFeatures());
+        self::assertSame(1, $eventEmittedCount);
+    }
 }
