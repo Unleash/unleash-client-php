@@ -97,7 +97,7 @@ final class UnleashConfiguration
         return $this;
     }
 
-    public function setStaleCache(CacheInterface $cache): self
+    public function setStaleCache(?CacheInterface $cache): self
     {
         $this->staleCache = $cache;
         return $this;
