@@ -731,6 +731,29 @@ final class UnleashBuilderTest extends TestCase
         );
     }
 
+    public function testWithStaleCacheHandler()
+    {
+        $cache1 = $this->getCache();
+        $cache2 = $this->getCache();
+
+        $instance = $this->instance->withFetchingEnabled(false);
+        self::assertNull($this->getProperty($instance, 'staleCache'));
+        self::assertNotNull($this->getConfiguration($instance->build())->getStaleCache());
+
+        $instance = $this->instance->withFetchingEnabled(false)->withCacheHandler($cache1);
+        self::assertNull($this->getProperty($instance, 'staleCache'));
+        self::assertSame($cache1, $this->getConfiguration($instance->build())->getStaleCache());
+
+        $instance = $this->instance
+            ->withFetchingEnabled(false)
+            ->withCacheHandler($cache1)
+            ->withStaleCacheHandler($cache2)
+        ;
+        self::assertSame($cache2, $this->getProperty($instance, 'staleCache'));
+        self::assertSame($cache2, $this->getConfiguration($instance->build())->getStaleCache());
+        self::assertSame($cache1, $this->getConfiguration($instance->build())->getCache());
+    }
+
     private function getConfiguration(DefaultUnleash $unleash): UnleashConfiguration
     {
         $configurationProperty = (new ReflectionObject($unleash))->getProperty('configuration');

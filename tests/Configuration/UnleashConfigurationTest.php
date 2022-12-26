@@ -98,4 +98,31 @@ final class UnleashConfigurationTest extends TestCase
 
         self::assertSame($provider, $instance->getContextProvider());
     }
+
+    public function testGetStaleCache()
+    {
+        // test that stale cache falls back to normal cache adapter
+        $cache = $this->getCache();
+
+        $instance = (new UnleashConfiguration('', '', ''))
+            ->setCache($cache);
+
+        self::assertSame($cache, $instance->getCache());
+        self::assertSame($cache, $instance->getStaleCache());
+
+        $cache1 = $this->getCache();
+        $cache2 = $this->getCache();
+
+        $instance = (new UnleashConfiguration('', '', ''))
+            ->setCache($cache1)
+            ->setStaleCache($cache2)
+        ;
+
+        self::assertSame($cache1, $instance->getCache());
+        self::assertSame($cache2, $instance->getStaleCache());
+
+        $instance = new UnleashConfiguration('', '', '');
+        $this->expectException(LogicException::class);
+        $instance->getStaleCache();
+    }
 }

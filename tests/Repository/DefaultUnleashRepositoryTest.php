@@ -9,6 +9,8 @@ use GuzzleHttp\Psr7\HttpFactory;
 use GuzzleHttp\Psr7\Request;
 use LogicException;
 use Psr\Http\Message\ResponseInterface;
+use Symfony\Component\Cache\Adapter\ArrayAdapter;
+use Symfony\Component\Cache\Psr16Cache;
 use Symfony\Component\EventDispatcher\EventDispatcher as SymfonyEventDispatcher;
 use Unleash\Client\Bootstrap\JsonSerializableBootstrapProvider;
 use Unleash\Client\Configuration\UnleashConfiguration;
@@ -383,5 +385,44 @@ final class DefaultUnleashRepositoryTest extends AbstractHttpClientTest
         $features = $repository->getFeatures();
         self::assertEquals($features, $repository->getFeatures());
         self::assertSame(1, $eventEmittedCount);
+    }
+
+    public function testFallbackStaleCacheDifferentHandlers()
+    {
+        $cacheNormal = $this->getRealCache();
+        $cacheStale = new Psr16Cache(new ArrayAdapter());
+
+        // just some sanity checks
+        $testCacheKey = '___test_for_unleash_test_suite';
+        self::assertNotSame($cacheStale, $cacheNormal);
+        $cacheNormal->set($testCacheKey, 1);
+        self::assertSame(1, $cacheNormal->get($testCacheKey));
+        self::assertNull($cacheStale->get($testCacheKey));
+
+        $repository = new DefaultUnleashRepository(
+            new Client([
+                'handler' => $this->handlerStack,
+            ]),
+            new HttpFactory(),
+            (new UnleashConfiguration('', '', ''))
+                ->setCache($cacheNormal)
+                ->setStaleCache($cacheStale)
+                ->setTtl(10)
+                ->setStaleTtl(10)
+        );
+
+        $this->pushResponse($this->response);
+        $features = $repository->getFeatures();
+        self::assertEquals($features, $repository->getFeatures());
+        self::assertTrue($cacheNormal->has('unleash.client.feature.list'));
+        $cacheNormal->clear();
+        self::assertFalse($cacheNormal->has('unleash.client.feature.list'));
+        // test that no exception has been thrown after clearing normal cache
+        self::assertEquals($features, $repository->getFeatures());
+
+        $cacheStale->clear();
+        $cacheNormal->clear();
+        $this->expectException(HttpResponseException::class);
+        $repository->getFeatures();
     }
 }
