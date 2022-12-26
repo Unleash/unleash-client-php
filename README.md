@@ -264,6 +264,31 @@ $builder = $builder
     ->withCacheHandler(null);
 ```
 
+You can use a different cache implementation for standard item cache and for stale cache. If you don't provide any
+implementation for stale cache, the same instance as for standard cache is used.
+
+```php
+<?php
+
+use Cache\Adapter\Filesystem\FilesystemCachePool;
+use League\Flysystem\Adapter\Local;
+use League\Flysystem\Filesystem;
+use Unleash\Client\UnleashBuilder;
+use Symfony\Component\Cache\Psr16Cache;
+use Symfony\Component\Cache\Adapter\ArrayAdapter;
+
+$builder = UnleashBuilder::create()
+    ->withCacheHandler(new FilesystemCachePool( // example with using cache/filesystem-adapter
+        new Filesystem(
+            new Local(sys_get_temp_dir()),
+        ),
+    ))
+    ->withStaleCacheHandler(new Psr16Cache(new ArrayAdapter()))
+    ->withCacheTimeToLive(120)
+    ->withStaleTtl(300)
+;
+```
+
 ## Bootstrapping
 
 You can set a default response from the SDK in cases when for some reason contacting Unleash server fails.
