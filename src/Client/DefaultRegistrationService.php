@@ -3,6 +3,7 @@
 namespace Unleash\Client\Client;
 
 use DateTimeImmutable;
+use Exception;
 use JsonException;
 use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Client\ClientInterface;
@@ -59,9 +60,14 @@ final class DefaultRegistrationService implements RegistrationService
         foreach ($this->configuration->getHeaders() as $name => $value) {
             $request = $request->withHeader($name, $value);
         }
-        $response = $this->httpClient->sendRequest($request);
 
-        $result = $response->getStatusCode() >= 200 && $response->getStatusCode() < 300;
+        try {
+            $response = $this->httpClient->sendRequest($request);
+            $result = $response->getStatusCode() >= 200 && $response->getStatusCode() < 300;
+        } catch (Exception) {
+            $result = false;
+        }
+
         $this->storeCache($result);
 
         return $result;
@@ -70,15 +76,21 @@ final class DefaultRegistrationService implements RegistrationService
     private function hasValidCacheRegistration(): bool
     {
         $cache = $this->configuration->getCache();
-        if (!$cache->has(CacheKey::REGISTRATION)) {
-            return false;
-        }
+        $staleCache = $this->configuration->getStaleCache();
 
-        return (bool) $cache->get(CacheKey::REGISTRATION);
+        $hasNormalCache = $cache->has(CacheKey::REGISTRATION);
+        $hasStaleCache = $staleCache->has(CacheKey::REGISTRATION);
+
+        return match (true) {
+            $hasNormalCache => (bool) $cache->get(CacheKey::REGISTRATION),
+            $hasStaleCache => (bool) $staleCache->get(CacheKey::REGISTRATION),
+            default => false,
+        };
     }
 
     private function storeCache(bool $result): void
     {
         $this->configuration->getCache()->set(CacheKey::REGISTRATION, $result, $this->configuration->getTtl());
+        $this->configuration->getStaleCache()->set(CacheKey::REGISTRATION, $result, $this->configuration->getStaleTtl());
     }
 }

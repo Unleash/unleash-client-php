@@ -4,6 +4,7 @@ namespace Unleash\Client\Tests;
 
 use ArrayIterator;
 use LimitIterator;
+use RuntimeException;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Unleash\Client\Configuration\UnleashConfiguration;
@@ -796,6 +797,20 @@ final class DefaultUnleashTest extends AbstractHttpClientTest
 
         $instance->getVariant('test2');
         self::assertSame(2, $triggeredCount);
+    }
+
+    public function testAutoRegistrationOnInvalidResponse()
+    {
+        $this->pushResponse(new RuntimeException("This exception shouldn't be propagated"), 1, 404);
+        new DefaultUnleash(
+            [new DefaultStrategyHandler()],
+            $this->repository,
+            $this->registrationService,
+            (new UnleashConfiguration('', '', ''))
+                ->setCache($this->getCache()),
+            $this->metricsHandler,
+            new DefaultVariantHandler(new MurmurHashCalculator())
+        );
     }
 
     private function getInstance(StrategyHandler ...$handlers): DefaultUnleash
