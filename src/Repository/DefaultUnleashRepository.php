@@ -227,11 +227,11 @@ final class DefaultUnleashRepository implements UnleashRepository
 
     private function getLastValidState(): ?string
     {
-        if (!$this->configuration->getCache()->has(CacheKey::FEATURES_RESPONSE)) {
+        if (!$this->configuration->getStaleCache()->has(CacheKey::FEATURES_RESPONSE)) {
             return null;
         }
 
-        $value = $this->configuration->getCache()->get(CacheKey::FEATURES_RESPONSE);
+        $value = $this->configuration->getStaleCache()->get(CacheKey::FEATURES_RESPONSE);
         assert(is_string($value));
 
         return $value;
@@ -239,7 +239,7 @@ final class DefaultUnleashRepository implements UnleashRepository
 
     private function setLastValidState(string $data): void
     {
-        $this->configuration->getCache()->set(
+        $this->configuration->getStaleCache()->set(
             CacheKey::FEATURES_RESPONSE,
             $data,
             $this->configuration->getStaleTtl(),

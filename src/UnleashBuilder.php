@@ -62,6 +62,8 @@ final class UnleashBuilder
 
     private ?CacheInterface $cache = null;
 
+    private ?CacheInterface $staleCache = null;
+
     private ?int $cacheTtl = null;
 
     private ?int $staleTtl = null;
@@ -195,6 +197,12 @@ final class UnleashBuilder
         }
 
         return $result;
+    }
+
+    #[Pure]
+    public function withStaleCacheHandler(?CacheInterface $cache): self
+    {
+        return $this->with('staleCache', $cache);
     }
 
     #[Pure]
@@ -365,6 +373,7 @@ final class UnleashBuilder
             }
         }
         assert($cache instanceof CacheInterface);
+        $staleCache = $this->staleCache ?? $cache;
 
         $contextProvider = $this->contextProvider;
         if ($contextProvider === null) {
@@ -384,6 +393,7 @@ final class UnleashBuilder
         $configuration = new UnleashConfiguration($appUrl, $appName, $instanceId);
         $configuration
             ->setCache($cache)
+            ->setStaleCache($staleCache)
             ->setTtl($this->cacheTtl ?? $configuration->getTtl())
             ->setStaleTtl($this->staleTtl ?? $configuration->getStaleTtl())
             ->setMetricsEnabled($this->metricsEnabled ?? $configuration->isMetricsEnabled())
