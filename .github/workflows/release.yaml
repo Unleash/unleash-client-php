@@ -55,6 +55,10 @@ jobs:
         uses: actions/checkout@v2
       - name: Install Dependencies
         run: composer install
+      - name: Check if version is updated in SDK
+        env:
+          VERSION: ${{ steps.extract_name.outputs.result }}
+        run: php tests/check-version.php $VERSION
       - name: Transpile ${{ matrix.version }}
         run: php vendor/bin/rector process --no-diffs --no-progress-bar --config rector.$(echo ${{ matrix.version }} | sed -e 's/\.//').php src
       - name: Add polyfill for 7.3
