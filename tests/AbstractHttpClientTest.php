@@ -9,6 +9,7 @@ use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\HttpFactory;
 use GuzzleHttp\Psr7\Response;
 use PHPUnit\Framework\TestCase;
+use Throwable;
 use Unleash\Client\Client\DefaultRegistrationService;
 use Unleash\Client\Client\RegistrationService;
 use Unleash\Client\Configuration\Context;
@@ -114,10 +115,18 @@ abstract class AbstractHttpClientTest extends TestCase
         self::assertEquals(0, $this->mockHandler->count(), 'Some responses are leftover in the mock queue');
     }
 
-    protected function pushResponse(array $response, int $count = 1, int $statusCode = 200): void
+    /**
+     * @param array|Throwable $response
+     */
+    protected function pushResponse($response, int $count = 1, int $statusCode = 200): void
     {
         for ($i = 0; $i < $count; ++$i) {
-            $this->mockHandler->append(new Response($statusCode, ['Content-Type' => 'application/json'], json_encode($response)));
+            if (is_array($response)) {
+                $mocked = new Response($statusCode, ['Content-Type' => 'application/json'], json_encode($response));
+            } else {
+                $mocked = $response;
+            }
+            $this->mockHandler->append($mocked);
         }
     }
 }

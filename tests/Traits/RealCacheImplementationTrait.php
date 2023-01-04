@@ -13,10 +13,19 @@ trait RealCacheImplementationTrait
      */
     private $_cache;
 
+    /**
+     * @var array<CacheInterface>
+     */
+    private $_additionalCaches = [];
+
     protected function tearDown(): void
     {
         if ($this->_cache !== null) {
             $this->_cache->clear();
+        }
+
+        foreach ($this->_additionalCaches as $additionalCache) {
+            $additionalCache->clear();
         }
     }
 
@@ -27,5 +36,10 @@ trait RealCacheImplementationTrait
         }
 
         return $this->_cache;
+    }
+
+    private function getFreshCacheInstance(): CacheInterface
+    {
+        return $this->_additionalCaches[] = new Psr16Cache(new ArrayAdapter());
     }
 }
