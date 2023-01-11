@@ -6,6 +6,7 @@ use JetBrains\PhpStorm\Deprecated;
 use JetBrains\PhpStorm\Immutable;
 use JetBrains\PhpStorm\Pure;
 use JsonSerializable;
+use LogicException;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
 use Psr\SimpleCache\CacheInterface;
@@ -29,7 +30,15 @@ use Unleash\Client\ContextProvider\DefaultUnleashContextProvider;
 use Unleash\Client\ContextProvider\SettableUnleashContextProvider;
 use Unleash\Client\ContextProvider\UnleashContextProvider;
 use Unleash\Client\Exception\InvalidValueException;
+use Unleash\Client\Helper\Builder\CacheAware;
+use Unleash\Client\Helper\Builder\ConfigurationAware;
+use Unleash\Client\Helper\Builder\HttpClientAware;
+use Unleash\Client\Helper\Builder\MetricsSenderAware;
+use Unleash\Client\Helper\Builder\RequestFactoryAware;
+use Unleash\Client\Helper\Builder\StaleCacheAware;
+use Unleash\Client\Helper\Builder\StickinessCalculatorAware;
 use Unleash\Client\Helper\DefaultImplementationLocator;
+use Unleash\Client\Helper\UnleashBuilderContainer;
 use Unleash\Client\Metrics\DefaultMetricsHandler;
 use Unleash\Client\Metrics\DefaultMetricsSender;
 use Unleash\Client\Repository\DefaultUnleashRepository;
@@ -338,6 +347,7 @@ final class UnleashBuilder
 
     public function build(): Unleash
     {
+        // basic scalar attributes
         $appUrl = $this->appUrl;
         $instanceId = $this->instanceId;
         $appName = $this->appName;
@@ -360,6 +370,7 @@ final class UnleashBuilder
             );
         }
 
+        // PSR services
         $cache = $this->cache;
         if ($cache === null) {
             $cache = $this->defaultImplementationLocator->findCache();
@@ -374,38 +385,6 @@ final class UnleashBuilder
         }
         assert($cache instanceof CacheInterface);
         $staleCache = $this->staleCache ?? $cache;
-
-        $contextProvider = $this->contextProvider;
-        if ($contextProvider === null) {
-            $contextProvider = new DefaultUnleashContextProvider();
-        }
-        if ($this->defaultContext !== null && $contextProvider instanceof SettableUnleashContextProvider) {
-            $contextProvider->setDefaultContext($this->defaultContext);
-        }
-
-        $bootstrapHandler = $this->bootstrapHandler ?? new DefaultBootstrapHandler();
-        $bootstrapProvider = $this->bootstrapProvider ?? new EmptyBootstrapProvider();
-        $eventDispatcher = $this->eventDispatcher;
-        foreach ($this->eventSubscribers as $eventSubscriber) {
-            $eventDispatcher?->addSubscriber($eventSubscriber);
-        }
-
-        $configuration = new UnleashConfiguration($appUrl, $appName, $instanceId);
-        $configuration
-            ->setCache($cache)
-            ->setStaleCache($staleCache)
-            ->setTtl($this->cacheTtl ?? $configuration->getTtl())
-            ->setStaleTtl($this->staleTtl ?? $configuration->getStaleTtl())
-            ->setMetricsEnabled($this->metricsEnabled ?? $configuration->isMetricsEnabled())
-            ->setMetricsInterval($this->metricsInterval ?? $configuration->getMetricsInterval())
-            ->setHeaders($this->headers)
-            ->setAutoRegistrationEnabled($this->autoregister)
-            ->setContextProvider($contextProvider)
-            ->setBootstrapHandler($bootstrapHandler)
-            ->setBootstrapProvider($bootstrapProvider)
-            ->setFetchingEnabled($this->fetchingEnabled)
-            ->setEventDispatcher($eventDispatcher)
-        ;
 
         $httpClient = $this->httpClient;
         if ($httpClient === null) {
@@ -438,29 +417,104 @@ final class UnleashBuilder
         }
         assert($requestFactory instanceof RequestFactoryInterface);
 
-        $repository = new DefaultUnleashRepository($httpClient, $requestFactory, $configuration);
+        // internal shared services needed for UnleashConfiguration
 
         $hashCalculator = new MurmurHashCalculator();
+
+        $dependencyContainer = new UnleashBuilderContainer(
+            cache: $cache,
+            staleCache: $staleCache,
+            httpClient: $httpClient,
+            metricsSender: null,
+            requestFactory: $requestFactory,
+            stickinessCalculator: $hashCalculator,
+            configuration: null,
+        );
+
+        $contextProvider = $this->contextProvider;
+        if ($contextProvider === null) {
+            $contextProvider = new DefaultUnleashContextProvider();
+        }
+        if ($this->defaultContext !== null && $contextProvider instanceof SettableUnleashContextProvider) {
+            $contextProvider->setDefaultContext($this->defaultContext);
+        }
+
+        $bootstrapHandler = $this->bootstrapHandler ?? new DefaultBootstrapHandler();
+        $bootstrapProvider = $this->bootstrapProvider ?? new EmptyBootstrapProvider();
+        $eventDispatcher = $this->eventDispatcher;
+        foreach ($this->eventSubscribers as $eventSubscriber) {
+            $eventDispatcher?->addSubscriber($eventSubscriber);
+        }
+
+        // initialize services
+        $this->initializeServices($contextProvider, $dependencyContainer);
+        $this->initializeServices($bootstrapHandler, $dependencyContainer);
+        $this->initializeServices($bootstrapProvider, $dependencyContainer);
+        if ($eventDispatcher !== null) {
+            $this->initializeServices($eventDispatcher, $dependencyContainer);
+        }
+        foreach ($this->eventSubscribers as $eventSubscriber) {
+            $this->initializeServices($eventSubscriber, $dependencyContainer);
+        }
+
+        $configuration = new UnleashConfiguration($appUrl, $appName, $instanceId);
+        $configuration
+            ->setCache($cache)
+            ->setStaleCache($staleCache)
+            ->setTtl($this->cacheTtl ?? $configuration->getTtl())
+            ->setStaleTtl($this->staleTtl ?? $configuration->getStaleTtl())
+            ->setMetricsEnabled($this->metricsEnabled ?? $configuration->isMetricsEnabled())
+            ->setMetricsInterval($this->metricsInterval ?? $configuration->getMetricsInterval())
+            ->setHeaders($this->headers)
+            ->setAutoRegistrationEnabled($this->autoregister)
+            ->setContextProvider($contextProvider)
+            ->setBootstrapHandler($bootstrapHandler)
+            ->setBootstrapProvider($bootstrapProvider)
+            ->setFetchingEnabled($this->fetchingEnabled)
+            ->setEventDispatcher($eventDispatcher)
+        ;
+
+        // runtime-unchangeable blocks of Unleash
+
+        $repository = new DefaultUnleashRepository($httpClient, $requestFactory, $configuration);
+
+        $metricsSender = new DefaultMetricsSender($httpClient, $requestFactory, $configuration);
+
+        $dependencyContainer = new UnleashBuilderContainer(
+            cache: $cache,
+            staleCache: $staleCache,
+            httpClient: $httpClient,
+            metricsSender: $metricsSender,
+            requestFactory: $requestFactory,
+            stickinessCalculator: $hashCalculator,
+            configuration: $configuration,
+        );
 
         $registrationService = $this->registrationService;
         if ($registrationService === null) {
             $registrationService = new DefaultRegistrationService($httpClient, $requestFactory, $configuration);
         }
 
+        $metricsHandler = new DefaultMetricsHandler($metricsSender, $configuration);
+        $variantHandler = new DefaultVariantHandler($hashCalculator);
+
+        // initialization of dependencies
+
+        foreach ($this->strategies as $strategy) {
+            $this->initializeServices($strategy, $dependencyContainer);
+        }
+        $this->initializeServices($repository, $dependencyContainer);
+        $this->initializeServices($registrationService, $dependencyContainer);
+        $this->initializeServices($metricsSender, $dependencyContainer);
+        $this->initializeServices($variantHandler, $dependencyContainer);
+
         return new DefaultUnleash(
             $this->strategies,
             $repository,
             $registrationService,
             $configuration,
-            new DefaultMetricsHandler(
-                new DefaultMetricsSender(
-                    $httpClient,
-                    $requestFactory,
-                    $configuration,
-                ),
-                $configuration
-            ),
-            new DefaultVariantHandler($hashCalculator),
+            $metricsHandler,
+            $variantHandler,
         );
     }
 
@@ -470,5 +524,44 @@ final class UnleashBuilder
         $copy->{$property} = $value;
 
         return $copy;
+    }
+
+    private function initializeServices(object $target, UnleashBuilderContainer $container): void
+    {
+        if ($target instanceof CacheAware) {
+            $target->setCache($container->getCache());
+        }
+        if ($target instanceof ConfigurationAware) {
+            if ($configuration = $container->getConfiguration()) {
+                $target->setConfiguration($configuration);
+            } else {
+                throw new LogicException(sprintf(
+                    "A dependency '%s' is tagged as ConfigurationAware but that would cause a cyclic dependency as it needs to be part of Configuration",
+                    $target::class,
+                ));
+            }
+        }
+        if ($target instanceof HttpClientAware) {
+            $target->setHttpClient($container->getHttpClient());
+        }
+        if ($target instanceof MetricsSenderAware) {
+            if ($sender = $container->getMetricsSender()) {
+                $target->setMetricsSender($sender);
+            } else {
+                throw new LogicException(sprintf(
+                    "A dependency '%s' is tagged as MetricsSenderAware but MetricsSender is not available for this type of dependency",
+                    $target::class,
+                ));
+            }
+        }
+        if ($target instanceof RequestFactoryAware) {
+            $target->setRequestFactory($container->getRequestFactory());
+        }
+        if ($target instanceof StaleCacheAware) {
+            $target->setStaleCache($container->getStaleCache());
+        }
+        if ($target instanceof StickinessCalculatorAware) {
+            $target->setStickinessCalculator($container->getStickinessCalculator());
+        }
     }
 }
