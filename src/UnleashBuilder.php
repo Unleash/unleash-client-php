@@ -41,6 +41,7 @@ use Unleash\Client\Helper\DefaultImplementationLocator;
 use Unleash\Client\Helper\UnleashBuilderContainer;
 use Unleash\Client\Metrics\DefaultMetricsHandler;
 use Unleash\Client\Metrics\DefaultMetricsSender;
+use Unleash\Client\Metrics\MetricsHandler;
 use Unleash\Client\Repository\DefaultUnleashRepository;
 use Unleash\Client\Stickiness\MurmurHashCalculator;
 use Unleash\Client\Strategy\ApplicationHostnameStrategyHandler;
@@ -53,6 +54,7 @@ use Unleash\Client\Strategy\IpAddressStrategyHandler;
 use Unleash\Client\Strategy\StrategyHandler;
 use Unleash\Client\Strategy\UserIdStrategyHandler;
 use Unleash\Client\Variant\DefaultVariantHandler;
+use Unleash\Client\Variant\VariantHandler;
 
 #[Immutable]
 final class UnleashBuilder
@@ -116,6 +118,10 @@ final class UnleashBuilder
      * @var array<EventSubscriberInterface>
      */
     private array $eventSubscribers = [];
+
+    private ?MetricsHandler $metricsHandler = null;
+
+    private ?VariantHandler $variantHandler = null;
 
     public function __construct()
     {
@@ -345,6 +351,18 @@ final class UnleashBuilder
         return $this->with('staleTtl', $ttl);
     }
 
+    #[Pure]
+    public function withMetricsHandler(?MetricsHandler $metricsHandler): self
+    {
+        return $this->with('metricsHandler', $metricsHandler);
+    }
+
+    #[Pure]
+    public function withVariantHandler(?VariantHandler $variantHandler): self
+    {
+        return $this->with('variantHandler', $variantHandler);
+    }
+
     public function build(): Unleash
     {
         // basic scalar attributes
@@ -477,7 +495,6 @@ final class UnleashBuilder
         // runtime-unchangeable blocks of Unleash
 
         $repository = new DefaultUnleashRepository($httpClient, $requestFactory, $configuration);
-
         $metricsSender = new DefaultMetricsSender($httpClient, $requestFactory, $configuration);
 
         $dependencyContainer = new UnleashBuilderContainer(
@@ -495,8 +512,8 @@ final class UnleashBuilder
             $registrationService = new DefaultRegistrationService($httpClient, $requestFactory, $configuration);
         }
 
-        $metricsHandler = new DefaultMetricsHandler($metricsSender, $configuration);
-        $variantHandler = new DefaultVariantHandler($hashCalculator);
+        $metricsHandler = $this->metricsHandler ?? new DefaultMetricsHandler($metricsSender, $configuration);
+        $variantHandler = $this->variantHandler ?? new DefaultVariantHandler($hashCalculator);
 
         // initialization of dependencies
 
@@ -505,7 +522,7 @@ final class UnleashBuilder
         }
         $this->initializeServices($repository, $dependencyContainer);
         $this->initializeServices($registrationService, $dependencyContainer);
-        $this->initializeServices($metricsSender, $dependencyContainer);
+        $this->initializeServices($metricsHandler, $dependencyContainer);
         $this->initializeServices($variantHandler, $dependencyContainer);
 
         return new DefaultUnleash(
