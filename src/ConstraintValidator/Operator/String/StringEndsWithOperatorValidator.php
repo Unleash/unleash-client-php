@@ -11,6 +11,6 @@ final class StringEndsWithOperatorValidator extends AbstractStringOperatorValida
     {
         assert(is_string($searchInValue));
 
-        return str_ends_with($searchInValue, $currentValue);
+        return str_ends_with($currentValue, $searchInValue);
     }
 }
