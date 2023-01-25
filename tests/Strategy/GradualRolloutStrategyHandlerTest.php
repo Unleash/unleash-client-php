@@ -144,6 +144,24 @@ final class GradualRolloutStrategyHandlerTest extends TestCase
             $strategy,
             (new UnleashContext())->setCustomProperty('something', 'test')
         ));
+
+        // using stickiness=default
+        $strategy = $this->createStrategy(100, Stickiness::DEFAULT, [
+            new DefaultConstraint('email', ConstraintOperator::STRING_ENDS_WITH, ['test.com']),
+        ]);
+        self::assertTrue($this->instance->isEnabled(
+            $strategy,
+            (new UnleashContext())->setCustomProperty('email', 'me@test.com')
+        ));
+
+        // using stickiness=email
+        $strategy = $this->createStrategy(100, 'email', [
+            new DefaultConstraint('email', ConstraintOperator::STRING_ENDS_WITH, ['test.com']),
+        ]);
+        self::assertTrue($this->instance->isEnabled(
+            $strategy,
+            (new UnleashContext())->setCustomProperty('email', 'me@test.com')
+        ));
     }
 
     #[Pure]
