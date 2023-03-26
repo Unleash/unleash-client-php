@@ -6,7 +6,6 @@ use JetBrains\PhpStorm\Deprecated;
 use JetBrains\PhpStorm\Immutable;
 use JetBrains\PhpStorm\Pure;
 use JsonSerializable;
-use LogicException;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
 use Psr\SimpleCache\CacheInterface;
@@ -29,6 +28,7 @@ use Unleash\Client\Configuration\UnleashConfiguration;
 use Unleash\Client\ContextProvider\DefaultUnleashContextProvider;
 use Unleash\Client\ContextProvider\SettableUnleashContextProvider;
 use Unleash\Client\ContextProvider\UnleashContextProvider;
+use Unleash\Client\Exception\CyclicDependencyException;
 use Unleash\Client\Exception\InvalidValueException;
 use Unleash\Client\Helper\Builder\CacheAware;
 use Unleash\Client\Helper\Builder\ConfigurationAware;
@@ -552,7 +552,7 @@ final class UnleashBuilder
             if ($configuration = $container->getConfiguration()) {
                 $target->setConfiguration($configuration);
             } else {
-                throw new LogicException(sprintf(
+                throw new CyclicDependencyException(sprintf(
                     "A dependency '%s' is tagged as ConfigurationAware but that would cause a cyclic dependency as it needs to be part of Configuration",
                     $target::class,
                 ));
@@ -565,7 +565,7 @@ final class UnleashBuilder
             if ($sender = $container->getMetricsSender()) {
                 $target->setMetricsSender($sender);
             } else {
-                throw new LogicException(sprintf(
+                throw new CyclicDependencyException(sprintf(
                     "A dependency '%s' is tagged as MetricsSenderAware but MetricsSender is not available for this type of dependency",
                     $target::class,
                 ));
