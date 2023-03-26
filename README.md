@@ -110,6 +110,75 @@ $builder = new UnleashBuilder();
 $builder = UnleashBuilder::create();
 ```
 
+You can replace various parts of the Unleash SDK with custom implementation using the builder, like custom registration
+service, custom metrics handler and so on.
+
+Replaceable parts (some of them have further documentation below):
+
+- registration service (`withRegistrationService()`)
+- context provider (`withContextProvider()`)
+- bootstrap handler (`withBootstrapHandler()`)
+- event dispatcher (`withEventDispatcher()`)
+- metrics handler (`withMetricsHandler()`)
+- variant handler (`withVariantHandler()`)
+
+Dependencies can be injected by implementing one of the following interfaces from the `Unleash\Client\Helper\Builder` namespace:
+
+- `CacheAware` - injects standard cache
+- `ConfigurationAware` - injects the global configuration object
+- `HttpClientAware` - injects the http client
+- `MetricsSenderAware` - injects the metrics sender service
+- `RequestFactoryAware` - injects the request factory
+- `StaleCacheAware` - injects the stale cache handler
+- `StickinessCalculatorAware` - injects the stickiness calculator used for calculating stickiness in gradual rollout strategy
+
+In addition to the parts above these interfaces can also be implemented by these kinds of classes:
+
+- bootstrap providers
+- event subscribers
+- strategy handlers
+
+> Some classes cannot depend on certain objects, namely any object that is present in the configuration cannot implement
+> ConfigurationAware (to avoid circular dependency). The same classes also cannot implement MetricsSenderAware because
+> metrics sender depends on the configuration object. You will get a \Unleash\Client\Exception\CyclicDependencyException
+> if that happens.
+
+Example:
+
+```php
+<?php
+
+use Unleash\Client\Helper\Builder\ConfigurationAware;
+use Unleash\Client\Metrics\MetricsHandler;
+use Unleash\Client\Configuration\UnleashConfiguration;
+use Unleash\Client\DTO\Feature;
+use Unleash\Client\DTO\Variant;
+use Unleash\Client\UnleashBuilder;
+
+final class CustomMetricsHandler implements MetricsHandler, ConfigurationAware
+{
+    private UnleashConfiguration $configuration;
+
+    public function setConfiguration(UnleashConfiguration $configuration): void
+    {
+        // this method gets called automatically by the builder
+        $this->configuration = $configuration;
+    }
+
+    public function handleMetrics(Feature $feature, bool $successful, Variant $variant = null): void
+    {
+        // the configuration object is available here
+        if ($this->configuration->getInstanceId() === '...') {
+            // do something
+        }
+    }
+}
+
+$instance = UnleashBuilder::create()
+    ->withMetricsHandler(new CustomMetricsHandler())
+    ->build();
+```
+
 #### Required parameters
 
 The app name, instance id and app url are required as per the specification.
