@@ -2,8 +2,6 @@
 
 namespace Unleash\Client\Tests;
 
-use GuzzleHttp\Client;
-use GuzzleHttp\Psr7\HttpFactory;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Unleash\Client\Configuration\UnleashConfiguration;
@@ -18,9 +16,6 @@ use Unleash\Client\Event\FeatureToggleMissingStrategyHandlerEvent;
 use Unleash\Client\Event\FeatureToggleNotFoundEvent;
 use Unleash\Client\Exception\CompoundException;
 use Unleash\Client\Helper\EventDispatcher as HelperEventDispatcher;
-use Unleash\Client\Helper\UnleashBuilderContainer;
-use Unleash\Client\Stickiness\MurmurHashCalculator;
-use Unleash\Client\Tests\Traits\FakeCacheImplementationTrait;
 
 /**
  * This class is only for triggering code that doesn't really make sense to test and is here to achieve 100% code coverage.
@@ -28,8 +23,6 @@ use Unleash\Client\Tests\Traits\FakeCacheImplementationTrait;
  */
 final class CoverageOnlyTest extends TestCase
 {
-    use FakeCacheImplementationTrait;
-
     /**
      * For whatever reason PHPUnit doesn't include tests that don't perform assertions when calculating
      * code coverage, so here's one dumb assertion that will get triggered after every test.
@@ -124,25 +117,4 @@ final class CoverageOnlyTest extends TestCase
         $configurationEventDispatcher = $configuration()->setEventDispatcher(new EventDispatcher());
         $configurationEventDispatcher->getEventDispatcher();
     }
-
-    //public function testUnleashBuilderContainer()
-    //{
-    //    $container = new UnleashBuilderContainer(
-    //        $this->getCache(),
-    //        $this->getCache(),
-    //        new Client(),
-    //        null,
-    //        new HttpFactory(),
-    //        new MurmurHashCalculator(),
-    //        null,
-    //    );
-    //
-    //    $container->getCache();
-    //    $container->getStaleCache();
-    //    $container->getHttpClient();
-    //    $container->getMetricsSender();
-    //    $container->getRequestFactory();
-    //    $container->getStickinessCalculator();
-    //    $container->getConfiguration();
-    //}
 }
