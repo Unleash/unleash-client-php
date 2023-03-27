@@ -27,17 +27,34 @@ use Unleash\Client\Configuration\UnleashConfiguration;
 use Unleash\Client\Configuration\UnleashContext;
 use Unleash\Client\ContextProvider\DefaultUnleashContextProvider;
 use Unleash\Client\DefaultUnleash;
+use Unleash\Client\DTO\DefaultVariant;
+use Unleash\Client\DTO\Feature;
 use Unleash\Client\DTO\Strategy;
+use Unleash\Client\DTO\Variant;
 use Unleash\Client\Event\FeatureToggleDisabledEvent;
 use Unleash\Client\Event\FeatureToggleNotFoundEvent;
 use Unleash\Client\Event\UnleashEvents;
+use Unleash\Client\Exception\CyclicDependencyException;
 use Unleash\Client\Exception\InvalidValueException;
+use Unleash\Client\Metrics\MetricsHandler;
 use Unleash\Client\Strategy\DefaultStrategyHandler;
 use Unleash\Client\Strategy\StrategyHandler;
 use Unleash\Client\Tests\TestHelpers\CustomBootstrapProviderImpl74;
 use Unleash\Client\Tests\TestHelpers\CustomBootstrapProviderImpl80;
+use Unleash\Client\Tests\TestHelpers\DependencyContainer\CacheAwareMetricsHandler;
+use Unleash\Client\Tests\TestHelpers\DependencyContainer\ConfigurationAwareContextProvider;
+use Unleash\Client\Tests\TestHelpers\DependencyContainer\ConfigurationAwareMetricsHandler;
+use Unleash\Client\Tests\TestHelpers\DependencyContainer\ConfigurationAwareRegistrationService;
+use Unleash\Client\Tests\TestHelpers\DependencyContainer\ConfigurationAwareVariantHandler;
+use Unleash\Client\Tests\TestHelpers\DependencyContainer\HttpClientAwareBootstrapProvider;
+use Unleash\Client\Tests\TestHelpers\DependencyContainer\MetricsSenderAwareBootstrapHandler;
+use Unleash\Client\Tests\TestHelpers\DependencyContainer\MetricsSenderAwareMetricsHandler;
+use Unleash\Client\Tests\TestHelpers\DependencyContainer\RequestFactoryAwareEventDispatcher;
+use Unleash\Client\Tests\TestHelpers\DependencyContainer\StaleCacheAwareStrategyHandler;
+use Unleash\Client\Tests\TestHelpers\DependencyContainer\StickinessCalculatorAwareEventSubscriber;
 use Unleash\Client\Tests\Traits\RealCacheImplementationTrait;
 use Unleash\Client\UnleashBuilder;
+use Unleash\Client\Variant\VariantHandler;
 
 final class UnleashBuilderTest extends TestCase
 {
@@ -752,6 +769,116 @@ final class UnleashBuilderTest extends TestCase
         self::assertSame($cache2, $this->getProperty($instance, 'staleCache'));
         self::assertSame($cache2, $this->getConfiguration($instance->build())->getStaleCache());
         self::assertSame($cache1, $this->getConfiguration($instance->build())->getCache());
+    }
+
+    public function testWithMetricsHandler()
+    {
+        $metricsHandler = new class implements MetricsHandler {
+            public function handleMetrics(Feature $feature, bool $successful, Variant $variant = null): void
+            {
+            }
+        };
+        $instance = $this->instance
+            ->withMetricsHandler($metricsHandler)
+        ;
+        self::assertNotSame($this->instance, $instance);
+        self::assertSame(
+            $metricsHandler,
+            $this->getProperty($instance->withFetchingEnabled(false)->build(), 'metricsHandler'),
+        );
+    }
+
+    public function testWithVariantHandler()
+    {
+        $variantHandler = new class implements VariantHandler {
+            public function getDefaultVariant(): Variant
+            {
+                return new DefaultVariant('test', false);
+            }
+
+            public function selectVariant(Feature $feature, Context $context): ?Variant
+            {
+                return null;
+            }
+        };
+
+        $instance = $this->instance
+            ->withVariantHandler($variantHandler)
+        ;
+        self::assertNotSame($this->instance, $instance);
+        self::assertSame(
+            $variantHandler,
+            $this->getProperty($instance->withFetchingEnabled(false)->build(), 'variantHandler'),
+        );
+    }
+
+    public function testDependencyContainer()
+    {
+        $base = $this->instance->withFetchingEnabled(false);
+
+        $cacheAwareMetricsHandler = new CacheAwareMetricsHandler();
+        self::assertNull($cacheAwareMetricsHandler->cache);
+        $instance = $base->withMetricsHandler($cacheAwareMetricsHandler);
+        self::assertNull($cacheAwareMetricsHandler->cache);
+        $instance->build();
+        self::assertNotNull($cacheAwareMetricsHandler->cache);
+
+        $configurationAwareMetricsHandler = new ConfigurationAwareMetricsHandler();
+        self::assertNull($configurationAwareMetricsHandler->configuration);
+        $instance = $base->withMetricsHandler($configurationAwareMetricsHandler);
+        $instance->build();
+        self::assertNotNull($configurationAwareMetricsHandler->configuration);
+
+        try {
+            $configurationAwareContextProvider = new ConfigurationAwareContextProvider();
+            $instance->withContextProvider($configurationAwareContextProvider)->build();
+            $this->fail('A cyclic dependency was provided, exception should have been thrown');
+        } catch (CyclicDependencyException $e) {
+            // ignore
+        }
+
+        $httpClientAwareBootstrapProvider = new HttpClientAwareBootstrapProvider();
+        self::assertNull($httpClientAwareBootstrapProvider->client);
+        $instance->withBootstrapProvider($httpClientAwareBootstrapProvider)->build();
+        self::assertNotNull($httpClientAwareBootstrapProvider->client);
+
+        $metricsSenderAwareMetricsHandler = new MetricsSenderAwareMetricsHandler();
+        self::assertNull($metricsSenderAwareMetricsHandler->metricsSender);
+        $instance->withMetricsHandler($metricsSenderAwareMetricsHandler)->build();
+        self::assertNotNull($metricsSenderAwareMetricsHandler);
+
+        try {
+            $metricsSenderAwareBootstrapHandler = new MetricsSenderAwareBootstrapHandler();
+            $instance->withBootstrapHandler($metricsSenderAwareBootstrapHandler)->build();
+            $this->fail('A cyclic dependency was provided, exception should be thrown');
+        } catch (CyclicDependencyException $e) {
+            // ignore
+        }
+
+        $requestFactoryAwareEventDispatcher = new RequestFactoryAwareEventDispatcher();
+        self::assertNull($requestFactoryAwareEventDispatcher->requestFactory);
+        $instance->withEventDispatcher($requestFactoryAwareEventDispatcher)->build();
+        self::assertNotNull($requestFactoryAwareEventDispatcher->requestFactory);
+
+        $stickinessCalculatorAwareEventSubscriber = new StickinessCalculatorAwareEventSubscriber();
+        self::assertNull($stickinessCalculatorAwareEventSubscriber->stickinessCalculator);
+        $instance->withEventSubscriber($stickinessCalculatorAwareEventSubscriber)->build();
+        self::assertNotNull($stickinessCalculatorAwareEventSubscriber->stickinessCalculator);
+
+        $staleCacheAwareStrategyHandler = new StaleCacheAwareStrategyHandler();
+        self::assertNull($staleCacheAwareStrategyHandler->cache);
+        $instance->withStrategy($staleCacheAwareStrategyHandler)->build();
+        self::assertNotNull($staleCacheAwareStrategyHandler->cache);
+
+        $configurationAwareRegistrationService = new ConfigurationAwareRegistrationService();
+        self::assertNull($configurationAwareRegistrationService->configuration);
+        $instance->withRegistrationService($configurationAwareRegistrationService)->build();
+        self::assertNotNull($configurationAwareRegistrationService->configuration);
+
+        $configurationAwareVariantHandler = new ConfigurationAwareVariantHandler();
+        self::assertNull($configurationAwareVariantHandler->configuration);
+        $instance->withVariantHandler($configurationAwareVariantHandler)->build();
+        self::assertNotNull($configurationAwareVariantHandler->configuration);
     }
 
     private function getConfiguration(DefaultUnleash $unleash): UnleashConfiguration
