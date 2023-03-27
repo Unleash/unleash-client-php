@@ -7,7 +7,10 @@ use Traversable;
 
 final class EmptyBootstrapProvider implements BootstrapProvider
 {
-    public function getBootstrap(): array|JsonSerializable|Traversable|null
+    /**
+     * @return mixed[]|\JsonSerializable|\Traversable|null
+     */
+    public function getBootstrap()
     {
         return null;
     }
