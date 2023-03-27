@@ -4,15 +4,14 @@ namespace Unleash\Client\Tests\TestHelpers\DependencyContainer;
 
 use JsonSerializable;
 use Psr\Http\Client\ClientInterface;
-use Traversable;
 use Unleash\Client\Bootstrap\BootstrapProvider;
 use Unleash\Client\Helper\Builder\HttpClientAware;
 
-final class HttpClientAwareBootstrapProvider implements BootstrapProvider, HttpClientAware
+final class HttpClientAwareBootstrapProvider80 implements BootstrapProvider, HttpClientAware
 {
     public ?ClientInterface $client = null;
 
-    public function getBootstrap(): array|JsonSerializable|Traversable|null
+    public function getBootstrap(): JsonSerializable|null|iterable
     {
         return null;
     }

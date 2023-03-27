@@ -46,7 +46,8 @@ use Unleash\Client\Tests\TestHelpers\DependencyContainer\ConfigurationAwareConte
 use Unleash\Client\Tests\TestHelpers\DependencyContainer\ConfigurationAwareMetricsHandler;
 use Unleash\Client\Tests\TestHelpers\DependencyContainer\ConfigurationAwareRegistrationService;
 use Unleash\Client\Tests\TestHelpers\DependencyContainer\ConfigurationAwareVariantHandler;
-use Unleash\Client\Tests\TestHelpers\DependencyContainer\HttpClientAwareBootstrapProvider;
+use Unleash\Client\Tests\TestHelpers\DependencyContainer\HttpClientAwareBootstrapProvider72;
+use Unleash\Client\Tests\TestHelpers\DependencyContainer\HttpClientAwareBootstrapProvider80;
 use Unleash\Client\Tests\TestHelpers\DependencyContainer\MetricsSenderAwareBootstrapHandler;
 use Unleash\Client\Tests\TestHelpers\DependencyContainer\MetricsSenderAwareMetricsHandler;
 use Unleash\Client\Tests\TestHelpers\DependencyContainer\RequestFactoryAwareEventDispatcher;
@@ -837,7 +838,12 @@ final class UnleashBuilderTest extends TestCase
             // ignore
         }
 
-        $httpClientAwareBootstrapProvider = new HttpClientAwareBootstrapProvider();
+        // these tests also run on php < 8 which doesn't support multiple types
+        if (PHP_VERSION_ID >= 80000) {
+            $httpClientAwareBootstrapProvider = new HttpClientAwareBootstrapProvider80();
+        } else {
+            $httpClientAwareBootstrapProvider = new HttpClientAwareBootstrapProvider72();
+        }
         self::assertNull($httpClientAwareBootstrapProvider->client);
         $instance->withBootstrapProvider($httpClientAwareBootstrapProvider)->build();
         self::assertNotNull($httpClientAwareBootstrapProvider->client);
