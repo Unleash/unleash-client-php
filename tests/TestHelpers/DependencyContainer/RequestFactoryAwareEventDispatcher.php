@@ -10,7 +10,10 @@ use Unleash\Client\Helper\Builder\RequestFactoryAware;
 
 final class RequestFactoryAwareEventDispatcher implements EventDispatcherInterface, RequestFactoryAware
 {
-    public ?RequestFactoryInterface $requestFactory = null;
+    /**
+     * @var RequestFactoryInterface|null
+     */
+    public $requestFactory = null;
 
     public function dispatch(object $event, string $eventName = null): object
     {

@@ -10,7 +10,10 @@ use Unleash\Client\Metrics\MetricsHandler;
 
 final class CacheAwareMetricsHandler implements MetricsHandler, CacheAware
 {
-    public ?CacheInterface $cache = null;
+    /**
+     * @var null|CacheInterface
+     */
+    public $cache = null;
 
     public function setCache(CacheInterface $cache): void
     {

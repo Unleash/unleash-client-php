@@ -8,7 +8,10 @@ use Unleash\Client\Helper\Builder\HttpClientAware;
 
 final class HttpClientAwareBootstrapProvider72 implements BootstrapProvider, HttpClientAware
 {
-    public ?ClientInterface $client = null;
+    /**
+     * @var ClientInterface|null
+     */
+    public $client = null;
 
     public function getBootstrap()
     {

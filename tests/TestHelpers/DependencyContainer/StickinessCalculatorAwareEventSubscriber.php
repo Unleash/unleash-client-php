@@ -8,7 +8,10 @@ use Unleash\Client\Stickiness\StickinessCalculator;
 
 final class StickinessCalculatorAwareEventSubscriber implements EventSubscriberInterface, StickinessCalculatorAware
 {
-    public ?StickinessCalculator $stickinessCalculator = null;
+    /**
+     * @var StickinessCalculator|null
+     */
+    public $stickinessCalculator = null;
 
     public static function getSubscribedEvents(): array
     {

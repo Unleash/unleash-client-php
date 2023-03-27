@@ -10,7 +10,10 @@ use Unleash\Client\Metrics\MetricsHandler;
 
 final class ConfigurationAwareMetricsHandler implements MetricsHandler, ConfigurationAware
 {
-    public ?UnleashConfiguration $configuration = null;
+    /**
+     * @var UnleashConfiguration|null
+     */
+    public $configuration = null;
 
     public function setConfiguration(UnleashConfiguration $configuration): void
     {
