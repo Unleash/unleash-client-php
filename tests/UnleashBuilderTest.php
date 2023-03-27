@@ -844,7 +844,6 @@ final class UnleashBuilderTest extends TestCase
         } else {
             $httpClientAwareBootstrapProvider = new HttpClientAwareBootstrapProvider72();
         }
-        $httpClientAwareBootstrapProvider = new HttpClientAwareBootstrapProvider72();
         self::assertNull($httpClientAwareBootstrapProvider->client);
         $instance->withBootstrapProvider($httpClientAwareBootstrapProvider)->build();
         self::assertNotNull($httpClientAwareBootstrapProvider->client);
