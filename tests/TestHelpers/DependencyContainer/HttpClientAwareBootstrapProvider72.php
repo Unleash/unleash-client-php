@@ -8,7 +8,7 @@ use Traversable;
 use Unleash\Client\Bootstrap\BootstrapProvider;
 use Unleash\Client\Helper\Builder\HttpClientAware;
 
-final class HttpClientAwareBootstrapProvider implements BootstrapProvider, HttpClientAware
+final class HttpClientAwareBootstrapProvider72 implements BootstrapProvider, HttpClientAware
 {
     public ?ClientInterface $client = null;
 
