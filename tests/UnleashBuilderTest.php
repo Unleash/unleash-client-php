@@ -784,7 +784,7 @@ final class UnleashBuilderTest extends TestCase
         self::assertNotSame($this->instance, $instance);
         self::assertSame(
             $metricsHandler,
-            $this->getProperty($instance->withFetchingEnabled(false)->build(), 'metricsHandler'),
+            $this->getProperty($instance->withFetchingEnabled(false)->build(), 'metricsHandler')
         );
     }
 
@@ -808,7 +808,7 @@ final class UnleashBuilderTest extends TestCase
         self::assertNotSame($this->instance, $instance);
         self::assertSame(
             $variantHandler,
-            $this->getProperty($instance->withFetchingEnabled(false)->build(), 'variantHandler'),
+            $this->getProperty($instance->withFetchingEnabled(false)->build(), 'variantHandler')
         );
     }
 
