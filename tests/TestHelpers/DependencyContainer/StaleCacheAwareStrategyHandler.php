@@ -10,7 +10,10 @@ use Unleash\Client\Strategy\StrategyHandler;
 
 final class StaleCacheAwareStrategyHandler implements StrategyHandler, StaleCacheAware
 {
-    public ?CacheInterface $cache = null;
+    /**
+     * @var CacheInterface|null
+     */
+    public $cache = null;
 
     public function setStaleCache(CacheInterface $cache): void
     {

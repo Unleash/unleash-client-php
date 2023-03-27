@@ -10,7 +10,10 @@ use Unleash\Client\Metrics\MetricsSender;
 
 final class MetricsSenderAwareMetricsHandler implements MetricsHandler, MetricsSenderAware
 {
-    public ?MetricsSender $metricsSender = null;
+    /**
+     * @var MetricsSender|null
+     */
+    public $metricsSender = null;
 
     public function handleMetrics(Feature $feature, bool $successful, Variant $variant = null): void
     {

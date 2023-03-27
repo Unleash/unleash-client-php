@@ -12,7 +12,10 @@ use Unleash\Client\Variant\VariantHandler;
 
 final class ConfigurationAwareVariantHandler implements VariantHandler, ConfigurationAware
 {
-    public ?UnleashConfiguration $configuration = null;
+    /**
+     * @var UnleashConfiguration|null
+     */
+    public $configuration = null;
 
     public function setConfiguration(UnleashConfiguration $configuration): void
     {
