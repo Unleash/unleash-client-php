@@ -40,9 +40,9 @@ use Unleash\Client\Exception\InvalidValueException;
 final class DefaultUnleashRepository implements UnleashRepository
 {
     public function __construct(
-        private readonly ClientInterface $httpClient,
-        private readonly RequestFactoryInterface $requestFactory,
-        private readonly UnleashConfiguration $configuration,
+        private ClientInterface $httpClient,
+        private RequestFactoryInterface $requestFactory,
+        private UnleashConfiguration $configuration,
     ) {
     }
 
