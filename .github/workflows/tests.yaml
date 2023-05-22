@@ -50,7 +50,6 @@ jobs:
       matrix:
         version: ['8.2']
         optional-deps: ['', 'cache/filesystem-adapter:^1.1']
-
     steps:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -66,5 +65,44 @@ jobs:
       - name: Install Dependencies (with optional)
         if: ${{ matrix.optional-deps != '' }}
         run: composer require ${{ matrix.optional-deps }}
+      - name: Run tests
+        run: composer phpunit
+  testsTranspiled:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        version: ['7.2', '7.3', '7.4', '8.0', '8.1', '8.2']
+    steps:
+      - name: Setup Build PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.2
+      - name: Checkout Code
+        uses: actions/checkout@v2
+        with:
+          submodules: true
+      - name: Install Dependencies
+        run: composer install
+      - name: Transpile ${{ matrix.version }}
+        run: php vendor/bin/rector process --no-diffs --no-progress-bar --config rector.$(echo ${{ matrix.version }} | sed -e 's/\.//').php src
+      - name: Add polyfill for 7.3
+        if: matrix.version == '7.2'
+        run: composer require symfony/polyfill-php73:^1.0
+      - name: Update composer.json version
+        run: 'sed -i -e ''s/"php": "\^8.2"/"php": "\^${{ matrix.version }}"/'' composer.json'
+      - name: Downgrade phpunit
+        if: matrix.version == '7.2'
+        run: 'sed -i -e ''s/"phpunit\/phpunit": "\^9.5"/"phpunit\/phpunit": "\^8.5"/'' composer.json'
+      - name: Copy Bootstrap
+        if: matrix.version == '7.2'
+        run: cp .github/bootstrap-72.php src
+      - name: Load Bootstrap
+        if: matrix.version == '7.2'
+        run: 'cat composer.json | jq --argjson files ''["src/bootstrap-72.php"]'' ''.autoload += {files: $files}'' > tmp.json && mv tmp.json composer.json'
+      - name: Setup Runtime PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.version }}
       - name: Run tests
         run: composer phpunit
