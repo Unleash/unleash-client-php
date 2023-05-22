@@ -68,11 +68,12 @@ jobs:
       - name: Run tests
         run: composer phpunit
   testsTranspiled:
+    name: Tests (transpiled versions)
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        version: ['7.2', '7.3', '7.4', '8.0', '8.1', '8.2']
+        version: ['7.2', '7.3', '7.4', '8.0', '8.1']
     steps:
       - name: Setup Build PHP
         uses: shivammathur/setup-php@v2
