@@ -9,13 +9,27 @@ use Unleash\Client\Helper\StringStream;
 
 final class DefaultMetricsSender implements MetricsSender
 {
-    public function __construct(
-        private readonly ClientInterface $httpClient,
-        private readonly RequestFactoryInterface $requestFactory,
-        private readonly UnleashConfiguration $configuration,
-    ) {
+    /**
+     * @readonly
+     * @var \Psr\Http\Client\ClientInterface
+     */
+    private $httpClient;
+    /**
+     * @readonly
+     * @var \Psr\Http\Message\RequestFactoryInterface
+     */
+    private $requestFactory;
+    /**
+     * @readonly
+     * @var \Unleash\Client\Configuration\UnleashConfiguration
+     */
+    private $configuration;
+    public function __construct(ClientInterface $httpClient, RequestFactoryInterface $requestFactory, UnleashConfiguration $configuration)
+    {
+        $this->httpClient = $httpClient;
+        $this->requestFactory = $requestFactory;
+        $this->configuration = $configuration;
     }
-
     public function sendMetrics(MetricsBucket $bucket): void
     {
         if (!$this->configuration->isMetricsEnabled() || !$this->configuration->isFetchingEnabled()) {
@@ -29,7 +43,7 @@ final class DefaultMetricsSender implements MetricsSender
                 'appName' => $this->configuration->getAppName(),
                 'instanceId' => $this->configuration->getInstanceId(),
                 'bucket' => $bucket->jsonSerialize(),
-            ], JSON_THROW_ON_ERROR)));
+            ], 0)));
         foreach ($this->configuration->getHeaders() as $name => $value) {
             $request = $request->withHeader($name, $value);
         }
