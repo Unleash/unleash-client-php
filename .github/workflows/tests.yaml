@@ -106,6 +106,6 @@ jobs:
         with:
           php-version: ${{ matrix.version }}
       - name: Install Dependencies (Runtime)
-        run: composer install
+        run: composer update
       - name: Run tests
         run: composer phpunit
