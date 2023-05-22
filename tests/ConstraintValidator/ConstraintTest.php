@@ -2,9 +2,11 @@
 
 namespace Unleash\Client\Tests\ConstraintValidator;
 
+use DateTimeImmutable;
 use Unleash\Client\Configuration\UnleashConfiguration;
 use Unleash\Client\Configuration\UnleashContext;
 use Unleash\Client\DefaultUnleash;
+use Unleash\Client\Enum\ConstraintOperator;
 use Unleash\Client\Stickiness\MurmurHashCalculator;
 use Unleash\Client\Strategy\DefaultStrategyHandler;
 use Unleash\Client\Tests\AbstractHttpClientTest;
@@ -15,9 +17,13 @@ final class ConstraintTest extends AbstractHttpClientTest
 {
     use FakeCacheImplementationTrait;
 
-    public function testInvalidVersion()
+    private DefaultUnleash $instance;
+
+    protected function setUp(): void
     {
-        $instance = new DefaultUnleash(
+        parent::setUp();
+
+        $this->instance = new DefaultUnleash(
             [new DefaultStrategyHandler()],
             $this->repository,
             $this->registrationService,
@@ -27,7 +33,10 @@ final class ConstraintTest extends AbstractHttpClientTest
             $this->metricsHandler,
             new DefaultVariantHandler(new MurmurHashCalculator())
         );
+    }
 
+    public function testInvalidVersion()
+    {
         $this->pushResponse([
             'version' => 1,
             'features' => [
@@ -53,22 +62,11 @@ final class ConstraintTest extends AbstractHttpClientTest
 
         $context = (new UnleashContext())->setCustomProperty('version', '1.5.5');
 
-        self::assertFalse($instance->isEnabled('test', $context));
+        self::assertFalse($this->instance->isEnabled('test', $context));
     }
 
     public function testInvalidOperator()
     {
-        $instance = new DefaultUnleash(
-            [new DefaultStrategyHandler()],
-            $this->repository,
-            $this->registrationService,
-            (new UnleashConfiguration('', '', ''))
-                ->setAutoRegistrationEnabled(false)
-                ->setCache($this->getCache()),
-            $this->metricsHandler,
-            new DefaultVariantHandler(new MurmurHashCalculator())
-        );
-
         $this->pushResponse([
             'version' => 1,
             'features' => [
@@ -92,6 +90,40 @@ final class ConstraintTest extends AbstractHttpClientTest
             ],
         ]);
 
-        self::assertFalse($instance->isEnabled('test'));
+        self::assertFalse($this->instance->isEnabled('test'));
+    }
+
+    /**
+     * @see https://github.com/Unleash/unleash-client-php/issues/151
+     */
+    public function testDateBeforeGetValues()
+    {
+        $this->pushResponse([
+            'version' => 1,
+            'features' => [
+                [
+                    'name' => 'test',
+                    'description' => '',
+                    'enabled' => true,
+                    'strategies' => [
+                        [
+                            'name' => 'default',
+                            'constraints' => [
+                                [
+                                    'contextName' => 'currentTime',
+                                    'operator' => ConstraintOperator::DATE_BEFORE,
+                                    'value' => (new DateTimeImmutable('+1 day'))->format('c'),
+                                    'values' => [],
+                                    'inverted' => false,
+                                    'caseInsensitive' => false,
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ]);
+
+        self::assertTrue($this->instance->isEnabled('test'));
     }
 }

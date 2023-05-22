@@ -30,11 +30,9 @@ final class DefaultConstraintValidator implements ConstraintValidator
         $currentValue = $context->findContextValue($field) ?? '';
 
         $callback = $this->getValidationCallback($constraint->getOperator());
-        $valueToPass = $constraint->getValues() ?? (
-            method_exists($constraint, 'getSingleValue')
-                ? $constraint->getSingleValue()
-                : null
-        );
+        $valueToPass = method_exists($constraint, 'getSingleValue') && $constraint->getSingleValue() !== null
+            ? $constraint->getSingleValue()
+            : $constraint->getValues();
 
         $isCaseInsensitive = method_exists($constraint, 'isCaseInsensitive') && $constraint->isCaseInsensitive();
         if ($isCaseInsensitive) {
