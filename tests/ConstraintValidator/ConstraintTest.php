@@ -17,7 +17,10 @@ final class ConstraintTest extends AbstractHttpClientTest
 {
     use FakeCacheImplementationTrait;
 
-    private DefaultUnleash $instance;
+    /**
+     * @var DefaultUnleash
+     */
+    private $instance;
 
     protected function setUp(): void
     {
