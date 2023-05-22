@@ -83,7 +83,7 @@ jobs:
         uses: actions/checkout@v2
         with:
           submodules: true
-      - name: Install Dependencies
+      - name: Install Dependencies (Build)
         run: composer install
       - name: Transpile ${{ matrix.version }}
         run: php vendor/bin/rector process --no-diffs --no-progress-bar --config rector.$(echo ${{ matrix.version }} | sed -e 's/\.//').php src
@@ -105,5 +105,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.version }}
+      - name: Install Dependencies (Runtime)
+        run: composer install
       - name: Run tests
         run: composer phpunit
