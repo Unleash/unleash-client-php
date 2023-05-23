@@ -7,13 +7,13 @@ use DateTimeInterface;
 /**
  * @todo move to required methods in next major
  *
- * @method string|null       getHostname()
- * @method string|null       getEnvironment()
- * @method DateTimeInterface getCurrentTime()
- * @method Context           setHostname(string|null $hostname)
- * @method Context           setEnvironment(string|null $environment)
- * @method Context           setCurrentTime(DateTimeInterface|null $time)
- * @method array<string,     string> getCustomProperties()
+ * @method string|null           getHostname()
+ * @method string|null           getEnvironment()
+ * @method DateTimeInterface     getCurrentTime()
+ * @method Context               setHostname(string|null $hostname)
+ * @method Context               setEnvironment(string|null $environment)
+ * @method Context               setCurrentTime(DateTimeInterface|null $time)
+ * @method array<string, string> getCustomProperties()
  */
 interface Context
 {
