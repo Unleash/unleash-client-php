@@ -69,6 +69,9 @@ final class FileBootstrapProviderTest extends TestCase
 
     public function testUnreadableFile()
     {
+        if (strtolower(substr(PHP_OS, 0, 3)) === 'win') {
+            self::markTestSkipped("This test doesn't run correctly on Windows");
+        }
         $file = $this->createTemporaryFile();
         chmod($file, 0222);
         $instance = new FileBootstrapProvider($file);
