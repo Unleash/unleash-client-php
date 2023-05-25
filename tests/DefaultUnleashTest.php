@@ -826,4 +826,142 @@ final class DefaultUnleashTest extends AbstractHttpClientTest
             new DefaultVariantHandler(new MurmurHashCalculator())
         );
     }
+
+    public function testGetFeatures()
+    {
+        $instance = $this->getInstance(new DefaultStrategyHandler());
+
+        $this->pushResponse([
+            'version' => 1,
+            'features' => [
+                [
+                    'name' => 'test',
+                    'description' => '',
+                    'enabled' => false,
+                    'impressionData' => true,
+                    'strategies' => [
+                        [
+                            'name' => 'default',
+                        ],
+                    ],
+                ],
+                [
+                    'name' => 'test2',
+                    'description' => '',
+                    'enabled' => true,
+                    'impressionData' => true,
+                    'strategies' => [
+                        [
+                            'name' => 'default',
+                        ],
+                    ],
+                    'variants' => [
+                        [
+                            'name' => 'variant1',
+                            'weight' => 1,
+                            'payload' => [
+                                'type' => 'string',
+                                'value' => 'val1',
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ]);
+
+        self::assertNotNull($instance->getFeatures());
+    }
+
+    public function testGetFeaturesEmpty()
+    {
+        $instance = $this->getInstance(new DefaultStrategyHandler());
+
+        $this->pushResponse([
+            'version' => 1,
+            'features' => [],
+        ]);
+
+        self::assertEmpty($instance->getFeatures());
+    }
+
+    public function testGetFeaturesCount()
+    {
+        $instance = $this->getInstance(new DefaultStrategyHandler());
+
+        $this->pushResponse([
+            'version' => 1,
+            'features' => [
+                [
+                    'name' => 'test',
+                    'description' => '',
+                    'enabled' => false,
+                    'impressionData' => true,
+                    'strategies' => [
+                        [
+                            'name' => 'default',
+                        ],
+                    ],
+                ],
+                [
+                    'name' => 'test2',
+                    'description' => '',
+                    'enabled' => true,
+                    'impressionData' => true,
+                    'strategies' => [
+                        [
+                            'name' => 'default',
+                        ],
+                    ],
+                    'variants' => [
+                        [
+                            'name' => 'variant1',
+                            'weight' => 1,
+                            'payload' => [
+                                'type' => 'string',
+                                'value' => 'val1',
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ]);
+
+        self::assertCount(2, $instance->getFeatures());
+    }
+
+    public function testGetFeature()
+    {
+        $instance = $this->getInstance(new DefaultStrategyHandler());
+
+        $this->pushResponse([
+            'version' => 1,
+            'features' => [
+                [
+                    'name' => 'test',
+                    'description' => '',
+                    'enabled' => false,
+                    'impressionData' => true,
+                    'strategies' => [
+                        [
+                            'name' => 'default',
+                        ],
+                    ],
+                ]
+            ],
+        ]);
+
+        self::assertNotNull($instance->getFeature("test"));
+    }
+
+    public function testGetFeatureNull()
+    {
+        $instance = $this->getInstance(new DefaultStrategyHandler());
+
+        $this->pushResponse([
+            'version' => 1,
+            'features' => [],
+        ]);
+
+        self::assertNull($instance->getFeature("test"));
+    }
 }

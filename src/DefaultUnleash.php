@@ -164,4 +164,14 @@ final class DefaultUnleash implements Unleash
 
         return $handlers;
     }
+
+    public function getFeatures(): array 
+    {
+        return $this->repository->getFeatures();
+    }
+
+    public function getFeature(string $featureName) 
+    {
+        return $this->repository->findFeature($featureName);
+    }
 }
