@@ -14,8 +14,4 @@ interface Unleash
     public function getVariant(string $featureName, ?Context $context = null, ?Variant $fallbackVariant = null): Variant;
 
     public function register(): bool;
-
-    public function getFeatures(): array;
-
-    public function getFeature(string $featureName);
 }

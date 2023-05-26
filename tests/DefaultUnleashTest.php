@@ -34,6 +34,374 @@ final class DefaultUnleashTest extends AbstractHttpClientTest
 {
     use FakeCacheImplementationTrait;
 
+    public function testAutoRegistrationOnInvalidResponse()
+    {
+        $this->pushResponse(new RuntimeException("This exception shouldn't be propagated"), 1, 404);
+        new DefaultUnleash(
+            [new DefaultStrategyHandler()],
+            $this->repository,
+            $this->registrationService,
+            (new UnleashConfiguration('', '', ''))
+                ->setCache($this->getCache()),
+            $this->metricsHandler,
+            new DefaultVariantHandler(new MurmurHashCalculator())
+        );
+    }
+
+    public function testEventDisabledFeature()
+    {
+        $calledCount = 0;
+        $subscriber = new class($calledCount) implements EventSubscriberInterface {
+            /**
+             * @var int
+             */
+            private $calledCount;
+
+            public function __construct(int &$calledCount)
+            {
+                $this->calledCount = &$calledCount;
+            }
+
+            public static function getSubscribedEvents(): array
+            {
+                return [UnleashEvents::FEATURE_TOGGLE_DISABLED => 'onDisabled'];
+            }
+
+            public function onDisabled(FeatureToggleDisabledEvent $event): void
+            {
+                ++$this->calledCount;
+            }
+        };
+
+        $unleash = UnleashBuilder::create()
+            ->withCacheHandler($this->getCache())
+            ->withFetchingEnabled(false)
+            ->withEventSubscriber($subscriber)
+            ->withBootstrap([
+                'features' => [
+                    [
+                        'name' => 'test',
+                        'enabled' => false,
+                        'strategies' => [
+                            [
+                                'name' => 'default',
+                            ],
+                        ],
+                    ],
+                    [
+                        'name' => 'test2',
+                        'enabled' => false,
+                        'strategies' => [
+                            [
+                                'name' => 'default',
+                            ],
+                        ],
+                    ],
+                ],
+            ])
+            ->build();
+
+        self::assertFalse($unleash->isEnabled('test'));
+        self::assertFalse($unleash->isEnabled('test2'));
+        self::assertFalse($unleash->isEnabled('test3'));
+
+        self::assertSame(2, $calledCount);
+    }
+
+    public function testEventStrategyHandlerNotFound()
+    {
+        $calledCount = 0;
+
+        $eventDispatcher = new EventDispatcher();
+        $builder = UnleashBuilder::create()
+            ->withFetchingEnabled(false)
+            ->withCacheHandler($this->getCache())
+            ->withBootstrap([
+                'features' => [
+                    [
+                        'name' => 'test',
+                        'enabled' => true,
+                        'strategies' => [
+                            [
+                                'name' => 'unknownStrategy',
+                            ],
+                        ],
+                    ],
+                    [
+                        'name' => 'test2',
+                        'enabled' => true,
+                        'strategies' => [
+                            [
+                                'name' => 'disabledStrategy',
+                            ],
+                        ],
+                    ],
+                ],
+            ]);
+        $subscriber = new class($calledCount) implements EventSubscriberInterface {
+            /**
+             * @var int
+             */
+            private $calledCount;
+
+            public function __construct(int &$calledCount)
+            {
+                $this->calledCount = &$calledCount;
+            }
+
+            public static function getSubscribedEvents()
+            {
+                return [UnleashEvents::FEATURE_TOGGLE_MISSING_STRATEGY_HANDLER => 'onNoStrategyHandler'];
+            }
+
+            public function onNoStrategyHandler(FeatureToggleMissingStrategyHandlerEvent $event): void
+            {
+                ++$this->calledCount;
+            }
+        };
+
+        $instance = $builder->withEventDispatcher(clone $eventDispatcher)->withEventSubscriber($subscriber)->build();
+        // check that nonexistent features won't trigger the event
+        $instance->isEnabled('test3');
+        self::assertSame(0, $calledCount);
+        $instance->isEnabled('test2');
+        self::assertSame(1, $calledCount);
+        $instance->isEnabled('test');
+        self::assertSame(2, $calledCount);
+    }
+
+    public function testEventToggleNotFound()
+    {
+        $triggeredCount = 0;
+
+        $eventDispatcher = new EventDispatcher();
+        $subscriber = new class($triggeredCount) implements EventSubscriberInterface {
+            /**
+             * @var int
+             */
+            private $triggeredCount;
+
+            public function __construct(int &$triggeredCount)
+            {
+                $this->triggeredCount = &$triggeredCount;
+            }
+
+            public static function getSubscribedEvents(): array
+            {
+                return [UnleashEvents::FEATURE_TOGGLE_NOT_FOUND => 'onNotFound'];
+            }
+
+            public function onNotFound(FeatureToggleNotFoundEvent $event)
+            {
+                ++$this->triggeredCount;
+            }
+        };
+
+        $builder = UnleashBuilder::create()
+            ->withFetchingEnabled(false)
+            ->withCacheHandler($this->getCache())
+            ->withEventSubscriber($subscriber)
+            ->withBootstrap([
+                'features' => [
+                    [
+                        'name' => 'test',
+                        'enabled' => true,
+                        'strategies' => [
+                            [
+                                'name' => 'default',
+                            ],
+                        ],
+                    ],
+                ],
+            ]);
+
+        $instance = $builder->withEventDispatcher(clone $eventDispatcher)->build();
+        self::assertTrue($instance->isEnabled('test'));
+
+        $instance = $builder->withEventDispatcher(clone $eventDispatcher)->build();
+        self::assertFalse($instance->isEnabled('test2'));
+
+        $instance = $builder->withEventDispatcher(clone $eventDispatcher)->build();
+        self::assertFalse($instance->isEnabled('test3'));
+
+        self::assertEquals(2, $triggeredCount);
+    }
+
+    public function testFindFeature()
+    {
+        $instance = $this->getInstance(new DefaultStrategyHandler());
+
+        $this->pushResponse([
+            'version' => 1,
+            'features' => [
+                [
+                    'name' => 'test',
+                    'description' => '',
+                    'enabled' => false,
+                    'impressionData' => true,
+                    'strategies' => [
+                        [
+                            'name' => 'default',
+                        ],
+                    ],
+                ],
+            ],
+        ]);
+
+        self::assertNotNull($instance->findFeature('test'));
+    }
+
+    public function testFindFeatureNull()
+    {
+        $instance = $this->getInstance(new DefaultStrategyHandler());
+
+        $this->pushResponse([
+            'version' => 1,
+            'features' => [],
+        ]);
+
+        self::assertNull($instance->findFeature('test'));
+    }
+
+    public function testGetFeaturesCount()
+    {
+        $instance = $this->getInstance(new DefaultStrategyHandler());
+
+        $this->pushResponse([
+            'version' => 1,
+            'features' => [
+                [
+                    'name' => 'test',
+                    'description' => '',
+                    'enabled' => false,
+                    'impressionData' => true,
+                    'strategies' => [
+                        [
+                            'name' => 'default',
+                        ],
+                    ],
+                ],
+                [
+                    'name' => 'test2',
+                    'description' => '',
+                    'enabled' => true,
+                    'impressionData' => true,
+                    'strategies' => [
+                        [
+                            'name' => 'default',
+                        ],
+                    ],
+                    'variants' => [
+                        [
+                            'name' => 'variant1',
+                            'weight' => 1,
+                            'payload' => [
+                                'type' => 'string',
+                                'value' => 'val1',
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ]);
+
+        self::assertCount(2, $instance->getFeatures());
+    }
+
+    public function testGetFeaturesEmpty()
+    {
+        $instance = $this->getInstance(new DefaultStrategyHandler());
+
+        $this->pushResponse([
+            'version' => 1,
+            'features' => [],
+        ]);
+
+        self::assertEmpty($instance->getFeatures());
+    }
+
+    public function testImpressionData()
+    {
+        $triggeredCount = 0;
+
+        $dispatcher = new EventDispatcher();
+
+        $dispatcher->addListener(UnleashEvents::IMPRESSION_DATA, function (ImpressionDataEvent $event) use (&$triggeredCount) {
+            // trigger these to have complete code coverage
+            $event->getEventId();
+            $event->getContext();
+            $event->jsonSerialize();
+
+            if ($event->getFeatureName() === 'test') {
+                self::assertSame(ImpressionDataEventType::IS_ENABLED, $event->getEventType());
+                self::assertFalse($event->isEnabled());
+                self::assertNull($event->getVariant());
+            } else {
+                self::assertTrue($event->isEnabled());
+                if ($event->getEventType() === ImpressionDataEventType::GET_VARIANT) {
+                    self::assertNotNull($event->getVariant());
+                }
+            }
+
+            ++$triggeredCount;
+        });
+
+        $instance = UnleashBuilder::create()
+            ->withCacheHandler($this->getCache())
+            ->withEventDispatcher($dispatcher)
+            ->withFetchingEnabled(false)
+            ->withBootstrap([
+                'version' => 1,
+                'features' => [
+                    [
+                        'name' => 'test',
+                        'description' => '',
+                        'enabled' => false,
+                        'impressionData' => true,
+                        'strategies' => [
+                            [
+                                'name' => 'default',
+                            ],
+                        ],
+                    ],
+                    [
+                        'name' => 'test2',
+                        'description' => '',
+                        'enabled' => true,
+                        'impressionData' => true,
+                        'strategies' => [
+                            [
+                                'name' => 'default',
+                            ],
+                        ],
+                        'variants' => [
+                            [
+                                'name' => 'variant1',
+                                'weight' => 1,
+                                'payload' => [
+                                    'type' => 'string',
+                                    'value' => 'val1',
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ])
+            ->build();
+
+        $instance->isEnabled('nonexistent');
+        self::assertSame(0, $triggeredCount);
+
+        $instance->isEnabled('test');
+        self::assertSame(1, $triggeredCount);
+
+        $instance->getVariant('test');
+        self::assertSame(1, $triggeredCount);
+
+        $instance->getVariant('test2');
+        self::assertSame(2, $triggeredCount);
+    }
+
     public function testIsEnabled()
     {
         $instance = $this->getInstance(new DefaultStrategyHandler());
@@ -117,6 +485,69 @@ final class DefaultUnleashTest extends AbstractHttpClientTest
         self::assertFalse($instance->isEnabled('test'));
         self::assertFalse($instance->isEnabled('test2'));
         self::assertTrue($instance->isEnabled('test3', null, true));
+    }
+
+    public function testIsEnabledGradual()
+    {
+        $instance = $this->getInstance(new GradualRolloutStrategyHandler(new MurmurHashCalculator()));
+
+        $this->pushResponse([
+            'version' => 1,
+            'features' => [
+                [
+                    'name' => 'test',
+                    'description' => '',
+                    'enabled' => true,
+                    'strategies' => [
+                        [
+                            'name' => 'flexibleRollout',
+                            'parameters' => [
+                                'groupId' => 'default',
+                                'rollout' => 100,
+                                'stickiness' => 'DEFAULT',
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ], 3);
+
+        self::assertTrue($instance->isEnabled('test'));
+        self::assertFalse($instance->isEnabled('test2'));
+        self::assertTrue($instance->isEnabled('test3', null, true));
+
+        $this->pushResponse([
+            'version' => 1,
+            'features' => [
+                [
+                    'name' => 'test',
+                    'description' => '',
+                    'enabled' => true,
+                    'strategies' => [
+                        [
+                            'name' => 'flexibleRollout',
+                            'parameters' => [
+                                'groupId' => 'default',
+                                'rollout' => 50,
+                                'stickiness' => 'DEFAULT',
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ], 4);
+
+        $contextTrue = new UnleashContext('634');
+        $contextFalse = new UnleashContext('123');
+
+        self::assertTrue($instance->isEnabled('test', $contextTrue));
+        self::assertFalse($instance->isEnabled('test', $contextFalse));
+
+        $contextTrue = new UnleashContext(null, null, '634');
+        $contextFalse = new UnleashContext(null, null, '123');
+
+        self::assertTrue($instance->isEnabled('test', $contextTrue));
+        self::assertFalse($instance->isEnabled('test', $contextFalse));
     }
 
     public function testIsEnabledIpAddress()
@@ -237,115 +668,6 @@ final class DefaultUnleashTest extends AbstractHttpClientTest
         $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
         self::assertFalse($instance->isEnabled('test'));
         self::assertFalse($instance->isEnabled('test'));
-    }
-
-    public function testIsEnabledUserId()
-    {
-        $instance = $this->getInstance(new UserIdStrategyHandler());
-        $context = new UnleashContext('123');
-
-        $this->pushResponse([
-            'version' => 1,
-            'features' => [
-                [
-                    'name' => 'test',
-                    'description' => '',
-                    'enabled' => true,
-                    'strategies' => [
-                        [
-                            'name' => 'userWithId',
-                            'parameters' => [
-                                'userIds' => 'test,test2,123',
-                            ],
-                        ],
-                    ],
-                ],
-            ],
-        ], 3);
-        self::assertTrue($instance->isEnabled('test', $context));
-        self::assertFalse($instance->isEnabled('test2', $context));
-        self::assertTrue($instance->isEnabled('test3', $context, true));
-
-        $this->pushResponse([
-            'version' => 1,
-            'features' => [
-                [
-                    'name' => 'test',
-                    'description' => '',
-                    'enabled' => true,
-                    'strategies' => [
-                        [
-                            'name' => 'default',
-                            'parameters' => [],
-                        ],
-                    ],
-                ],
-            ],
-        ]);
-        self::assertFalse($instance->isEnabled('test'));
-    }
-
-    public function testIsEnabledGradual()
-    {
-        $instance = $this->getInstance(new GradualRolloutStrategyHandler(new MurmurHashCalculator()));
-
-        $this->pushResponse([
-            'version' => 1,
-            'features' => [
-                [
-                    'name' => 'test',
-                    'description' => '',
-                    'enabled' => true,
-                    'strategies' => [
-                        [
-                            'name' => 'flexibleRollout',
-                            'parameters' => [
-                                'groupId' => 'default',
-                                'rollout' => 100,
-                                'stickiness' => 'DEFAULT',
-                            ],
-                        ],
-                    ],
-                ],
-            ],
-        ], 3);
-
-        self::assertTrue($instance->isEnabled('test'));
-        self::assertFalse($instance->isEnabled('test2'));
-        self::assertTrue($instance->isEnabled('test3', null, true));
-
-        $this->pushResponse([
-            'version' => 1,
-            'features' => [
-                [
-                    'name' => 'test',
-                    'description' => '',
-                    'enabled' => true,
-                    'strategies' => [
-                        [
-                            'name' => 'flexibleRollout',
-                            'parameters' => [
-                                'groupId' => 'default',
-                                'rollout' => 50,
-                                'stickiness' => 'DEFAULT',
-                            ],
-                        ],
-                    ],
-                ],
-            ],
-        ], 4);
-
-        $contextTrue = new UnleashContext('634');
-        $contextFalse = new UnleashContext('123');
-
-        self::assertTrue($instance->isEnabled('test', $contextTrue));
-        self::assertFalse($instance->isEnabled('test', $contextFalse));
-
-        $contextTrue = new UnleashContext(null, null, '634');
-        $contextFalse = new UnleashContext(null, null, '123');
-
-        self::assertTrue($instance->isEnabled('test', $contextTrue));
-        self::assertFalse($instance->isEnabled('test', $contextFalse));
     }
 
     public function testIsEnabledMultiple()
@@ -480,24 +802,50 @@ final class DefaultUnleashTest extends AbstractHttpClientTest
         self::assertTrue($instance->isEnabled('test', $context));
     }
 
-    public function testRegister()
+    public function testIsEnabledUserId()
     {
-        $instance = $this->getInstance();
-        $this->pushResponse([]);
-        self::assertTrue($instance->register());
-        $this->pushResponse([], 1, 400);
-        self::assertFalse($instance->register());
+        $instance = $this->getInstance(new UserIdStrategyHandler());
+        $context = new UnleashContext('123');
 
-        $this->pushResponse([]);
-        new DefaultUnleash(
-            [],
-            $this->repository,
-            $this->registrationService,
-            new UnleashConfiguration('', '', ''),
-            $this->metricsHandler,
-            new DefaultVariantHandler(new MurmurHashCalculator())
-        );
-        self::assertCount(3, $this->requestHistory);
+        $this->pushResponse([
+            'version' => 1,
+            'features' => [
+                [
+                    'name' => 'test',
+                    'description' => '',
+                    'enabled' => true,
+                    'strategies' => [
+                        [
+                            'name' => 'userWithId',
+                            'parameters' => [
+                                'userIds' => 'test,test2,123',
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ], 3);
+        self::assertTrue($instance->isEnabled('test', $context));
+        self::assertFalse($instance->isEnabled('test2', $context));
+        self::assertTrue($instance->isEnabled('test3', $context, true));
+
+        $this->pushResponse([
+            'version' => 1,
+            'features' => [
+                [
+                    'name' => 'test',
+                    'description' => '',
+                    'enabled' => true,
+                    'strategies' => [
+                        [
+                            'name' => 'default',
+                            'parameters' => [],
+                        ],
+                    ],
+                ],
+            ],
+        ]);
+        self::assertFalse($instance->isEnabled('test'));
     }
 
     public function testIterators()
@@ -538,279 +886,24 @@ final class DefaultUnleashTest extends AbstractHttpClientTest
         self::assertTrue($instance->isEnabled('someFeature'));
     }
 
-    public function testEventToggleNotFound()
+    public function testRegister()
     {
-        $triggeredCount = 0;
+        $instance = $this->getInstance();
+        $this->pushResponse([]);
+        self::assertTrue($instance->register());
+        $this->pushResponse([], 1, 400);
+        self::assertFalse($instance->register());
 
-        $eventDispatcher = new EventDispatcher();
-        $subscriber = new class($triggeredCount) implements EventSubscriberInterface {
-            /**
-             * @var int
-             */
-            private $triggeredCount;
-
-            public function __construct(int &$triggeredCount)
-            {
-                $this->triggeredCount = &$triggeredCount;
-            }
-
-            public static function getSubscribedEvents(): array
-            {
-                return [UnleashEvents::FEATURE_TOGGLE_NOT_FOUND => 'onNotFound'];
-            }
-
-            public function onNotFound(FeatureToggleNotFoundEvent $event)
-            {
-                ++$this->triggeredCount;
-            }
-        };
-
-        $builder = UnleashBuilder::create()
-            ->withFetchingEnabled(false)
-            ->withCacheHandler($this->getCache())
-            ->withEventSubscriber($subscriber)
-            ->withBootstrap([
-                'features' => [
-                    [
-                        'name' => 'test',
-                        'enabled' => true,
-                        'strategies' => [
-                            [
-                                'name' => 'default',
-                            ],
-                        ],
-                    ],
-                ],
-            ]);
-
-        $instance = $builder->withEventDispatcher(clone $eventDispatcher)->build();
-        self::assertTrue($instance->isEnabled('test'));
-
-        $instance = $builder->withEventDispatcher(clone $eventDispatcher)->build();
-        self::assertFalse($instance->isEnabled('test2'));
-
-        $instance = $builder->withEventDispatcher(clone $eventDispatcher)->build();
-        self::assertFalse($instance->isEnabled('test3'));
-
-        self::assertEquals(2, $triggeredCount);
-    }
-
-    public function testEventStrategyHandlerNotFound()
-    {
-        $calledCount = 0;
-
-        $eventDispatcher = new EventDispatcher();
-        $builder = UnleashBuilder::create()
-            ->withFetchingEnabled(false)
-            ->withCacheHandler($this->getCache())
-            ->withBootstrap([
-                'features' => [
-                    [
-                        'name' => 'test',
-                        'enabled' => true,
-                        'strategies' => [
-                            [
-                                'name' => 'unknownStrategy',
-                            ],
-                        ],
-                    ],
-                    [
-                        'name' => 'test2',
-                        'enabled' => true,
-                        'strategies' => [
-                            [
-                                'name' => 'disabledStrategy',
-                            ],
-                        ],
-                    ],
-                ],
-            ]);
-        $subscriber = new class($calledCount) implements EventSubscriberInterface {
-            /**
-             * @var int
-             */
-            private $calledCount;
-
-            public function __construct(int &$calledCount)
-            {
-                $this->calledCount = &$calledCount;
-            }
-
-            public static function getSubscribedEvents()
-            {
-                return [UnleashEvents::FEATURE_TOGGLE_MISSING_STRATEGY_HANDLER => 'onNoStrategyHandler'];
-            }
-
-            public function onNoStrategyHandler(FeatureToggleMissingStrategyHandlerEvent $event): void
-            {
-                ++$this->calledCount;
-            }
-        };
-
-        $instance = $builder->withEventDispatcher(clone $eventDispatcher)->withEventSubscriber($subscriber)->build();
-        // check that nonexistent features won't trigger the event
-        $instance->isEnabled('test3');
-        self::assertSame(0, $calledCount);
-        $instance->isEnabled('test2');
-        self::assertSame(1, $calledCount);
-        $instance->isEnabled('test');
-        self::assertSame(2, $calledCount);
-    }
-
-    public function testEventDisabledFeature()
-    {
-        $calledCount = 0;
-        $subscriber = new class($calledCount) implements EventSubscriberInterface {
-            /**
-             * @var int
-             */
-            private $calledCount;
-
-            public function __construct(int &$calledCount)
-            {
-                $this->calledCount = &$calledCount;
-            }
-
-            public static function getSubscribedEvents(): array
-            {
-                return [UnleashEvents::FEATURE_TOGGLE_DISABLED => 'onDisabled'];
-            }
-
-            public function onDisabled(FeatureToggleDisabledEvent $event): void
-            {
-                ++$this->calledCount;
-            }
-        };
-
-        $unleash = UnleashBuilder::create()
-            ->withCacheHandler($this->getCache())
-            ->withFetchingEnabled(false)
-            ->withEventSubscriber($subscriber)
-            ->withBootstrap([
-                'features' => [
-                    [
-                        'name' => 'test',
-                        'enabled' => false,
-                        'strategies' => [
-                            [
-                                'name' => 'default',
-                            ],
-                        ],
-                    ],
-                    [
-                        'name' => 'test2',
-                        'enabled' => false,
-                        'strategies' => [
-                            [
-                                'name' => 'default',
-                            ],
-                        ],
-                    ],
-                ],
-            ])
-            ->build();
-
-        self::assertFalse($unleash->isEnabled('test'));
-        self::assertFalse($unleash->isEnabled('test2'));
-        self::assertFalse($unleash->isEnabled('test3'));
-
-        self::assertSame(2, $calledCount);
-    }
-
-    public function testImpressionData()
-    {
-        $triggeredCount = 0;
-
-        $dispatcher = new EventDispatcher();
-
-        $dispatcher->addListener(UnleashEvents::IMPRESSION_DATA, function (ImpressionDataEvent $event) use (&$triggeredCount) {
-            // trigger these to have complete code coverage
-            $event->getEventId();
-            $event->getContext();
-            $event->jsonSerialize();
-
-            if ($event->getFeatureName() === 'test') {
-                self::assertSame(ImpressionDataEventType::IS_ENABLED, $event->getEventType());
-                self::assertFalse($event->isEnabled());
-                self::assertNull($event->getVariant());
-            } else {
-                self::assertTrue($event->isEnabled());
-                if ($event->getEventType() === ImpressionDataEventType::GET_VARIANT) {
-                    self::assertNotNull($event->getVariant());
-                }
-            }
-
-            ++$triggeredCount;
-        });
-
-        $instance = UnleashBuilder::create()
-            ->withCacheHandler($this->getCache())
-            ->withEventDispatcher($dispatcher)
-            ->withFetchingEnabled(false)
-            ->withBootstrap([
-                'version' => 1,
-                'features' => [
-                    [
-                        'name' => 'test',
-                        'description' => '',
-                        'enabled' => false,
-                        'impressionData' => true,
-                        'strategies' => [
-                            [
-                                'name' => 'default',
-                            ],
-                        ],
-                    ],
-                    [
-                        'name' => 'test2',
-                        'description' => '',
-                        'enabled' => true,
-                        'impressionData' => true,
-                        'strategies' => [
-                            [
-                                'name' => 'default',
-                            ],
-                        ],
-                        'variants' => [
-                            [
-                                'name' => 'variant1',
-                                'weight' => 1,
-                                'payload' => [
-                                    'type' => 'string',
-                                    'value' => 'val1',
-                                ],
-                            ],
-                        ],
-                    ],
-                ],
-            ])
-            ->build();
-
-        $instance->isEnabled('nonexistent');
-        self::assertSame(0, $triggeredCount);
-
-        $instance->isEnabled('test');
-        self::assertSame(1, $triggeredCount);
-
-        $instance->getVariant('test');
-        self::assertSame(1, $triggeredCount);
-
-        $instance->getVariant('test2');
-        self::assertSame(2, $triggeredCount);
-    }
-
-    public function testAutoRegistrationOnInvalidResponse()
-    {
-        $this->pushResponse(new RuntimeException("This exception shouldn't be propagated"), 1, 404);
+        $this->pushResponse([]);
         new DefaultUnleash(
-            [new DefaultStrategyHandler()],
+            [],
             $this->repository,
             $this->registrationService,
-            (new UnleashConfiguration('', '', ''))
-                ->setCache($this->getCache()),
+            new UnleashConfiguration('', '', ''),
             $this->metricsHandler,
             new DefaultVariantHandler(new MurmurHashCalculator())
         );
+        self::assertCount(3, $this->requestHistory);
     }
 
     private function getInstance(StrategyHandler ...$handlers): DefaultUnleash
@@ -825,143 +918,5 @@ final class DefaultUnleashTest extends AbstractHttpClientTest
             $this->metricsHandler,
             new DefaultVariantHandler(new MurmurHashCalculator())
         );
-    }
-
-    public function testGetFeatures()
-    {
-        $instance = $this->getInstance(new DefaultStrategyHandler());
-
-        $this->pushResponse([
-            'version' => 1,
-            'features' => [
-                [
-                    'name' => 'test',
-                    'description' => '',
-                    'enabled' => false,
-                    'impressionData' => true,
-                    'strategies' => [
-                        [
-                            'name' => 'default',
-                        ],
-                    ],
-                ],
-                [
-                    'name' => 'test2',
-                    'description' => '',
-                    'enabled' => true,
-                    'impressionData' => true,
-                    'strategies' => [
-                        [
-                            'name' => 'default',
-                        ],
-                    ],
-                    'variants' => [
-                        [
-                            'name' => 'variant1',
-                            'weight' => 1,
-                            'payload' => [
-                                'type' => 'string',
-                                'value' => 'val1',
-                            ],
-                        ],
-                    ],
-                ],
-            ],
-        ]);
-
-        self::assertNotNull($instance->getFeatures());
-    }
-
-    public function testGetFeaturesEmpty()
-    {
-        $instance = $this->getInstance(new DefaultStrategyHandler());
-
-        $this->pushResponse([
-            'version' => 1,
-            'features' => [],
-        ]);
-
-        self::assertEmpty($instance->getFeatures());
-    }
-
-    public function testGetFeaturesCount()
-    {
-        $instance = $this->getInstance(new DefaultStrategyHandler());
-
-        $this->pushResponse([
-            'version' => 1,
-            'features' => [
-                [
-                    'name' => 'test',
-                    'description' => '',
-                    'enabled' => false,
-                    'impressionData' => true,
-                    'strategies' => [
-                        [
-                            'name' => 'default',
-                        ],
-                    ],
-                ],
-                [
-                    'name' => 'test2',
-                    'description' => '',
-                    'enabled' => true,
-                    'impressionData' => true,
-                    'strategies' => [
-                        [
-                            'name' => 'default',
-                        ],
-                    ],
-                    'variants' => [
-                        [
-                            'name' => 'variant1',
-                            'weight' => 1,
-                            'payload' => [
-                                'type' => 'string',
-                                'value' => 'val1',
-                            ],
-                        ],
-                    ],
-                ],
-            ],
-        ]);
-
-        self::assertCount(2, $instance->getFeatures());
-    }
-
-    public function testGetFeature()
-    {
-        $instance = $this->getInstance(new DefaultStrategyHandler());
-
-        $this->pushResponse([
-            'version' => 1,
-            'features' => [
-                [
-                    'name' => 'test',
-                    'description' => '',
-                    'enabled' => false,
-                    'impressionData' => true,
-                    'strategies' => [
-                        [
-                            'name' => 'default',
-                        ],
-                    ],
-                ]
-            ],
-        ]);
-
-        self::assertNotNull($instance->getFeature("test"));
-    }
-
-    public function testGetFeatureNull()
-    {
-        $instance = $this->getInstance(new DefaultStrategyHandler());
-
-        $this->pushResponse([
-            'version' => 1,
-            'features' => [],
-        ]);
-
-        self::assertNull($instance->getFeature("test"));
     }
 }
