@@ -2,6 +2,7 @@
 
 namespace Unleash\Client\Metrics;
 
+use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
 use Unleash\Client\Configuration\UnleashConfiguration;
@@ -33,6 +34,11 @@ final class DefaultMetricsSender implements MetricsSender
         foreach ($this->configuration->getHeaders() as $name => $value) {
             $request = $request->withHeader($name, $value);
         }
-        $this->httpClient->sendRequest($request);
+
+        try {
+            $this->httpClient->sendRequest($request);
+        } catch (ClientExceptionInterface) {
+            // ignore the error
+        }
     }
 }
