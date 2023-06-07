@@ -15,9 +15,15 @@ use Unleash\Client\Tests\AbstractHttpClientTest;
 
 final class DefaultMetricsSenderTest extends AbstractHttpClientTest
 {
-    private DefaultMetricsSender $instance;
+    /**
+     * @var DefaultMetricsSender
+     */
+    private $instance;
 
-    private UnleashConfiguration $configuration;
+    /**
+     * @var UnleashConfiguration
+     */
+    private $configuration;
 
     protected function setUp(): void
     {
