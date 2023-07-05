@@ -7,12 +7,12 @@ use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\HttpFactory;
 use GuzzleHttp\Psr7\Response;
-use Unleash\Client\ProxyUnleash;
-use Unleash\Client\ProxyVariant;
-use Unleash\Client\ProxyVariantPayload;
+use Unleash\Client\DefaultProxyUnleash;
+use Unleash\Client\DTO\DefaultProxyVariant;
+use Unleash\Client\DTO\DefaultVariantPayload;
 use Unleash\Client\Tests\Traits\FakeCacheImplementationTrait;
 
-final class ProxyUnleashTest extends AbstractHttpClientTest
+final class DefaultProxyUnleashTest extends AbstractHttpClientTest
 {
     use FakeCacheImplementationTrait;
 
@@ -77,9 +77,8 @@ final class ProxyUnleashTest extends AbstractHttpClientTest
         ]);
         $unleash = $builder->getInstance();
         $variant = $unleash->getVariant('test');
-        $payload = new ProxyVariantPayload('string', 'some-value');
 
-        $this->assertEquals($variant, new ProxyVariant('some-variant', true, $payload));
+        $this->assertEquals($variant, new DefaultProxyVariant('some-variant', true, new DefaultVariantPayload("string", "some-value")));
     }
 
     public function testVariantWithoutPayload()
@@ -96,7 +95,7 @@ final class ProxyUnleashTest extends AbstractHttpClientTest
         $unleash = $builder->getInstance();
         $variant = $unleash->getVariant('test');
 
-        $this->assertEquals($variant, new ProxyVariant('some-variant', true, null));
+        $this->assertEquals($variant, new DefaultProxyVariant('some-variant', true));
     }
 
     public function testMissingVariantReturnsDefault()
@@ -107,7 +106,7 @@ final class ProxyUnleashTest extends AbstractHttpClientTest
         $unleash = $builder->getInstance();
         $variant = $unleash->getVariant('test');
 
-        $this->assertEquals($variant, new ProxyVariant('disabled', false, null));
+        $this->assertEquals($variant, new DefaultProxyVariant('disabled', false));
     }
 
     public function testVariantWithEmptyPayload()
@@ -125,7 +124,7 @@ final class ProxyUnleashTest extends AbstractHttpClientTest
         $unleash = $builder->getInstance();
         $variant = $unleash->getVariant('test');
 
-        $this->assertEquals($variant, new ProxyVariant('some-variant', true, null));
+        $this->assertEquals($variant, new DefaultProxyVariant('some-variant', true));
     }
 }
 
@@ -144,12 +143,12 @@ class TestBuilder
         $this->mockHandler->append($mockResponse);
     }
 
-    public function getInstance(): ProxyUnleash
+    public function getInstance(): DefaultProxyUnleash
     {
         $handlerStack = HandlerStack::create($this->mockHandler);
         $client = new Client(['handler' => $handlerStack]);
 
-        return new ProxyUnleash(
+        return new DefaultProxyUnleash(
             'http://localhost',
             'test',
             $client,
