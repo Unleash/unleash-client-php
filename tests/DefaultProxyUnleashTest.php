@@ -7,6 +7,7 @@ use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\HttpFactory;
 use GuzzleHttp\Psr7\Response;
+use Unleash\Client\Configuration\UnleashConfiguration;
 use Unleash\Client\DefaultProxyUnleash;
 use Unleash\Client\DTO\DefaultProxyVariant;
 use Unleash\Client\DTO\DefaultVariantPayload;
@@ -147,10 +148,11 @@ class TestBuilder
     {
         $handlerStack = HandlerStack::create($this->mockHandler);
         $client = new Client(['handler' => $handlerStack]);
+        $config = new UnleashConfiguration('localhost:4242', 'some-app', 'some-instance');
 
         return new DefaultProxyUnleash(
             'http://localhost',
-            'test',
+            $config,
             $client,
             new HttpFactory()
         );

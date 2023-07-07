@@ -5,6 +5,7 @@ namespace Unleash\Client;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
 use Unleash\Client\Configuration\Context;
+use Unleash\Client\Configuration\UnleashConfiguration;
 use Unleash\Client\Configuration\UnleashContext;
 use Unleash\Client\DTO\ProxyVariant;
 use Unleash\Client\DTO\DefaultVariantPayload;
@@ -12,23 +13,27 @@ use Unleash\Client\DTO\DefaultProxyVariant;
 
 final class DefaultProxyUnleash implements ProxyUnleash
 {
-    public function __construct(private string $url, private string $apiKey, private ClientInterface $httpClient, private RequestFactoryInterface $requestFactory)
+    public function __construct(private string $url, private UnleashConfiguration $configuration, private ClientInterface $httpClient, private RequestFactoryInterface $requestFactory)
     {
-        $this->url = $url;
-        $this->apiKey = $apiKey;
+        $this->url = $url . '/frontend/features';
         $this->httpClient = $httpClient;
         $this->requestFactory = $requestFactory;
+        $this->configuration = $configuration;
     }
 
     public function isEnabled(string $featureName, ?Context $context = null, bool $default = false): bool
     {
         $context ??= new UnleashContext();
-        $url = $this->addQuery($this->url, $this->contextToQueryString($context));
+        $featureUrl = $this->url . '/' . $featureName;
+        $url = $this->addQuery($featureUrl, $this->contextToQueryString($context));
 
         $request = $this->requestFactory->createRequest('GET', $url)
-            ->withHeader('Authorization', $this->apiKey)
             ->withHeader('Content-Type', 'application/json')
             ->withHeader('Accept', 'application/json');
+
+        foreach ($this->configuration->getHeaders() as $name => $value) {
+            $request = $request->withHeader($name, $value);
+        }
 
         $response = $this->httpClient->sendRequest($request);
         $body = json_decode($response->getBody(), true);
@@ -38,12 +43,16 @@ final class DefaultProxyUnleash implements ProxyUnleash
     public function getVariant(string $featureName, ?Context $context = null, ?ProxyVariant $fallbackVariant = null): ProxyVariant
     {
         $context ??= new UnleashContext();
-        $url = $this->addQuery($this->url, $this->contextToQueryString($context));
+        $featureUrl = $this->url . '/' . $featureName;
+        $url = $this->addQuery($this->$featureUrl, $this->contextToQueryString($context));
 
         $request = $this->requestFactory->createRequest('GET', $url)
-            ->withHeader('Authorization', $this->apiKey)
             ->withHeader('Content-Type', 'application/json')
             ->withHeader('Accept', 'application/json');
+
+        foreach ($this->configuration->getHeaders() as $name => $value) {
+            $request = $request->withHeader($name, $value);
+        }
 
         $response = $this->httpClient->sendRequest($request);
         $body = json_decode($response->getBody(), true);
