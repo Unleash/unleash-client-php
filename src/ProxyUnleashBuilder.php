@@ -279,7 +279,8 @@ final class ProxyUnleashBuilder
             $appUrl,
             $configuration,
             $httpClient,
-            $requestFactory
+            $requestFactory,
+            $cache
         );
     }
 

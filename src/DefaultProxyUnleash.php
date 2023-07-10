@@ -4,6 +4,7 @@ namespace Unleash\Client;
 
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
+use Psr\SimpleCache\CacheInterface;
 use Unleash\Client\Configuration\Context;
 use Unleash\Client\Configuration\UnleashConfiguration;
 use Unleash\Client\Configuration\UnleashContext;
@@ -13,16 +14,43 @@ use Unleash\Client\DTO\DefaultProxyVariant;
 
 final class DefaultProxyUnleash implements ProxyUnleash
 {
-    public function __construct(private string $url, private UnleashConfiguration $configuration, private ClientInterface $httpClient, private RequestFactoryInterface $requestFactory)
+    public function __construct(private string $url, private UnleashConfiguration $configuration, private ClientInterface $httpClient, private RequestFactoryInterface $requestFactory, private ?CacheInterface $cache = null)
     {
         $this->url = $url . '/frontend/features';
         $this->httpClient = $httpClient;
         $this->requestFactory = $requestFactory;
         $this->configuration = $configuration;
+        $this->cache = $cache;
     }
 
     public function isEnabled(string $featureName, ?Context $context = null, bool $default = false): bool
     {
+        $body = $this->fetchFromApi($featureName, $context);
+        return $body['enabled'] ?? false;
+    }
+
+    public function getVariant(string $featureName, ?Context $context = null, ?ProxyVariant $fallbackVariant = null): ProxyVariant
+    {
+        $body = $this->fetchFromApi($featureName, $context);
+
+        $payload = null;
+        if (isset($body['variant']['payload']['type']) && isset($body['variant']['payload']['value'])) {
+            $payload = new DefaultVariantPayload($body['variant']['payload']['type'], $body['variant']['payload']['value']);
+        }
+
+        if (isset($body['variant']) && isset($body['variant']['name']) && isset($body['variant']['enabled'])) {
+            return new DefaultProxyVariant($body['variant']['name'], $body['variant']['enabled'], $payload);
+        } else {
+            return $fallbackVariant ?? new DefaultProxyVariant('disabled', false, null);
+        }
+    }
+
+    private function fetchFromApi(string $featureName, ?Context $context = null): ?array
+    {
+        if ($this->cache !== null && $this->cache->has($featureName)) {
+            return $this->cache->get($featureName);
+        }
+
         $context ??= new UnleashContext();
         $featureUrl = $this->url . '/' . $featureName;
         $url = $this->addQuery($featureUrl, $this->contextToQueryString($context));
@@ -37,36 +65,12 @@ final class DefaultProxyUnleash implements ProxyUnleash
 
         $response = $this->httpClient->sendRequest($request);
         $body = json_decode($response->getBody(), true);
-        return $body['enabled'] ?? false;
-    }
 
-    public function getVariant(string $featureName, ?Context $context = null, ?ProxyVariant $fallbackVariant = null): ProxyVariant
-    {
-        $context ??= new UnleashContext();
-        $featureUrl = $this->url . '/' . $featureName;
-        $url = $this->addQuery($this->$featureUrl, $this->contextToQueryString($context));
-
-        $request = $this->requestFactory->createRequest('GET', $url)
-            ->withHeader('Content-Type', 'application/json')
-            ->withHeader('Accept', 'application/json');
-
-        foreach ($this->configuration->getHeaders() as $name => $value) {
-            $request = $request->withHeader($name, $value);
+        if ($this->cache !== null) {
+            $this->cache->set($featureName, $body);
         }
 
-        $response = $this->httpClient->sendRequest($request);
-        $body = json_decode($response->getBody(), true);
-        $payload = null;
-
-        if (isset($body['variant']['payload']['type']) && isset($body['variant']['payload']['value'])) {
-            $payload = new DefaultVariantPayload($body['variant']['payload']['type'], $body['variant']['payload']['value']);
-        }
-
-        if (isset($body['variant']) && isset($body['variant']['name']) && isset($body['variant']['enabled'])) {
-            return new DefaultProxyVariant($body['variant']['name'], $body['variant']['enabled'], $payload);
-        } else {
-            return $fallbackVariant ?? new DefaultProxyVariant('disabled', false, null);
-        }
+        return $body;
     }
 
     public function register(): bool
