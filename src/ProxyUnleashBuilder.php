@@ -7,7 +7,6 @@ use JetBrains\PhpStorm\Pure;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
 use Psr\SimpleCache\CacheInterface;
-use Unleash\Client\Client\DefaultRegistrationService;
 use Unleash\Client\Client\RegistrationService;
 use Unleash\Client\Configuration\Context;
 use Unleash\Client\Configuration\UnleashConfiguration;
@@ -42,10 +41,6 @@ final class ProxyUnleashBuilder
     private ?int $cacheTtl = null;
 
     private ?int $staleTtl = null;
-
-    private ?RegistrationService $registrationService = null;
-
-    private bool $autoregister = true;
 
     private ?bool $metricsEnabled = null;
 
@@ -237,7 +232,6 @@ final class ProxyUnleashBuilder
             ->setMetricsEnabled($this->metricsEnabled ?? $configuration->isMetricsEnabled())
             ->setMetricsInterval($this->metricsInterval ?? $configuration->getMetricsInterval())
             ->setHeaders($this->headers)
-            ->setAutoRegistrationEnabled($this->autoregister)
             ->setContextProvider($contextProvider)
         ;
 
@@ -271,11 +265,6 @@ final class ProxyUnleashBuilder
             // @codeCoverageIgnoreEnd
         }
         assert($requestFactory instanceof RequestFactoryInterface);
-
-        $registrationService = $this->registrationService;
-        if ($registrationService === null) {
-            $registrationService = new DefaultRegistrationService($httpClient, $requestFactory, $configuration);
-        }
 
         return new DefaultProxyUnleash(
             $appUrl,
