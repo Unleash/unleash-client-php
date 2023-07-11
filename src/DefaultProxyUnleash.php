@@ -8,24 +8,34 @@ use Psr\SimpleCache\CacheInterface;
 use Unleash\Client\Configuration\Context;
 use Unleash\Client\Configuration\UnleashConfiguration;
 use Unleash\Client\Configuration\UnleashContext;
+use Unleash\Client\DTO\DefaultFeature;
 use Unleash\Client\DTO\ProxyVariant;
 use Unleash\Client\DTO\DefaultVariantPayload;
 use Unleash\Client\DTO\DefaultProxyVariant;
+use Unleash\Client\Metrics\MetricsHandler;
 
 final class DefaultProxyUnleash implements ProxyUnleash
 {
-    public function __construct(private string $url, private UnleashConfiguration $configuration, private ClientInterface $httpClient, private RequestFactoryInterface $requestFactory, private ?CacheInterface $cache = null)
-    {
+    public function __construct(
+        private string $url,
+        private UnleashConfiguration $configuration,
+        private ClientInterface $httpClient,
+        private RequestFactoryInterface $requestFactory,
+        private ?CacheInterface $cache = null,
+        private ?MetricsHandler $metricsHandler = null
+    ) {
         $this->url = $url . '/frontend/features';
         $this->httpClient = $httpClient;
         $this->requestFactory = $requestFactory;
         $this->configuration = $configuration;
         $this->cache = $cache;
+        $this->metricsHandler = $metricsHandler;
     }
 
     public function isEnabled(string $featureName, ?Context $context = null, bool $default = false): bool
     {
         $body = $this->fetchFromApi($featureName, $context);
+        $this->metricsHandler->handleMetrics(new DefaultFeature($featureName, false, []), false);
         return $body['enabled'] ?? false;
     }
 
@@ -43,6 +53,11 @@ final class DefaultProxyUnleash implements ProxyUnleash
         } else {
             return $fallbackVariant ?? new DefaultProxyVariant('disabled', false, null);
         }
+    }
+
+    public function register(): bool
+    {
+        return false;
     }
 
     private function fetchFromApi(string $featureName, ?Context $context = null): ?array
@@ -66,16 +81,15 @@ final class DefaultProxyUnleash implements ProxyUnleash
         $response = $this->httpClient->sendRequest($request);
         $body = json_decode($response->getBody(), true);
 
-        if ($this->cache !== null) {
-            $this->cache->set($featureName, $body);
+        if (isset($body['name'], $body['enabled'], $body['variant']) && $body['name'] === $featureName) {
+            if ($this->cache !== null) {
+                $this->cache->set($featureName, $body);
+            }
+
+            return $body;
         }
 
-        return $body;
-    }
-
-    public function register(): bool
-    {
-        return false;
+        return null;
     }
 
     private function contextToQueryString(Context $context): string

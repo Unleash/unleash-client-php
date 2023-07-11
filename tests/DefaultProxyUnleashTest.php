@@ -11,6 +11,8 @@ use Unleash\Client\Configuration\UnleashConfiguration;
 use Unleash\Client\DefaultProxyUnleash;
 use Unleash\Client\DTO\DefaultProxyVariant;
 use Unleash\Client\DTO\DefaultVariantPayload;
+use Unleash\Client\Metrics\DefaultMetricsHandler;
+use Unleash\Client\Metrics\DefaultMetricsSender;
 use Unleash\Client\Tests\Traits\FakeCacheImplementationTrait;
 
 final class DefaultProxyUnleashTest extends AbstractHttpClientTest
@@ -131,6 +133,7 @@ final class DefaultProxyUnleashTest extends AbstractHttpClientTest
 
 class TestBuilder
 {
+    use FakeCacheImplementationTrait;
     private $mockHandler;
 
     public function __construct(mixed $responseBody, int $statusCode = 200)
@@ -148,13 +151,24 @@ class TestBuilder
     {
         $handlerStack = HandlerStack::create($this->mockHandler);
         $client = new Client(['handler' => $handlerStack]);
-        $config = new UnleashConfiguration('localhost:4242', 'some-app', 'some-instance');
+        $config = new UnleashConfiguration('localhost:4242', 'some-app', 'some-instance', $this->getCache());
+        $requestFactory = new HttpFactory();
+        $metricsHandler = new DefaultMetricsHandler(
+            new DefaultMetricsSender(
+                $client,
+                $requestFactory,
+                $config,
+            ),
+            $config
+        );
 
         return new DefaultProxyUnleash(
             'http://localhost',
             $config,
             $client,
-            new HttpFactory()
+            $requestFactory,
+            $this->getCache(),
+            $metricsHandler
         );
     }
 }

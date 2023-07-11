@@ -17,6 +17,8 @@ use Unleash\Client\ContextProvider\UnleashContextProvider;
 use Unleash\Client\DefaultProxyUnleash;
 use Unleash\Client\Exception\InvalidValueException;
 use Unleash\Client\Helper\DefaultImplementationLocator;
+use Unleash\Client\Metrics\DefaultMetricsHandler;
+use Unleash\Client\Metrics\DefaultMetricsSender;
 
 #[Immutable]
 final class ProxyUnleashBuilder
@@ -280,7 +282,15 @@ final class ProxyUnleashBuilder
             $configuration,
             $httpClient,
             $requestFactory,
-            $cache
+            $cache,
+            new DefaultMetricsHandler(
+                new DefaultMetricsSender(
+                    $httpClient,
+                    $requestFactory,
+                    $configuration,
+                ),
+                $configuration
+            ),
         );
     }
 
