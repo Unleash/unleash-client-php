@@ -15,9 +15,9 @@ $unleash = ProxyUnleashBuilder::create()
     ->withAppUrl($appUrl)
     ->withInstanceId($instanceId)
     ->withCacheHandler($cache)
-    ->withMetricsEnabled(false)
+    ->withMetricsEnabled(true)
     ->withCacheTimeToLive(3)
-    ->withMetricsInterval(3_000)
+    ->withMetricsInterval(300)
     ->withHeader('Authorization', $apiKey)
     ->build();
 
@@ -26,6 +26,8 @@ if ($unleash->isEnabled('myFeature')) {
 } else {
     echo "myFeature is disabled";
 }
+
+sleep(1);
 
 if ($unleash->isEnabled('myFeature')) {
     echo "myFeature is enabled";

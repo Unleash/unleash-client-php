@@ -12,6 +12,4 @@ interface ProxyUnleash
     public function isEnabled(string $featureName, ?Context $context = null, bool $default = false): bool;
 
     public function getVariant(string $featureName, ?Context $context = null, ?ProxyVariant $fallbackVariant = null): ProxyVariant;
-
-    public function register(): bool;
 }

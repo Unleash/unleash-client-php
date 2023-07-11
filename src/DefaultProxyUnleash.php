@@ -5,6 +5,7 @@ namespace Unleash\Client;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
 use Psr\SimpleCache\CacheInterface;
+use Unleash\Client\Client\RegistrationService;
 use Unleash\Client\Configuration\Context;
 use Unleash\Client\Configuration\UnleashConfiguration;
 use Unleash\Client\Configuration\UnleashContext;
@@ -22,9 +23,9 @@ final class DefaultProxyUnleash implements ProxyUnleash
         private ClientInterface $httpClient,
         private RequestFactoryInterface $requestFactory,
         private ?CacheInterface $cache = null,
-        private ?MetricsHandler $metricsHandler = null
+        private ?MetricsHandler $metricsHandler = null,
     ) {
-        $this->url = $url . '/frontend/features';
+        $this->url = $url . '/features';
         $this->httpClient = $httpClient;
         $this->requestFactory = $requestFactory;
         $this->configuration = $configuration;
@@ -35,8 +36,9 @@ final class DefaultProxyUnleash implements ProxyUnleash
     public function isEnabled(string $featureName, ?Context $context = null, bool $default = false): bool
     {
         $body = $this->fetchFromApi($featureName, $context);
-        $this->metricsHandler->handleMetrics(new DefaultFeature($featureName, false, []), false);
-        return $body['enabled'] ?? false;
+        $enabled = $body['enabled'] ?? false;
+        $this->metricsHandler->handleMetrics(new DefaultFeature($featureName, $enabled, []), $enabled);
+        return $enabled;
     }
 
     public function getVariant(string $featureName, ?Context $context = null, ?ProxyVariant $fallbackVariant = null): ProxyVariant
@@ -53,11 +55,6 @@ final class DefaultProxyUnleash implements ProxyUnleash
         } else {
             return $fallbackVariant ?? new DefaultProxyVariant('disabled', false, null);
         }
-    }
-
-    public function register(): bool
-    {
-        return false;
     }
 
     private function fetchFromApi(string $featureName, ?Context $context = null): ?array
