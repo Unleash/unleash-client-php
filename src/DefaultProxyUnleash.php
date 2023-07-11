@@ -5,14 +5,14 @@ namespace Unleash\Client;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
 use Psr\SimpleCache\CacheInterface;
-use Unleash\Client\Client\RegistrationService;
 use Unleash\Client\Configuration\Context;
 use Unleash\Client\Configuration\UnleashConfiguration;
 use Unleash\Client\Configuration\UnleashContext;
 use Unleash\Client\DTO\DefaultFeature;
+use Unleash\Client\DTO\DefaultProxyFeature;
 use Unleash\Client\DTO\DefaultVariant;
+use Unleash\Client\DTO\ProxyFeature;
 use Unleash\Client\DTO\ProxyVariant;
-use Unleash\Client\DTO\DefaultVariantPayload;
 use Unleash\Client\DTO\DefaultProxyVariant;
 use Unleash\Client\Enum\Stickiness;
 use Unleash\Client\Metrics\MetricsHandler;
@@ -20,14 +20,14 @@ use Unleash\Client\Metrics\MetricsHandler;
 final class DefaultProxyUnleash implements ProxyUnleash
 {
     public function __construct(
-        private string $url,
+        private string $baseUrl,
         private UnleashConfiguration $configuration,
         private ClientInterface $httpClient,
         private RequestFactoryInterface $requestFactory,
         private ?CacheInterface $cache = null,
         private ?MetricsHandler $metricsHandler = null,
     ) {
-        $this->url = $url . '/features';
+        $this->baseUrl = $baseUrl;
         $this->httpClient = $httpClient;
         $this->requestFactory = $requestFactory;
         $this->configuration = $configuration;
@@ -37,44 +37,37 @@ final class DefaultProxyUnleash implements ProxyUnleash
 
     public function isEnabled(string $featureName, ?Context $context = null, bool $default = false): bool
     {
-        $body = $this->fetchFromApi($featureName, $context);
-        $enabled = $body['enabled'] ?? false;
+        $response = $this->resolveSingleToggle($featureName, $context);
+        $enabled = $response ? $response->isEnabled() : false;
+
         $this->metricsHandler->handleMetrics(new DefaultFeature($featureName, $enabled, []), $enabled);
-        return $enabled;
+
+        return $enabled ?? $default;
     }
 
     public function getVariant(string $featureName, ?Context $context = null, ?ProxyVariant $fallbackVariant = null): ProxyVariant
     {
         $variant = $fallbackVariant ?? new DefaultProxyVariant('disabled', false, null);
 
-        $body = $this->fetchFromApi($featureName, $context);
+        $response = $this->resolveSingleToggle($featureName, $context);
 
-        if ($body !== null) {
-            $payload = null;
-
-            if (isset($body['variant']['payload']['type']) && isset($body['variant']['payload']['value'])) {
-                $payload = new DefaultVariantPayload($body['variant']['payload']['type'], $body['variant']['payload']['value']);
-            }
-
-            if (isset($body['variant'], $body['variant']['name'], $body['variant']['enabled'])) {
-                $variant = new DefaultProxyVariant($body['variant']['name'], $body['variant']['enabled'], $payload);
-            }
+        if ($response !== null) {
+            $variant = $response->getVariant();
         }
-
         $metricVariant = new DefaultVariant($variant->getName(), $variant->isEnabled(), 0, Stickiness::DEFAULT , $variant->getPayload());
         $this->metricsHandler->handleMetrics(new DefaultFeature($featureName, $variant->isEnabled(), []), $variant->isEnabled(), $metricVariant);
 
         return $variant;
     }
 
-    private function fetchFromApi(string $featureName, ?Context $context = null): ?array
+    private function resolveSingleToggle(string $featureName, ?Context $context = null): ?ProxyFeature
     {
         if ($this->cache !== null && $this->cache->has($featureName)) {
-            return $this->cache->get($featureName);
+            return new DefaultProxyFeature($this->cache->get($featureName));
         }
 
         $context ??= new UnleashContext();
-        $featureUrl = $this->url . '/' . $featureName;
+        $featureUrl = $this->baseUrl . '/features/' . $featureName;
         $url = $this->addQuery($featureUrl, $this->contextToQueryString($context));
 
         $request = $this->requestFactory->createRequest('GET', $url)
@@ -93,7 +86,7 @@ final class DefaultProxyUnleash implements ProxyUnleash
                 $this->cache->set($featureName, $body);
             }
 
-            return $body;
+            return new DefaultProxyFeature($body);
         }
 
         return null;
