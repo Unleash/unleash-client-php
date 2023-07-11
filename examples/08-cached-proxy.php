@@ -22,15 +22,19 @@ $unleash = ProxyUnleashBuilder::create()
     ->build();
 
 if ($unleash->isEnabled('myFeature')) {
-    echo "myFeature is enabled";
+    echo "myFeature is enabled \n";
 } else {
-    echo "myFeature is disabled";
+    echo "myFeature is disabled \n";
 }
+
+$resolvedVariant = $unleash->getVariant('myFeature');
+echo "Resolved a variant";
+var_dump($resolvedVariant);
 
 sleep(1);
 
 if ($unleash->isEnabled('myFeature')) {
-    echo "myFeature is enabled";
+    echo "myFeature is enabled \n";
 } else {
-    echo "myFeature is disabled";
+    echo "myFeature is disabled \n";
 }

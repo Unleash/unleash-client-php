@@ -10,9 +10,11 @@ use Unleash\Client\Configuration\Context;
 use Unleash\Client\Configuration\UnleashConfiguration;
 use Unleash\Client\Configuration\UnleashContext;
 use Unleash\Client\DTO\DefaultFeature;
+use Unleash\Client\DTO\DefaultVariant;
 use Unleash\Client\DTO\ProxyVariant;
 use Unleash\Client\DTO\DefaultVariantPayload;
 use Unleash\Client\DTO\DefaultProxyVariant;
+use Unleash\Client\Enum\Stickiness;
 use Unleash\Client\Metrics\MetricsHandler;
 
 final class DefaultProxyUnleash implements ProxyUnleash
@@ -43,18 +45,26 @@ final class DefaultProxyUnleash implements ProxyUnleash
 
     public function getVariant(string $featureName, ?Context $context = null, ?ProxyVariant $fallbackVariant = null): ProxyVariant
     {
+        $variant = $fallbackVariant ?? new DefaultProxyVariant('disabled', false, null);
+
         $body = $this->fetchFromApi($featureName, $context);
 
-        $payload = null;
-        if (isset($body['variant']['payload']['type']) && isset($body['variant']['payload']['value'])) {
-            $payload = new DefaultVariantPayload($body['variant']['payload']['type'], $body['variant']['payload']['value']);
+        if ($body !== null) {
+            $payload = null;
+
+            if (isset($body['variant']['payload']['type']) && isset($body['variant']['payload']['value'])) {
+                $payload = new DefaultVariantPayload($body['variant']['payload']['type'], $body['variant']['payload']['value']);
+            }
+
+            if (isset($body['variant'], $body['variant']['name'], $body['variant']['enabled'])) {
+                $variant = new DefaultProxyVariant($body['variant']['name'], $body['variant']['enabled'], $payload);
+            }
         }
 
-        if (isset($body['variant']) && isset($body['variant']['name']) && isset($body['variant']['enabled'])) {
-            return new DefaultProxyVariant($body['variant']['name'], $body['variant']['enabled'], $payload);
-        } else {
-            return $fallbackVariant ?? new DefaultProxyVariant('disabled', false, null);
-        }
+        $metricVariant = new DefaultVariant($variant->getName(), $variant->isEnabled(), 0, Stickiness::DEFAULT , $variant->getPayload());
+        $this->metricsHandler->handleMetrics(new DefaultFeature($featureName, $variant->isEnabled(), []), $variant->isEnabled(), $metricVariant);
+
+        return $variant;
     }
 
     private function fetchFromApi(string $featureName, ?Context $context = null): ?array
