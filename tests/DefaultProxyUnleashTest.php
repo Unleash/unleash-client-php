@@ -112,14 +112,14 @@ final class DefaultProxyUnleashTest extends AbstractHttpClientTest
         $this->assertEquals($variant, new DefaultProxyVariant('disabled', false));
     }
 
-    public function testVariantWithEmptyPayload()
+    public function testVariantWithNullPayload()
     {
         $builder = new TestBuilder([
             "name" => "test",
             "enabled" => true,
             "variant" => [
                 "name" => "some-variant",
-                "payload" => [],
+                "payload" => null,
                 "enabled" => true
             ],
             "impression_data" => false
@@ -167,8 +167,8 @@ class TestBuilder
             $config,
             $client,
             $requestFactory,
-            $this->getCache(),
-            $metricsHandler
+            $metricsHandler,
+            $this->getCache()
         );
     }
 }

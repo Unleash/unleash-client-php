@@ -266,20 +266,22 @@ final class ProxyUnleashBuilder
         }
         assert($requestFactory instanceof RequestFactoryInterface);
 
+        $metricsHandler = new DefaultMetricsHandler(
+            new DefaultMetricsSender(
+                $httpClient,
+                $requestFactory,
+                $configuration,
+            ),
+            $configuration
+        );
+
         return new DefaultProxyUnleash(
             $appUrl,
             $configuration,
             $httpClient,
             $requestFactory,
+            $metricsHandler,
             $cache,
-            new DefaultMetricsHandler(
-                new DefaultMetricsSender(
-                    $httpClient,
-                    $requestFactory,
-                    $configuration,
-                ),
-                $configuration
-            ),
         );
     }
 

@@ -11,6 +11,21 @@ class DefaultProxyFeature implements ProxyFeature
     public ProxyVariant $variant;
     public bool $impression_data;
 
+    /**
+     * @param array{
+     *     name: string,
+     *     enabled: bool,
+     *     variant: array{
+     *         name: string,
+     *         enabled: bool,
+     *         payload?: array{
+     *             type: string,
+     *             value: string
+     *         }
+     *     },
+     *     impression_data: bool
+     * } $response
+     */
     public function __construct(array $response)
     {
         if (!isset($response['name'], $response['enabled'], $response['variant'], $response['impression_data'])) {

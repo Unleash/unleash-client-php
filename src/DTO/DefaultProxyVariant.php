@@ -6,9 +6,6 @@ use JetBrains\PhpStorm\ArrayShape;
 
 final class DefaultProxyVariant implements ProxyVariant
 {
-    /**
-     * @param array<VariantOverride> $overrides
-     */
     public function __construct(
         private readonly string $name,
         private readonly bool $enabled,
