@@ -137,8 +137,12 @@ final class TestBuilder
 
     private $mockHandler;
 
-    public function __construct(mixed $responseBody, int $statusCode = 200)
+    public function __construct($responseBody, int $statusCode = 200)
     {
+        if (!is_array($responseBody) && !is_string($responseBody)) {
+            throw new \InvalidArgumentException('responseBody must be an array or a string');
+        }
+
         $this->mockHandler = new MockHandler();
         $mockResponse = new Response(
             $statusCode,
