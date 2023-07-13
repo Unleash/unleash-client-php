@@ -193,6 +193,32 @@ final class DefaultProxyUnleashTest extends AbstractHttpClientTest
         $this->assertCount(1, $container);
         $this->assertEquals($expectedUrl, (string) $container[0]['request']->getUri());
     }
+
+    public function testHeadersArePassedToServer()
+    {
+        $container = [];
+        $history = Middleware::history($container);
+
+        $mock = new MockHandler([
+            new Response(200, [], 'OK'),
+        ]);
+
+        $handler = HandlerStack::create($mock);
+        $handler->push($history);
+
+        $builder = new TestBuilder();
+        $builder->withHandlerStack($handler);
+        $builder->withHeaders(['customHeader' => 'someCustomHeader']);
+
+        $unleash = $builder->build();
+
+        $enabled = $unleash->isEnabled('test');
+
+        $this->assertFalse($enabled);
+        $this->assertCount(1, $container);
+        $this->assertEquals('application/json', $container[0]['request']->getHeaderLine('Content-Type'));
+        $this->assertEquals('someCustomHeader', $container[0]['request']->getHeaderLine('customHeader'));
+    }
 }
 
 final class TestBuilder
@@ -206,6 +232,8 @@ final class TestBuilder
     private $handler;
 
     private $handlerStack;
+
+    private $headers;
 
     public function __construct()
     {
@@ -221,6 +249,13 @@ final class TestBuilder
     public function withCache(CacheInterface $cache): TestBuilder
     {
         $this->cache = $cache;
+
+        return $this;
+    }
+
+    public function withHeaders(array $headers): TestBuilder
+    {
+        $this->headers = $headers;
 
         return $this;
     }
@@ -242,6 +277,10 @@ final class TestBuilder
         $this->cache = $this->cache ?? $this->getCache();
         $client = new Client(['handler' => $handlerStack]);
         $config = new UnleashConfiguration('http://localhost:4242', 'some-app', 'some-instance', $this->cache);
+        if ($this->headers) {
+            $config->setHeaders($this->headers);
+        }
+
         $requestFactory = new HttpFactory();
         $metricsHandler = new DefaultMetricsHandler(
             new DefaultMetricsSender(
