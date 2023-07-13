@@ -235,6 +235,8 @@ final class TestBuilder
 
     private $headers;
 
+    private $url;
+
     public function __construct()
     {
     }
@@ -260,6 +262,13 @@ final class TestBuilder
         return $this;
     }
 
+    public function withUrl(string $url): TestBuilder
+    {
+        $this->url = $url;
+
+        return $this;
+    }
+
     public function pushResponse($responseBody, int $statusCode = 200)
     {
         $this->mockHandler = new MockHandler();
@@ -273,10 +282,11 @@ final class TestBuilder
 
     public function build(): DefaultProxyUnleash
     {
+        $url = $this->url ?? 'http://localhost:4242';
         $handlerStack = $this->handlerStack ?? HandlerStack::create($this->mockHandler);
         $this->cache = $this->cache ?? $this->getCache();
         $client = new Client(['handler' => $handlerStack]);
-        $config = new UnleashConfiguration('http://localhost:4242', 'some-app', 'some-instance', $this->cache);
+        $config = new UnleashConfiguration($url, 'some-app', 'some-instance', $this->cache);
         if ($this->headers) {
             $config->setHeaders($this->headers);
         }
@@ -292,7 +302,7 @@ final class TestBuilder
         );
 
         return new DefaultProxyUnleash(
-            'http://localhost:4242',
+            $url,
             $config,
             $client,
             $requestFactory,

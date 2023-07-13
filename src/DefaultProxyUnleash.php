@@ -138,11 +138,6 @@ final class DefaultProxyUnleash implements ProxyUnleash
 
         if (!isset($urlParts['query'])) {
             $urlParts['query'] = $query;
-        } else {
-            parse_str($urlParts['query'], $existingQuery);
-            parse_str($query, $newQuery);
-            $merged = array_merge($existingQuery, $newQuery);
-            $urlParts['query'] = http_build_query($merged);
         }
 
         return $this->buildUrl($urlParts);
@@ -215,9 +210,6 @@ final class DefaultProxyUnleash implements ProxyUnleash
         }
         if (isset($parts['query']) && is_string($parts['query'])) {
             $result .= '?' . $parts['query'];
-        }
-        if (isset($parts['fragment']) && is_string($parts['fragment'])) {
-            $result .= '#' . $parts['fragment'];
         }
 
         return $result;
