@@ -171,7 +171,7 @@ final class DefaultProxyUnleashTest extends AbstractHttpClientTest
     public function testContextIsCorrectlyLayeredIntoUrl()
     {
         $context = new UnleashContext(7, '127.0.0.1', 'some-session', ['hasCustomProperty' => 'true']);
-        $expectedUrl = 'http://localhost:4242/features/test?userId=7&sessionId=some-session&remoteAddress=127.0.0.1&properties%5BhasCustomProperty%5D=true';
+        $expectedUrl = 'http://username:password@localhost:4242/features/test?userId=7&sessionId=some-session&remoteAddress=127.0.0.1&properties%5BhasCustomProperty%5D=true';
         $container = [];
         $history = Middleware::history($container);
 
@@ -183,6 +183,7 @@ final class DefaultProxyUnleashTest extends AbstractHttpClientTest
         $handler->push($history);
 
         $builder = new TestBuilder();
+        $builder->withUrl('http://username:password@localhost:4242');
         $builder->withHandlerStack($handler);
 
         $unleash = $builder->build();
@@ -218,6 +219,55 @@ final class DefaultProxyUnleashTest extends AbstractHttpClientTest
         $this->assertCount(1, $container);
         $this->assertEquals('application/json', $container[0]['request']->getHeaderLine('Content-Type'));
         $this->assertEquals('someCustomHeader', $container[0]['request']->getHeaderLine('customHeader'));
+    }
+
+    public function testPoisonedResponsesReturnFalse()
+    {
+        $responses = [
+            [
+                'valid' => 'json',
+                'but' => 'poisoned',
+            ],
+            [
+                'name' => 'test',
+                'enabled' => 'not a boolean',
+                'variant' => [
+                    'name' => 'some-variant',
+                    'enabled' => true,
+                ],
+                'impression_data' => false,
+            ],
+            [
+                'name' => 'test',
+                'enabled' => true,
+                'variant' => [
+                    'poisoned' => 'variant',
+                ],
+                'impression_data' => false,
+            ],
+            [
+                'name' => 'test',
+                'enabled' => true,
+                'variant' => [
+                    'name' => 'some-variant',
+                    'enabled' => true,
+                    'payload' => [
+                        'poisoned' => 'payload',
+                        'value' => 'stuff',
+                    ],
+                ],
+                'impression_data' => false,
+            ],
+        ];
+
+        foreach ($responses as $response) {
+            $builder = new TestBuilder();
+            $builder->pushResponse($response);
+            $unleash = $builder->build();
+            $enabled = $unleash->isEnabled('test');
+
+            $this->assertFalse($enabled);
+        }
     }
 }
 
