@@ -13,7 +13,6 @@ use Unleash\Client\Configuration\UnleashConfiguration;
 use Unleash\Client\ContextProvider\DefaultUnleashContextProvider;
 use Unleash\Client\ContextProvider\SettableUnleashContextProvider;
 use Unleash\Client\ContextProvider\UnleashContextProvider;
-use Unleash\Client\DefaultProxyUnleash;
 use Unleash\Client\Exception\InvalidValueException;
 use Unleash\Client\Helper\DefaultImplementationLocator;
 use Unleash\Client\Metrics\DefaultMetricsHandler;

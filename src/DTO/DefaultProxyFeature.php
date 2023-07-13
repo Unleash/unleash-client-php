@@ -2,13 +2,14 @@
 
 namespace Unleash\Client\DTO;
 
-use Unleash\Client\DTO\DefaultVariantPayload;
-
-class DefaultProxyFeature implements ProxyFeature
+final class DefaultProxyFeature implements ProxyFeature
 {
     public string $name;
+
     public bool $enabled;
+
     public ProxyVariant $variant;
+
     public bool $impression_data;
 
     /**

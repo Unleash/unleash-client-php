@@ -2,9 +2,7 @@
 
 namespace Unleash\Client\DTO;
 
-use JetBrains\PhpStorm\ExpectedValues;
 use JsonSerializable;
-use Unleash\Client\Enum\Stickiness;
 
 interface ProxyVariant extends JsonSerializable
 {

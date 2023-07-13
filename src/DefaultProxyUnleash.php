@@ -10,10 +10,10 @@ use Unleash\Client\Configuration\UnleashConfiguration;
 use Unleash\Client\Configuration\UnleashContext;
 use Unleash\Client\DTO\DefaultFeature;
 use Unleash\Client\DTO\DefaultProxyFeature;
+use Unleash\Client\DTO\DefaultProxyVariant;
 use Unleash\Client\DTO\DefaultVariant;
 use Unleash\Client\DTO\ProxyFeature;
 use Unleash\Client\DTO\ProxyVariant;
-use Unleash\Client\DTO\DefaultProxyVariant;
 use Unleash\Client\Enum\Stickiness;
 use Unleash\Client\Metrics\MetricsHandler;
 
@@ -53,7 +53,7 @@ final class DefaultProxyUnleash implements ProxyUnleash
         if ($response !== null) {
             $variant = $response->getVariant();
         }
-        $metricVariant = new DefaultVariant($variant->getName(), $variant->isEnabled(), 0, Stickiness::DEFAULT , $variant->getPayload());
+        $metricVariant = new DefaultVariant($variant->getName(), $variant->isEnabled(), 0, Stickiness::DEFAULT, $variant->getPayload());
         $this->metricsHandler->handleMetrics(new DefaultFeature($featureName, $variant->isEnabled(), []), $variant->isEnabled(), $metricVariant);
 
         return $variant;
@@ -89,7 +89,6 @@ final class DefaultProxyUnleash implements ProxyUnleash
             return null;
         }
         if (is_array($body)) {
-
             $featureData = $this->validateResponse($body);
 
             if ($featureData !== null) {
@@ -113,8 +112,8 @@ final class DefaultProxyUnleash implements ProxyUnleash
             'remoteAddress' => $context->getIpAddress(),
         ];
 
-        $values = array_filter($values, fn(?string $value) => $value !== null);
-        $properties = array_filter($context->getCustomProperties(), fn(?string $value) => $value !== null);
+        $values = array_filter($values, fn (?string $value) => $value !== null);
+        $properties = array_filter($context->getCustomProperties(), fn (?string $value) => $value !== null);
 
         foreach ($values as $key => $value) {
             $query[$key] = $value;
@@ -151,6 +150,7 @@ final class DefaultProxyUnleash implements ProxyUnleash
 
     /**
      * @param array<string, mixed> $response
+     *
      * @return array{
      *     name: string,
      *     enabled: bool,
@@ -188,6 +188,7 @@ final class DefaultProxyUnleash implements ProxyUnleash
 
     /**
      * @param array<string, mixed> $parts
+     *
      * @return string
      */
     private function buildUrl(array $parts): string
@@ -199,7 +200,7 @@ final class DefaultProxyUnleash implements ProxyUnleash
         if (isset($parts['user']) && is_string($parts['user'])) {
             $result .= $parts['user'];
             if (isset($parts['pass']) && is_string($parts['pass'])) {
-                $result .= ":" . $parts['pass'];
+                $result .= ':' . $parts['pass'];
             }
             $result .= '@';
         }
@@ -207,16 +208,16 @@ final class DefaultProxyUnleash implements ProxyUnleash
             $result .= $parts['host'];
         }
         if (isset($parts['port']) && is_numeric($parts['port'])) {
-            $result .= ":" . $parts['port'];
+            $result .= ':' . $parts['port'];
         }
         if (isset($parts['path']) && is_string($parts['path'])) {
             $result .= $parts['path'];
         }
         if (isset($parts['query']) && is_string($parts['query'])) {
-            $result .= "?" . $parts['query'];
+            $result .= '?' . $parts['query'];
         }
         if (isset($parts['fragment']) && is_string($parts['fragment'])) {
-            $result .= "#" . $parts['fragment'];
+            $result .= '#' . $parts['fragment'];
         }
 
         return $result;

@@ -22,13 +22,13 @@ final class DefaultProxyUnleashTest extends AbstractHttpClientTest
     public function testBasicResolveFeature()
     {
         $builder = new TestBuilder([
-            "name" => "test",
-            "enabled" => true,
-            "variant" => [
-                "name" => "some-variant",
-                "enabled" => true
+            'name' => 'test',
+            'enabled' => true,
+            'variant' => [
+                'name' => 'some-variant',
+                'enabled' => true,
             ],
-            "impression_data" => false
+            'impression_data' => false,
         ]);
         $unleash = $builder->getInstance();
         $enabled = $unleash->isEnabled('test');
@@ -38,7 +38,7 @@ final class DefaultProxyUnleashTest extends AbstractHttpClientTest
     public function testResolveNonExistentFeatureReturnsFalse()
     {
         $builder = new TestBuilder([
-            "error" => "Failed to find feature with name test"
+            'error' => 'Failed to find feature with name test',
         ]);
         $unleash = $builder->getInstance();
         $enabled = $unleash->isEnabled('test');
@@ -48,7 +48,7 @@ final class DefaultProxyUnleashTest extends AbstractHttpClientTest
     public function testResolveFeatureWithNon200Response()
     {
         $builder = new TestBuilder([
-            "error" => "Server Error"
+            'error' => 'Server Error',
         ], 500);
         $unleash = $builder->getInstance();
         $enabled = $unleash->isEnabled('test');
@@ -57,7 +57,7 @@ final class DefaultProxyUnleashTest extends AbstractHttpClientTest
 
     public function testResolveFeatureWithInvalidJsonResponse()
     {
-        $builder = new TestBuilder("Invalid JSON", 200);
+        $builder = new TestBuilder('Invalid JSON', 200);
         $unleash = $builder->getInstance();
         $enabled = $unleash->isEnabled('test');
         $this->assertFalse($enabled);
@@ -66,34 +66,34 @@ final class DefaultProxyUnleashTest extends AbstractHttpClientTest
     public function testBasicResolveVariant()
     {
         $builder = new TestBuilder([
-            "name" => "test",
-            "enabled" => true,
-            "variant" => [
-                "name" => "some-variant",
-                "payload" => [
-                    "type" => "string",
-                    "value" => "some-value"
+            'name' => 'test',
+            'enabled' => true,
+            'variant' => [
+                'name' => 'some-variant',
+                'payload' => [
+                    'type' => 'string',
+                    'value' => 'some-value',
                 ],
-                "enabled" => true
+                'enabled' => true,
             ],
-            "impression_data" => false
+            'impression_data' => false,
         ]);
         $unleash = $builder->getInstance();
         $variant = $unleash->getVariant('test');
 
-        $this->assertEquals($variant, new DefaultProxyVariant('some-variant', true, new DefaultVariantPayload("string", "some-value")));
+        $this->assertEquals($variant, new DefaultProxyVariant('some-variant', true, new DefaultVariantPayload('string', 'some-value')));
     }
 
     public function testVariantWithoutPayload()
     {
         $builder = new TestBuilder([
-            "name" => "test",
-            "enabled" => true,
-            "variant" => [
-                "name" => "some-variant",
-                "enabled" => true
+            'name' => 'test',
+            'enabled' => true,
+            'variant' => [
+                'name' => 'some-variant',
+                'enabled' => true,
             ],
-            "impression_data" => false
+            'impression_data' => false,
         ]);
         $unleash = $builder->getInstance();
         $variant = $unleash->getVariant('test');
@@ -104,7 +104,7 @@ final class DefaultProxyUnleashTest extends AbstractHttpClientTest
     public function testMissingVariantReturnsDefault()
     {
         $builder = new TestBuilder([
-            "error" => "Failed to find feature with name test"
+            'error' => 'Failed to find feature with name test',
         ]);
         $unleash = $builder->getInstance();
         $variant = $unleash->getVariant('test');
@@ -115,14 +115,14 @@ final class DefaultProxyUnleashTest extends AbstractHttpClientTest
     public function testVariantWithNullPayload()
     {
         $builder = new TestBuilder([
-            "name" => "test",
-            "enabled" => true,
-            "variant" => [
-                "name" => "some-variant",
-                "payload" => null,
-                "enabled" => true
+            'name' => 'test',
+            'enabled' => true,
+            'variant' => [
+                'name' => 'some-variant',
+                'payload' => null,
+                'enabled' => true,
             ],
-            "impression_data" => false
+            'impression_data' => false,
         ]);
         $unleash = $builder->getInstance();
         $variant = $unleash->getVariant('test');
@@ -131,9 +131,10 @@ final class DefaultProxyUnleashTest extends AbstractHttpClientTest
     }
 }
 
-class TestBuilder
+final class TestBuilder
 {
     use FakeCacheImplementationTrait;
+
     private $mockHandler;
 
     public function __construct(mixed $responseBody, int $statusCode = 200)
@@ -157,7 +158,7 @@ class TestBuilder
             new DefaultMetricsSender(
                 $client,
                 $requestFactory,
-                $config,
+                $config
             ),
             $config
         );
