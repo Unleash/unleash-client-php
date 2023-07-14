@@ -352,7 +352,6 @@ final class TestBuilder
         );
 
         return new DefaultProxyUnleash(
-            $url,
             $config,
             $client,
             $requestFactory,

@@ -20,14 +20,12 @@ use Unleash\Client\Metrics\MetricsHandler;
 final class DefaultProxyUnleash implements ProxyUnleash
 {
     public function __construct(
-        private string $baseUrl,
         private UnleashConfiguration $configuration,
         private ClientInterface $httpClient,
         private RequestFactoryInterface $requestFactory,
         private MetricsHandler $metricsHandler,
         private ?CacheInterface $cache = null,
     ) {
-        $this->baseUrl = $baseUrl;
         $this->httpClient = $httpClient;
         $this->requestFactory = $requestFactory;
         $this->configuration = $configuration;
@@ -72,7 +70,7 @@ final class DefaultProxyUnleash implements ProxyUnleash
         }
 
         $context ??= new UnleashContext();
-        $featureUrl = $this->baseUrl . '/features/' . $featureName;
+        $featureUrl = $this->configuration->getUrl() . 'features/' . $featureName;
         $url = $this->addQuery($featureUrl, $this->contextToQueryString($context));
 
         $request = $this->requestFactory->createRequest('GET', $url)

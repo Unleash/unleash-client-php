@@ -10,9 +10,6 @@ use Psr\SimpleCache\CacheInterface;
 use Unleash\Client\Client\RegistrationService;
 use Unleash\Client\Configuration\Context;
 use Unleash\Client\Configuration\UnleashConfiguration;
-use Unleash\Client\ContextProvider\DefaultUnleashContextProvider;
-use Unleash\Client\ContextProvider\SettableUnleashContextProvider;
-use Unleash\Client\ContextProvider\UnleashContextProvider;
 use Unleash\Client\Exception\InvalidValueException;
 use Unleash\Client\Helper\DefaultImplementationLocator;
 use Unleash\Client\Metrics\DefaultMetricsHandler;
@@ -50,8 +47,6 @@ final class ProxyUnleashBuilder
 
     private ?MetricsHandler $metricsHandler = null;
 
-    private ?UnleashContextProvider $contextProvider = null;
-
     /**
      * @var array<string,string>
      */
@@ -65,13 +60,6 @@ final class ProxyUnleashBuilder
     public static function create(): self
     {
         return new self();
-    }
-
-    public static function createForGitlab(): self
-    {
-        return self::create()
-            ->withMetricsEnabled(false)
-            ->withAutomaticRegistrationEnabled(false);
     }
 
     #[Pure]
@@ -90,12 +78,6 @@ final class ProxyUnleashBuilder
     public function withAppName(string $appName): self
     {
         return $this->with('appName', $appName);
-    }
-
-    #[Pure]
-    public function withGitlabEnvironment(string $environment): self
-    {
-        return $this->withAppName($environment);
     }
 
     #[Pure]
@@ -155,12 +137,6 @@ final class ProxyUnleashBuilder
     }
 
     #[Pure]
-    public function withAutomaticRegistrationEnabled(bool $enabled): self
-    {
-        return $this->with('autoregister', $enabled);
-    }
-
-    #[Pure]
     public function withMetricsEnabled(bool $enabled): self
     {
         return $this->with('metricsEnabled', $enabled);
@@ -170,12 +146,6 @@ final class ProxyUnleashBuilder
     public function withMetricsInterval(int $milliseconds): self
     {
         return $this->with('metricsInterval', $milliseconds);
-    }
-
-    #[Pure]
-    public function withContextProvider(?UnleashContextProvider $contextProvider): self
-    {
-        return $this->with('contextProvider', $contextProvider);
     }
 
     #[Pure]
@@ -202,11 +172,6 @@ final class ProxyUnleashBuilder
         if ($instanceId === null) {
             throw new InvalidValueException("Instance ID must be set, please use 'withInstanceId()' method");
         }
-        if ($appName === null) {
-            throw new InvalidValueException(
-                "App name must be set, please use 'withAppName()' or 'withGitlabEnvironment()' method"
-            );
-        }
 
         $cache = $this->cache;
         if ($cache === null) {
@@ -223,14 +188,6 @@ final class ProxyUnleashBuilder
         assert($cache instanceof CacheInterface);
         $staleCache = $this->staleCache ?? $cache;
 
-        $contextProvider = $this->contextProvider;
-        if ($contextProvider === null) {
-            $contextProvider = new DefaultUnleashContextProvider();
-        }
-        if ($this->defaultContext !== null && $contextProvider instanceof SettableUnleashContextProvider) {
-            $contextProvider->setDefaultContext($this->defaultContext);
-        }
-
         $configuration = new UnleashConfiguration($appUrl, $appName, $instanceId);
         $configuration
             ->setCache($cache)
@@ -240,7 +197,6 @@ final class ProxyUnleashBuilder
             ->setMetricsEnabled($this->metricsEnabled ?? $configuration->isMetricsEnabled())
             ->setMetricsInterval($this->metricsInterval ?? $configuration->getMetricsInterval())
             ->setHeaders($this->headers)
-            ->setContextProvider($contextProvider)
         ;
 
         $httpClient = $this->httpClient;
@@ -283,7 +239,6 @@ final class ProxyUnleashBuilder
         $metricsHandler = $this->metricsHandler ?? new DefaultMetricsHandler($metricsSender, $configuration);
 
         return new DefaultProxyUnleash(
-            $appUrl,
             $configuration,
             $httpClient,
             $requestFactory,
