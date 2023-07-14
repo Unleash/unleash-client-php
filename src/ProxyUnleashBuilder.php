@@ -17,6 +17,7 @@ use Unleash\Client\Exception\InvalidValueException;
 use Unleash\Client\Helper\DefaultImplementationLocator;
 use Unleash\Client\Metrics\DefaultMetricsHandler;
 use Unleash\Client\Metrics\DefaultMetricsSender;
+use Unleash\Client\Metrics\MetricsHandler;
 
 #[Immutable]
 final class ProxyUnleashBuilder
@@ -46,6 +47,8 @@ final class ProxyUnleashBuilder
     private ?int $metricsInterval = null;
 
     private ?Context $defaultContext = null;
+
+    private ?MetricsHandler $metricsHandler = null;
 
     private ?UnleashContextProvider $contextProvider = null;
 
@@ -181,6 +184,12 @@ final class ProxyUnleashBuilder
         return $this->with('staleTtl', $ttl);
     }
 
+    #[Pure]
+    public function withMetricsHandler(MetricsHandler $metricsHandler): self
+    {
+        return $this->with('metricsHandler', $metricsHandler);
+    }
+
     public function build(): DefaultProxyUnleash
     {
         $appUrl = $this->appUrl;
@@ -265,14 +274,13 @@ final class ProxyUnleashBuilder
         }
         assert($requestFactory instanceof RequestFactoryInterface);
 
-        $metricsHandler = new DefaultMetricsHandler(
-            new DefaultMetricsSender(
-                $httpClient,
-                $requestFactory,
-                $configuration,
-            ),
-            $configuration
+        $metricsSender = new DefaultMetricsSender(
+            $httpClient,
+            $requestFactory,
+            $configuration,
         );
+
+        $metricsHandler = $this->metricsHandler ?? new DefaultMetricsHandler($metricsSender, $configuration);
 
         return new DefaultProxyUnleash(
             $appUrl,
