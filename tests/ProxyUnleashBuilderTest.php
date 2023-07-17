@@ -7,6 +7,7 @@ use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
 use ReflectionObject;
 use Unleash\Client\Configuration\UnleashConfiguration;
+use Unleash\Client\DefaultProxyUnleash;
 use Unleash\Client\DefaultUnleash;
 use Unleash\Client\ProxyUnleashBuilder;
 use Unleash\Client\Tests\Traits\RealCacheImplementationTrait;
@@ -77,7 +78,32 @@ final class ProxyUnleashBuilderTest extends TestCase
         self::assertEquals('test2', $headers['Authorization']);
     }
 
-    private function getConfiguration(DefaultUnleash $unleash): UnleashConfiguration
+    public function testWithStaleCacheHandler()
+    {
+        $cache1 = $this->getCache();
+        $cache2 = $this->getCache();
+
+        $instance = $this->instance->withAppUrl("http://test.com")->withInstanceId('test')->withAppName('test-app');
+        self::assertNull($this->getProperty($instance, 'staleCache'));
+        self::assertNotNull($this->getConfiguration($instance->build())->getStaleCache());
+
+        $instance = $this->instance->withCacheHandler($cache1)->withAppUrl("http://test.com")->withInstanceId('test')->withAppName('test-app');
+        self::assertNull($this->getProperty($instance, 'staleCache'));
+        self::assertSame($cache1, $this->getConfiguration($instance->build())->getStaleCache());
+
+        $instance = $this->instance
+            ->withCacheHandler($cache1)
+            ->withStaleCacheHandler($cache2)
+            ->withAppUrl("http://test.com")
+            ->withInstanceId('test')
+            ->withAppName('test-app')
+        ;
+        self::assertSame($cache2, $this->getProperty($instance, 'staleCache'));
+        self::assertSame($cache2, $this->getConfiguration($instance->build())->getStaleCache());
+        self::assertSame($cache1, $this->getConfiguration($instance->build())->getCache());
+    }
+
+    private function getConfiguration(DefaultProxyUnleash $unleash): UnleashConfiguration
     {
         $configurationProperty = (new ReflectionObject($unleash))->getProperty('configuration');
         $configurationProperty->setAccessible(true);
