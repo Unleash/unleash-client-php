@@ -2,10 +2,12 @@
 
 namespace Unleash\Client\Tests;
 
+use Http\Discovery\Psr18ClientDiscovery;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
 use ReflectionObject;
+use Symfony\Component\Cache\Psr16Cache;
 use Unleash\Client\Configuration\UnleashConfiguration;
 use Unleash\Client\DefaultProxyUnleash;
 use Unleash\Client\DTO\Feature;
@@ -116,6 +118,61 @@ final class ProxyUnleashBuilderTest extends TestCase
             $metricsHandler,
             $this->getProperty($instance->withAppUrl('http://test.com')->withInstanceId('test')->withAppName('test-app')->build(), 'metricsHandler')
         );
+    }
+
+    public function testWithoutDefaultCache()
+    {
+        $instance = $this->instance
+            ->withAppUrl('http://example.com')
+            ->withInstanceId('test')
+            ->withAppName('test');
+
+        $unleash = $instance->build();
+
+        $cacheProperty = (new ReflectionObject($unleash))->getProperty('cache');
+        $cacheProperty->setAccessible(true);
+
+        $locatorProperty = (new ReflectionObject($instance))->getProperty('defaultImplementationLocator');
+        $locatorProperty->setAccessible(true);
+        $locator = $locatorProperty->getValue($instance);
+
+        $defaultImplementationsProperty = (new ReflectionObject($locator))->getProperty('defaultImplementations');
+        $defaultImplementationsProperty->setAccessible(true);
+
+        $defaultImplementations = $defaultImplementationsProperty->getValue($locator);
+
+        if (class_exists(FilesystemCachePool::class)) {
+            $this->assertDefaultCacheImplementation($instance, $cacheProperty, FilesystemCachePool::class, $locator, $defaultImplementationsProperty, $defaultImplementations);
+        }
+
+        $this->assertDefaultCacheImplementation($instance, $cacheProperty, Psr16Cache::class, $locator, $defaultImplementationsProperty, $defaultImplementations);
+
+        $this->expectException(InvalidValueException::class);
+        $instance->build();
+    }
+
+    public function testWithoutDefaultHttpClient()
+    {
+        $instance = $this->instance
+            ->withAppUrl('http://example.com')
+            ->withInstanceId('test')
+            ->withAppName('test')
+        ;
+
+        $locatorProperty = (new ReflectionObject($instance))->getProperty('defaultImplementationLocator');
+        $locatorProperty->setAccessible(true);
+
+        $discoveryStrategies = Psr18ClientDiscovery::getStrategies();
+        Psr18ClientDiscovery::setStrategies([]);
+
+        try {
+            $instance->build();
+            $this->fail('No default http client is available, expected exception');
+        } catch (InvalidValueException $e) {
+            Psr18ClientDiscovery::setStrategies($discoveryStrategies);
+        }
+
+        self::assertTrue(true);
     }
 
     public function testWithStaleTtl()
@@ -243,5 +300,16 @@ final class ProxyUnleashBuilderTest extends TestCase
         $property->setAccessible(true);
 
         return $property->getValue($object);
+    }
+
+    private function assertDefaultCacheImplementation($instance, $cacheProperty, $className, $locator, $defaultImplementationsProperty, $defaultImplementations)
+    {
+        $unleash = $instance->build();
+        $cache = $cacheProperty->getValue($unleash);
+
+        self::assertInstanceOf($className, $cache);
+
+        unset($defaultImplementations['cache'][$className]);
+        $defaultImplementationsProperty->setValue($locator, $defaultImplementations);
     }
 }
