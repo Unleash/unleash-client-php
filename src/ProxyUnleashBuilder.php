@@ -7,7 +7,6 @@ use JetBrains\PhpStorm\Pure;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
 use Psr\SimpleCache\CacheInterface;
-use Unleash\Client\Client\RegistrationService;
 use Unleash\Client\Configuration\Context;
 use Unleash\Client\Configuration\UnleashConfiguration;
 use Unleash\Client\Exception\InvalidValueException;
@@ -131,12 +130,6 @@ final class ProxyUnleashBuilder
     }
 
     #[Pure]
-    public function withRegistrationService(RegistrationService $registrationService): self
-    {
-        return $this->with('registrationService', $registrationService);
-    }
-
-    #[Pure]
     public function withMetricsEnabled(bool $enabled): self
     {
         return $this->with('metricsEnabled', $enabled);
@@ -171,6 +164,11 @@ final class ProxyUnleashBuilder
         }
         if ($instanceId === null) {
             throw new InvalidValueException("Instance ID must be set, please use 'withInstanceId()' method");
+        }
+        if ($appName === null) {
+            throw new InvalidValueException(
+                "App name must be set, please use 'withAppName()' method"
+            );
         }
 
         $cache = $this->cache;

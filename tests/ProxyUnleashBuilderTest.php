@@ -56,6 +56,27 @@ final class ProxyUnleashBuilderTest extends TestCase
         self::assertNotSame($this->instance, $this->instance->withRequestFactory($this->newRequestFactory()));
     }
 
+    public function testWithHeader()
+    {
+        self::assertNotSame($this->instance, $this->instance->withHeader('Authorization', 'test'));
+
+        $instance = $this->instance
+            ->withHeader('Authorization', 'test')
+            ->withHeader('Some-Header', 'test');
+        $reflection = new ReflectionObject($instance);
+        $headersProperty = $reflection->getProperty('headers');
+        $headersProperty->setAccessible(true);
+        $headers = $headersProperty->getValue($instance);
+        self::assertCount(2, $headers);
+
+        $instance = $instance
+            ->withHeader('Authorization', 'test2');
+        $headers = $headersProperty->getValue($instance);
+        self::assertCount(2, $headers);
+        self::assertArrayHasKey('Authorization', $headers);
+        self::assertEquals('test2', $headers['Authorization']);
+    }
+
     private function getConfiguration(DefaultUnleash $unleash): UnleashConfiguration
     {
         $configurationProperty = (new ReflectionObject($unleash))->getProperty('configuration');
