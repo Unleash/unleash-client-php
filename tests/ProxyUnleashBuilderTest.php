@@ -8,7 +8,10 @@ use Psr\Http\Message\RequestFactoryInterface;
 use ReflectionObject;
 use Unleash\Client\Configuration\UnleashConfiguration;
 use Unleash\Client\DefaultProxyUnleash;
-use Unleash\Client\DefaultUnleash;
+use Unleash\Client\DTO\Feature;
+use Unleash\Client\DTO\Variant;
+use Unleash\Client\Exception\InvalidValueException;
+use Unleash\Client\Metrics\MetricsHandler;
 use Unleash\Client\ProxyUnleashBuilder;
 use Unleash\Client\Tests\Traits\RealCacheImplementationTrait;
 
@@ -76,6 +79,43 @@ final class ProxyUnleashBuilderTest extends TestCase
         self::assertCount(2, $headers);
         self::assertArrayHasKey('Authorization', $headers);
         self::assertEquals('test2', $headers['Authorization']);
+
+        $instance = $instance
+            ->withHeaders([
+                'Some-Header-2' => 'value',
+                'Some-Header-3' => 'value',
+            ]);
+        $headers = $headersProperty->getValue($instance);
+        self::assertCount(2, $headers);
+        self::assertArrayHasKey('Some-Header-2', $headers);
+        self::assertArrayHasKey('Some-Header-3', $headers);
+    }
+
+    public function testWithMetricsInterval()
+    {
+        self::assertNotSame($this->instance, $this->instance->withMetricsInterval(5000));
+    }
+
+    public function testWithMetricsEnabled()
+    {
+        self::assertNotSame($this->instance, $this->instance->withMetricsEnabled(false));
+    }
+
+    public function testWithMetricsHandler()
+    {
+        $metricsHandler = new class implements MetricsHandler {
+            public function handleMetrics(Feature $feature, bool $successful, Variant $variant = null): void
+            {
+            }
+        };
+        $instance = $this->instance
+            ->withMetricsHandler($metricsHandler)
+        ;
+        self::assertNotSame($this->instance, $instance);
+        self::assertSame(
+            $metricsHandler,
+            $this->getProperty($instance->withAppUrl('http://test.com')->withInstanceId('test')->withAppName('test-app')->build(), 'metricsHandler')
+        );
     }
 
     public function testWithStaleCacheHandler()
@@ -83,24 +123,78 @@ final class ProxyUnleashBuilderTest extends TestCase
         $cache1 = $this->getCache();
         $cache2 = $this->getCache();
 
-        $instance = $this->instance->withAppUrl("http://test.com")->withInstanceId('test')->withAppName('test-app');
+        $instance = $this->instance->withAppUrl('http://test.com')->withInstanceId('test')->withAppName('test-app');
         self::assertNull($this->getProperty($instance, 'staleCache'));
         self::assertNotNull($this->getConfiguration($instance->build())->getStaleCache());
 
-        $instance = $this->instance->withCacheHandler($cache1)->withAppUrl("http://test.com")->withInstanceId('test')->withAppName('test-app');
+        $instance = $this->instance->withCacheHandler($cache1)->withAppUrl('http://test.com')->withInstanceId('test')->withAppName('test-app');
         self::assertNull($this->getProperty($instance, 'staleCache'));
         self::assertSame($cache1, $this->getConfiguration($instance->build())->getStaleCache());
 
         $instance = $this->instance
             ->withCacheHandler($cache1)
             ->withStaleCacheHandler($cache2)
-            ->withAppUrl("http://test.com")
+            ->withAppUrl('http://test.com')
             ->withInstanceId('test')
             ->withAppName('test-app')
         ;
         self::assertSame($cache2, $this->getProperty($instance, 'staleCache'));
         self::assertSame($cache2, $this->getConfiguration($instance->build())->getStaleCache());
         self::assertSame($cache1, $this->getConfiguration($instance->build())->getCache());
+    }
+
+    public function testBuild()
+    {
+        try {
+            $this->instance->build();
+            self::fail('Expected exception: ' . InvalidValueException::class);
+        } catch (InvalidValueException $e) {
+        }
+
+        try {
+            $this->instance
+                ->withAppUrl('https://example.com')
+                ->build();
+            self::fail('Expected exception: ' . InvalidValueException::class);
+        } catch (InvalidValueException $e) {
+        }
+
+        try {
+            $this->instance
+                ->withAppUrl('https://example.com')
+                ->withInstanceId('test')
+                ->build();
+            self::fail('Expected exception: ' . InvalidValueException::class);
+        } catch (InvalidValueException $e) {
+        }
+
+        $instance = $this->instance
+            ->withAppUrl('https://example.com')
+            ->withAppName('Test App')
+            ->withInstanceId('test')
+            ->build();
+        $reflection = new ReflectionObject($instance);
+
+        $configurationProperty = $reflection->getProperty('configuration');
+        $configurationProperty->setAccessible(true);
+        $configuration = $configurationProperty->getValue($instance);
+
+        self::assertEquals('https://example.com/', $configuration->getUrl());
+        self::assertEquals('Test App', $configuration->getAppName());
+        self::assertEquals('test', $configuration->getInstanceId());
+        self::assertNotNull($configuration->getCache());
+        self::assertIsInt($configuration->getTtl());
+
+        $requestFactory = $this->newRequestFactory();
+        $httpClient = $this->newHttpClient();
+
+        $instance = $this->instance
+            ->withAppUrl('https://example.com')
+            ->withAppName('Test App')
+            ->withInstanceId('test')
+            ->withRequestFactory($requestFactory)
+            ->withHttpClient($httpClient)
+            ->build();
     }
 
     private function getConfiguration(DefaultProxyUnleash $unleash): UnleashConfiguration
