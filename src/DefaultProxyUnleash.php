@@ -72,11 +72,7 @@ final class DefaultProxyUnleash implements ProxyUnleash
         $context ??= new UnleashContext();
         $featureUrl = $this->configuration->getUrl() . 'features/' . $featureName;
 
-        try {
-            $url = $this->addQuery($featureUrl, $this->contextToQueryString($context));
-        } catch (\InvalidArgumentException $e) {
-            return null;
-        }
+        $url = $this->addQuery($featureUrl, $this->contextToQueryString($context));
 
         $request = $this->requestFactory->createRequest('GET', $url)
             ->withHeader('Content-Type', 'application/json')

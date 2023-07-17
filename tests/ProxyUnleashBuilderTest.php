@@ -145,7 +145,9 @@ final class ProxyUnleashBuilderTest extends TestCase
             $this->assertDefaultCacheImplementation($instance, $cacheProperty, FilesystemCachePool::class, $locator, $defaultImplementationsProperty, $defaultImplementations);
         }
 
-        $this->assertDefaultCacheImplementation($instance, $cacheProperty, Psr16Cache::class, $locator, $defaultImplementationsProperty, $defaultImplementations);
+        if (class_exists(Psr16Cache::class)) {
+            $this->assertDefaultCacheImplementation($instance, $cacheProperty, Psr16Cache::class, $locator, $defaultImplementationsProperty, $defaultImplementations);
+        }
 
         $this->expectException(InvalidValueException::class);
         $instance->build();
