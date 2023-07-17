@@ -118,6 +118,23 @@ final class ProxyUnleashBuilderTest extends TestCase
         );
     }
 
+    public function testWithStaleTtl()
+    {
+        $instance = $this->instance->withAppUrl('http://test.com')->withInstanceId('test')->withAppName('test-app');
+        self::assertNull($this->getProperty($this->instance, 'staleTtl'));
+        self::assertEquals(
+            30 * 60,
+            $this->getConfiguration($instance->build())->getStaleTtl()
+        );
+
+        $instance = $this->instance->withAppUrl('http://test.com')->withInstanceId('test')->withAppName('test-app')->withStaleTtl(60 * 60);
+        self::assertNull($this->getProperty($this->instance, 'staleTtl'));
+        self::assertEquals(
+            60 * 60,
+            $this->getConfiguration($instance->build())->getStaleTtl()
+        );
+    }
+
     public function testWithStaleCacheHandler()
     {
         $cache1 = $this->getCache();
