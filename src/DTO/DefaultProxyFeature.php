@@ -29,9 +29,14 @@ final class DefaultProxyFeature implements ProxyFeature
      */
     public function __construct(array $response)
     {
+        // This is validated elsewhere, this should only happen if a consumer
+        // tries to new this up manually and isn't interesting to tests
+
+        // @codeCoverageIgnoreStart
         if (!isset($response['name'], $response['enabled'], $response['variant'], $response['impression_data'])) {
             throw new \InvalidArgumentException('Invalid response structure');
         }
+        // @codeCoverageIgnoreEnd
 
         $this->name = $response['name'];
         $this->enabled = $response['enabled'];

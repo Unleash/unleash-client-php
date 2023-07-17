@@ -71,7 +71,12 @@ final class DefaultProxyUnleash implements ProxyUnleash
 
         $context ??= new UnleashContext();
         $featureUrl = $this->configuration->getUrl() . 'features/' . $featureName;
-        $url = $this->addQuery($featureUrl, $this->contextToQueryString($context));
+
+        try {
+            $url = $this->addQuery($featureUrl, $this->contextToQueryString($context));
+        } catch (\InvalidArgumentException $e) {
+            return null;
+        }
 
         $request = $this->requestFactory->createRequest('GET', $url)
             ->withHeader('Content-Type', 'application/json')
@@ -130,9 +135,15 @@ final class DefaultProxyUnleash implements ProxyUnleash
     {
         $urlParts = parse_url($url);
 
+        // The base url is already validated, so this should only happen if a feature toggle has a name
+        // that can't form part of a URL but this shouldn't ever happen, given that this is validated
+        // by the Unleash server and UI
+
+        // @codeCoverageIgnoreStart
         if ($urlParts === false) {
             throw new \InvalidArgumentException('Invalid URL provided');
         }
+        // @codeCoverageIgnoreEnd
 
         if (!isset($urlParts['query'])) {
             $urlParts['query'] = $query;
