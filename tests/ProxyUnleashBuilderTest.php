@@ -11,7 +11,10 @@ use ReflectionObject;
 use Symfony\Component\Cache\Psr16Cache;
 use Unleash\Client\Configuration\UnleashConfiguration;
 use Unleash\Client\DefaultProxyUnleash;
+use Unleash\Client\DTO\Feature;
+use Unleash\Client\DTO\Variant;
 use Unleash\Client\Exception\InvalidValueException;
+use Unleash\Client\Metrics\MetricsHandler;
 use Unleash\Client\ProxyUnleashBuilder;
 use Unleash\Client\Tests\Traits\RealCacheImplementationTrait;
 
@@ -58,6 +61,64 @@ final class ProxyUnleashBuilderTest extends TestCase
     public function testWithRequestFactory()
     {
         self::assertNotSame($this->instance, $this->instance->withRequestFactory($this->newRequestFactory()));
+    }
+
+    public function testWithHeader()
+    {
+        self::assertNotSame($this->instance, $this->instance->withHeader('Authorization', 'test'));
+
+        $instance = $this->instance
+            ->withHeader('Authorization', 'test')
+            ->withHeader('Some-Header', 'test');
+        $reflection = new ReflectionObject($instance);
+        $headersProperty = $reflection->getProperty('headers');
+        $headersProperty->setAccessible(true);
+        $headers = $headersProperty->getValue($instance);
+        self::assertCount(2, $headers);
+
+        $instance = $instance
+            ->withHeader('Authorization', 'test2');
+        $headers = $headersProperty->getValue($instance);
+        self::assertCount(2, $headers);
+        self::assertArrayHasKey('Authorization', $headers);
+        self::assertEquals('test2', $headers['Authorization']);
+
+        $instance = $instance
+            ->withHeaders([
+                'Some-Header-2' => 'value',
+                'Some-Header-3' => 'value',
+            ]);
+        $headers = $headersProperty->getValue($instance);
+        self::assertCount(2, $headers);
+        self::assertArrayHasKey('Some-Header-2', $headers);
+        self::assertArrayHasKey('Some-Header-3', $headers);
+    }
+
+    public function testWithMetricsInterval()
+    {
+        self::assertNotSame($this->instance, $this->instance->withMetricsInterval(5000));
+    }
+
+    public function testWithMetricsEnabled()
+    {
+        self::assertNotSame($this->instance, $this->instance->withMetricsEnabled(false));
+    }
+
+    public function testWithMetricsHandler()
+    {
+        $metricsHandler = new class implements MetricsHandler {
+            public function handleMetrics(Feature $feature, bool $successful, Variant $variant = null): void
+            {
+            }
+        };
+        $instance = $this->instance
+            ->withMetricsHandler($metricsHandler)
+        ;
+        self::assertNotSame($this->instance, $instance);
+        self::assertSame(
+            $metricsHandler,
+            $this->getProperty($instance->withAppUrl('http://test.com')->withInstanceId('test')->withAppName('test-app')->build(), 'metricsHandler')
+        );
     }
 
     public function testWithoutDefaultCache()
