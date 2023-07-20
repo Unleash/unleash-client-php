@@ -8,7 +8,7 @@ use Unleash\Client\Configuration\UnleashConfiguration;
 use Unleash\Client\Configuration\UnleashContext;
 use Unleash\Client\DefaultUnleash;
 use Unleash\Client\DTO\Feature;
-use Unleash\Client\DTO\Variant;
+use Unleash\Client\DTO\ProxyVariant;
 use Unleash\Client\Enum\ContextField;
 use Unleash\Client\Exception\InvalidValueException;
 use Unleash\Client\Metrics\MetricsHandler;
@@ -185,7 +185,7 @@ final class UnleashContextTest extends AbstractHttpClientTest
                 ->setAutoRegistrationEnabled(false)
                 ->setCache($this->getCache()),
             new class implements MetricsHandler {
-                public function handleMetrics(Feature $feature, bool $successful, Variant $variant = null): void
+                public function handleMetrics(Feature $feature, bool $successful, ProxyVariant $variant = null): void
                 {
                 }
             },

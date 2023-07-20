@@ -4,7 +4,7 @@ namespace Unleash\Client\Tests\TestHelpers\DependencyContainer;
 
 use Psr\SimpleCache\CacheInterface;
 use Unleash\Client\DTO\Feature;
-use Unleash\Client\DTO\Variant;
+use Unleash\Client\DTO\ProxyVariant;
 use Unleash\Client\Helper\Builder\CacheAware;
 use Unleash\Client\Metrics\MetricsHandler;
 
@@ -20,7 +20,7 @@ final class CacheAwareMetricsHandler implements MetricsHandler, CacheAware
         $this->cache = $cache;
     }
 
-    public function handleMetrics(Feature $feature, bool $successful, Variant $variant = null): void
+    public function handleMetrics(Feature $feature, bool $successful, ProxyVariant $variant = null): void
     {
     }
 }

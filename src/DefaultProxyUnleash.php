@@ -11,13 +11,11 @@ use Unleash\Client\Configuration\UnleashContext;
 use Unleash\Client\DTO\DefaultFeature;
 use Unleash\Client\DTO\DefaultProxyFeature;
 use Unleash\Client\DTO\DefaultProxyVariant;
-use Unleash\Client\DTO\DefaultVariant;
 use Unleash\Client\DTO\ProxyFeature;
 use Unleash\Client\DTO\ProxyVariant;
-use Unleash\Client\Enum\Stickiness;
 use Unleash\Client\Metrics\MetricsHandler;
 
-final class DefaultProxyUnleash implements ProxyUnleash
+final class DefaultProxyUnleash implements Unleash
 {
     public function __construct(
         private UnleashConfiguration $configuration,
@@ -31,6 +29,11 @@ final class DefaultProxyUnleash implements ProxyUnleash
         $this->configuration = $configuration;
         $this->cache = $cache;
         $this->metricsHandler = $metricsHandler;
+    }
+
+    public function register(): bool
+    {
+        return false;
     }
 
     public function isEnabled(string $featureName, ?Context $context = null, bool $default = false): bool
@@ -51,7 +54,7 @@ final class DefaultProxyUnleash implements ProxyUnleash
         if ($response !== null) {
             $variant = $response->getVariant();
         }
-        $metricVariant = new DefaultVariant($variant->getName(), $variant->isEnabled(), 0, Stickiness::DEFAULT, $variant->getPayload());
+        $metricVariant = new DefaultProxyVariant($variant->getName(), $variant->isEnabled(), $variant->getPayload());
         $this->metricsHandler->handleMetrics(new DefaultFeature($featureName, $variant->isEnabled(), []), $variant->isEnabled(), $metricVariant);
 
         return $variant;

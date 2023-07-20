@@ -6,7 +6,7 @@ use Unleash\Client\Configuration\UnleashConfiguration;
 use Unleash\Client\Configuration\UnleashContext;
 use Unleash\Client\DefaultUnleash;
 use Unleash\Client\DTO\Feature;
-use Unleash\Client\DTO\Variant;
+use Unleash\Client\DTO\ProxyVariant;
 use Unleash\Client\Metrics\MetricsHandler;
 use Unleash\Client\Stickiness\MurmurHashCalculator;
 use Unleash\Client\Strategy\DefaultStrategyHandler;
@@ -41,7 +41,7 @@ final class ClientSpecificationTest extends AbstractHttpClientTest
                 ->setAutoRegistrationEnabled(false)
                 ->setCache($this->getCache()),
             new class implements MetricsHandler {
-                public function handleMetrics(Feature $feature, bool $successful, Variant $variant = null): void
+                public function handleMetrics(Feature $feature, bool $successful, ProxyVariant $variant = null): void
                 {
                 }
             },

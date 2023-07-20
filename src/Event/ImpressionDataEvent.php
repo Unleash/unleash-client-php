@@ -8,7 +8,7 @@ use JsonSerializable;
 use Unleash\Client\Configuration\Context;
 use Unleash\Client\Configuration\UnleashConfiguration;
 use Unleash\Client\DTO\Feature;
-use Unleash\Client\DTO\Variant;
+use Unleash\Client\DTO\ProxyVariant;
 use Unleash\Client\Enum\ImpressionDataEventType;
 
 final class ImpressionDataEvent extends AbstractEvent implements JsonSerializable
@@ -20,7 +20,7 @@ final class ImpressionDataEvent extends AbstractEvent implements JsonSerializabl
         private readonly UnleashConfiguration $configuration,
         private readonly Context $context,
         private readonly Feature $feature,
-        private readonly ?Variant $variant,
+        private readonly ?ProxyVariant $variant,
     ) {
     }
 

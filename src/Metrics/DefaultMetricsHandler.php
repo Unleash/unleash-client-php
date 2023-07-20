@@ -5,7 +5,7 @@ namespace Unleash\Client\Metrics;
 use DateTimeImmutable;
 use Unleash\Client\Configuration\UnleashConfiguration;
 use Unleash\Client\DTO\Feature;
-use Unleash\Client\DTO\Variant;
+use Unleash\Client\DTO\ProxyVariant;
 use Unleash\Client\Enum\CacheKey;
 
 final class DefaultMetricsHandler implements MetricsHandler
@@ -16,7 +16,7 @@ final class DefaultMetricsHandler implements MetricsHandler
     ) {
     }
 
-    public function handleMetrics(Feature $feature, bool $successful, Variant $variant = null): void
+    public function handleMetrics(Feature $feature, bool $successful, ProxyVariant $variant = null): void
     {
         if (!$this->configuration->isMetricsEnabled()) {
             return;

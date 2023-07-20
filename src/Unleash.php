@@ -3,7 +3,7 @@
 namespace Unleash\Client;
 
 use Unleash\Client\Configuration\Context;
-use Unleash\Client\DTO\Variant;
+use Unleash\Client\DTO\ProxyVariant;
 
 interface Unleash
 {
@@ -11,7 +11,7 @@ interface Unleash
 
     public function isEnabled(string $featureName, ?Context $context = null, bool $default = false): bool;
 
-    public function getVariant(string $featureName, ?Context $context = null, ?Variant $fallbackVariant = null): Variant;
+    public function getVariant(string $featureName, ?Context $context = null, ?ProxyVariant $fallbackVariant = null): ProxyVariant;
 
     public function register(): bool;
 }

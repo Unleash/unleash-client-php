@@ -7,7 +7,7 @@ use GuzzleHttp\Exception\TransferException;
 use GuzzleHttp\Psr7\HttpFactory;
 use Unleash\Client\Configuration\UnleashConfiguration;
 use Unleash\Client\DTO\DefaultFeature;
-use Unleash\Client\DTO\DefaultVariant;
+use Unleash\Client\DTO\DefaultProxyVariant;
 use Unleash\Client\Metrics\DefaultMetricsSender;
 use Unleash\Client\Metrics\MetricsBucket;
 use Unleash\Client\Metrics\MetricsBucketToggle;
@@ -56,7 +56,7 @@ final class DefaultMetricsSenderTest extends AbstractHttpClientTest
             ->addToggle(new MetricsBucketToggle(
                 new DefaultFeature('tet', true, []),
                 true,
-                new DefaultVariant('test', true)
+                new DefaultProxyVariant('test', true)
             ));
         $this->pushResponse([]);
         $this->instance->sendMetrics($bucket);
