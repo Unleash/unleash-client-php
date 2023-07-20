@@ -5,8 +5,8 @@ namespace Unleash\Client;
 use Unleash\Client\Client\RegistrationService;
 use Unleash\Client\Configuration\Context;
 use Unleash\Client\Configuration\UnleashConfiguration;
-use Unleash\Client\DTO\ProxyVariant;
 use Unleash\Client\DTO\Strategy;
+use Unleash\Client\DTO\Variant;
 use Unleash\Client\Enum\ImpressionDataEventType;
 use Unleash\Client\Event\FeatureToggleDisabledEvent;
 use Unleash\Client\Event\FeatureToggleMissingStrategyHandlerEvent;
@@ -115,7 +115,7 @@ final class DefaultUnleash implements Unleash
         return false;
     }
 
-    public function getVariant(string $featureName, ?Context $context = null, ?ProxyVariant $fallbackVariant = null): ProxyVariant
+    public function getVariant(string $featureName, ?Context $context = null, ?Variant $fallbackVariant = null): Variant
     {
         $fallbackVariant ??= $this->variantHandler->getDefaultVariant();
         $context ??= $this->configuration->getContextProvider()->getContext();

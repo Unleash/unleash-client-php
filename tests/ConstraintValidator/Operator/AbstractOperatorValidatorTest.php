@@ -7,7 +7,7 @@ use Unleash\Client\ConstraintValidator\Operator\Lists\InListOperatorValidator;
 use Unleash\Client\ConstraintValidator\Operator\String\StringContainsOperatorValidator;
 use Unleash\Client\DefaultUnleash;
 use Unleash\Client\DTO\Feature;
-use Unleash\Client\DTO\ProxyVariant;
+use Unleash\Client\DTO\Variant;
 use Unleash\Client\Enum\ConstraintOperator;
 use Unleash\Client\Exception\OperatorValidatorException;
 use Unleash\Client\Metrics\MetricsHandler;
@@ -53,7 +53,7 @@ final class AbstractOperatorValidatorTest extends AbstractHttpClientTest
                 ->setMetricsEnabled(false)
                 ->setAutoRegistrationEnabled(false),
             new class implements MetricsHandler {
-                public function handleMetrics(Feature $feature, bool $successful, ProxyVariant $variant = null): void
+                public function handleMetrics(Feature $feature, bool $successful, Variant $variant = null): void
                 {
                 }
             },

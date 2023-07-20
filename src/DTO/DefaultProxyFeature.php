@@ -8,7 +8,7 @@ final class DefaultProxyFeature implements ProxyFeature
 
     public bool $enabled;
 
-    public ProxyVariant $variant;
+    public Variant $variant;
 
     public bool $impression_data;
 
@@ -48,7 +48,7 @@ final class DefaultProxyFeature implements ProxyFeature
             $payload = new DefaultVariantPayload($response['variant']['payload']['type'], $response['variant']['payload']['value']);
         }
 
-        $this->variant = new DefaultProxyVariant($response['variant']['name'], $response['variant']['enabled'], $payload);
+        $this->variant = new DefaultVariant($response['variant']['name'], $response['variant']['enabled'], $payload);
     }
 
     public function getName(): string
@@ -61,7 +61,7 @@ final class DefaultProxyFeature implements ProxyFeature
         return $this->enabled;
     }
 
-    public function getVariant(): ProxyVariant
+    public function getVariant(): Variant
     {
         return $this->variant;
     }

@@ -3,7 +3,7 @@
 namespace Unleash\Client\Metrics;
 
 use Unleash\Client\DTO\Feature;
-use Unleash\Client\DTO\ProxyVariant;
+use Unleash\Client\DTO\Variant;
 
 /**
  * @internal
@@ -13,7 +13,7 @@ final class MetricsBucketToggle
     public function __construct(
         private readonly Feature $feature,
         private readonly bool $success,
-        private readonly ?ProxyVariant $variant = null,
+        private readonly ?Variant $variant = null,
     ) {
     }
 
@@ -27,7 +27,7 @@ final class MetricsBucketToggle
         return $this->success;
     }
 
-    public function getVariant(): ?ProxyVariant
+    public function getVariant(): ?Variant
     {
         return $this->variant;
     }

@@ -27,10 +27,10 @@ use Unleash\Client\Configuration\UnleashConfiguration;
 use Unleash\Client\Configuration\UnleashContext;
 use Unleash\Client\ContextProvider\DefaultUnleashContextProvider;
 use Unleash\Client\DefaultUnleash;
-use Unleash\Client\DTO\DefaultProxyVariant;
+use Unleash\Client\DTO\DefaultVariant;
 use Unleash\Client\DTO\Feature;
-use Unleash\Client\DTO\ProxyVariant;
 use Unleash\Client\DTO\Strategy;
+use Unleash\Client\DTO\Variant;
 use Unleash\Client\Event\FeatureToggleDisabledEvent;
 use Unleash\Client\Event\FeatureToggleNotFoundEvent;
 use Unleash\Client\Event\UnleashEvents;
@@ -783,7 +783,7 @@ final class UnleashBuilderTest extends TestCase
     public function testWithMetricsHandler()
     {
         $metricsHandler = new class implements MetricsHandler {
-            public function handleMetrics(Feature $feature, bool $successful, ProxyVariant $variant = null): void
+            public function handleMetrics(Feature $feature, bool $successful, Variant $variant = null): void
             {
             }
         };
@@ -800,12 +800,12 @@ final class UnleashBuilderTest extends TestCase
     public function testWithVariantHandler()
     {
         $variantHandler = new class implements VariantHandler {
-            public function getDefaultVariant(): ProxyVariant
+            public function getDefaultVariant(): Variant
             {
-                return new DefaultProxyVariant('test', false);
+                return new DefaultVariant('test', false);
             }
 
-            public function selectVariant(Feature $feature, Context $context): ?ProxyVariant
+            public function selectVariant(Feature $feature, Context $context): ?Variant
             {
                 return null;
             }

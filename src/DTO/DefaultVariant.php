@@ -4,7 +4,7 @@ namespace Unleash\Client\DTO;
 
 use JetBrains\PhpStorm\ArrayShape;
 
-final class DefaultProxyVariant implements ProxyVariant
+final class DefaultVariant implements Variant
 {
     public function __construct(
         private readonly string $name,

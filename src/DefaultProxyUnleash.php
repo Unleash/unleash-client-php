@@ -10,9 +10,9 @@ use Unleash\Client\Configuration\UnleashConfiguration;
 use Unleash\Client\Configuration\UnleashContext;
 use Unleash\Client\DTO\DefaultFeature;
 use Unleash\Client\DTO\DefaultProxyFeature;
-use Unleash\Client\DTO\DefaultProxyVariant;
+use Unleash\Client\DTO\DefaultVariant;
 use Unleash\Client\DTO\ProxyFeature;
-use Unleash\Client\DTO\ProxyVariant;
+use Unleash\Client\DTO\Variant;
 use Unleash\Client\Metrics\MetricsHandler;
 
 final class DefaultProxyUnleash implements Unleash
@@ -45,16 +45,16 @@ final class DefaultProxyUnleash implements Unleash
         return $enabled;
     }
 
-    public function getVariant(string $featureName, ?Context $context = null, ?ProxyVariant $fallbackVariant = null): ProxyVariant
+    public function getVariant(string $featureName, ?Context $context = null, ?Variant $fallbackVariant = null): Variant
     {
-        $variant = $fallbackVariant ?? new DefaultProxyVariant('disabled', false, null);
+        $variant = $fallbackVariant ?? new DefaultVariant('disabled', false, null);
 
         $response = $this->resolveSingleToggle($featureName, $context);
 
         if ($response !== null) {
             $variant = $response->getVariant();
         }
-        $metricVariant = new DefaultProxyVariant($variant->getName(), $variant->isEnabled(), $variant->getPayload());
+        $metricVariant = new DefaultVariant($variant->getName(), $variant->isEnabled(), $variant->getPayload());
         $this->metricsHandler->handleMetrics(new DefaultFeature($featureName, $variant->isEnabled(), []), $variant->isEnabled(), $metricVariant);
 
         return $variant;

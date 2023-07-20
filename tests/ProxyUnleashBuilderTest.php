@@ -12,7 +12,7 @@ use Symfony\Component\Cache\Psr16Cache;
 use Unleash\Client\Configuration\UnleashConfiguration;
 use Unleash\Client\DefaultProxyUnleash;
 use Unleash\Client\DTO\Feature;
-use Unleash\Client\DTO\ProxyVariant;
+use Unleash\Client\DTO\Variant;
 use Unleash\Client\Exception\InvalidValueException;
 use Unleash\Client\Metrics\MetricsHandler;
 use Unleash\Client\ProxyUnleashBuilder;
@@ -107,7 +107,7 @@ final class ProxyUnleashBuilderTest extends TestCase
     public function testWithMetricsHandler()
     {
         $metricsHandler = new class implements MetricsHandler {
-            public function handleMetrics(Feature $feature, bool $successful, ProxyVariant $variant = null): void
+            public function handleMetrics(Feature $feature, bool $successful, Variant $variant = null): void
             {
             }
         };

@@ -4,7 +4,7 @@ namespace Unleash\Client\Tests\DTO;
 
 use PHPUnit\Framework\TestCase;
 use Unleash\Client\DTO\DefaultProxyFeature;
-use Unleash\Client\DTO\DefaultProxyVariant;
+use Unleash\Client\DTO\DefaultVariant;
 
 final class DefaultProxyFeatureTest extends TestCase
 {
@@ -14,7 +14,7 @@ final class DefaultProxyFeatureTest extends TestCase
         self::assertIsString($instance->getName());
         self::assertIsBool($instance->isEnabled());
         self::assertIsBool($instance->hasImpressionData());
-        self::assertInstanceOf(DefaultProxyVariant::class, $instance->getVariant());
+        self::assertInstanceOf(DefaultVariant::class, $instance->getVariant());
 
         self::assertEquals('test', $instance->getName());
         self::assertTrue($instance->isEnabled());

@@ -4,10 +4,10 @@ namespace Unleash\Client\Variant;
 
 use JetBrains\PhpStorm\Pure;
 use Unleash\Client\Configuration\Context;
-use Unleash\Client\DTO\DefaultProxyVariant;
+use Unleash\Client\DTO\DefaultVariant;
 use Unleash\Client\DTO\Feature;
 use Unleash\Client\DTO\InternalVariant;
-use Unleash\Client\DTO\ProxyVariant;
+use Unleash\Client\DTO\Variant;
 use Unleash\Client\Enum\Stickiness;
 use Unleash\Client\Stickiness\StickinessCalculator;
 
@@ -19,16 +19,16 @@ final class DefaultVariantHandler implements VariantHandler
     }
 
     #[Pure]
-    public function getDefaultVariant(): DefaultProxyVariant
+    public function getDefaultVariant(): DefaultVariant
     {
-        return new DefaultProxyVariant(
+        return new DefaultVariant(
             'disabled',
             false,
             null,
         );
     }
 
-    public function selectVariant(Feature $feature, Context $context): ?ProxyVariant
+    public function selectVariant(Feature $feature, Context $context): ?Variant
     {
         $totalWeight = 0;
         foreach ($feature->getVariants() as $variant) {
@@ -39,7 +39,7 @@ final class DefaultVariantHandler implements VariantHandler
         }
 
         if ($overridden = $this->findOverriddenVariant($feature, $context)) {
-            return new DefaultProxyVariant(
+            return new DefaultVariant(
                 $overridden->getName(),
                 true,
                 $overridden->getPayload()
@@ -59,7 +59,7 @@ final class DefaultVariantHandler implements VariantHandler
             }
             $counter += $variant->getWeight();
             if ($counter >= $stickiness) {
-                return new DefaultProxyVariant(
+                return new DefaultVariant(
                     $variant->getName(),
                     true,
                     $variant->getPayload(),

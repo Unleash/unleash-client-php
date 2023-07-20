@@ -4,7 +4,7 @@ namespace Unleash\Client\DTO;
 
 use JsonSerializable;
 
-interface ProxyVariant extends JsonSerializable
+interface Variant extends JsonSerializable
 {
     public function getName(): string;
 

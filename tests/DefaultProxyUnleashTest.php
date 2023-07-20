@@ -14,7 +14,7 @@ use Symfony\Component\Cache\Psr16Cache;
 use Unleash\Client\Configuration\UnleashConfiguration;
 use Unleash\Client\Configuration\UnleashContext;
 use Unleash\Client\DefaultProxyUnleash;
-use Unleash\Client\DTO\DefaultProxyVariant;
+use Unleash\Client\DTO\DefaultVariant;
 use Unleash\Client\DTO\DefaultVariantPayload;
 use Unleash\Client\Metrics\DefaultMetricsHandler;
 use Unleash\Client\Metrics\DefaultMetricsSender;
@@ -92,7 +92,7 @@ final class DefaultProxyUnleashTest extends AbstractHttpClientTest
         $unleash = $builder->build();
         $variant = $unleash->getVariant('test');
 
-        $this->assertEquals($variant, new DefaultProxyVariant('some-variant', true, new DefaultVariantPayload('string', 'some-value')));
+        $this->assertEquals($variant, new DefaultVariant('some-variant', true, new DefaultVariantPayload('string', 'some-value')));
     }
 
     public function testVariantWithoutPayload()
@@ -110,7 +110,7 @@ final class DefaultProxyUnleashTest extends AbstractHttpClientTest
         $unleash = $builder->build();
         $variant = $unleash->getVariant('test');
 
-        $this->assertEquals($variant, new DefaultProxyVariant('some-variant', true));
+        $this->assertEquals($variant, new DefaultVariant('some-variant', true));
     }
 
     public function testMissingVariantReturnsDefault()
@@ -122,7 +122,7 @@ final class DefaultProxyUnleashTest extends AbstractHttpClientTest
         $unleash = $builder->build();
         $variant = $unleash->getVariant('test');
 
-        $this->assertEquals($variant, new DefaultProxyVariant('disabled', false));
+        $this->assertEquals($variant, new DefaultVariant('disabled', false));
     }
 
     public function testVariantWithNullPayload()
@@ -141,7 +141,7 @@ final class DefaultProxyUnleashTest extends AbstractHttpClientTest
         $unleash = $builder->build();
         $variant = $unleash->getVariant('test');
 
-        $this->assertEquals($variant, new DefaultProxyVariant('some-variant', true));
+        $this->assertEquals($variant, new DefaultVariant('some-variant', true));
     }
 
     public function testCachingIsRespected()
