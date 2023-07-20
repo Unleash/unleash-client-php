@@ -6,7 +6,7 @@ use JetBrains\PhpStorm\ArrayShape;
 use JetBrains\PhpStorm\ExpectedValues;
 use Unleash\Client\Enum\Stickiness;
 
-final class DefaultVariant implements Variant
+final class DefaultInternalVariant implements InternalVariant
 {
     /**
      * @param array<VariantOverride> $overrides

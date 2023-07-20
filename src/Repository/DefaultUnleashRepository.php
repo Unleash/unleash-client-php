@@ -13,9 +13,9 @@ use Unleash\Client\Configuration\UnleashConfiguration;
 use Unleash\Client\DTO\Constraint;
 use Unleash\Client\DTO\DefaultConstraint;
 use Unleash\Client\DTO\DefaultFeature;
+use Unleash\Client\DTO\DefaultInternalVariant;
 use Unleash\Client\DTO\DefaultSegment;
 use Unleash\Client\DTO\DefaultStrategy;
-use Unleash\Client\DTO\DefaultVariant;
 use Unleash\Client\DTO\DefaultVariantOverride;
 use Unleash\Client\DTO\DefaultVariantPayload;
 use Unleash\Client\DTO\Feature;
@@ -194,7 +194,7 @@ final class DefaultUnleashRepository implements UnleashRepository
                 foreach ($variant['overrides'] ?? [] as $override) {
                     $overrides[] = new DefaultVariantOverride($override['contextName'], $override['values']);
                 }
-                $variants[] = new DefaultVariant(
+                $variants[] = new DefaultInternalVariant(
                     $variant['name'],
                     true,
                     $variant['weight'],

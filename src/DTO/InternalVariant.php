@@ -6,7 +6,7 @@ use JetBrains\PhpStorm\ExpectedValues;
 use JsonSerializable;
 use Unleash\Client\Enum\Stickiness;
 
-interface Variant extends JsonSerializable
+interface InternalVariant extends JsonSerializable
 {
     public function getName(): string;
 
