@@ -5,7 +5,7 @@
  */
 
 use Unleash\Client\Configuration\UnleashContext;
-use Unleash\Client\DTO\Variant;
+use Unleash\Client\DTO\ProxyVariant;
 use Unleash\Client\Unleash;
 use Unleash\Client\UnleashBuilder;
 
@@ -22,7 +22,7 @@ class PrefixedUnleash implements Unleash
         return $this->original->isEnabled("{$this->prefix}.{$featureName}", $context, $default);
     }
 
-    public function getVariant(string $featureName, ?UnleashContext $context = null, ?Variant $fallbackVariant = null): Variant
+    public function getVariant(string $featureName, ?UnleashContext $context = null, ?ProxyVariant $fallbackVariant = null): ProxyVariant
     {
         return $this->original->getVariant("{$this->prefix}.{$featureName}", $context, $fallbackVariant);
     }
