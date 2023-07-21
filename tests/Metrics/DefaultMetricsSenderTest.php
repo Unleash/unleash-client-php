@@ -9,7 +9,7 @@ use Unleash\Client\Configuration\UnleashConfiguration;
 use Unleash\Client\DTO\DefaultFeature;
 use Unleash\Client\DTO\DefaultVariant;
 use Unleash\Client\Metrics\DefaultMetricsSender;
-use Unleash\Client\Metrics\MetricsBucket;
+use Unleash\Client\Metrics\DefaultMetricsBucket;
 use Unleash\Client\Metrics\MetricsBucketToggle;
 use Unleash\Client\Tests\AbstractHttpClientTest;
 
@@ -39,7 +39,7 @@ final class DefaultMetricsSenderTest extends AbstractHttpClientTest
             'Authorization' => 'test',
         ]);
 
-        $bucket = new MetricsBucket(new DateTimeImmutable(), new DateTimeImmutable());
+        $bucket = new DefaultMetricsBucket(new DateTimeImmutable(), new DateTimeImmutable());
         $bucket
             ->addToggle(new MetricsBucketToggle(new DefaultFeature('test', true, []), true, null));
 
@@ -65,7 +65,7 @@ final class DefaultMetricsSenderTest extends AbstractHttpClientTest
     public function testSendMetricsFailure()
     {
         $this->pushResponse(new TransferException());
-        $bucket = new MetricsBucket(new DateTimeImmutable(), new DateTimeImmutable());
+        $bucket = new DefaultMetricsBucket(new DateTimeImmutable(), new DateTimeImmutable());
         $this->instance->sendMetrics($bucket);
     }
 }

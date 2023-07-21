@@ -31,22 +31,22 @@ final class DefaultMetricsHandler implements MetricsHandler
         }
     }
 
-    private function getOrCreateBucket(): MetricsBucket
+    private function getOrCreateBucket(): DefaultMetricsBucket
     {
         $cache = $this->configuration->getCache();
 
         $bucket = null;
         if ($cache->has(CacheKey::METRICS_BUCKET)) {
             $bucket = $cache->get(CacheKey::METRICS_BUCKET);
-            assert($bucket instanceof MetricsBucket || $bucket === null);
+            assert($bucket instanceof DefaultMetricsBucket || $bucket === null);
         }
 
-        $bucket ??= new MetricsBucket(new DateTimeImmutable());
+        $bucket ??= new DefaultMetricsBucket(new DateTimeImmutable());
 
         return $bucket;
     }
 
-    private function shouldSend(MetricsBucket $bucket): bool
+    private function shouldSend(DefaultMetricsBucket $bucket): bool
     {
         $bucketStartDate = $bucket->getStartDate();
         $nowMilliseconds = (int) (microtime(true) * 1000);
@@ -58,7 +58,7 @@ final class DefaultMetricsHandler implements MetricsHandler
         return $diff >= $this->configuration->getMetricsInterval();
     }
 
-    private function send(MetricsBucket $bucket): void
+    private function send(DefaultMetricsBucket $bucket): void
     {
         $bucket->setEndDate(new DateTimeImmutable());
         $this->metricsSender->sendMetrics($bucket);
@@ -68,7 +68,7 @@ final class DefaultMetricsHandler implements MetricsHandler
         }
     }
 
-    private function store(MetricsBucket $bucket): void
+    private function store(DefaultMetricsBucket $bucket): void
     {
         $cache = $this->configuration->getCache();
         $cache->set(CacheKey::METRICS_BUCKET, $bucket);
