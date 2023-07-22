@@ -8,9 +8,9 @@ use GuzzleHttp\Psr7\HttpFactory;
 use Unleash\Client\Configuration\UnleashConfiguration;
 use Unleash\Client\DTO\DefaultFeature;
 use Unleash\Client\DTO\DefaultVariant;
-use Unleash\Client\Metrics\DefaultMetricsSender;
 use Unleash\Client\Metrics\DefaultMetricsBucket;
-use Unleash\Client\Metrics\MetricsBucketToggle;
+use Unleash\Client\Metrics\DefaultMetricsBucketToggle;
+use Unleash\Client\Metrics\DefaultMetricsSender;
 use Unleash\Client\Tests\AbstractHttpClientTest;
 
 final class DefaultMetricsSenderTest extends AbstractHttpClientTest
@@ -41,7 +41,7 @@ final class DefaultMetricsSenderTest extends AbstractHttpClientTest
 
         $bucket = new DefaultMetricsBucket(new DateTimeImmutable(), new DateTimeImmutable());
         $bucket
-            ->addToggle(new MetricsBucketToggle(new DefaultFeature('test', true, []), true, null));
+            ->addToggle(new DefaultMetricsBucketToggle(new DefaultFeature('test', true, []), true, null));
 
         $this->pushResponse([], 1, 202);
         $this->instance->sendMetrics($bucket);
@@ -53,7 +53,7 @@ final class DefaultMetricsSenderTest extends AbstractHttpClientTest
 
         $this->configuration->setMetricsEnabled(true);
         $bucket
-            ->addToggle(new MetricsBucketToggle(
+            ->addToggle(new DefaultMetricsBucketToggle(
                 new DefaultFeature('tet', true, []),
                 true,
                 new DefaultVariant('test', true)

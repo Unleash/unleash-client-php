@@ -4,13 +4,12 @@ namespace Unleash\Client\Metrics;
 
 use DateTimeInterface;
 use JetBrains\PhpStorm\ArrayShape;
-use JsonSerializable;
 use LogicException;
 
 /**
  * @internal
  */
-final class DefaultMetricsBucket implements MetricsBucket, JsonSerializable
+final class DefaultMetricsBucket implements MetricsBucket
 {
     /**
      * @var array<MetricsBucketToggle>
@@ -30,6 +29,11 @@ final class DefaultMetricsBucket implements MetricsBucket, JsonSerializable
         return $this;
     }
 
+    public function setStartDate(DateTimeInterface $date): self
+    {
+        throw new LogicException('Start date cannot be modified');
+    }
+
     public function getStartDate(): DateTimeInterface
     {
         return $this->startDate;
@@ -40,6 +44,11 @@ final class DefaultMetricsBucket implements MetricsBucket, JsonSerializable
         $this->endDate = $endDate;
 
         return $this;
+    }
+
+    public function getEndDate(): ?DateTimeInterface
+    {
+        return $this->endDate;
     }
 
     /**

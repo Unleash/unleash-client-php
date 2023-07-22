@@ -29,7 +29,7 @@ final class DefaultMetricsSender implements MetricsSender
             ->withBody(new StringStream(json_encode([
                 'appName' => $this->configuration->getAppName(),
                 'instanceId' => $this->configuration->getInstanceId(),
-                'bucket' => $bucket->jsonSerialize(),
+                'bucket' => $bucket,
             ], JSON_THROW_ON_ERROR)));
         foreach ($this->configuration->getHeaders() as $name => $value) {
             $request = $request->withHeader($name, $value);

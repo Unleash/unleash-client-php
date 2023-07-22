@@ -23,7 +23,7 @@ final class DefaultMetricsHandler implements MetricsHandler
         }
 
         $bucket = $this->getOrCreateBucket();
-        $bucket->addToggle(new MetricsBucketToggle($feature, $successful, $variant));
+        $bucket->addToggle(new DefaultMetricsBucketToggle($feature, $successful, $variant));
         if ($this->shouldSend($bucket)) {
             $this->send($bucket);
         } else {
