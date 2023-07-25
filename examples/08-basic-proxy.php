@@ -1,14 +1,14 @@
 <?php
 
-use Unleash\Client\ProxyUnleashBuilder;
+use Unleash\Client\UnleashBuilder;
 
 require __DIR__ . '/_common.php';
 
-$unleash = ProxyUnleashBuilder::create()
+$unleash = UnleashBuilder::create()
     ->withAppName($appName)
     ->withAppUrl($appUrl)
     ->withInstanceId($instanceId)
-    ->withHeader('Authorization', $apiKey)
+    ->withProxy($apiKey)
     ->build();
 
 if ($unleash->isEnabled('myFeature')) {

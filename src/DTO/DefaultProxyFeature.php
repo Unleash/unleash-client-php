@@ -2,15 +2,15 @@
 
 namespace Unleash\Client\DTO;
 
-final class DefaultProxyFeature implements ProxyFeature
+final class DefaultProxyFeature implements Feature
 {
     public string $name;
 
     public bool $enabled;
 
-    public Variant $variant;
+    public ResolvedVariant $variant;
 
-    public bool $impression_data;
+    public bool $impressionData;
 
     /**
      * @param array{
@@ -24,7 +24,7 @@ final class DefaultProxyFeature implements ProxyFeature
      *             value: string
      *         }
      *     },
-     *     impression_data: bool
+     *     impressionData: bool
      * } $response
      */
     public function __construct(array $response)
@@ -40,7 +40,7 @@ final class DefaultProxyFeature implements ProxyFeature
 
         $this->name = $response['name'];
         $this->enabled = $response['enabled'];
-        $this->impression_data = $response['impression_data'];
+        $this->impressionData = $response['impression_data'];
 
         $payload = null;
 
@@ -48,7 +48,7 @@ final class DefaultProxyFeature implements ProxyFeature
             $payload = new DefaultVariantPayload($response['variant']['payload']['type'], $response['variant']['payload']['value']);
         }
 
-        $this->variant = new DefaultVariant($response['variant']['name'], $response['variant']['enabled'], $payload);
+        $this->variant = new DefaultResolvedVariant($response['variant']['name'], $response['variant']['enabled'], $payload);
     }
 
     public function getName(): string
@@ -61,13 +61,24 @@ final class DefaultProxyFeature implements ProxyFeature
         return $this->enabled;
     }
 
-    public function getVariant(): Variant
+    /**
+     * @return array<Variant>
+     */
+    public function getVariants(): array
     {
-        return $this->variant;
+        return [$this->variant];
     }
 
     public function hasImpressionData(): bool
     {
-        return $this->impression_data;
+        return $this->impressionData;
+    }
+
+    /**
+     * @return iterable<Strategy>
+     */
+    public function getStrategies(): iterable
+    {
+        return [];
     }
 }

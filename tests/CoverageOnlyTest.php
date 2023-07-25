@@ -7,8 +7,8 @@ use Symfony\Component\EventDispatcher\EventDispatcher;
 use Unleash\Client\Configuration\UnleashConfiguration;
 use Unleash\Client\Configuration\UnleashContext;
 use Unleash\Client\DTO\DefaultFeature;
-use Unleash\Client\DTO\DefaultInternalVariant;
 use Unleash\Client\DTO\DefaultSegment;
+use Unleash\Client\DTO\DefaultVariant;
 use Unleash\Client\DTO\DefaultVariantPayload;
 use Unleash\Client\Enum\VariantPayloadType;
 use Unleash\Client\Event\FeatureToggleDisabledEvent;
@@ -53,7 +53,7 @@ final class CoverageOnlyTest extends TestCase
 
     public function testDefaultVariant(): void
     {
-        $instance = new DefaultInternalVariant('test', true);
+        $instance = new DefaultVariant('test', true);
         $instance->getPayload();
     }
 

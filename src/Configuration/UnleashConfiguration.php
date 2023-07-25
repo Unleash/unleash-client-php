@@ -44,6 +44,7 @@ final class UnleashConfiguration
         private ?EventDispatcherInterface $eventDispatcher = null,
         private int $staleTtl = 30 * 60,
         private ?CacheInterface $staleCache = null,
+        private ?string $proxyKey = null,
     ) {
         $this->contextProvider ??= new DefaultUnleashContextProvider();
         if ($defaultContext !== null) {
@@ -88,6 +89,18 @@ final class UnleashConfiguration
     public function getTtl(): int
     {
         return $this->ttl;
+    }
+
+    public function getProxyKey(): ?string
+    {
+        return $this->proxyKey;
+    }
+
+    public function setProxyKey(string $proxyKey): self
+    {
+        $this->proxyKey = $proxyKey;
+
+        return $this;
     }
 
     public function setCache(CacheInterface $cache): self

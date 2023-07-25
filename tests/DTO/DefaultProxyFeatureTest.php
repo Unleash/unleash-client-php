@@ -4,7 +4,7 @@ namespace Unleash\Client\Tests\DTO;
 
 use PHPUnit\Framework\TestCase;
 use Unleash\Client\DTO\DefaultProxyFeature;
-use Unleash\Client\DTO\DefaultVariant;
+use Unleash\Client\DTO\DefaultResolvedVariant;
 
 final class DefaultProxyFeatureTest extends TestCase
 {
@@ -14,18 +14,18 @@ final class DefaultProxyFeatureTest extends TestCase
         self::assertIsString($instance->getName());
         self::assertIsBool($instance->isEnabled());
         self::assertIsBool($instance->hasImpressionData());
-        self::assertInstanceOf(DefaultVariant::class, $instance->getVariant());
+        self::assertInstanceOf(DefaultResolvedVariant::class, $instance->getVariants()[0]);
 
         self::assertEquals('test', $instance->getName());
         self::assertTrue($instance->isEnabled());
         self::assertTrue($instance->hasImpressionData());
-        self::assertEquals('someVariant', $instance->getVariant()->getName());
+        self::assertEquals('someVariant', $instance->getVariants()[0]->getName());
     }
 
     public function testToJson()
     {
         $instance = new DefaultProxyFeature(['name' => 'test', 'enabled' => true, 'impression_data' => true, 'variant' => ['name' => 'someVariant', 'enabled' => true, 'payload' => ['type' => 'string', 'value' => 'test']]]);
         $json = json_encode($instance);
-        self::assertEquals('{"name":"test","enabled":true,"variant":{"name":"someVariant","enabled":true,"payload":{"type":"string","value":"test"}},"impression_data":true}', $json);
+        self::assertEquals('{"name":"test","enabled":true,"variant":{"name":"someVariant","enabled":true,"payload":{"type":"string","value":"test"}},"impressionData":true}', $json);
     }
 }

@@ -6,7 +6,6 @@ use JetBrains\PhpStorm\Pure;
 use Unleash\Client\Configuration\Context;
 use Unleash\Client\DTO\DefaultVariant;
 use Unleash\Client\DTO\Feature;
-use Unleash\Client\DTO\InternalVariant;
 use Unleash\Client\DTO\Variant;
 use Unleash\Client\Enum\Stickiness;
 use Unleash\Client\Stickiness\StickinessCalculator;
@@ -19,12 +18,11 @@ final class DefaultVariantHandler implements VariantHandler
     }
 
     #[Pure]
-    public function getDefaultVariant(): DefaultVariant
+    public function getDefaultVariant(): Variant
     {
         return new DefaultVariant(
             'disabled',
-            false,
-            null,
+            false
         );
     }
 
@@ -39,11 +37,7 @@ final class DefaultVariantHandler implements VariantHandler
         }
 
         if ($overridden = $this->findOverriddenVariant($feature, $context)) {
-            return new DefaultVariant(
-                $overridden->getName(),
-                true,
-                $overridden->getPayload()
-            );
+            return $overridden;
         }
 
         $stickiness = $this->calculateStickiness(
@@ -59,11 +53,7 @@ final class DefaultVariantHandler implements VariantHandler
             }
             $counter += $variant->getWeight();
             if ($counter >= $stickiness) {
-                return new DefaultVariant(
-                    $variant->getName(),
-                    true,
-                    $variant->getPayload(),
-                );
+                return $variant;
             }
         }
 
@@ -75,7 +65,7 @@ final class DefaultVariantHandler implements VariantHandler
         // @codeCoverageIgnoreEnd
     }
 
-    private function findOverriddenVariant(Feature $feature, Context $context): ?InternalVariant
+    private function findOverriddenVariant(Feature $feature, Context $context): ?Variant
     {
         foreach ($feature->getVariants() as $variant) {
             foreach ($variant->getOverrides() as $override) {

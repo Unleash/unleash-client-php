@@ -5,7 +5,7 @@ namespace Unleash\Client\Tests\Variant;
 use PHPUnit\Framework\TestCase;
 use Unleash\Client\Configuration\UnleashContext;
 use Unleash\Client\DTO\DefaultFeature;
-use Unleash\Client\DTO\DefaultInternalVariant;
+use Unleash\Client\DTO\DefaultVariant;
 use Unleash\Client\Enum\Stickiness;
 use Unleash\Client\Stickiness\MurmurHashCalculator;
 use Unleash\Client\Variant\DefaultVariantHandler;
@@ -30,8 +30,8 @@ final class DefaultVariantHandlerTest extends TestCase
             true,
             [],
             [
-                new DefaultInternalVariant('test', true),
-                new DefaultInternalVariant('test2', true),
+                new DefaultVariant('test', true),
+                new DefaultVariant('test2', true),
             ]
         );
 
@@ -42,8 +42,8 @@ final class DefaultVariantHandlerTest extends TestCase
             true,
             [],
             [
-                new DefaultInternalVariant('test', true),
-                new DefaultInternalVariant('test2', true, 1),
+                new DefaultVariant('test', true),
+                new DefaultVariant('test2', true, 1),
             ]
         );
 
@@ -54,8 +54,8 @@ final class DefaultVariantHandlerTest extends TestCase
             true,
             [],
             [
-                new DefaultInternalVariant('test', true, 1, Stickiness::USER_ID),
-                new DefaultInternalVariant('test2', true, 1, Stickiness::USER_ID),
+                new DefaultVariant('test', true, 1, Stickiness::USER_ID),
+                new DefaultVariant('test2', true, 1, Stickiness::USER_ID),
             ]
         );
         self::assertEquals('test2', $instance->selectVariant($feature, new UnleashContext('125'))->getName());

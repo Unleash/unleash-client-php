@@ -17,7 +17,7 @@ interface Feature
     public function getStrategies(): iterable;
 
     /**
-     * @return array<InternalVariant>
+     * @return array<Variant>
      */
     public function getVariants(): array;
 }

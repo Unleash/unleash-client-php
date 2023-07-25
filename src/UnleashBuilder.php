@@ -42,6 +42,7 @@ use Unleash\Client\Helper\UnleashBuilderContainer;
 use Unleash\Client\Metrics\DefaultMetricsHandler;
 use Unleash\Client\Metrics\DefaultMetricsSender;
 use Unleash\Client\Metrics\MetricsHandler;
+use Unleash\Client\Repository\DefaultUnleashProxyRepository;
 use Unleash\Client\Repository\DefaultUnleashRepository;
 use Unleash\Client\Stickiness\MurmurHashCalculator;
 use Unleash\Client\Strategy\ApplicationHostnameStrategyHandler;
@@ -94,6 +95,8 @@ final class UnleashBuilder
     private ?BootstrapProvider $bootstrapProvider = null;
 
     private ?BootstrapHandler $bootstrapHandler = null;
+
+    private ?string $proxyKey = null;
 
     private bool $fetchingEnabled = true;
 
@@ -363,6 +366,12 @@ final class UnleashBuilder
         return $this->with('variantHandler', $variantHandler);
     }
 
+    #[Pure]
+    public function withProxy(string $proxyKey): self
+    {
+        return $this->with('proxyKey', $proxyKey);
+    }
+
     public function build(): Unleash
     {
         // basic scalar attributes
@@ -525,14 +534,29 @@ final class UnleashBuilder
         $this->initializeServices($metricsHandler, $dependencyContainer);
         $this->initializeServices($variantHandler, $dependencyContainer);
 
-        return new DefaultUnleash(
-            $this->strategies,
-            $repository,
-            $registrationService,
-            $configuration,
-            $metricsHandler,
-            $variantHandler,
-        );
+        if ($this->proxyKey !== null) {
+            $configuration = $configuration->setProxyKey($this->proxyKey);
+            $proxyRepository = new DefaultUnleashProxyRepository(
+                $repository,
+                $configuration,
+                $httpClient,
+                $requestFactory
+            );
+
+            return new DefaultProxyUnleash(
+                $proxyRepository,
+                $metricsHandler
+            );
+        } else {
+            return new DefaultUnleash(
+                $this->strategies,
+                $repository,
+                $registrationService,
+                $configuration,
+                $metricsHandler,
+                $variantHandler,
+            );
+        }
     }
 
     private function with(string $property, mixed $value): self
@@ -552,10 +576,12 @@ final class UnleashBuilder
             if ($configuration = $container->getConfiguration()) {
                 $target->setConfiguration($configuration);
             } else {
-                throw new CyclicDependencyException(sprintf(
-                    "A dependency '%s' is tagged as ConfigurationAware but that would cause a cyclic dependency as it needs to be part of Configuration",
-                    $target::class,
-                ));
+                throw new CyclicDependencyException(
+                    sprintf(
+                        "A dependency '%s' is tagged as ConfigurationAware but that would cause a cyclic dependency as it needs to be part of Configuration",
+                        $target::class,
+                    )
+                );
             }
         }
         if ($target instanceof HttpClientAware) {
@@ -565,10 +591,12 @@ final class UnleashBuilder
             if ($sender = $container->getMetricsSender()) {
                 $target->setMetricsSender($sender);
             } else {
-                throw new CyclicDependencyException(sprintf(
-                    "A dependency '%s' is tagged as MetricsSenderAware but MetricsSender is not available for this type of dependency",
-                    $target::class,
-                ));
+                throw new CyclicDependencyException(
+                    sprintf(
+                        "A dependency '%s' is tagged as MetricsSenderAware but MetricsSender is not available for this type of dependency",
+                        $target::class,
+                    )
+                );
             }
         }
         if ($target instanceof RequestFactoryAware) {

@@ -5,8 +5,9 @@ namespace Unleash\Client;
 use Unleash\Client\Client\RegistrationService;
 use Unleash\Client\Configuration\Context;
 use Unleash\Client\Configuration\UnleashConfiguration;
+use Unleash\Client\DTO\DefaultResolvedVariant;
+use Unleash\Client\DTO\ResolvedVariant;
 use Unleash\Client\DTO\Strategy;
-use Unleash\Client\DTO\Variant;
 use Unleash\Client\Enum\ImpressionDataEventType;
 use Unleash\Client\Event\FeatureToggleDisabledEvent;
 use Unleash\Client\Event\FeatureToggleMissingStrategyHandlerEvent;
@@ -115,14 +116,14 @@ final class DefaultUnleash implements Unleash
         return false;
     }
 
-    public function getVariant(string $featureName, ?Context $context = null, ?Variant $fallbackVariant = null): Variant
+    public function getVariant(string $featureName, ?Context $context = null, ?ResolvedVariant $fallbackVariant = null): ResolvedVariant
     {
         $fallbackVariant ??= $this->variantHandler->getDefaultVariant();
         $context ??= $this->configuration->getContextProvider()->getContext();
 
         $feature = $this->repository->findFeature($featureName);
         if ($feature === null || !$feature->isEnabled() || !count($feature->getVariants())) {
-            return $fallbackVariant;
+            return new DefaultResolvedVariant($fallbackVariant->getName(), $fallbackVariant->isEnabled(), $fallbackVariant->getPayload());
         }
 
         $variant = $this->variantHandler->selectVariant($feature, $context);
@@ -141,8 +142,9 @@ final class DefaultUnleash implements Unleash
                 $this->configuration->getEventDispatcherOrNull()?->dispatch($event, UnleashEvents::IMPRESSION_DATA);
             }
         }
+        $resolvedVariant = $variant ?? $fallbackVariant;
 
-        return $variant ?? $fallbackVariant;
+        return new DefaultResolvedVariant($resolvedVariant->getName(), $resolvedVariant->isEnabled(), $resolvedVariant->getPayload());
     }
 
     public function register(): bool
