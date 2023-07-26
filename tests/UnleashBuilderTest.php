@@ -56,6 +56,7 @@ use Unleash\Client\Tests\TestHelpers\DependencyContainer\StickinessCalculatorAwa
 use Unleash\Client\Tests\Traits\RealCacheImplementationTrait;
 use Unleash\Client\UnleashBuilder;
 use Unleash\Client\Variant\VariantHandler;
+use Unleash\Client\DefaultProxyUnleash;
 
 final class UnleashBuilderTest extends TestCase
 {
@@ -289,7 +290,8 @@ final class UnleashBuilderTest extends TestCase
                 $this->newRequestFactory(),
                 new UnleashConfiguration('', '', '')
             )
-        ));
+        )
+        );
     }
 
     public function testWithAutomaticRegistrationEnabled()
@@ -582,10 +584,10 @@ final class UnleashBuilderTest extends TestCase
             JsonSerializableBootstrapProvider::class,
             $this->getBootstrapProvider($builder->withBootstrap(
                 new class implements JsonSerializable {
-                    public function jsonSerialize(): array
-                    {
-                        return [];
-                    }
+            public function jsonSerialize(): array
+            {
+                return [];
+            }
                 }
             )->build())
         );
@@ -893,6 +895,12 @@ final class UnleashBuilderTest extends TestCase
         self::assertNull($configurationAwareVariantHandler->configuration);
         $instance->withVariantHandler($configurationAwareVariantHandler)->build();
         self::assertNotNull($configurationAwareVariantHandler->configuration);
+    }
+
+    public function testBuilderWithProxyKeyYieldsProxyUnleash()
+    {
+        $base = $this->instance->withFetchingEnabled(false)->withProxy('proxy-key');
+        self::assertInstanceOf(DefaultProxyUnleash::class, $base->build());
     }
 
     private function getConfiguration(DefaultUnleash $unleash): UnleashConfiguration
