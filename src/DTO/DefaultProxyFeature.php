@@ -2,7 +2,7 @@
 
 namespace Unleash\Client\DTO;
 
-final class DefaultProxyFeature implements Feature
+final class DefaultProxyFeature implements ProxyFeature
 {
     public string $name;
 
@@ -10,7 +10,7 @@ final class DefaultProxyFeature implements Feature
 
     public ResolvedVariant $variant;
 
-    public bool $impressionData;
+    public bool $impression_data;
 
     /**
      * @param array{
@@ -24,7 +24,7 @@ final class DefaultProxyFeature implements Feature
      *             value: string
      *         }
      *     },
-     *     impressionData: bool
+     *     impression_data: bool
      * } $response
      */
     public function __construct(array $response)
@@ -40,7 +40,7 @@ final class DefaultProxyFeature implements Feature
 
         $this->name = $response['name'];
         $this->enabled = $response['enabled'];
-        $this->impressionData = $response['impression_data'];
+        $this->impression_data = $response['impression_data'];
 
         $payload = null;
 
@@ -61,24 +61,13 @@ final class DefaultProxyFeature implements Feature
         return $this->enabled;
     }
 
-    /**
-     * @return array<Variant>
-     */
-    public function getVariants(): array
+    public function getVariant(): ResolvedVariant
     {
-        return [$this->variant];
+        return $this->variant;
     }
 
     public function hasImpressionData(): bool
     {
-        return $this->impressionData;
-    }
-
-    /**
-     * @return iterable<Strategy>
-     */
-    public function getStrategies(): iterable
-    {
-        return [];
+        return $this->impression_data;
     }
 }

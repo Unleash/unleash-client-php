@@ -5,8 +5,8 @@ namespace Unleash\Client\DTO;
 final class DefaultFeature implements Feature
 {
     /**
-     * @param iterable<Strategy>     $strategies
-     * @param array<InternalVariant> $variants
+     * @param iterable<Strategy> $strategies
+     * @param array<Variant>     $variants
      */
     public function __construct(
         private readonly string $name,
@@ -36,7 +36,7 @@ final class DefaultFeature implements Feature
     }
 
     /**
-     * @return array<InternalVariant>
+     * @return array<Variant>
      */
     public function getVariants(): array
     {

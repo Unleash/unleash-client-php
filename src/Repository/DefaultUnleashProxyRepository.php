@@ -7,11 +7,13 @@ use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
 use Psr\SimpleCache\InvalidArgumentException;
+use Symfony\Component\VarExporter\Exception\LogicException;
 use Unleash\Client\Configuration\Context;
 use Unleash\Client\Configuration\UnleashConfiguration;
 use Unleash\Client\Configuration\UnleashContext;
 use Unleash\Client\DTO\DefaultProxyFeature;
 use Unleash\Client\DTO\Feature;
+use Unleash\Client\DTO\ProxyFeature;
 
 final class DefaultUnleashProxyRepository implements UnleashRepository, ProxyRepository
 {
@@ -40,7 +42,7 @@ final class DefaultUnleashProxyRepository implements UnleashRepository, ProxyRep
         return $this->baseRepo->getFeatures();
     }
 
-    public function findFeatureByContext(string $featureName, ?Context $context = null): ?Feature
+    public function findFeatureByContext(string $featureName, ?Context $context = null): ?ProxyFeature
     {
         $cacheKey = $this->getCacheKey($featureName, $context);
 
@@ -66,7 +68,12 @@ final class DefaultUnleashProxyRepository implements UnleashRepository, ProxyRep
             $request = $request->withHeader($name, $value);
         }
 
-        $request = $request->withHeader('Authorization', $this->configuration->getProxyKey());
+        $apiKey = $this->configuration->getProxyKey();
+        if($apiKey === null) {
+            throw new LogicException('No api proxy key was specified');
+        }
+
+        $request = $request->withHeader('Authorization', $apiKey);
 
         $response = $this->httpClient->sendRequest($request);
         $body = json_decode($response->getBody(), true);
