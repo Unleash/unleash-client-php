@@ -2,11 +2,8 @@
 
 namespace Unleash\Client\Repository;
 
-use JsonException;
-use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
-use Psr\SimpleCache\InvalidArgumentException;
 use Symfony\Component\VarExporter\Exception\LogicException;
 use Unleash\Client\Configuration\Context;
 use Unleash\Client\Configuration\UnleashConfiguration;
@@ -15,31 +12,13 @@ use Unleash\Client\DTO\DefaultProxyFeature;
 use Unleash\Client\DTO\Feature;
 use Unleash\Client\DTO\ProxyFeature;
 
-final class DefaultUnleashProxyRepository implements UnleashRepository, ProxyRepository
+final class DefaultUnleashProxyRepository implements ProxyRepository
 {
     public function __construct(
-        private readonly DefaultUnleashRepository $baseRepo,
         private UnleashConfiguration $configuration,
         private ClientInterface $httpClient,
         private RequestFactoryInterface $requestFactory
     ) {
-    }
-
-    public function findFeature(string $featureName): ?Feature
-    {
-        return $this->baseRepo->findFeature($featureName);
-    }
-
-    /**
-     * @throws InvalidArgumentException
-     * @throws ClientExceptionInterface
-     * @throws JsonException
-     *
-     * @return iterable<Feature>
-     */
-    public function getFeatures(): iterable
-    {
-        return $this->baseRepo->getFeatures();
     }
 
     public function findFeatureByContext(string $featureName, ?Context $context = null): ?ProxyFeature
@@ -69,7 +48,7 @@ final class DefaultUnleashProxyRepository implements UnleashRepository, ProxyRep
         }
 
         $apiKey = $this->configuration->getProxyKey();
-        if($apiKey === null) {
+        if ($apiKey === null) {
             throw new LogicException('No api proxy key was specified');
         }
 
@@ -97,7 +76,7 @@ final class DefaultUnleashProxyRepository implements UnleashRepository, ProxyRep
 
     private function getCacheKey(string $featureName, ?Context $context): string
     {
-        if($context === null) {
+        if ($context === null) {
             return $featureName;
         }
         $contextHash = md5($this->contextToQueryString($context));

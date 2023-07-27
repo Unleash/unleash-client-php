@@ -26,6 +26,7 @@ use Unleash\Client\Configuration\Context;
 use Unleash\Client\Configuration\UnleashConfiguration;
 use Unleash\Client\Configuration\UnleashContext;
 use Unleash\Client\ContextProvider\DefaultUnleashContextProvider;
+use Unleash\Client\DefaultProxyUnleash;
 use Unleash\Client\DefaultUnleash;
 use Unleash\Client\DTO\DefaultVariant;
 use Unleash\Client\DTO\Feature;
@@ -56,7 +57,6 @@ use Unleash\Client\Tests\TestHelpers\DependencyContainer\StickinessCalculatorAwa
 use Unleash\Client\Tests\Traits\RealCacheImplementationTrait;
 use Unleash\Client\UnleashBuilder;
 use Unleash\Client\Variant\VariantHandler;
-use Unleash\Client\DefaultProxyUnleash;
 
 final class UnleashBuilderTest extends TestCase
 {
@@ -284,13 +284,15 @@ final class UnleashBuilderTest extends TestCase
 
     public function testWithRegistrationService()
     {
-        self::assertNotSame($this->instance, $this->instance->withRegistrationService(
-            new DefaultRegistrationService(
-                $this->newHttpClient(),
-                $this->newRequestFactory(),
-                new UnleashConfiguration('', '', '')
+        self::assertNotSame(
+            $this->instance,
+            $this->instance->withRegistrationService(
+                new DefaultRegistrationService(
+                    $this->newHttpClient(),
+                    $this->newRequestFactory(),
+                    new UnleashConfiguration('', '', '')
+                )
             )
-        )
         );
     }
 
@@ -584,10 +586,10 @@ final class UnleashBuilderTest extends TestCase
             JsonSerializableBootstrapProvider::class,
             $this->getBootstrapProvider($builder->withBootstrap(
                 new class implements JsonSerializable {
-            public function jsonSerialize(): array
-            {
-                return [];
-            }
+                    public function jsonSerialize(): array
+                    {
+                        return [];
+                    }
                 }
             )->build())
         );
