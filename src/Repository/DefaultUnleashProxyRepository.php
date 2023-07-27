@@ -49,7 +49,10 @@ final class DefaultUnleashProxyRepository implements ProxyRepository
 
         $apiKey = $this->configuration->getProxyKey();
         if ($apiKey === null) {
+            // The only way we can get here is if this is manually constructed without the builder
+            // @codeCoverageIgnoreStart
             throw new LogicException('No api proxy key was specified');
+            // @codeCoverageIgnoreEnd
         }
 
         $request = $request->withHeader('Authorization', $apiKey);
