@@ -9,7 +9,6 @@ use Unleash\Client\Configuration\Context;
 use Unleash\Client\Configuration\UnleashConfiguration;
 use Unleash\Client\Configuration\UnleashContext;
 use Unleash\Client\DTO\DefaultProxyFeature;
-use Unleash\Client\DTO\Feature;
 use Unleash\Client\DTO\ProxyFeature;
 
 final class DefaultUnleashProxyRepository implements ProxyRepository
@@ -23,6 +22,14 @@ final class DefaultUnleashProxyRepository implements ProxyRepository
 
     public function findFeatureByContext(string $featureName, ?Context $context = null): ?ProxyFeature
     {
+        $apiKey = $this->configuration->getProxyKey();
+        if ($apiKey === null) {
+            // The only way we can get here is if this is manually constructed without the builder
+            // @codeCoverageIgnoreStart
+            throw new LogicException('No api proxy key was specified');
+            // @codeCoverageIgnoreEnd
+        }
+
         $cacheKey = $this->getCacheKey($featureName, $context);
 
         if ($this->configuration->getCache() !== null && $this->configuration->getCache()->has($cacheKey)) {
@@ -40,24 +47,19 @@ final class DefaultUnleashProxyRepository implements ProxyRepository
         $url = $this->addQuery($featureUrl, $this->contextToQueryString($context));
 
         $request = $this->requestFactory->createRequest('GET', $url)
-            ->withHeader('Content-Type', 'application/json')
             ->withHeader('Accept', 'application/json');
 
         foreach ($this->configuration->getHeaders() as $name => $value) {
             $request = $request->withHeader($name, $value);
         }
 
-        $apiKey = $this->configuration->getProxyKey();
-        if ($apiKey === null) {
-            // The only way we can get here is if this is manually constructed without the builder
-            // @codeCoverageIgnoreStart
-            throw new LogicException('No api proxy key was specified');
-            // @codeCoverageIgnoreEnd
-        }
-
         $request = $request->withHeader('Authorization', $apiKey);
 
         $response = $this->httpClient->sendRequest($request);
+        if ($response->getStatusCode() != 200) {
+            return null;
+        }
+
         $body = json_decode($response->getBody(), true);
         if ($body === null) {
             return null;

@@ -218,7 +218,6 @@ final class DefaultProxyUnleashTest extends AbstractHttpClientTest
 
         $this->assertFalse($enabled);
         $this->assertCount(1, $container);
-        $this->assertEquals('application/json', $container[0]['request']->getHeaderLine('Content-Type'));
         $this->assertEquals('someCustomHeader', $container[0]['request']->getHeaderLine('customHeader'));
     }
 
