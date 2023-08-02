@@ -544,7 +544,7 @@ final class UnleashBuilder
 
             return new DefaultProxyUnleash(
                 $proxyRepository,
-                $metricsHandler
+                $metricsHandler,
             );
         } else {
             return new DefaultUnleash(
