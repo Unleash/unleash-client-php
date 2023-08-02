@@ -2,13 +2,15 @@
 
 namespace Unleash\Client\DTO;
 
+use Unleash\Client\Enum\Stickiness;
+
 final class DefaultProxyFeature implements ProxyFeature
 {
     public string $name;
 
     public bool $enabled;
 
-    public ResolvedVariant $variant;
+    public Variant $variant;
 
     public bool $impression_data;
 
@@ -48,7 +50,7 @@ final class DefaultProxyFeature implements ProxyFeature
             $payload = new DefaultVariantPayload($response['variant']['payload']['type'], $response['variant']['payload']['value']);
         }
 
-        $this->variant = new DefaultResolvedVariant($response['variant']['name'], $response['variant']['enabled'], $payload);
+        $this->variant = new DefaultVariant($response['variant']['name'], $response['variant']['enabled'], 0, Stickiness::DEFAULT, $payload);
     }
 
     public function getName(): string
@@ -61,7 +63,7 @@ final class DefaultProxyFeature implements ProxyFeature
         return $this->enabled;
     }
 
-    public function getVariant(): ResolvedVariant
+    public function getVariant(): Variant
     {
         return $this->variant;
     }

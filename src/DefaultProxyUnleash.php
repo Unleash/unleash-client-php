@@ -4,9 +4,8 @@ namespace Unleash\Client;
 
 use Unleash\Client\Configuration\Context;
 use Unleash\Client\DTO\DefaultFeature;
-use Unleash\Client\DTO\DefaultResolvedVariant;
 use Unleash\Client\DTO\DefaultVariant;
-use Unleash\Client\DTO\ResolvedVariant;
+use Unleash\Client\DTO\Variant;
 use Unleash\Client\Enum\Stickiness;
 use Unleash\Client\Metrics\MetricsHandler;
 use Unleash\Client\Repository\ProxyRepository;
@@ -37,9 +36,9 @@ final class DefaultProxyUnleash implements Unleash
         return $enabled;
     }
 
-    public function getVariant(string $featureName, ?Context $context = null, ?ResolvedVariant $fallbackVariant = null): ResolvedVariant
+    public function getVariant(string $featureName, ?Context $context = null, ?Variant $fallbackVariant = null): Variant
     {
-        $variant = $fallbackVariant ?? new DefaultResolvedVariant('disabled', false, null);
+        $variant = $fallbackVariant ?? new DefaultVariant('disabled', false, 0, Stickiness::DEFAULT);
 
         $response = $this->repository->findFeatureByContext($featureName, $context);
 

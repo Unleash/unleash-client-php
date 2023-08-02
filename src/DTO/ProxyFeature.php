@@ -8,7 +8,7 @@ interface ProxyFeature
 
     public function isEnabled(): bool;
 
-    public function getVariant(): ResolvedVariant;
+    public function getVariant(): Variant;
 
     public function hasImpressionData(): bool;
 }

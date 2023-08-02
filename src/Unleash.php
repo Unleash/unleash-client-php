@@ -3,7 +3,7 @@
 namespace Unleash\Client;
 
 use Unleash\Client\Configuration\Context;
-use Unleash\Client\DTO\ResolvedVariant;
+use Unleash\Client\DTO\Variant;
 
 interface Unleash
 {
@@ -11,7 +11,7 @@ interface Unleash
 
     public function isEnabled(string $featureName, ?Context $context = null, bool $default = false): bool;
 
-    public function getVariant(string $featureName, ?Context $context = null, ?ResolvedVariant $fallbackVariant = null): ResolvedVariant;
+    public function getVariant(string $featureName, ?Context $context = null, ?Variant $fallbackVariant = null): Variant;
 
     public function register(): bool;
 }

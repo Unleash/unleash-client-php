@@ -9,8 +9,9 @@ use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\HttpFactory;
 use GuzzleHttp\Psr7\Response;
 use Unleash\Client\Configuration\UnleashConfiguration;
-use Unleash\Client\DTO\DefaultResolvedVariant;
+use Unleash\Client\DTO\DefaultVariant;
 use Unleash\Client\DTO\DefaultVariantPayload;
+use Unleash\Client\Enum\Stickiness;
 use Unleash\Client\Repository\DefaultUnleashProxyRepository;
 use Unleash\Client\Tests\AbstractHttpClientTest;
 use Unleash\Client\Tests\Traits\FakeCacheImplementationTrait;
@@ -86,7 +87,7 @@ final class DefaultUnleashProxyRepositoryTest extends AbstractHttpClientTest
         $repository = new DefaultUnleashProxyRepository($config, $client, $requestFactory);
         $resolvedFeature = $repository->findFeatureByContext('test');
 
-        $expectedVariant = new DefaultResolvedVariant('some-variant', true, new DefaultVariantPayload('string', 'some-value'));
+        $expectedVariant = new DefaultVariant('some-variant', true, 0, Stickiness::DEFAULT, new DefaultVariantPayload('string', 'some-value'));
 
         $this->assertEquals('test', $resolvedFeature->getName());
         $this->assertTrue($resolvedFeature->isEnabled());
