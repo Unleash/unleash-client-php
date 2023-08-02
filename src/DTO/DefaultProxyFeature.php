@@ -35,9 +35,7 @@ final class DefaultProxyFeature implements ProxyFeature
         // tries to new this up manually and isn't interesting to tests
 
         // @codeCoverageIgnoreStart
-        if (!isset($response['name'], $response['enabled'], $response['variant'], $response['impression_data'])) {
-            throw new \InvalidArgumentException('Invalid response structure');
-        }
+        assert(isset($response['name'], $response['enabled'], $response['variant'], $response['impression_data']));
         // @codeCoverageIgnoreEnd
 
         $this->name = $response['name'];
