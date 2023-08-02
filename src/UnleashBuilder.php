@@ -535,7 +535,7 @@ final class UnleashBuilder
         $this->initializeServices($variantHandler, $dependencyContainer);
 
         if ($this->proxyKey !== null) {
-            $configuration = $configuration->setProxyKey($this->proxyKey);
+            $configuration->setProxyKey($this->proxyKey);
             $proxyRepository = new DefaultUnleashProxyRepository(
                 $configuration,
                 $httpClient,
