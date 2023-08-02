@@ -367,7 +367,7 @@ final class UnleashBuilder
     }
 
     #[Pure]
-    public function withProxy(string $proxyKey): self
+    public function withProxy(?string $proxyKey): self
     {
         return $this->with('proxyKey', $proxyKey);
     }
