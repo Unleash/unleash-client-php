@@ -96,7 +96,7 @@ final class UnleashConfiguration
         return $this->proxyKey;
     }
 
-    public function setProxyKey(string $proxyKey): self
+    public function setProxyKey(?string $proxyKey): self
     {
         $this->proxyKey = $proxyKey;
 

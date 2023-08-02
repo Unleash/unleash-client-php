@@ -7,8 +7,8 @@ use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\Cache\Psr16Cache;
 
 
-$psr16Cache = new FilesystemAdapter();
-$cache = new Psr16Cache($psr16Cache);
+$psr6Cache = new FilesystemAdapter();
+$cache = new Psr16Cache($psr6Cache);
 
 $unleash = UnleashBuilder::create()
     ->withAppName($appName)
