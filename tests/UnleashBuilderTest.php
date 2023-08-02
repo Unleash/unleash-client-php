@@ -284,16 +284,11 @@ final class UnleashBuilderTest extends TestCase
 
     public function testWithRegistrationService()
     {
-        self::assertNotSame(
-            $this->instance,
-            $this->instance->withRegistrationService(
-                new DefaultRegistrationService(
-                    $this->newHttpClient(),
-                    $this->newRequestFactory(),
-                    new UnleashConfiguration('', '', '')
-                )
-            )
-        );
+        self::assertNotSame($this->instance, $this->instance->withRegistrationService(new DefaultRegistrationService(
+            $this->newHttpClient(),
+            $this->newRequestFactory(),
+            new UnleashConfiguration('', '', '')
+        )));
     }
 
     public function testWithAutomaticRegistrationEnabled()
@@ -721,20 +716,14 @@ final class UnleashBuilderTest extends TestCase
         self::assertIsArray($subscribers);
         self::assertCount(2, $subscribers);
 
-        self::assertThat(
-            $subscribers[0],
-            self::logicalOr(
-                new IsIdentical($eventSubscriber1),
-                new IsIdentical($eventSubscriber2)
-            )
-        );
-        self::assertThat(
-            $subscribers[1],
-            self::logicalOr(
-                new IsIdentical($eventSubscriber1),
-                new IsIdentical($eventSubscriber2)
-            )
-        );
+        self::assertThat($subscribers[0], self::logicalOr(
+            new IsIdentical($eventSubscriber1),
+            new IsIdentical($eventSubscriber2)
+        ));
+        self::assertThat($subscribers[1], self::logicalOr(
+            new IsIdentical($eventSubscriber1),
+            new IsIdentical($eventSubscriber2)
+        ));
 
         $unleash = $instance->build();
         $eventDispatcher = $this->getConfiguration($unleash)->getEventDispatcherOrNull();

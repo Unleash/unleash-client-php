@@ -575,12 +575,10 @@ final class UnleashBuilder
             if ($configuration = $container->getConfiguration()) {
                 $target->setConfiguration($configuration);
             } else {
-                throw new CyclicDependencyException(
-                    sprintf(
-                        "A dependency '%s' is tagged as ConfigurationAware but that would cause a cyclic dependency as it needs to be part of Configuration",
-                        $target::class,
-                    )
-                );
+                throw new CyclicDependencyException(sprintf(
+                    "A dependency '%s' is tagged as ConfigurationAware but that would cause a cyclic dependency as it needs to be part of Configuration",
+                    $target::class,
+                ));
             }
         }
         if ($target instanceof HttpClientAware) {
@@ -590,12 +588,10 @@ final class UnleashBuilder
             if ($sender = $container->getMetricsSender()) {
                 $target->setMetricsSender($sender);
             } else {
-                throw new CyclicDependencyException(
-                    sprintf(
-                        "A dependency '%s' is tagged as MetricsSenderAware but MetricsSender is not available for this type of dependency",
-                        $target::class,
-                    )
-                );
+                throw new CyclicDependencyException(sprintf(
+                    "A dependency '%s' is tagged as MetricsSenderAware but MetricsSender is not available for this type of dependency",
+                    $target::class,
+                ));
             }
         }
         if ($target instanceof RequestFactoryAware) {
