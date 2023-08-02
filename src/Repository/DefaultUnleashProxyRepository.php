@@ -84,7 +84,7 @@ final class DefaultUnleashProxyRepository implements ProxyRepository
         if ($context === null) {
             return $featureName;
         }
-        $contextHash = hash('sha512',($this->contextToQueryString($context)));
+        $contextHash = hash('sha512', ($this->contextToQueryString($context)));
 
         return $featureName . '-' . $contextHash;
     }
