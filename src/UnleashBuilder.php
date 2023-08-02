@@ -539,7 +539,7 @@ final class UnleashBuilder
             $proxyRepository = new DefaultUnleashProxyRepository(
                 $configuration,
                 $httpClient,
-                $requestFactory
+                $requestFactory,
             );
 
             return new DefaultProxyUnleash(
