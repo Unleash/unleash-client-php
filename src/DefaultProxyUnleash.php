@@ -19,12 +19,13 @@ final class DefaultProxyUnleash implements Unleash
     ) {
     }
 
+    /**
+     * @codeCoverageIgnore
+     */
     public function register(): bool
     {
         //This is a no op, since registration is handled by the proxy/edge, this doesn't need coverage
-        // @codeCoverageIgnoreStart
         return false;
-        // @codeCoverageIgnoreEnd
     }
 
     public function isEnabled(string $featureName, ?Context $context = null, bool $default = false): bool
