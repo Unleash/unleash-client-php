@@ -141,8 +141,9 @@ final class DefaultUnleash implements Unleash
                 $this->configuration->getEventDispatcherOrNull()?->dispatch($event, UnleashEvents::IMPRESSION_DATA);
             }
         }
+        $resolvedVariant = $variant ?? $fallbackVariant;
 
-        return $variant ?? $fallbackVariant;
+        return $resolvedVariant;
     }
 
     public function register(): bool

@@ -22,11 +22,7 @@ final class DefaultVariantHandler implements VariantHandler
     {
         return new DefaultVariant(
             'disabled',
-            false,
-            0,
-            Stickiness::DEFAULT,
-            null,
-            null,
+            false
         );
     }
 

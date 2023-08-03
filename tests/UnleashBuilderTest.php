@@ -26,6 +26,7 @@ use Unleash\Client\Configuration\Context;
 use Unleash\Client\Configuration\UnleashConfiguration;
 use Unleash\Client\Configuration\UnleashContext;
 use Unleash\Client\ContextProvider\DefaultUnleashContextProvider;
+use Unleash\Client\DefaultProxyUnleash;
 use Unleash\Client\DefaultUnleash;
 use Unleash\Client\DTO\DefaultVariant;
 use Unleash\Client\DTO\Feature;
@@ -885,6 +886,12 @@ final class UnleashBuilderTest extends TestCase
         self::assertNull($configurationAwareVariantHandler->configuration);
         $instance->withVariantHandler($configurationAwareVariantHandler)->build();
         self::assertNotNull($configurationAwareVariantHandler->configuration);
+    }
+
+    public function testBuilderWithProxyKeyYieldsProxyUnleash()
+    {
+        $base = $this->instance->withFetchingEnabled(false)->withProxy('proxy-key');
+        self::assertInstanceOf(DefaultProxyUnleash::class, $base->build());
     }
 
     private function getConfiguration(DefaultUnleash $unleash): UnleashConfiguration

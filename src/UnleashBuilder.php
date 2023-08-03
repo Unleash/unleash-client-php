@@ -42,6 +42,7 @@ use Unleash\Client\Helper\UnleashBuilderContainer;
 use Unleash\Client\Metrics\DefaultMetricsHandler;
 use Unleash\Client\Metrics\DefaultMetricsSender;
 use Unleash\Client\Metrics\MetricsHandler;
+use Unleash\Client\Repository\DefaultUnleashProxyRepository;
 use Unleash\Client\Repository\DefaultUnleashRepository;
 use Unleash\Client\Stickiness\MurmurHashCalculator;
 use Unleash\Client\Strategy\ApplicationHostnameStrategyHandler;
@@ -94,6 +95,8 @@ final class UnleashBuilder
     private ?BootstrapProvider $bootstrapProvider = null;
 
     private ?BootstrapHandler $bootstrapHandler = null;
+
+    private ?string $proxyKey = null;
 
     private bool $fetchingEnabled = true;
 
@@ -363,6 +366,12 @@ final class UnleashBuilder
         return $this->with('variantHandler', $variantHandler);
     }
 
+    #[Pure]
+    public function withProxy(?string $proxyKey): self
+    {
+        return $this->with('proxyKey', $proxyKey);
+    }
+
     public function build(): Unleash
     {
         // basic scalar attributes
@@ -525,14 +534,28 @@ final class UnleashBuilder
         $this->initializeServices($metricsHandler, $dependencyContainer);
         $this->initializeServices($variantHandler, $dependencyContainer);
 
-        return new DefaultUnleash(
-            $this->strategies,
-            $repository,
-            $registrationService,
-            $configuration,
-            $metricsHandler,
-            $variantHandler,
-        );
+        if ($this->proxyKey !== null) {
+            $configuration->setProxyKey($this->proxyKey);
+            $proxyRepository = new DefaultUnleashProxyRepository(
+                $configuration,
+                $httpClient,
+                $requestFactory,
+            );
+
+            return new DefaultProxyUnleash(
+                $proxyRepository,
+                $metricsHandler,
+            );
+        } else {
+            return new DefaultUnleash(
+                $this->strategies,
+                $repository,
+                $registrationService,
+                $configuration,
+                $metricsHandler,
+                $variantHandler,
+            );
+        }
     }
 
     private function with(string $property, mixed $value): self
