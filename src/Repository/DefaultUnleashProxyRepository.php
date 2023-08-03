@@ -13,11 +13,23 @@ use Unleash\Client\DTO\ProxyFeature;
 
 final class DefaultUnleashProxyRepository implements ProxyRepository
 {
-    public function __construct(
-        private UnleashConfiguration $configuration,
-        private ClientInterface $httpClient,
-        private RequestFactoryInterface $requestFactory
-    ) {
+    /**
+     * @var \Unleash\Client\Configuration\UnleashConfiguration
+     */
+    private $configuration;
+    /**
+     * @var \Psr\Http\Client\ClientInterface
+     */
+    private $httpClient;
+    /**
+     * @var \Psr\Http\Message\RequestFactoryInterface
+     */
+    private $requestFactory;
+    public function __construct(UnleashConfiguration $configuration, ClientInterface $httpClient, RequestFactoryInterface $requestFactory)
+    {
+        $this->configuration = $configuration;
+        $this->httpClient = $httpClient;
+        $this->requestFactory = $requestFactory;
     }
 
     public function findFeatureByContext(string $featureName, ?Context $context = null): ?ProxyFeature
@@ -42,7 +54,7 @@ final class DefaultUnleashProxyRepository implements ProxyRepository
             }
         }
 
-        $context ??= new UnleashContext();
+        $context = $context ?? new UnleashContext();
         $featureUrl = $this->configuration->getUrl() . 'frontend/features/' . $featureName;
         $url = $this->addQuery($featureUrl, $this->contextToQueryString($context));
 
@@ -98,8 +110,12 @@ final class DefaultUnleashProxyRepository implements ProxyRepository
             'remoteAddress' => $context->getIpAddress(),
         ];
 
-        $values = array_filter($values, fn (?string $value) => $value !== null);
-        $properties = array_filter($context->getCustomProperties(), fn (?string $value) => $value !== null);
+        $values = array_filter($values, function (?string $value) {
+            return $value !== null;
+        });
+        $properties = array_filter($context->getCustomProperties(), function (?string $value) {
+            return $value !== null;
+        });
 
         foreach ($values as $key => $value) {
             $query[$key] = $value;
