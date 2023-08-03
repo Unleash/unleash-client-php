@@ -8,7 +8,7 @@ use Unleash\Client\Exception\InvalidValueException;
 final class JsonBootstrapProvider implements BootstrapProvider
 {
     public function __construct(
-        private readonly string $json,
+        private string $json,
     ) {
     }
 

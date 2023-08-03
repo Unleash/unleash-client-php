@@ -12,7 +12,7 @@ use Unleash\Client\Exception\InvalidValueException;
 final class FileBootstrapProvider implements BootstrapProvider
 {
     public function __construct(
-        private readonly string|SplFileInfo $file,
+        private string|SplFileInfo $file,
     ) {
     }
 
