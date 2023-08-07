@@ -21,6 +21,8 @@ final class DefaultUnleashProxyRepositoryTest extends AbstractHttpClientTest
 {
     use FakeCacheImplementationTrait, RealCacheImplementationTrait {
         FakeCacheImplementationTrait::getCache insteadof RealCacheImplementationTrait;
+
+        RealCacheImplementationTrait::getCache as getRealCache;
     }
 
     public function testNon200ResponseDegradesGracefully()
@@ -92,5 +94,60 @@ final class DefaultUnleashProxyRepositoryTest extends AbstractHttpClientTest
         $this->assertEquals('test', $resolvedFeature->getName());
         $this->assertTrue($resolvedFeature->isEnabled());
         $this->assertEquals($expectedVariant, $resolvedFeature->getVariant());
+    }
+
+    public function testCacheTtlIsRespected()
+    {
+        $container = [];
+        $history = Middleware::history($container);
+        $response = json_encode([
+            'name' => 'test',
+            'enabled' => true,
+            'variant' => [
+                'name' => 'some-variant',
+                'payload' => [
+                    'type' => 'string',
+                    'value' => 'some-value',
+                ],
+                'enabled' => true,
+            ],
+            'impression_data' => false,
+        ]);
+
+        $mock = new MockHandler([
+            new Response(
+                200,
+                ['ETag' => 'etag value'],
+                $response
+            ),
+            new Response(
+                200,
+                ['ETag' => 'etag value'],
+                $response
+            ),
+        ]);
+
+        $handlerStack = HandlerStack::create($mock);
+        $handlerStack->push($history);
+
+        $client = new Client(['handler' => $handlerStack]);
+        $config = (new UnleashConfiguration('', '', ''))
+            ->setCache($this->getRealCache())
+            ->setProxyKey('some-key')
+            ->setTtl(1);
+
+        $requestFactory = new HttpFactory();
+        $repository = new DefaultUnleashProxyRepository($config, $client, $requestFactory);
+
+        $repository->findFeatureByContext('test');
+        //cache is still warm so this should fall back to that
+        $repository->findFeatureByContext('test');
+
+        sleep(1);
+
+        //ttl should have expired so this should trigger an API call
+        $repository->findFeatureByContext('test');
+
+        $this->assertCount(2, $container);
     }
 }
