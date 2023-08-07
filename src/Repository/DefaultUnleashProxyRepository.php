@@ -69,7 +69,7 @@ final class DefaultUnleashProxyRepository implements ProxyRepository
 
             if ($featureData !== null) {
                 if ($this->configuration->getCache() !== null) {
-                    $this->configuration->getCache()->set($cacheKey, $featureData);
+                    $this->configuration->getCache()->set($cacheKey, $featureData, $this->configuration->getTtl());
                 }
 
                 return new DefaultProxyFeature($featureData);
