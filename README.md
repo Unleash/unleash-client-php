@@ -292,6 +292,36 @@ $builder = UnleashBuilder::create()
     ]);
 ```
 
+
+## Proxy SDK
+
+By default the SDK uses the Server-side endpoints on the Unleash API. You can also use the Proxy SDK, which is a
+lightweight SDK that uses the Client-side endpoints on the Unleash API. The Proxy SDK give a substantial performance improvement when using a large set of feature toggles (10K+).
+
+To use the Proxy SDK, you need to call `withProxy($apiKey)` on the builder. The `$apiKey` needs to be a [frontend token](https://docs.getunleash.io/reference/api-tokens-and-client-keys#front-end-tokens). Note that `withProxy($apiKey)` is in lieu of setting the API key header.
+
+Example of using the builder to create a Proxy SDK instance:
+
+```php
+<?php
+$builder = UnleashBuilder::create()
+    ->withAppName('Some app name')
+    ->withAppUrl('https://some-app-url.com/api')
+    ->withInstanceId('Some instance id')
+    ->withProxy("some-proxy-key"); // <-- This is the only difference
+
+$unleash = $builder->build();
+
+$unleash.isEnabled("some-feature");
+```
+
+As of version 1.12, the Proxy SDK requires [Edge](https://docs.getunleash.io/reference/unleash-edge), so the `appUrl` needs to point to the Edge server.
+
+Not supported in the Proxy SDK:
+- Custom strategies
+- Registration (this is handled by Edge)
+
+
 ## Caching
 
 It would be slow to perform a http request every time you check if a feature is enabled, especially in popular
