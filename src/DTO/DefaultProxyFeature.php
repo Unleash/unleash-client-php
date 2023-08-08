@@ -6,13 +6,25 @@ use Unleash\Client\Enum\Stickiness;
 
 final class DefaultProxyFeature implements ProxyFeature
 {
-    public string $name;
+    /**
+     * @var string
+     */
+    public $name;
 
-    public bool $enabled;
+    /**
+     * @var bool
+     */
+    public $enabled;
 
-    public Variant $variant;
+    /**
+     * @var \Unleash\Client\DTO\Variant
+     */
+    public $variant;
 
-    public bool $impression_data;
+    /**
+     * @var bool
+     */
+    public $impression_data;
 
     /**
      * @param array{
