@@ -10,11 +10,11 @@ final class DefaultStrategy implements Strategy
      * @param array<Segment>       $segments
      */
     public function __construct(
-        private readonly string $name,
-        private readonly array $parameters = [],
-        private readonly array $constraints = [],
-        private readonly array $segments = [],
-        private readonly bool $nonexistentSegments = false,
+        private string $name,
+        private array $parameters = [],
+        private array $constraints = [],
+        private array $segments = [],
+        private bool $nonexistentSegments = false,
     ) {
     }
 

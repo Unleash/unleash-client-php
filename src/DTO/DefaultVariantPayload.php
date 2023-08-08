@@ -14,9 +14,8 @@ use Unleash\Client\Enum\VariantPayloadType;
 final class DefaultVariantPayload implements VariantPayload
 {
     public function __construct(
-        #[ExpectedValues(valuesFromClass: VariantPayloadType::class)]
-        private readonly string $type,
-        private readonly string $value,
+        #[ExpectedValues(valuesFromClass: VariantPayloadType::class)]private string $type,
+        private string $value,
     ) {
     }
 
