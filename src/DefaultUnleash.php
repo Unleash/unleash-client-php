@@ -57,7 +57,6 @@ final class DefaultUnleash implements Unleash
             }
         }
 
-
         return $this->isFeatureEnabled($feature, $context, $default);
     }
 
@@ -98,7 +97,7 @@ final class DefaultUnleash implements Unleash
         return $this->registrationService->register($this->strategyHandlers);
     }
 
-    private function findFeature(string $featureName, ?Context $context = null): ?Feature
+    private function findFeature(string $featureName, Context $context): ?Feature
     {
         $feature = $this->repository->findFeature($featureName);
         if ($feature === null) {
@@ -112,7 +111,7 @@ final class DefaultUnleash implements Unleash
         return $feature;
     }
 
-    private function isFeatureEnabled(?Feature $feature, ?Context $context = null, bool $default = false): bool
+    private function isFeatureEnabled(?Feature $feature, Context $context, bool $default = false): bool
     {
         if ($feature === null) {
             return $default;

@@ -112,8 +112,6 @@ final class DefaultUnleashRepository implements UnleashRepository
 
             $features = $this->parseFeatures($data);
             $this->setCache($features);
-        } else {
-            echo 'returning from cache';
         }
 
         return $features;
