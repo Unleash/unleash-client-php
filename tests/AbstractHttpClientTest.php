@@ -103,7 +103,7 @@ abstract class AbstractHttpClientTest extends TestCase
                 return new DefaultVariant('test', false);
             }
 
-            public function selectVariant(Feature $feature, Context $context): ?Variant
+            public function selectVariant(array $variants, string $groupId, Context $context): ?Variant
             {
                 return null;
             }

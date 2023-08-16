@@ -5,7 +5,6 @@ namespace Unleash\Client\Variant;
 use JetBrains\PhpStorm\Pure;
 use Unleash\Client\Configuration\Context;
 use Unleash\Client\DTO\DefaultVariant;
-use Unleash\Client\DTO\Feature;
 use Unleash\Client\DTO\Variant;
 use Unleash\Client\Enum\Stickiness;
 use Unleash\Client\Stickiness\StickinessCalculator;
@@ -26,28 +25,32 @@ final class DefaultVariantHandler implements VariantHandler
         );
     }
 
-    public function selectVariant(Feature $feature, Context $context): ?Variant
+    /**
+     * @param array<Variant> $variants
+     */
+    public function selectVariant(array $variants, string $groupId, Context $context): ?Variant
     {
         $totalWeight = 0;
-        foreach ($feature->getVariants() as $variant) {
+        foreach ($variants as $variant) {
             $totalWeight += $variant->getWeight();
         }
         if ($totalWeight <= 0) {
             return null;
         }
 
-        if ($overridden = $this->findOverriddenVariant($feature, $context)) {
+        if ($overridden = $this->findOverriddenVariant($variants, $context)) {
             return $overridden;
         }
 
         $stickiness = $this->calculateStickiness(
-            $feature,
+            $variants,
+            $groupId,
             $context,
             $totalWeight,
         );
 
         $counter = 0;
-        foreach ($feature->getVariants() as $variant) {
+        foreach ($variants as $variant) {
             if ($variant->getWeight() <= 0) {
                 continue;
             }
@@ -65,9 +68,12 @@ final class DefaultVariantHandler implements VariantHandler
         // @codeCoverageIgnoreEnd
     }
 
-    private function findOverriddenVariant(Feature $feature, Context $context): ?Variant
+    /**
+     * @param array<Variant> $variants
+     */
+    private function findOverriddenVariant(array $variants, Context $context): ?Variant
     {
-        foreach ($feature->getVariants() as $variant) {
+        foreach ($variants as $variant) {
             foreach ($variant->getOverrides() as $override) {
                 if ($context->hasMatchingFieldValue($override->getField(), $override->getValues())) {
                     return $variant;
@@ -78,12 +84,16 @@ final class DefaultVariantHandler implements VariantHandler
         return null;
     }
 
+    /**
+     * @param array<Variant> $variants
+     */
     private function calculateStickiness(
-        Feature $feature,
+        array $variants,
+        string $groupId,
         Context $context,
         int $totalWeight
     ): int {
-        $stickiness = $feature->getVariants()[0]->getStickiness();
+        $stickiness = $variants[0]->getStickiness();
         if ($stickiness !== Stickiness::DEFAULT) {
             $seed = $context->findContextValue($stickiness) ?? $this->randomString();
         } else {
@@ -93,7 +103,7 @@ final class DefaultVariantHandler implements VariantHandler
                 ?? $this->randomString();
         }
 
-        return $this->stickinessCalculator->calculate($seed, $feature->getName(), $totalWeight);
+        return $this->stickinessCalculator->calculate($seed, $groupId, $totalWeight);
     }
 
     private function randomString(): string

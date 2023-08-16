@@ -35,7 +35,7 @@ final class DefaultVariantHandlerTest extends TestCase
             ]
         );
 
-        self::assertNull($instance->selectVariant($feature, new UnleashContext()));
+        self::assertNull($instance->selectVariant($feature->getVariants(), $feature->getName(), new UnleashContext()));
 
         $feature = new DefaultFeature(
             'test',
@@ -47,7 +47,7 @@ final class DefaultVariantHandlerTest extends TestCase
             ]
         );
 
-        self::assertEquals('test2', $instance->selectVariant($feature, new UnleashContext())->getName());
+        self::assertEquals('test2', $instance->selectVariant($feature->getVariants(), $feature->getName(), new UnleashContext())->getName());
 
         $feature = new DefaultFeature(
             'test',
@@ -58,7 +58,7 @@ final class DefaultVariantHandlerTest extends TestCase
                 new DefaultVariant('test2', true, 1, Stickiness::USER_ID),
             ]
         );
-        self::assertEquals('test2', $instance->selectVariant($feature, new UnleashContext('125'))->getName());
-        self::assertEquals('test', $instance->selectVariant($feature, new UnleashContext('126'))->getName());
+        self::assertEquals('test2', $instance->selectVariant($feature->getVariants(), $feature->getName(), new UnleashContext('125'))->getName());
+        self::assertEquals('test', $instance->selectVariant($feature->getVariants(), $feature->getName(), new UnleashContext('126'))->getName());
     }
 }

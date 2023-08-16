@@ -8,12 +8,14 @@ final class DefaultStrategy implements Strategy
      * @param array<string,string> $parameters
      * @param array<Constraint>    $constraints
      * @param array<Segment>       $segments
+     * @param array<Variant>       $variants
      */
     public function __construct(
         private readonly string $name,
         private readonly array $parameters = [],
         private readonly array $constraints = [],
         private readonly array $segments = [],
+        private readonly array $variants = [],
         private readonly bool $nonexistentSegments = false,
     ) {
     }
@@ -45,6 +47,14 @@ final class DefaultStrategy implements Strategy
     public function getSegments(): array
     {
         return $this->segments;
+    }
+
+    /**
+     * @return array<Variant>
+     */
+    public function getVariants(): array
+    {
+        return $this->variants;
     }
 
     public function hasNonexistentSegments(): bool
