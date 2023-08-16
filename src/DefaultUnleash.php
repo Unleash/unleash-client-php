@@ -26,13 +26,14 @@ final class DefaultUnleash implements Unleash
      * @param iterable<StrategyHandler> $strategyHandlers
      */
     public function __construct(
-        private readonly iterable $strategyHandlers,
-        private readonly UnleashRepository $repository,
-        private readonly RegistrationService $registrationService,
+        private readonly iterable             $strategyHandlers,
+        private readonly UnleashRepository    $repository,
+        private readonly RegistrationService  $registrationService,
         private readonly UnleashConfiguration $configuration,
-        private readonly MetricsHandler $metricsHandler,
-        private readonly VariantHandler $variantHandler,
-    ) {
+        private readonly MetricsHandler       $metricsHandler,
+        private readonly VariantHandler       $variantHandler,
+    )
+    {
         if ($configuration->isAutoRegistrationEnabled()) {
             $this->register();
         }
@@ -43,7 +44,7 @@ final class DefaultUnleash implements Unleash
         $context ??= $this->configuration->getContextProvider()->getContext();
         $feature = $this->findFeature($featureName, $context);
 
-        if($feature !== null) {
+        if ($feature !== null) {
             if (method_exists($feature, 'hasImpressionData') && $feature->hasImpressionData()) {
                 $event = new ImpressionDataEvent(
                     ImpressionDataEventType::IS_ENABLED,
@@ -67,7 +68,7 @@ final class DefaultUnleash implements Unleash
 
         $feature = $this->findFeature($featureName, $context);
         $isEnabled = $this->isFeatureEnabled($feature, $context);
-        if ($feature === null || !$isEnabled || !count($feature->getVariants())) {
+        if ($feature === null || $isEnabled === FALSE || !count($feature->getVariants())) {
             return $fallbackVariant;
         }
 
@@ -97,6 +98,12 @@ final class DefaultUnleash implements Unleash
         return $this->registrationService->register($this->strategyHandlers);
     }
 
+    /**
+     * Finds a feature and posts events if the feature is not found.
+     * @param string $featureName
+     * @param Context $context
+     * @return Feature|null
+     */
     private function findFeature(string $featureName, Context $context): ?Feature
     {
         $feature = $this->repository->findFeature($featureName);
@@ -111,6 +118,13 @@ final class DefaultUnleash implements Unleash
         return $feature;
     }
 
+    /**
+     * Underlying method to check if a feature is enabled.
+     * @param Feature|null $feature
+     * @param Context $context
+     * @param bool $default
+     * @return bool
+     */
     private function isFeatureEnabled(?Feature $feature, Context $context, bool $default = false): bool
     {
         if ($feature === null) {
