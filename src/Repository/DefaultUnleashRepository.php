@@ -79,7 +79,7 @@ final class DefaultUnleashRepository implements UnleashRepository
                     ->createRequest('GET', $this->configuration->getUrl() . 'client/features')
                     ->withHeader('UNLEASH-APPNAME', $this->configuration->getAppName())
                     ->withHeader('UNLEASH-INSTANCEID', $this->configuration->getInstanceId())
-                    ->withHeader('Unleash-Client-Spec', '4.2.2')
+                    ->withHeader('Unleash-Client-Spec', '4.2.3')
                 ;
 
                 foreach ($this->configuration->getHeaders() as $name => $value) {
@@ -112,6 +112,8 @@ final class DefaultUnleashRepository implements UnleashRepository
 
             $features = $this->parseFeatures($data);
             $this->setCache($features);
+        } else {
+            echo 'returning from cache';
         }
 
         return $features;

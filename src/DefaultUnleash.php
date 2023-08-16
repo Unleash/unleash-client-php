@@ -7,6 +7,7 @@ use Unleash\Client\Configuration\Context;
 use Unleash\Client\Configuration\UnleashConfiguration;
 use Unleash\Client\DTO\Strategy;
 use Unleash\Client\DTO\Variant;
+use Unleash\Client\DTO\Feature;
 use Unleash\Client\Enum\ImpressionDataEventType;
 use Unleash\Client\Event\FeatureToggleDisabledEvent;
 use Unleash\Client\Event\FeatureToggleMissingStrategyHandlerEvent;
@@ -39,16 +40,60 @@ final class DefaultUnleash implements Unleash
 
     public function isEnabled(string $featureName, ?Context $context = null, bool $default = false): bool
     {
+        $feature = $this->findFeature($featureName);
+        return $this->isFeatureEnabled($feature, $default);
+    }
+
+    public function getVariant(string $featureName, ?Context $context = null, ?Variant $fallbackVariant = null): Variant
+    {
+        $fallbackVariant ??= $this->variantHandler->getDefaultVariant();
         $context ??= $this->configuration->getContextProvider()->getContext();
 
+        $feature = $this->findFeature($featureName);
+        $isEnabled = $this->isFeatureEnabled($feature);
+        if ($feature === null || !$isEnabled || !count($feature->getVariants())) {
+            return $fallbackVariant;
+        }
+
+        $variant = $this->variantHandler->selectVariant($feature, $context);
+        if ($variant !== null) {
+            $this->metricsHandler->handleMetrics($feature, true, $variant);
+
+            if (method_exists($feature, 'hasImpressionData') && $feature->hasImpressionData()) {
+                $event = new ImpressionDataEvent(
+                    ImpressionDataEventType::GET_VARIANT,
+                    Uuid::v4(),
+                    clone $this->configuration,
+                    clone $context,
+                    clone $feature,
+                    clone $variant,
+                );
+                $this->configuration->getEventDispatcherOrNull()?->dispatch($event, UnleashEvents::IMPRESSION_DATA);
+            }
+        }
+        $resolvedVariant = $variant ?? $fallbackVariant;
+
+        return $resolvedVariant;
+    }
+
+    private function findFeature(string $featureName) : ?Feature {
         $feature = $this->repository->findFeature($featureName);
         if ($feature === null) {
+            $context ??= $this->configuration->getContextProvider()->getContext();
             $event = new FeatureToggleNotFoundEvent($context, $featureName);
             $this->configuration->getEventDispatcherOrNull()?->dispatch(
                 $event,
                 UnleashEvents::FEATURE_TOGGLE_NOT_FOUND,
             );
+        }
+        return $feature;
+    }
 
+    private function isFeatureEnabled(?Feature $feature, bool $default = false): bool
+    {
+        $context ??= $this->configuration->getContextProvider()->getContext();
+
+        if ($feature === null) {
             return $default;
         }
 
@@ -115,36 +160,7 @@ final class DefaultUnleash implements Unleash
         return false;
     }
 
-    public function getVariant(string $featureName, ?Context $context = null, ?Variant $fallbackVariant = null): Variant
-    {
-        $fallbackVariant ??= $this->variantHandler->getDefaultVariant();
-        $context ??= $this->configuration->getContextProvider()->getContext();
 
-        $feature = $this->repository->findFeature($featureName);
-        if ($feature === null || !$feature->isEnabled() || !count($feature->getVariants())) {
-            return $fallbackVariant;
-        }
-
-        $variant = $this->variantHandler->selectVariant($feature, $context);
-        if ($variant !== null) {
-            $this->metricsHandler->handleMetrics($feature, true, $variant);
-
-            if (method_exists($feature, 'hasImpressionData') && $feature->hasImpressionData()) {
-                $event = new ImpressionDataEvent(
-                    ImpressionDataEventType::GET_VARIANT,
-                    Uuid::v4(),
-                    clone $this->configuration,
-                    clone $context,
-                    clone $feature,
-                    clone $variant,
-                );
-                $this->configuration->getEventDispatcherOrNull()?->dispatch($event, UnleashEvents::IMPRESSION_DATA);
-            }
-        }
-        $resolvedVariant = $variant ?? $fallbackVariant;
-
-        return $resolvedVariant;
-    }
 
     public function register(): bool
     {
