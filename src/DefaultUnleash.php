@@ -26,13 +26,14 @@ final class DefaultUnleash implements Unleash
      * @param iterable<StrategyHandler> $strategyHandlers
      */
     public function __construct(
-        private readonly iterable $strategyHandlers,
-        private readonly UnleashRepository $repository,
-        private readonly RegistrationService $registrationService,
+        private readonly iterable             $strategyHandlers,
+        private readonly UnleashRepository    $repository,
+        private readonly RegistrationService  $registrationService,
         private readonly UnleashConfiguration $configuration,
-        private readonly MetricsHandler $metricsHandler,
-        private readonly VariantHandler $variantHandler,
-    ) {
+        private readonly MetricsHandler       $metricsHandler,
+        private readonly VariantHandler       $variantHandler,
+    )
+    {
         if ($configuration->isAutoRegistrationEnabled()) {
             $this->register();
         }
@@ -40,8 +41,9 @@ final class DefaultUnleash implements Unleash
 
     public function isEnabled(string $featureName, ?Context $context = null, bool $default = false): bool
     {
-        $feature = $this->findFeature($featureName);
-        return $this->isFeatureEnabled($feature, $default);
+        $context ??= $this->configuration->getContextProvider()->getContext();
+        $feature = $this->findFeature($featureName, $context);
+        return $this->isFeatureEnabled($feature, $context, $default);
     }
 
     public function getVariant(string $featureName, ?Context $context = null, ?Variant $fallbackVariant = null): Variant
@@ -49,8 +51,8 @@ final class DefaultUnleash implements Unleash
         $fallbackVariant ??= $this->variantHandler->getDefaultVariant();
         $context ??= $this->configuration->getContextProvider()->getContext();
 
-        $feature = $this->findFeature($featureName);
-        $isEnabled = $this->isFeatureEnabled($feature);
+        $feature = $this->findFeature($featureName, $context);
+        $isEnabled = $this->isFeatureEnabled($feature, $context);
         if ($feature === null || !$isEnabled || !count($feature->getVariants())) {
             return $fallbackVariant;
         }
@@ -76,10 +78,10 @@ final class DefaultUnleash implements Unleash
         return $resolvedVariant;
     }
 
-    private function findFeature(string $featureName) : ?Feature {
+    private function findFeature(string $featureName, ?Context $context = null): ?Feature
+    {
         $feature = $this->repository->findFeature($featureName);
         if ($feature === null) {
-            $context = $this->configuration->getContextProvider()->getContext();
             $event = new FeatureToggleNotFoundEvent($context, $featureName);
             $this->configuration->getEventDispatcherOrNull()?->dispatch(
                 $event,
@@ -89,10 +91,8 @@ final class DefaultUnleash implements Unleash
         return $feature;
     }
 
-    private function isFeatureEnabled(?Feature $feature, bool $default = false): bool
+    private function isFeatureEnabled(?Feature $feature, ?Context $context = null, bool $default = false): bool
     {
-        $context = $this->configuration->getContextProvider()->getContext();
-
         if ($feature === null) {
             return $default;
         }
@@ -159,7 +159,6 @@ final class DefaultUnleash implements Unleash
 
         return false;
     }
-
 
 
     public function register(): bool
