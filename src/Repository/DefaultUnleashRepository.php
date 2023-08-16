@@ -20,6 +20,7 @@ use Unleash\Client\DTO\DefaultVariantOverride;
 use Unleash\Client\DTO\DefaultVariantPayload;
 use Unleash\Client\DTO\Feature;
 use Unleash\Client\DTO\Segment;
+use Unleash\Client\DTO\Variant;
 use Unleash\Client\Enum\CacheKey;
 use Unleash\Client\Enum\Stickiness;
 use Unleash\Client\Event\FetchingDataFailedEvent;
@@ -36,6 +37,24 @@ use Unleash\Client\Exception\InvalidValueException;
  *     inverted?: bool,
  *     caseInsensitive?: bool
  * }
+ * @phpstan-type VariantArray array{
+ *      contextName: string,
+ *      name: string,
+ *      weight: int,
+ *      stickiness?: string,
+ *      payload?: VariantPayload,
+ *      overrides?: array<VariantOverride>,
+ *  }
+ * @phpstan-type VariantPayload array{
+ *        type: string,
+ *        value: string,
+ *    }
+ * @phpstan-type VariantOverride array{
+ *       contextName: string,
+ *       values: array<string>,
+ *       type:string,
+ *       value: string,
+ *   }
  */
 final class DefaultUnleashRepository implements UnleashRepository
 {
@@ -274,11 +293,16 @@ final class DefaultUnleashRepository implements UnleashRepository
         return $constraints;
     }
 
+    /**
+     * @param array<VariantArray> $variantsRaw
+     *
+     * @return array<Variant>
+     */
     private function parseVariants(array $variantsRaw): array
     {
         $variants = [];
 
-        foreach ($variantsRaw?? [] as $variant) {
+        foreach ($variantsRaw as $variant) {
             $overrides = [];
             foreach ($variant['overrides'] ?? [] as $override) {
                 $overrides[] = new DefaultVariantOverride($override['contextName'], $override['values']);

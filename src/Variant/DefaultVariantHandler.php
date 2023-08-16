@@ -5,7 +5,6 @@ namespace Unleash\Client\Variant;
 use JetBrains\PhpStorm\Pure;
 use Unleash\Client\Configuration\Context;
 use Unleash\Client\DTO\DefaultVariant;
-use Unleash\Client\DTO\Feature;
 use Unleash\Client\DTO\Variant;
 use Unleash\Client\Enum\Stickiness;
 use Unleash\Client\Stickiness\StickinessCalculator;
@@ -26,7 +25,10 @@ final class DefaultVariantHandler implements VariantHandler
         );
     }
 
-    public function selectVariant(array $variants, string $groupId,  Context $context): ?Variant
+    /**
+     * @param array<Variant> $variants
+     */
+    public function selectVariant(array $variants, string $groupId, Context $context): ?Variant
     {
         $totalWeight = 0;
         foreach ($variants as $variant) {
@@ -66,6 +68,9 @@ final class DefaultVariantHandler implements VariantHandler
         // @codeCoverageIgnoreEnd
     }
 
+    /**
+     * @param array<Variant> $variants
+     */
     private function findOverriddenVariant(array $variants, Context $context): ?Variant
     {
         foreach ($variants as $variant) {
@@ -79,6 +84,9 @@ final class DefaultVariantHandler implements VariantHandler
         return null;
     }
 
+    /**
+     * @param array<Variant> $variants
+     */
     private function calculateStickiness(
         array $variants,
         string $groupId,

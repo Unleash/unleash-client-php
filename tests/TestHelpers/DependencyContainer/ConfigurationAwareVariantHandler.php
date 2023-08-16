@@ -5,7 +5,6 @@ namespace Unleash\Client\Tests\TestHelpers\DependencyContainer;
 use Unleash\Client\Configuration\Context;
 use Unleash\Client\Configuration\UnleashConfiguration;
 use Unleash\Client\DTO\DefaultVariant;
-use Unleash\Client\DTO\Feature;
 use Unleash\Client\DTO\Variant;
 use Unleash\Client\Helper\Builder\ConfigurationAware;
 use Unleash\Client\Variant\VariantHandler;
@@ -27,7 +26,7 @@ final class ConfigurationAwareVariantHandler implements VariantHandler, Configur
         return new DefaultVariant('test', false);
     }
 
-    public function selectVariant(Feature $feature, Context $context): ?Variant
+    public function selectVariant(array $variants, string $groupId, Context $context): ?Variant
     {
         return null;
     }
