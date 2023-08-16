@@ -26,14 +26,13 @@ final class DefaultUnleash implements Unleash
      * @param iterable<StrategyHandler> $strategyHandlers
      */
     public function __construct(
-        private readonly iterable             $strategyHandlers,
-        private readonly UnleashRepository    $repository,
-        private readonly RegistrationService  $registrationService,
+        private readonly iterable $strategyHandlers,
+        private readonly UnleashRepository $repository,
+        private readonly RegistrationService $registrationService,
         private readonly UnleashConfiguration $configuration,
-        private readonly MetricsHandler       $metricsHandler,
-        private readonly VariantHandler       $variantHandler,
-    )
-    {
+        private readonly MetricsHandler $metricsHandler,
+        private readonly VariantHandler $variantHandler,
+    ) {
         if ($configuration->isAutoRegistrationEnabled()) {
             $this->register();
         }
@@ -68,7 +67,7 @@ final class DefaultUnleash implements Unleash
 
         $feature = $this->findFeature($featureName, $context);
         $isEnabled = $this->isFeatureEnabled($feature, $context);
-        if ($feature === null || $isEnabled === FALSE || !count($feature->getVariants())) {
+        if ($feature === null || $isEnabled === false || !count($feature->getVariants())) {
             return $fallbackVariant;
         }
 
@@ -100,8 +99,10 @@ final class DefaultUnleash implements Unleash
 
     /**
      * Finds a feature and posts events if the feature is not found.
-     * @param string $featureName name of the feature to find
-     * @param Context $context the context to use
+     *
+     * @param string  $featureName name of the feature to find
+     * @param Context $context     the context to use
+     *
      * @return Feature|null
      */
     private function findFeature(string $featureName, Context $context): ?Feature
@@ -120,9 +121,11 @@ final class DefaultUnleash implements Unleash
 
     /**
      * Underlying method to check if a feature is enabled.
+     *
      * @param Feature|null $feature the feature to check
-     * @param Context $context the context to use
-     * @param bool $default the default value to return if the feature is not found
+     * @param Context      $context the context to use
+     * @param bool         $default the default value to return if the feature is not found
+     *
      * @return bool
      */
     private function isFeatureEnabled(?Feature $feature, Context $context, bool $default = false): bool
