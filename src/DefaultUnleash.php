@@ -79,7 +79,7 @@ final class DefaultUnleash implements Unleash
     private function findFeature(string $featureName) : ?Feature {
         $feature = $this->repository->findFeature($featureName);
         if ($feature === null) {
-            $context ??= $this->configuration->getContextProvider()->getContext();
+            $context = $this->configuration->getContextProvider()->getContext();
             $event = new FeatureToggleNotFoundEvent($context, $featureName);
             $this->configuration->getEventDispatcherOrNull()?->dispatch(
                 $event,
@@ -91,7 +91,7 @@ final class DefaultUnleash implements Unleash
 
     private function isFeatureEnabled(?Feature $feature, bool $default = false): bool
     {
-        $context ??= $this->configuration->getContextProvider()->getContext();
+        $context = $this->configuration->getContextProvider()->getContext();
 
         if ($feature === null) {
             return $default;
