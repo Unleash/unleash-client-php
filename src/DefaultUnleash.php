@@ -43,6 +43,21 @@ final class DefaultUnleash implements Unleash
         $context ??= $this->configuration->getContextProvider()->getContext();
         $feature = $this->findFeature($featureName, $context);
 
+        if($feature !== null) {
+            if (method_exists($feature, 'hasImpressionData') && $feature->hasImpressionData()) {
+                $event = new ImpressionDataEvent(
+                    ImpressionDataEventType::IS_ENABLED,
+                    Uuid::v4(),
+                    clone $this->configuration,
+                    clone $context,
+                    clone $feature,
+                    null,
+                );
+                $this->configuration->getEventDispatcherOrNull()?->dispatch($event, UnleashEvents::IMPRESSION_DATA);
+            }
+        }
+
+
         return $this->isFeatureEnabled($feature, $context, $default);
     }
 
@@ -101,18 +116,6 @@ final class DefaultUnleash implements Unleash
     {
         if ($feature === null) {
             return $default;
-        }
-
-        if (method_exists($feature, 'hasImpressionData') && $feature->hasImpressionData()) {
-            $event = new ImpressionDataEvent(
-                ImpressionDataEventType::IS_ENABLED,
-                Uuid::v4(),
-                clone $this->configuration,
-                clone $context,
-                clone $feature,
-                null,
-            );
-            $this->configuration->getEventDispatcherOrNull()?->dispatch($event, UnleashEvents::IMPRESSION_DATA);
         }
 
         if (!$feature->isEnabled()) {
