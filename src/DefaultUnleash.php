@@ -5,9 +5,9 @@ namespace Unleash\Client;
 use Unleash\Client\Client\RegistrationService;
 use Unleash\Client\Configuration\Context;
 use Unleash\Client\Configuration\UnleashConfiguration;
+use Unleash\Client\DTO\Feature;
 use Unleash\Client\DTO\Strategy;
 use Unleash\Client\DTO\Variant;
-use Unleash\Client\DTO\Feature;
 use Unleash\Client\Enum\ImpressionDataEventType;
 use Unleash\Client\Event\FeatureToggleDisabledEvent;
 use Unleash\Client\Event\FeatureToggleMissingStrategyHandlerEvent;
@@ -26,14 +26,13 @@ final class DefaultUnleash implements Unleash
      * @param iterable<StrategyHandler> $strategyHandlers
      */
     public function __construct(
-        private readonly iterable             $strategyHandlers,
-        private readonly UnleashRepository    $repository,
-        private readonly RegistrationService  $registrationService,
+        private readonly iterable $strategyHandlers,
+        private readonly UnleashRepository $repository,
+        private readonly RegistrationService $registrationService,
         private readonly UnleashConfiguration $configuration,
-        private readonly MetricsHandler       $metricsHandler,
-        private readonly VariantHandler       $variantHandler,
-    )
-    {
+        private readonly MetricsHandler $metricsHandler,
+        private readonly VariantHandler $variantHandler,
+    ) {
         if ($configuration->isAutoRegistrationEnabled()) {
             $this->register();
         }
@@ -43,6 +42,7 @@ final class DefaultUnleash implements Unleash
     {
         $context ??= $this->configuration->getContextProvider()->getContext();
         $feature = $this->findFeature($featureName, $context);
+
         return $this->isFeatureEnabled($feature, $context, $default);
     }
 
@@ -78,6 +78,11 @@ final class DefaultUnleash implements Unleash
         return $resolvedVariant;
     }
 
+    public function register(): bool
+    {
+        return $this->registrationService->register($this->strategyHandlers);
+    }
+
     private function findFeature(string $featureName, ?Context $context = null): ?Feature
     {
         $feature = $this->repository->findFeature($featureName);
@@ -88,6 +93,7 @@ final class DefaultUnleash implements Unleash
                 UnleashEvents::FEATURE_TOGGLE_NOT_FOUND,
             );
         }
+
         return $feature;
     }
 
@@ -158,12 +164,6 @@ final class DefaultUnleash implements Unleash
         $this->metricsHandler->handleMetrics($feature, false);
 
         return false;
-    }
-
-
-    public function register(): bool
-    {
-        return $this->registrationService->register($this->strategyHandlers);
     }
 
     /**
