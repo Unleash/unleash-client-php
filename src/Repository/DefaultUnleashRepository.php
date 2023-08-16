@@ -166,10 +166,10 @@ final class DefaultUnleashRepository implements UnleashRepository
 
         foreach ($body['features'] as $feature) {
             $strategies = [];
-            $variants = [];
 
             foreach ($feature['strategies'] as $strategy) {
                 $constraints = $this->parseConstraints($strategy['constraints'] ?? []);
+                $strategyVariants = $this->parseVariants($strategy['variants'] ?? []);
 
                 $hasNonexistentSegments = false;
                 $segments = [];
@@ -186,31 +186,18 @@ final class DefaultUnleashRepository implements UnleashRepository
                     $strategy['parameters'] ?? [],
                     $constraints,
                     $segments,
+                    $strategyVariants,
                     $hasNonexistentSegments,
                 );
             }
-            foreach ($feature['variants'] ?? [] as $variant) {
-                $overrides = [];
-                foreach ($variant['overrides'] ?? [] as $override) {
-                    $overrides[] = new DefaultVariantOverride($override['contextName'], $override['values']);
-                }
-                $variants[] = new DefaultVariant(
-                    $variant['name'],
-                    true,
-                    $variant['weight'],
-                    $variant['stickiness'] ?? Stickiness::DEFAULT,
-                    isset($variant['payload'])
-                        ? new DefaultVariantPayload($variant['payload']['type'], $variant['payload']['value'])
-                        : null,
-                    $overrides,
-                );
-            }
+
+            $featureVariants = $this->parseVariants($feature['variants'] ?? []);
 
             $features[$feature['name']] = new DefaultFeature(
                 $feature['name'],
                 $feature['enabled'],
                 $strategies,
-                $variants,
+                $featureVariants,
                 $feature['impressionData'] ?? false,
             );
         }
@@ -285,5 +272,29 @@ final class DefaultUnleashRepository implements UnleashRepository
         }
 
         return $constraints;
+    }
+
+    private function parseVariants(array $variantsRaw): array
+    {
+        $variants = [];
+
+        foreach ($variantsRaw?? [] as $variant) {
+            $overrides = [];
+            foreach ($variant['overrides'] ?? [] as $override) {
+                $overrides[] = new DefaultVariantOverride($override['contextName'], $override['values']);
+            }
+            $variants[] = new DefaultVariant(
+                $variant['name'],
+                true,
+                $variant['weight'],
+                $variant['stickiness'] ?? Stickiness::DEFAULT,
+                isset($variant['payload'])
+                    ? new DefaultVariantPayload($variant['payload']['type'], $variant['payload']['value'])
+                    : null,
+                $overrides,
+            );
+        }
+
+        return $variants;
     }
 }

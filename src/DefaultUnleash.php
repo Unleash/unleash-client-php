@@ -5,7 +5,9 @@ namespace Unleash\Client;
 use Unleash\Client\Client\RegistrationService;
 use Unleash\Client\Configuration\Context;
 use Unleash\Client\Configuration\UnleashConfiguration;
+use Unleash\Client\DTO\DefaultFeatureEnabledResult;
 use Unleash\Client\DTO\Feature;
+use Unleash\Client\DTO\FeatureEnabledResult;
 use Unleash\Client\DTO\Strategy;
 use Unleash\Client\DTO\Variant;
 use Unleash\Client\Enum\ImpressionDataEventType;
@@ -26,13 +28,14 @@ final class DefaultUnleash implements Unleash
      * @param iterable<StrategyHandler> $strategyHandlers
      */
     public function __construct(
-        private readonly iterable $strategyHandlers,
-        private readonly UnleashRepository $repository,
-        private readonly RegistrationService $registrationService,
+        private readonly iterable             $strategyHandlers,
+        private readonly UnleashRepository    $repository,
+        private readonly RegistrationService  $registrationService,
         private readonly UnleashConfiguration $configuration,
-        private readonly MetricsHandler $metricsHandler,
-        private readonly VariantHandler $variantHandler,
-    ) {
+        private readonly MetricsHandler       $metricsHandler,
+        private readonly VariantHandler       $variantHandler,
+    )
+    {
         if ($configuration->isAutoRegistrationEnabled()) {
             $this->register();
         }
@@ -57,7 +60,7 @@ final class DefaultUnleash implements Unleash
             }
         }
 
-        return $this->isFeatureEnabled($feature, $context, $default);
+        return $this->isFeatureEnabled($feature, $context, $default)->isEnabled();
     }
 
     public function getVariant(string $featureName, ?Context $context = null, ?Variant $fallbackVariant = null): Variant
@@ -66,12 +69,19 @@ final class DefaultUnleash implements Unleash
         $context ??= $this->configuration->getContextProvider()->getContext();
 
         $feature = $this->findFeature($featureName, $context);
-        $isEnabled = $this->isFeatureEnabled($feature, $context);
-        if ($feature === null || $isEnabled === false || !count($feature->getVariants())) {
+        $enabledResult = $this->isFeatureEnabled($feature, $context);
+        $strategyVariants = $enabledResult->getStrategy()?->getVariants() ?? [];
+        if ($feature === null || $enabledResult->isEnabled() === false ||
+            (!count($feature->getVariants()) && empty($strategyVariants))) {
             return $fallbackVariant;
         }
 
-        $variant = $this->variantHandler->selectVariant($feature, $context);
+
+        if (empty($strategyVariants)) {
+            $variant = $this->variantHandler->selectVariant($feature->getVariants(), $featureName, $context);
+        } else {
+            $variant = $this->variantHandler->selectVariant($strategyVariants, $enabledResult->getStrategy()->getParameters()['groupId'] ?? '', $context);
+        }
         if ($variant !== null) {
             $this->metricsHandler->handleMetrics($feature, true, $variant);
 
@@ -100,8 +110,8 @@ final class DefaultUnleash implements Unleash
     /**
      * Finds a feature and posts events if the feature is not found.
      *
-     * @param string  $featureName name of the feature to find
-     * @param Context $context     the context to use
+     * @param string $featureName name of the feature to find
+     * @param Context $context the context to use
      *
      * @return Feature|null
      */
@@ -123,15 +133,15 @@ final class DefaultUnleash implements Unleash
      * Underlying method to check if a feature is enabled.
      *
      * @param Feature|null $feature the feature to check
-     * @param Context      $context the context to use
-     * @param bool         $default the default value to return if the feature is not found
+     * @param Context $context the context to use
+     * @param bool $default the default value to return if the feature is not found
      *
      * @return bool
      */
-    private function isFeatureEnabled(?Feature $feature, Context $context, bool $default = false): bool
+    private function isFeatureEnabled(?Feature $feature, Context $context, bool $default = false): FeatureEnabledResult
     {
         if ($feature === null) {
-            return $default;
+            return new DefaultFeatureEnabledResult($default);
         }
 
         if (!$feature->isEnabled()) {
@@ -143,7 +153,7 @@ final class DefaultUnleash implements Unleash
 
             $this->metricsHandler->handleMetrics($feature, false);
 
-            return false;
+            return new DefaultFeatureEnabledResult();
         }
 
         $strategies = $feature->getStrategies();
@@ -153,7 +163,7 @@ final class DefaultUnleash implements Unleash
         if (!count($strategies)) {
             $this->metricsHandler->handleMetrics($feature, true);
 
-            return true;
+            return new DefaultFeatureEnabledResult(true);
         }
 
         $handlersFound = false;
@@ -166,8 +176,7 @@ final class DefaultUnleash implements Unleash
             foreach ($handlers as $handler) {
                 if ($handler->isEnabled($strategy, $context)) {
                     $this->metricsHandler->handleMetrics($feature, true);
-
-                    return true;
+                    return new DefaultFeatureEnabledResult(true, $strategy);
                 }
             }
         }
@@ -182,7 +191,7 @@ final class DefaultUnleash implements Unleash
 
         $this->metricsHandler->handleMetrics($feature, false);
 
-        return false;
+        return new DefaultFeatureEnabledResult();
     }
 
     /**

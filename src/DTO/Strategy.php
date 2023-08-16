@@ -19,4 +19,9 @@ interface Strategy
      * @return array<Constraint>
      */
     public function getConstraints(): array;
+
+    /**
+     * @return array<Variant>
+     */
+    public function getVariants(): array;
 }

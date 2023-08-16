@@ -10,5 +10,5 @@ interface VariantHandler
 {
     public function getDefaultVariant(): Variant;
 
-    public function selectVariant(Feature $feature, Context $context): ?Variant;
+    public function selectVariant(array $variants, string $groupId, Context $context): ?Variant;
 }
