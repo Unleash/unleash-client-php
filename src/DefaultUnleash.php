@@ -25,37 +25,59 @@ use Unleash\Client\Variant\VariantHandler;
 final class DefaultUnleash implements Unleash
 {
     /**
+     * @var iterable<StrategyHandler>
+     * @readonly
+     */
+    private $strategyHandlers;
+    /**
+     * @readonly
+     * @var \Unleash\Client\Repository\UnleashRepository
+     */
+    private $repository;
+    /**
+     * @readonly
+     * @var \Unleash\Client\Client\RegistrationService
+     */
+    private $registrationService;
+    /**
+     * @readonly
+     * @var \Unleash\Client\Configuration\UnleashConfiguration
+     */
+    private $configuration;
+    /**
+     * @readonly
+     * @var \Unleash\Client\Metrics\MetricsHandler
+     */
+    private $metricsHandler;
+    /**
+     * @readonly
+     * @var \Unleash\Client\Variant\VariantHandler
+     */
+    private $variantHandler;
+    /**
      * @param iterable<StrategyHandler> $strategyHandlers
      */
-    public function __construct(
-        private readonly iterable $strategyHandlers,
-        private readonly UnleashRepository $repository,
-        private readonly RegistrationService $registrationService,
-        private readonly UnleashConfiguration $configuration,
-        private readonly MetricsHandler $metricsHandler,
-        private readonly VariantHandler $variantHandler,
-    ) {
+    public function __construct(iterable $strategyHandlers, UnleashRepository $repository, RegistrationService $registrationService, UnleashConfiguration $configuration, MetricsHandler $metricsHandler, VariantHandler $variantHandler)
+    {
+        $this->strategyHandlers = $strategyHandlers;
+        $this->repository = $repository;
+        $this->registrationService = $registrationService;
+        $this->configuration = $configuration;
+        $this->metricsHandler = $metricsHandler;
+        $this->variantHandler = $variantHandler;
         if ($configuration->isAutoRegistrationEnabled()) {
             $this->register();
         }
     }
-
     public function isEnabled(string $featureName, ?Context $context = null, bool $default = false): bool
     {
-        $context ??= $this->configuration->getContextProvider()->getContext();
+        $context = $context ?? $this->configuration->getContextProvider()->getContext();
         $feature = $this->findFeature($featureName, $context);
 
         if ($feature !== null) {
             if (method_exists($feature, 'hasImpressionData') && $feature->hasImpressionData()) {
-                $event = new ImpressionDataEvent(
-                    ImpressionDataEventType::IS_ENABLED,
-                    Uuid::v4(),
-                    clone $this->configuration,
-                    clone $context,
-                    clone $feature,
-                    null,
-                );
-                $this->configuration->getEventDispatcherOrNull()?->dispatch($event, UnleashEvents::IMPRESSION_DATA);
+                $event = new ImpressionDataEvent(ImpressionDataEventType::IS_ENABLED, Uuid::v4(), clone $this->configuration, clone $context, clone $feature, null);
+                ($getEventDispatcherOrNull = $this->configuration->getEventDispatcherOrNull()) ? $getEventDispatcherOrNull->dispatch($event, UnleashEvents::IMPRESSION_DATA) : null;
             }
         }
 
@@ -64,12 +86,12 @@ final class DefaultUnleash implements Unleash
 
     public function getVariant(string $featureName, ?Context $context = null, ?Variant $fallbackVariant = null): Variant
     {
-        $fallbackVariant ??= $this->variantHandler->getDefaultVariant();
-        $context ??= $this->configuration->getContextProvider()->getContext();
+        $fallbackVariant = $fallbackVariant ?? $this->variantHandler->getDefaultVariant();
+        $context = $context ?? $this->configuration->getContextProvider()->getContext();
 
         $feature = $this->findFeature($featureName, $context);
         $enabledResult = $this->isFeatureEnabled($feature, $context);
-        $strategyVariants = $enabledResult->getStrategy()?->getVariants() ?? [];
+        $strategyVariants = (($getStrategy = $enabledResult->getStrategy()) ? $getStrategy->getVariants() : null) ?? [];
         if ($feature === null || $enabledResult->isEnabled() === false ||
             (!count($feature->getVariants()) && empty($strategyVariants))) {
             return $fallbackVariant;
@@ -78,21 +100,14 @@ final class DefaultUnleash implements Unleash
         if (empty($strategyVariants)) {
             $variant = $this->variantHandler->selectVariant($feature->getVariants(), $featureName, $context);
         } else {
-            $variant = $this->variantHandler->selectVariant($strategyVariants, $enabledResult->getStrategy()?->getParameters()['groupId'] ?? '', $context);
+            $variant = $this->variantHandler->selectVariant($strategyVariants, (($getStrategy = $enabledResult->getStrategy()) ? $getStrategy->getParameters() : null)['groupId'] ?? '', $context);
         }
         if ($variant !== null) {
             $this->metricsHandler->handleMetrics($feature, true, $variant);
 
             if (method_exists($feature, 'hasImpressionData') && $feature->hasImpressionData()) {
-                $event = new ImpressionDataEvent(
-                    ImpressionDataEventType::GET_VARIANT,
-                    Uuid::v4(),
-                    clone $this->configuration,
-                    clone $context,
-                    clone $feature,
-                    clone $variant,
-                );
-                $this->configuration->getEventDispatcherOrNull()?->dispatch($event, UnleashEvents::IMPRESSION_DATA);
+                $event = new ImpressionDataEvent(ImpressionDataEventType::GET_VARIANT, Uuid::v4(), clone $this->configuration, clone $context, clone $feature, clone $variant);
+                ($getEventDispatcherOrNull = $this->configuration->getEventDispatcherOrNull()) ? $getEventDispatcherOrNull->dispatch($event, UnleashEvents::IMPRESSION_DATA) : null;
             }
         }
         $resolvedVariant = $variant ?? $fallbackVariant;
@@ -118,10 +133,7 @@ final class DefaultUnleash implements Unleash
         $feature = $this->repository->findFeature($featureName);
         if ($feature === null) {
             $event = new FeatureToggleNotFoundEvent($context, $featureName);
-            $this->configuration->getEventDispatcherOrNull()?->dispatch(
-                $event,
-                UnleashEvents::FEATURE_TOGGLE_NOT_FOUND,
-            );
+            ($getEventDispatcherOrNull = $this->configuration->getEventDispatcherOrNull()) ? $getEventDispatcherOrNull->dispatch($event, UnleashEvents::FEATURE_TOGGLE_NOT_FOUND) : null;
         }
 
         return $feature;
@@ -142,10 +154,7 @@ final class DefaultUnleash implements Unleash
 
         if (!$feature->isEnabled()) {
             $event = new FeatureToggleDisabledEvent($feature, $context);
-            $this->configuration->getEventDispatcherOrNull()?->dispatch(
-                $event,
-                UnleashEvents::FEATURE_TOGGLE_DISABLED,
-            );
+            ($getEventDispatcherOrNull = $this->configuration->getEventDispatcherOrNull()) ? $getEventDispatcherOrNull->dispatch($event, UnleashEvents::FEATURE_TOGGLE_DISABLED) : null;
 
             $this->metricsHandler->handleMetrics($feature, false);
 
@@ -153,7 +162,7 @@ final class DefaultUnleash implements Unleash
         }
 
         $strategies = $feature->getStrategies();
-        if (!is_countable($strategies)) {
+        if (!(is_array($strategies) || $strategies instanceof \Countable)) {
             $strategies = iterator_to_array($strategies);
         }
         if (!count($strategies)) {
@@ -180,10 +189,7 @@ final class DefaultUnleash implements Unleash
 
         if (!$handlersFound) {
             $event = new FeatureToggleMissingStrategyHandlerEvent($context, $feature);
-            $this->configuration->getEventDispatcherOrNull()?->dispatch(
-                $event,
-                UnleashEvents::FEATURE_TOGGLE_MISSING_STRATEGY_HANDLER,
-            );
+            ($getEventDispatcherOrNull = $this->configuration->getEventDispatcherOrNull()) ? $getEventDispatcherOrNull->dispatch($event, UnleashEvents::FEATURE_TOGGLE_MISSING_STRATEGY_HANDLER) : null;
         }
 
         $this->metricsHandler->handleMetrics($feature, false);
