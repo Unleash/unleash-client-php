@@ -205,8 +205,8 @@ final class DefaultUnleashRepository implements UnleashRepository
                     $strategy['parameters'] ?? [],
                     $constraints,
                     $segments,
-                    $strategyVariants,
                     $hasNonexistentSegments,
+                    $strategyVariants,
                 );
             }
 

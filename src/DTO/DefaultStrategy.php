@@ -15,8 +15,8 @@ final class DefaultStrategy implements Strategy
         private readonly array $parameters = [],
         private readonly array $constraints = [],
         private readonly array $segments = [],
-        private readonly array $variants = [],
         private readonly bool $nonexistentSegments = false,
+        private readonly array $variants = [],
     ) {
     }
 
