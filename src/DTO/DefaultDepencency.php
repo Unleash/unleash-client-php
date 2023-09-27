@@ -4,13 +4,10 @@ namespace Unleash\Client\DTO;
 
 use JetBrains\PhpStorm\ArrayShape;
 
-final class DefaultVariant implements Dependency
+final class DefaultDepencency implements Dependency
 {
-    /**
-     * @param array<VariantOverride> $overrides
-     */
     public function __construct(
-        private readonly string $name,
+        private readonly string $feature,
         private readonly ?bool $enabled,
         private readonly ?array $variants = null,
     ) {
@@ -20,7 +17,7 @@ final class DefaultVariant implements Dependency
     public function jsonSerialize(): array
     {
         $result = [
-            'name' => $this->name,
+            'name' => $this->feature,
         ];
         if ($this->enabled !== null) {
             $result['enabled'] = $this->enabled;
@@ -32,9 +29,9 @@ final class DefaultVariant implements Dependency
         return $result;
     }
 
-    public function getName(): string
+    public function getFeature(): string
     {
-        return $this->name;
+        return $this->feature;
     }
 
     public function getEnabled(): ?bool

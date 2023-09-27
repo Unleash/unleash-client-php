@@ -49,4 +49,12 @@ final class DefaultFeature implements Feature
     {
         return $this->impressionData;
     }
+
+    /**
+     * @return array<Dependency>
+     */
+    public function getDependencies(): array
+    {
+        return $this->dependencies;
+    }
 }

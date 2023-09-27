@@ -5,12 +5,15 @@ namespace Unleash\Client;
 use Unleash\Client\Client\RegistrationService;
 use Unleash\Client\Configuration\Context;
 use Unleash\Client\Configuration\UnleashConfiguration;
+use Unleash\Client\DTO\DefaultDepencency;
 use Unleash\Client\DTO\DefaultFeatureEnabledResult;
+use Unleash\Client\DTO\Dependency;
 use Unleash\Client\DTO\Feature;
 use Unleash\Client\DTO\FeatureEnabledResult;
 use Unleash\Client\DTO\Strategy;
 use Unleash\Client\DTO\Variant;
 use Unleash\Client\Enum\ImpressionDataEventType;
+use Unleash\Client\Event\FeatureToggleDependencyNotFoundEvent;
 use Unleash\Client\Event\FeatureToggleDisabledEvent;
 use Unleash\Client\Event\FeatureToggleMissingStrategyHandlerEvent;
 use Unleash\Client\Event\FeatureToggleNotFoundEvent;
@@ -70,8 +73,10 @@ final class DefaultUnleash implements Unleash
         $feature = $this->findFeature($featureName, $context);
         $enabledResult = $this->isFeatureEnabled($feature, $context);
         $strategyVariants = $enabledResult->getStrategy()?->getVariants() ?? [];
-        if ($feature === null || $enabledResult->isEnabled() === false ||
-            (!count($feature->getVariants()) && empty($strategyVariants))) {
+        if (
+            $feature === null || $enabledResult->isEnabled() === false ||
+            (!count($feature->getVariants()) && empty($strategyVariants))
+        ) {
             return $fallbackVariant;
         }
 
@@ -128,6 +133,58 @@ final class DefaultUnleash implements Unleash
     }
 
     /**
+     * Checks if parent feature flag requirement is satisfied.
+     * 
+     * @param string   $featureName name of the feature to check
+     * @param Dependency $dependency the dependency to check
+     * @param Context  $context     the context to use
+     */
+    public function isDependencySatisfied(
+        Dependency $dependency = null,
+        ?Context $context = null,
+    ): bool {
+        $parentFeature = $this->findFeature($dependency->getFeature(), $context);
+
+        if ($parentFeature === null) {
+            $event = new FeatureToggleDependencyNotFoundEvent($context, $dependency->getFeature());
+            $this->configuration->getEventDispatcherOrNull()?->dispatch(
+                $event,
+                UnleashEvents::FEATURE_TOGGLE_NOT_FOUND,
+            );
+
+            return false;
+        }
+
+        if ($parentFeature->getDependencies() !== null) {
+            return false;
+        }
+
+        $parentFeatureEnabled = $this->isFeatureEnabled($parentFeature, $context);
+
+        if ($parentFeatureEnabled->isEnabled() && $dependency->getEnabled() === false) {
+            return false;
+        }
+        if (!$parentFeatureEnabled->isEnabled() && $dependency->getEnabled() !== false) {
+            return false;
+        }
+
+        $dependencyVariants = $dependency->getVariants();
+        if (!empty($dependencyVariants)) {
+            $parentFeatureVariantName = $this->getVariant($parentFeature->getName(), $context)->getName();
+
+            foreach ($dependencyVariants as $dependencyVariant) {
+                if ($dependencyVariant === $parentFeatureVariantName) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
      * Underlying method to check if a feature is enabled.
      *
      * @param Feature|null $feature the feature to check
@@ -150,6 +207,17 @@ final class DefaultUnleash implements Unleash
             $this->metricsHandler->handleMetrics($feature, false);
 
             return new DefaultFeatureEnabledResult();
+        }
+
+        $dependencies = $feature->getDependencies();
+        if (!empty($dependencies)) {
+            foreach ($dependencies as $dependency) {
+                if (!$this->isDependencySatisfied($dependency, $context)) {
+                    $this->metricsHandler->handleMetrics($feature, false);
+
+                    return new DefaultFeatureEnabledResult();
+                }
+            }
         }
 
         $strategies = $feature->getStrategies();

@@ -12,6 +12,7 @@ use Psr\SimpleCache\InvalidArgumentException;
 use Unleash\Client\Configuration\UnleashConfiguration;
 use Unleash\Client\DTO\Constraint;
 use Unleash\Client\DTO\DefaultConstraint;
+use Unleash\Client\DTO\DefaultDepencency;
 use Unleash\Client\DTO\DefaultFeature;
 use Unleash\Client\DTO\DefaultSegment;
 use Unleash\Client\DTO\DefaultStrategy;
@@ -98,8 +99,7 @@ final class DefaultUnleashRepository implements UnleashRepository
                     ->createRequest('GET', $this->configuration->getUrl() . 'client/features')
                     ->withHeader('UNLEASH-APPNAME', $this->configuration->getAppName())
                     ->withHeader('UNLEASH-INSTANCEID', $this->configuration->getInstanceId())
-                    ->withHeader('Unleash-Client-Spec', '4.5.0')
-                ;
+                    ->withHeader('Unleash-Client-Spec', '4.5.0');
 
                 foreach ($this->configuration->getHeaders() as $name => $value) {
                     $request = $request->withHeader($name, $value);
@@ -211,6 +211,7 @@ final class DefaultUnleashRepository implements UnleashRepository
             }
 
             $featureVariants = $this->parseVariants($feature['variants'] ?? []);
+            $dependencies = $this->parseDependencies($feature['dependencies'] ?? []);
 
             $features[$feature['name']] = new DefaultFeature(
                 $feature['name'],
@@ -218,6 +219,7 @@ final class DefaultUnleashRepository implements UnleashRepository
                 $strategies,
                 $featureVariants,
                 $feature['impressionData'] ?? false,
+                $dependencies
             );
         }
 
@@ -320,5 +322,25 @@ final class DefaultUnleashRepository implements UnleashRepository
         }
 
         return $variants;
+    }
+
+    /**
+     * @param array<array{feature: string, enabled: bool, variants?: array<string>}> $dependenciesRaw
+     *
+     * @return array<Dependency>
+     */
+    private function parseDependencies(array $dependenciesRaw): array
+    {
+        $dependencies = [];
+
+        foreach ($dependenciesRaw as $dependency) {
+            $dependencies[] = new DefaultDepencency(
+                $dependency['feature'],
+                $dependency['enabled'],
+                $dependency['variants'] ?? null,
+            );
+        }
+
+        return $dependencies;
     }
 }

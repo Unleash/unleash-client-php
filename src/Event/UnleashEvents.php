@@ -38,4 +38,11 @@ final class UnleashEvents
      * @Event("Unleash\Client\Event\ImpressionDataEvent")
      */
     public const IMPRESSION_DATA = 'unleash.events.impression_data';
+
+    /**
+     * Triggered when feature toggle dependency is not found.
+     *
+     * @Event("Unleash\Client\Event\FeatureToggleDependencyNotFoundEvent")
+     */
+    public const FEATURE_TOGGLE_DEPENDENCY_NOT_FOUND = 'unleash.event.toggle.dependency_not_found';
 }

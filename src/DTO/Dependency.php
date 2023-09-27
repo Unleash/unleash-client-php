@@ -6,7 +6,7 @@ use JsonSerializable;
 
 interface Dependency extends JsonSerializable
 {
-    public function getName(): string;
+    public function getFeature(): string;
 
     public function getEnabled(): ?bool;
 

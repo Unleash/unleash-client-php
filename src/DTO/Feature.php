@@ -20,4 +20,9 @@ interface Feature
      * @return array<Variant>
      */
     public function getVariants(): array;
+
+    /**
+     * @return array<Dependency>
+     */
+    public function getDependencies(): array;
 }
