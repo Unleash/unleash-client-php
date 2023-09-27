@@ -7,6 +7,7 @@ final class DefaultFeature implements Feature
     /**
      * @param iterable<Strategy> $strategies
      * @param array<Variant>     $variants
+     * @param array<Dependency>  $dependencies
      */
     public function __construct(
         private readonly string $name,
@@ -14,6 +15,7 @@ final class DefaultFeature implements Feature
         private readonly iterable $strategies,
         private readonly array $variants = [],
         private readonly bool $impressionData = false,
+        private readonly array $dependencies = [],
     ) {
     }
 
