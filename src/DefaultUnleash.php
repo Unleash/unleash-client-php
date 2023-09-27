@@ -5,7 +5,6 @@ namespace Unleash\Client;
 use Unleash\Client\Client\RegistrationService;
 use Unleash\Client\Configuration\Context;
 use Unleash\Client\Configuration\UnleashConfiguration;
-use Unleash\Client\DTO\DefaultDepencency;
 use Unleash\Client\DTO\DefaultFeatureEnabledResult;
 use Unleash\Client\DTO\Dependency;
 use Unleash\Client\DTO\Feature;
@@ -135,14 +134,17 @@ final class DefaultUnleash implements Unleash
     /**
      * Checks if parent feature flag requirement is satisfied.
      * 
-     * @param string   $featureName name of the feature to check
      * @param Dependency $dependency the dependency to check
      * @param Context  $context     the context to use
      */
     public function isDependencySatisfied(
-        Dependency $dependency = null,
+        ?Dependency $dependency = null,
         ?Context $context = null,
     ): bool {
+        if ($dependency === null) {
+            return true;
+        }
+        $context ??= $this->configuration->getContextProvider()->getContext();
         $parentFeature = $this->findFeature($dependency->getFeature(), $context);
 
         if ($parentFeature === null) {
@@ -155,7 +157,7 @@ final class DefaultUnleash implements Unleash
             return false;
         }
 
-        if ($parentFeature->getDependencies() !== null) {
+        if (count($parentFeature->getDependencies()) > 0) {
             return false;
         }
 

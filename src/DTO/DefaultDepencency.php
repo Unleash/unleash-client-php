@@ -6,6 +6,9 @@ use JetBrains\PhpStorm\ArrayShape;
 
 final class DefaultDepencency implements Dependency
 {
+    /**
+     * @param array<string> $variants
+     */
     public function __construct(
         private readonly string $feature,
         private readonly ?bool $enabled,
@@ -13,6 +16,9 @@ final class DefaultDepencency implements Dependency
     ) {
     }
 
+    /**
+     * @phpstan-return array<string|bool|array<string>>
+     */
     #[ArrayShape(['name' => 'string', 'enabled' => 'bool', 'variants' => 'array'])]
     public function jsonSerialize(): array
     {

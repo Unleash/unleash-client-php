@@ -22,6 +22,7 @@ use Unleash\Client\DTO\DefaultVariantPayload;
 use Unleash\Client\DTO\Feature;
 use Unleash\Client\DTO\Segment;
 use Unleash\Client\DTO\Variant;
+use Unleash\Client\DTO\Dependency;
 use Unleash\Client\Enum\CacheKey;
 use Unleash\Client\Enum\Stickiness;
 use Unleash\Client\Event\FetchingDataFailedEvent;
@@ -55,6 +56,11 @@ use Unleash\Client\Exception\InvalidValueException;
  *       values: array<string>,
  *       type:string,
  *       value: string,
+ *   }
+ * @phpstan-type DependencyArray array{
+ *       feature: string,
+ *       enabled: bool,
+ *       variants?: array<string>,
  *   }
  */
 final class DefaultUnleashRepository implements UnleashRepository
@@ -325,7 +331,7 @@ final class DefaultUnleashRepository implements UnleashRepository
     }
 
     /**
-     * @param array<array{feature: string, enabled: bool, variants?: array<string>}> $dependenciesRaw
+     * @param array<DependencyArray> $dependenciesRaw
      *
      * @return array<Dependency>
      */
