@@ -502,14 +502,13 @@ final class DefaultUnleashTest extends AbstractHttpClientTest
 
     public function testIterators()
     {
-        $repository = new class implements UnleashRepository
-        {
+        $repository = new class implements UnleashRepository {
             private $cache = [];
 
             public function __construct()
             {
                 $this->cache = [
-                    "someFeature" => new DefaultFeature(
+                    'someFeature' => new DefaultFeature(
                         'someFeature',
                         true,
                         new LimitIterator(new ArrayIterator([new DefaultStrategy('default')]))
@@ -547,8 +546,7 @@ final class DefaultUnleashTest extends AbstractHttpClientTest
         $triggeredCount = 0;
 
         $eventDispatcher = new EventDispatcher();
-        $subscriber = new class($triggeredCount) implements EventSubscriberInterface
-        {
+        $subscriber = new class($triggeredCount) implements EventSubscriberInterface {
             /**
              * @var int
              */
@@ -630,8 +628,7 @@ final class DefaultUnleashTest extends AbstractHttpClientTest
                     ],
                 ],
             ]);
-        $subscriber = new class($calledCount) implements EventSubscriberInterface
-        {
+        $subscriber = new class($calledCount) implements EventSubscriberInterface {
             /**
              * @var int
              */
@@ -666,8 +663,7 @@ final class DefaultUnleashTest extends AbstractHttpClientTest
     public function testEventDisabledFeature()
     {
         $calledCount = 0;
-        $subscriber = new class($calledCount) implements EventSubscriberInterface
-        {
+        $subscriber = new class($calledCount) implements EventSubscriberInterface {
             /**
              * @var int
              */

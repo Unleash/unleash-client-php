@@ -72,7 +72,7 @@ final class DefaultUnleash implements Unleash
         $feature = $featureAndDependencies['feature'] ?? null;
         $dependencies = $featureAndDependencies['dependencies'] ?? [];
 
-        return $this->getVariantForFeature($feature,  $context, $dependencies,  $fallbackVariant);
+        return $this->getVariantForFeature($feature, $context, $dependencies, $fallbackVariant);
     }
 
     public function register(): bool
@@ -80,53 +80,12 @@ final class DefaultUnleash implements Unleash
         return $this->registrationService->register($this->strategyHandlers);
     }
 
-    private function getVariantForFeature(?Feature $feature, ?Context $context = null,  array $dependencies = [], ?Variant $fallbackVariant = null): Variant
-    {
-
-        $fallbackVariant ??= $this->variantHandler->getDefaultVariant();
-        $context ??= $this->configuration->getContextProvider()->getContext();
-
-        $enabledResult = $this->isFeatureEnabled($feature, $context, $dependencies);
-        $strategyVariants = $enabledResult->getStrategy()?->getVariants() ?? [];
-        if (
-            $feature === null || $enabledResult->isEnabled() === false ||
-            (!count($feature->getVariants()) && empty($strategyVariants))
-        ) {
-            return $fallbackVariant;
-        }
-        $featureName = $feature->getName();
-
-        if (empty($strategyVariants)) {
-            $variant = $this->variantHandler->selectVariant($feature->getVariants(), $featureName, $context);
-        } else {
-            $variant = $this->variantHandler->selectVariant($strategyVariants, $enabledResult->getStrategy()?->getParameters()['groupId'] ?? '', $context);
-        }
-        if ($variant !== null) {
-            $this->metricsHandler->handleMetrics($feature, true, $variant);
-
-            if (method_exists($feature, 'hasImpressionData') && $feature->hasImpressionData()) {
-                $event = new ImpressionDataEvent(
-                    ImpressionDataEventType::GET_VARIANT,
-                    Uuid::v4(),
-                    clone $this->configuration,
-                    clone $context,
-                    clone $feature,
-                    clone $variant,
-                );
-                $this->configuration->getEventDispatcherOrNull()?->dispatch($event, UnleashEvents::IMPRESSION_DATA);
-            }
-        }
-        $resolvedVariant = $variant ?? $fallbackVariant;
-
-        return $resolvedVariant;
-    }
-
     /**
      * Finds a feature with it's parent features. Posts events if the feature is not found.
      *
      * @param string  $featureName name of the feature to find
      * @param Context $context     the context to use
-     * 
+     *
      * @return null|array{
      *   feature: Feature|null,
      *   dependencies: array<string, Feature>,
@@ -148,8 +107,8 @@ final class DefaultUnleash implements Unleash
             );
 
             return [
-                "feature" => null,
-                "dependencies" => []
+                'feature' => null,
+                'dependencies' => [],
             ];
         }
 
@@ -157,8 +116,8 @@ final class DefaultUnleash implements Unleash
 
         if ($dependencyDefinitions === null) {
             return [
-                "feature" => $feature,
-                "dependencies" => []
+                'feature' => $feature,
+                'dependencies' => [],
             ];
         }
 
@@ -178,14 +137,14 @@ final class DefaultUnleash implements Unleash
         }
 
         return [
-            "feature" => $feature,
-            "dependencies" => $dependencies
+            'feature' => $feature,
+            'dependencies' => $dependencies,
         ];
     }
 
     /**
      * Checks if parent feature flag requirement is satisfied.
-     * 
+     *
      * @param Dependency $dependency    the dependency to check
      * @param Feature    $parentFeature the parent feature to check
      * @param Context    $context       the context to use
@@ -233,13 +192,53 @@ final class DefaultUnleash implements Unleash
         return true;
     }
 
+    private function getVariantForFeature(?Feature $feature, ?Context $context = null, array $dependencies = [], ?Variant $fallbackVariant = null): Variant
+    {
+        $fallbackVariant ??= $this->variantHandler->getDefaultVariant();
+        $context ??= $this->configuration->getContextProvider()->getContext();
+
+        $enabledResult = $this->isFeatureEnabled($feature, $context, $dependencies);
+        $strategyVariants = $enabledResult->getStrategy()?->getVariants() ?? [];
+        if (
+            $feature === null || $enabledResult->isEnabled() === false ||
+            (!count($feature->getVariants()) && empty($strategyVariants))
+        ) {
+            return $fallbackVariant;
+        }
+        $featureName = $feature->getName();
+
+        if (empty($strategyVariants)) {
+            $variant = $this->variantHandler->selectVariant($feature->getVariants(), $featureName, $context);
+        } else {
+            $variant = $this->variantHandler->selectVariant($strategyVariants, $enabledResult->getStrategy()?->getParameters()['groupId'] ?? '', $context);
+        }
+        if ($variant !== null) {
+            $this->metricsHandler->handleMetrics($feature, true, $variant);
+
+            if (method_exists($feature, 'hasImpressionData') && $feature->hasImpressionData()) {
+                $event = new ImpressionDataEvent(
+                    ImpressionDataEventType::GET_VARIANT,
+                    Uuid::v4(),
+                    clone $this->configuration,
+                    clone $context,
+                    clone $feature,
+                    clone $variant,
+                );
+                $this->configuration->getEventDispatcherOrNull()?->dispatch($event, UnleashEvents::IMPRESSION_DATA);
+            }
+        }
+        $resolvedVariant = $variant ?? $fallbackVariant;
+
+        return $resolvedVariant;
+    }
+
     /**
      * Underlying method to check if a feature is enabled.
      *
-     * @param Feature|null   $feature the feature to check
+     * @param Feature|null   $feature        the feature to check
      * @param Feature[]|null $parentFeatures the dependencies to check
-     * @param Context        $context the context to use
-     * @param bool           $default the default value to return if the feature is not found
+     * @param Context        $context        the context to use
+     * @param bool           $default        the default value to return if the feature is not found
      */
     private function isFeatureEnabled(?Feature $feature, Context $context, ?array $parentFeatures = [], bool $default = false): FeatureEnabledResult
     {

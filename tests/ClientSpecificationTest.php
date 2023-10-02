@@ -40,8 +40,7 @@ final class ClientSpecificationTest extends AbstractHttpClientTest
             (new UnleashConfiguration('', '', ''))
                 ->setAutoRegistrationEnabled(false)
                 ->setCache($this->getCache()),
-            new class implements MetricsHandler
-            {
+            new class implements MetricsHandler {
                 public function handleMetrics(Feature $feature, bool $successful, Variant $variant = null): void
                 {
                 }
