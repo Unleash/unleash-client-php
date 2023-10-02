@@ -27,20 +27,21 @@ final class ClientSpecificationTest extends AbstractHttpClientTest
     {
         $unleash = new DefaultUnleash(
             [
-            new DefaultStrategyHandler(),
-            new GradualRolloutStrategyHandler(new MurmurHashCalculator()),
-            new IpAddressStrategyHandler(),
-            new UserIdStrategyHandler(),
-            new GradualRolloutUserIdStrategyHandler(new GradualRolloutStrategyHandler(new MurmurHashCalculator())),
-            new GradualRolloutSessionIdStrategyHandler(new GradualRolloutStrategyHandler(new MurmurHashCalculator())),
-            new GradualRolloutRandomStrategyHandler(new GradualRolloutStrategyHandler(new MurmurHashCalculator())),
-        ],
+                new DefaultStrategyHandler(),
+                new GradualRolloutStrategyHandler(new MurmurHashCalculator()),
+                new IpAddressStrategyHandler(),
+                new UserIdStrategyHandler(),
+                new GradualRolloutUserIdStrategyHandler(new GradualRolloutStrategyHandler(new MurmurHashCalculator())),
+                new GradualRolloutSessionIdStrategyHandler(new GradualRolloutStrategyHandler(new MurmurHashCalculator())),
+                new GradualRolloutRandomStrategyHandler(new GradualRolloutStrategyHandler(new MurmurHashCalculator())),
+            ],
             $this->repository,
             $this->registrationService,
             (new UnleashConfiguration('', '', ''))
                 ->setAutoRegistrationEnabled(false)
                 ->setCache($this->getCache()),
-            new class implements MetricsHandler {
+            new class implements MetricsHandler
+            {
                 public function handleMetrics(Feature $feature, bool $successful, Variant $variant = null): void
                 {
                 }

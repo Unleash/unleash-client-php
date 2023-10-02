@@ -90,9 +90,9 @@ final class DefaultUnleashRepository implements UnleashRepository
      * @throws ClientExceptionInterface
      * @throws JsonException
      *
-     * @return iterable<Feature>
+     * @return array<Feature>
      */
-    public function getFeatures(): iterable
+    public function getFeatures(): array
     {
         $features = $this->getCachedFeatures();
         if ($features === null) {
@@ -342,7 +342,7 @@ final class DefaultUnleashRepository implements UnleashRepository
         foreach ($dependenciesRaw as $dependency) {
             $dependencies[] = new DefaultDepencency(
                 $dependency['feature'],
-                $dependency['enabled'],
+                $dependency['enabled'] ?? true,
                 $dependency['variants'] ?? null,
             );
         }
