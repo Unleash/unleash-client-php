@@ -192,7 +192,15 @@ final class DefaultUnleash implements Unleash
         return true;
     }
 
-    private function getVariantForFeature(?Feature $feature, ?Context $context = null, array $dependencies = [], ?Variant $fallbackVariant = null): Variant
+    /**
+     * Selects a variant from a feature.
+     *
+     * @param Feature                 $feature         the feature to check
+     * @param Context                 $context         the context to use
+     * @param ?array<string, Feature> $dependencies    parent feature toggles
+     * @param ?Variant                $fallbackVariant the default value to return if the feature is not found
+     */
+    private function getVariantForFeature(?Feature $feature, ?Context $context = null, $dependencies = [], ?Variant $fallbackVariant = null): Variant
     {
         $fallbackVariant ??= $this->variantHandler->getDefaultVariant();
         $context ??= $this->configuration->getContextProvider()->getContext();
