@@ -32,7 +32,7 @@ final class StringStream implements StreamInterface
         rewind($this->stream);
     }
 
-    public function __toString()
+    public function __toString(): string
     {
         $stream = $this->stream;
         if ($stream === null) {
