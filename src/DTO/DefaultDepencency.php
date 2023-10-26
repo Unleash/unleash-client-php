@@ -10,7 +10,7 @@ final class DefaultDepencency implements Dependency
      * @param array<string> $variants
      */
     public function __construct(
-        private readonly string $feature,
+        private readonly Feature|string $feature,
         private readonly ?bool $enabled,
         private readonly ?array $variants = null,
     ) {
@@ -35,7 +35,7 @@ final class DefaultDepencency implements Dependency
         return $result;
     }
 
-    public function getFeature(): string
+    public function getFeature(): Feature
     {
         return $this->feature;
     }
