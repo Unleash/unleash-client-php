@@ -11,7 +11,7 @@ use Unleash\Client\Stickiness\StickinessCalculator;
 
 final class DefaultVariantHandler implements VariantHandler
 {
-    const VARIANT_HASH_SEED = 86028157;
+    private const VARIANT_HASH_SEED = 86028157;
 
     public function __construct(
         private readonly StickinessCalculator $stickinessCalculator,
@@ -96,7 +96,7 @@ final class DefaultVariantHandler implements VariantHandler
         int $totalWeight
     ): int {
         $stickiness = $variants[0]->getStickiness();
-        if ($stickiness !== Stickiness::DEFAULT ) {
+        if ($stickiness !== Stickiness::DEFAULT) {
             $seed = $context->findContextValue($stickiness) ?? $this->randomString();
         } else {
             $seed = $context->getCurrentUserId()
