@@ -79,9 +79,8 @@ final class DefaultUnleash implements Unleash
     /**
      * Checks if parent feature flag requirement is satisfied.
      *
-     * @param Dependency $dependency    the dependency to check
-     * @param Feature    $parentFeature the parent feature to check
-     * @param Context    $context       the context to use
+     * @param Dependency $dependency the dependency to check
+     * @param Context    $context    the context to use
      */
     public function isDependencySatisfied(
         ?Dependency $dependency = null,
@@ -94,12 +93,13 @@ final class DefaultUnleash implements Unleash
 
         $parentFeature = $dependency->getFeature();
 
-        if ($parentFeature === null || is_string($parentFeature)) {
-            $event = new FeatureToggleDependencyNotFoundEvent($context, $parentFeature || '');
+        if ($parentFeature == null || is_string($parentFeature)) {
+            $event = new FeatureToggleDependencyNotFoundEvent($context, $parentFeature ? $parentFeature : '');
             $this->configuration->getEventDispatcherOrNull()?->dispatch(
                 $event,
                 UnleashEvents::FEATURE_TOGGLE_NOT_FOUND,
             );
+
             return false;
         }
 
@@ -117,7 +117,7 @@ final class DefaultUnleash implements Unleash
         }
 
         $dependencyVariants = $dependency->getVariants();
-        if (count($dependencyVariants) > 0) {
+        if ($dependencyVariants && count($dependencyVariants) > 0) {
             $parentFeatureVariantName = $this->getVariantForFeature($parentFeature, $context)->getName();
 
             foreach ($dependencyVariants as $dependencyVariant) {
@@ -164,10 +164,9 @@ final class DefaultUnleash implements Unleash
     /**
      * Selects a variant from a feature.
      *
-     * @param Feature                 $feature         the feature to check
-     * @param Context                 $context         the context to use
-     * @param ?array<string, Feature> $dependencies    parent feature toggles
-     * @param ?Variant                $fallbackVariant the default value to return if the feature is not found
+     * @param Feature  $feature         the feature to check
+     * @param Context  $context         the context to use
+     * @param ?Variant $fallbackVariant the default value to return if the feature is not found
      */
     private function getVariantForFeature(?Feature $feature, ?Context $context = null, ?Variant $fallbackVariant = null): Variant
     {
@@ -212,10 +211,9 @@ final class DefaultUnleash implements Unleash
     /**
      * Underlying method to check if a feature is enabled.
      *
-     * @param Feature|null   $feature        the feature to check
-     * @param Feature[]|null $parentFeatures the dependencies to check
-     * @param Context        $context        the context to use
-     * @param bool           $default        the default value to return if the feature is not found
+     * @param Feature|null $feature the feature to check
+     * @param Context      $context the context to use
+     * @param bool         $default the default value to return if the feature is not found
      */
     private function isFeatureEnabled(?Feature $feature, Context $context, bool $default = false): FeatureEnabledResult
     {

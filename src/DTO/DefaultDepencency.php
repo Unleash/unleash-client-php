@@ -23,7 +23,7 @@ final class DefaultDepencency implements Dependency
     public function jsonSerialize(): array
     {
         $result = [
-            'name' => $this->feature,
+            'name' => is_string($this->feature) ? $this->feature : $this->feature->getName(),
         ];
         if ($this->enabled !== null) {
             $result['enabled'] = $this->enabled;
@@ -35,7 +35,7 @@ final class DefaultDepencency implements Dependency
         return $result;
     }
 
-    public function getFeature(): Feature
+    public function getFeature(): Feature|string
     {
         return $this->feature;
     }

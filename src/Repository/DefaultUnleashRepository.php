@@ -189,8 +189,12 @@ final class DefaultUnleashRepository implements UnleashRepository
             throw new InvalidValueException("The body isn't valid because it doesn't contain a 'features' key");
         }
 
-        foreach ($body['features'] as $feature) {
-            $features[$feature['name']] = $this->parseFeature($feature['name'], $body['features'], $globalSegments);
+        foreach ($body['features'] as $rawFeature) {
+            $feature = $this->parseFeature($rawFeature['name'], $body['features'], $globalSegments);
+
+            if ($feature != null) {
+                $features[$rawFeature['name']] = $feature;
+            }
         }
 
         return $features;
@@ -198,15 +202,20 @@ final class DefaultUnleashRepository implements UnleashRepository
 
     /**
      * @param array<Segment> $globalSegments
+     * @param array<mixed>   $features
      *
      * @return Feature
      */
-    private function parseFeature(string $featureName, array $features, array $globalSegments, bool $parseDependencies = true): ?Feature
+    private function parseFeature(string $featureName, array $features, array $globalSegments, bool $parseDependencies = true): Feature
     {
         // find in features array object with name $featureName
         $feature = null;
         foreach ($features as $featureItem) {
-            if ($featureItem['name'] === $featureName) {
+            if (
+                is_array($featureItem) &&
+                array_key_exists('name', $featureItem) &&
+                $featureItem['name'] === $featureName
+            ) {
                 $feature = $featureItem;
                 break;
             }
@@ -356,6 +365,7 @@ final class DefaultUnleashRepository implements UnleashRepository
     /**
      * @param array<DependencyArray> $dependenciesRaw
      * @param array<Segment>         $globalSegments
+     * @param array<mixed>           $features
      *
      * @return array<Dependency>
      */
@@ -367,7 +377,12 @@ final class DefaultUnleashRepository implements UnleashRepository
             $dependencyExists = $features[$dependency['feature']] ?? null;
 
             $dependencies[] = new DefaultDepencency(
-                $dependencyExists ? $this->parseFeature($dependency['feature'], $features, $globalSegments ?? [], false) : $dependency['feature'],
+                $dependencyExists ? $this->parseFeature(
+                    $dependency['feature'],
+                    $features,
+                    $globalSegments,
+                    false
+                ) : $dependency['feature'],
                 $dependency['enabled'] ?? true,
                 $dependency['variants'] ?? null,
             );
