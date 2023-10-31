@@ -374,7 +374,17 @@ final class DefaultUnleashRepository implements UnleashRepository
         $dependencies = [];
 
         foreach ($dependenciesRaw as $dependency) {
-            $dependencyExists = $features[$dependency['feature']] ?? null;
+            $dependencyExists = false;
+            foreach ($features as $feature) {
+                if (
+                    is_array($feature) &&
+                    array_key_exists('name', $feature) &&
+                    $feature['name'] === $dependency['feature']
+                ) {
+                    $dependencyExists = true;
+                    break;
+                }
+            }
 
             $dependencies[] = new DefaultDepencency(
                 $dependencyExists ? $this->parseFeature(
