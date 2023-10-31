@@ -184,10 +184,11 @@ final class DefaultUnleash implements Unleash
         $featureName = $feature->getName();
 
         if (count($strategyVariants) != 0) {
-            $variant = $this->variantHandler->selectVariant($feature->getVariants(), $featureName, $context);
-        } else {
             $variant = $this->variantHandler->selectVariant($strategyVariants, $enabledResult->getStrategy()?->getParameters()['groupId'] ?? '', $context);
+        } else {
+            $variant = $this->variantHandler->selectVariant($feature->getVariants(), $featureName, $context);
         }
+
         if ($variant !== null) {
             $this->metricsHandler->handleMetrics($feature, true, $variant);
 
