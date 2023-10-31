@@ -45,9 +45,7 @@ final class DefaultUnleash implements Unleash
     public function isEnabled(string $featureName, ?Context $context = null, bool $default = false): bool
     {
         $context ??= $this->configuration->getContextProvider()->getContext();
-        $featureAndDependencies = $this->findFeatureAndDependencies($featureName, $context);
-        $feature = $featureAndDependencies['feature'] ?? null;
-        $dependencies = $featureAndDependencies['dependencies'] ?? [];
+        $feature = $this->findFeature($featureName, $context) ?? null;
 
         if ($feature !== null) {
             if (method_exists($feature, 'hasImpressionData') && $feature->hasImpressionData()) {
@@ -63,16 +61,14 @@ final class DefaultUnleash implements Unleash
             }
         }
 
-        return $this->isFeatureEnabled($feature, $context, $dependencies, $default)->isEnabled();
+        return $this->isFeatureEnabled($feature, $context, $default)->isEnabled();
     }
 
     public function getVariant(string $featureName, ?Context $context = null, ?Variant $fallbackVariant = null): Variant
     {
-        $featureAndDependencies = $this->findFeatureAndDependencies($featureName, $context);
-        $feature = $featureAndDependencies['feature'] ?? null;
-        $dependencies = $featureAndDependencies['dependencies'] ?? [];
+        $feature = $this->findFeature($featureName, $context);
 
-        return $this->getVariantForFeature($feature, $context, $dependencies, $fallbackVariant);
+        return $this->getVariantForFeature($feature, $context, $fallbackVariant);
     }
 
     public function register(): bool
@@ -81,77 +77,13 @@ final class DefaultUnleash implements Unleash
     }
 
     /**
-     * Finds a feature with it's parent features. Posts events if the feature is not found.
-     *
-     * @param string  $featureName name of the feature to find
-     * @param Context $context     the context to use
-     *
-     * @return null|array{
-     *   feature: Feature|null,
-     *   dependencies: array<string, Feature>,
-     * }
-     */
-    public function findFeatureAndDependencies(string $featureName, ?Context $context): ?array
-    {
-        $features = $this->repository->getFeatures();
-        assert(is_array($features));
-        $context ??= $this->configuration->getContextProvider()->getContext();
-
-        $feature = $features[$featureName] ?? null;
-
-        if ($feature === null) {
-            $event = new FeatureToggleNotFoundEvent($context, $featureName);
-            $this->configuration->getEventDispatcherOrNull()?->dispatch(
-                $event,
-                UnleashEvents::FEATURE_TOGGLE_NOT_FOUND,
-            );
-
-            return [
-                'feature' => null,
-                'dependencies' => [],
-            ];
-        }
-
-        $dependencyDefinitions = $feature->getDependencies();
-
-        if ($dependencyDefinitions === null) {
-            return [
-                'feature' => $feature,
-                'dependencies' => [],
-            ];
-        }
-
-        $dependencies = [];
-        foreach ($dependencyDefinitions as $dependencyDefinition) {
-            $name = $dependencyDefinition->getFeature();
-            $dependency = $features[$name] ?? null;
-            if ($dependency !== null) {
-                $dependencies[$name] = $dependency;
-            } else {
-                $event = new FeatureToggleDependencyNotFoundEvent($context, $name);
-                $this->configuration->getEventDispatcherOrNull()?->dispatch(
-                    $event,
-                    UnleashEvents::FEATURE_TOGGLE_NOT_FOUND,
-                );
-            }
-        }
-
-        return [
-            'feature' => $feature,
-            'dependencies' => $dependencies,
-        ];
-    }
-
-    /**
      * Checks if parent feature flag requirement is satisfied.
      *
-     * @param Dependency $dependency    the dependency to check
-     * @param Feature    $parentFeature the parent feature to check
-     * @param Context    $context       the context to use
+     * @param Dependency $dependency the dependency to check
+     * @param Context    $context    the context to use
      */
     public function isDependencySatisfied(
         ?Dependency $dependency = null,
-        ?Feature $parentFeature = null,
         ?Context $context = null,
     ): bool {
         if ($dependency === null) {
@@ -159,7 +91,15 @@ final class DefaultUnleash implements Unleash
         }
         $context ??= $this->configuration->getContextProvider()->getContext();
 
-        if ($parentFeature === null) {
+        $parentFeature = $dependency->getFeature();
+
+        if ($parentFeature == null || is_string($parentFeature)) {
+            $event = new FeatureToggleDependencyNotFoundEvent($context, $parentFeature ? $parentFeature : '');
+            $this->configuration->getEventDispatcherOrNull()?->dispatch(
+                $event,
+                UnleashEvents::FEATURE_TOGGLE_NOT_FOUND,
+            );
+
             return false;
         }
 
@@ -177,7 +117,7 @@ final class DefaultUnleash implements Unleash
         }
 
         $dependencyVariants = $dependency->getVariants();
-        if (!empty($dependencyVariants)) {
+        if ($dependencyVariants && count($dependencyVariants) > 0) {
             $parentFeatureVariantName = $this->getVariantForFeature($parentFeature, $context)->getName();
 
             foreach ($dependencyVariants as $dependencyVariant) {
@@ -193,19 +133,47 @@ final class DefaultUnleash implements Unleash
     }
 
     /**
+     * Finds a feature with it's parent features. Posts events if the feature is not found.
+     *
+     * @param string  $featureName name of the feature to find
+     * @param Context $context     the context to use
+     *
+     * @return Feature|null
+     */
+    private function findFeature(string $featureName, ?Context $context): ?Feature
+    {
+        $features = $this->repository->getFeatures();
+        assert(is_array($features));
+        $context ??= $this->configuration->getContextProvider()->getContext();
+
+        $feature = $features[$featureName] ?? null;
+
+        if ($feature === null) {
+            $event = new FeatureToggleNotFoundEvent($context, $featureName);
+            $this->configuration->getEventDispatcherOrNull()?->dispatch(
+                $event,
+                UnleashEvents::FEATURE_TOGGLE_NOT_FOUND,
+            );
+
+            return null;
+        }
+
+        return $feature;
+    }
+
+    /**
      * Selects a variant from a feature.
      *
-     * @param Feature                 $feature         the feature to check
-     * @param Context                 $context         the context to use
-     * @param ?array<string, Feature> $dependencies    parent feature toggles
-     * @param ?Variant                $fallbackVariant the default value to return if the feature is not found
+     * @param Feature  $feature         the feature to check
+     * @param Context  $context         the context to use
+     * @param ?Variant $fallbackVariant the default value to return if the feature is not found
      */
-    private function getVariantForFeature(?Feature $feature, ?Context $context = null, $dependencies = [], ?Variant $fallbackVariant = null): Variant
+    private function getVariantForFeature(?Feature $feature, ?Context $context = null, ?Variant $fallbackVariant = null): Variant
     {
         $fallbackVariant ??= $this->variantHandler->getDefaultVariant();
         $context ??= $this->configuration->getContextProvider()->getContext();
 
-        $enabledResult = $this->isFeatureEnabled($feature, $context, $dependencies);
+        $enabledResult = $this->isFeatureEnabled($feature, $context);
         $strategyVariants = $enabledResult->getStrategy()?->getVariants() ?? [];
         if (
             $feature === null || $enabledResult->isEnabled() === false ||
@@ -215,11 +183,12 @@ final class DefaultUnleash implements Unleash
         }
         $featureName = $feature->getName();
 
-        if (empty($strategyVariants)) {
-            $variant = $this->variantHandler->selectVariant($feature->getVariants(), $featureName, $context);
-        } else {
+        if (count($strategyVariants) != 0) {
             $variant = $this->variantHandler->selectVariant($strategyVariants, $enabledResult->getStrategy()?->getParameters()['groupId'] ?? '', $context);
+        } else {
+            $variant = $this->variantHandler->selectVariant($feature->getVariants(), $featureName, $context);
         }
+
         if ($variant !== null) {
             $this->metricsHandler->handleMetrics($feature, true, $variant);
 
@@ -243,12 +212,11 @@ final class DefaultUnleash implements Unleash
     /**
      * Underlying method to check if a feature is enabled.
      *
-     * @param Feature|null   $feature        the feature to check
-     * @param Feature[]|null $parentFeatures the dependencies to check
-     * @param Context        $context        the context to use
-     * @param bool           $default        the default value to return if the feature is not found
+     * @param Feature|null $feature the feature to check
+     * @param Context      $context the context to use
+     * @param bool         $default the default value to return if the feature is not found
      */
-    private function isFeatureEnabled(?Feature $feature, Context $context, ?array $parentFeatures = [], bool $default = false): FeatureEnabledResult
+    private function isFeatureEnabled(?Feature $feature, Context $context, bool $default = false): FeatureEnabledResult
     {
         if ($feature === null) {
             return new DefaultFeatureEnabledResult($default);
@@ -267,10 +235,9 @@ final class DefaultUnleash implements Unleash
         }
 
         $dependencies = $feature->getDependencies();
-        if (!empty($dependencies)) {
+        if (count($dependencies) > 0) {
             foreach ($dependencies as $dependency) {
-                $parentFeature = $parentFeatures[$dependency->getFeature()] ?? null;
-                if (!$this->isDependencySatisfied($dependency, $parentFeature, $context)) {
+                if (!$this->isDependencySatisfied($dependency, $context)) {
                     $this->metricsHandler->handleMetrics($feature, false);
 
                     return new DefaultFeatureEnabledResult();

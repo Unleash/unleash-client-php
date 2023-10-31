@@ -189,47 +189,79 @@ final class DefaultUnleashRepository implements UnleashRepository
             throw new InvalidValueException("The body isn't valid because it doesn't contain a 'features' key");
         }
 
-        foreach ($body['features'] as $feature) {
-            $strategies = [];
+        foreach ($body['features'] as $rawFeature) {
+            $feature = $this->parseFeature($rawFeature['name'], $body['features'], $globalSegments);
 
-            foreach ($feature['strategies'] as $strategy) {
-                $constraints = $this->parseConstraints($strategy['constraints'] ?? []);
-                $strategyVariants = $this->parseVariants($strategy['variants'] ?? []);
-
-                $hasNonexistentSegments = false;
-                $segments = [];
-                foreach ($strategy['segments'] ?? [] as $segment) {
-                    if (isset($globalSegments[$segment])) {
-                        $segments[] = $globalSegments[$segment];
-                    } else {
-                        $hasNonexistentSegments = true;
-                        break;
-                    }
-                }
-                $strategies[] = new DefaultStrategy(
-                    $strategy['name'],
-                    $strategy['parameters'] ?? [],
-                    $constraints,
-                    $segments,
-                    $hasNonexistentSegments,
-                    $strategyVariants,
-                );
+            if ($feature != null) {
+                $features[$rawFeature['name']] = $feature;
             }
-
-            $featureVariants = $this->parseVariants($feature['variants'] ?? []);
-            $dependencies = $this->parseDependencies($feature['dependencies'] ?? []);
-
-            $features[$feature['name']] = new DefaultFeature(
-                $feature['name'],
-                $feature['enabled'],
-                $strategies,
-                $featureVariants,
-                $feature['impressionData'] ?? false,
-                $dependencies
-            );
         }
 
         return $features;
+    }
+
+    /**
+     * @param array<Segment> $globalSegments
+     * @param array<mixed>   $features
+     *
+     * @return Feature
+     */
+    private function parseFeature(string $featureName, array $features, array $globalSegments, bool $parseDependencies = true): Feature
+    {
+        // find in features array object with name $featureName
+        $feature = null;
+        foreach ($features as $featureItem) {
+            if (
+                is_array($featureItem) &&
+                array_key_exists('name', $featureItem) &&
+                $featureItem['name'] === $featureName
+            ) {
+                $feature = $featureItem;
+                break;
+            }
+        }
+
+        if ($feature === null) {
+            throw new InvalidValueException("The feature '{$featureName}' doesn't exist");
+        }
+
+        $strategies = [];
+
+        foreach ($feature['strategies'] as $strategy) {
+            $constraints = $this->parseConstraints($strategy['constraints'] ?? []);
+            $strategyVariants = $this->parseVariants($strategy['variants'] ?? []);
+
+            $hasNonexistentSegments = false;
+            $segments = [];
+            foreach ($strategy['segments'] ?? [] as $segment) {
+                if (isset($globalSegments[$segment])) {
+                    $segments[] = $globalSegments[$segment];
+                } else {
+                    $hasNonexistentSegments = true;
+                    break;
+                }
+            }
+            $strategies[] = new DefaultStrategy(
+                $strategy['name'],
+                $strategy['parameters'] ?? [],
+                $constraints,
+                $segments,
+                $hasNonexistentSegments,
+                $strategyVariants,
+            );
+        }
+
+        $featureVariants = $this->parseVariants($feature['variants'] ?? []);
+        $dependencies = $this->parseDependencies($feature['dependencies'] ?? [], $parseDependencies ? $features : [], $globalSegments);
+
+        return new DefaultFeature(
+            $feature['name'],
+            $feature['enabled'],
+            $strategies,
+            $featureVariants,
+            $feature['impressionData'] ?? false,
+            $dependencies
+        );
     }
 
     private function getBootstrappedResponse(): ?string
@@ -332,16 +364,35 @@ final class DefaultUnleashRepository implements UnleashRepository
 
     /**
      * @param array<DependencyArray> $dependenciesRaw
+     * @param array<Segment>         $globalSegments
+     * @param array<mixed>           $features
      *
      * @return array<Dependency>
      */
-    private function parseDependencies(array $dependenciesRaw): array
+    private function parseDependencies(array $dependenciesRaw, array $features, array $globalSegments): array
     {
         $dependencies = [];
 
         foreach ($dependenciesRaw as $dependency) {
+            $dependencyExists = false;
+            foreach ($features as $feature) {
+                if (
+                    is_array($feature) &&
+                    array_key_exists('name', $feature) &&
+                    $feature['name'] === $dependency['feature']
+                ) {
+                    $dependencyExists = true;
+                    break;
+                }
+            }
+
             $dependencies[] = new DefaultDepencency(
-                $dependency['feature'],
+                $dependencyExists ? $this->parseFeature(
+                    $dependency['feature'],
+                    $features,
+                    $globalSegments,
+                    false
+                ) : $dependency['feature'],
                 $dependency['enabled'] ?? true,
                 $dependency['variants'] ?? null,
             );
