@@ -33,7 +33,7 @@ final class DefaultMetricsHandler implements MetricsHandler
 
     private function getOrCreateBucket(): MetricsBucket
     {
-        $cache = $this->configuration->getCache();
+        $cache = $this->configuration->getMetricsCache();
 
         $bucket = null;
         if ($cache->has(CacheKey::METRICS_BUCKET)) {
@@ -62,7 +62,7 @@ final class DefaultMetricsHandler implements MetricsHandler
     {
         $bucket->setEndDate(new DateTimeImmutable());
         $this->metricsSender->sendMetrics($bucket);
-        $cache = $this->configuration->getCache();
+        $cache = $this->configuration->getMetricsCache();
         if ($cache->has(CacheKey::METRICS_BUCKET)) {
             $cache->delete(CacheKey::METRICS_BUCKET);
         }
@@ -70,7 +70,7 @@ final class DefaultMetricsHandler implements MetricsHandler
 
     private function store(MetricsBucket $bucket): void
     {
-        $cache = $this->configuration->getCache();
+        $cache = $this->configuration->getMetricsCache();
         $cache->set(CacheKey::METRICS_BUCKET, $bucket);
     }
 }

@@ -773,6 +773,29 @@ final class UnleashBuilderTest extends TestCase
         self::assertSame($cache1, $this->getConfiguration($instance->build())->getCache());
     }
 
+    public function testWithMetricsCacheHandler()
+    {
+        $cache1 = $this->getCache();
+        $cache2 = $this->getCache();
+
+        $instance = $this->instance->withFetchingEnabled(false);
+        self::assertNull($this->getProperty($instance, 'metricsCache'));
+        self::assertNotNull($this->getConfiguration($instance->build())->getMetricsCache());
+
+        $instance = $this->instance->withFetchingEnabled(false)->withCacheHandler($cache1);
+        self::assertNull($this->getProperty($instance, 'metricsCache'));
+        self::assertSame($cache1, $this->getConfiguration($instance->build())->getMetricsCache());
+
+        $instance = $this->instance
+            ->withFetchingEnabled(false)
+            ->withCacheHandler($cache1)
+            ->withMetricsCacheHandler($cache2)
+        ;
+        self::assertSame($cache2, $this->getProperty($instance, 'metricsCache'));
+        self::assertSame($cache2, $this->getConfiguration($instance->build())->getMetricsCache());
+        self::assertSame($cache1, $this->getConfiguration($instance->build())->getCache());
+    }
+
     public function testWithMetricsHandler()
     {
         $metricsHandler = new class implements MetricsHandler {

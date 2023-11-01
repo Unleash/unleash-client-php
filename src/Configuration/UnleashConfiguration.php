@@ -45,6 +45,7 @@ final class UnleashConfiguration
         private int $staleTtl = 30 * 60,
         private ?CacheInterface $staleCache = null,
         private ?string $proxyKey = null,
+        private ?CacheInterface $metricsCache = null,
     ) {
         $this->contextProvider ??= new DefaultUnleashContextProvider();
         if ($defaultContext !== null) {
@@ -64,6 +65,11 @@ final class UnleashConfiguration
     public function getStaleCache(): CacheInterface
     {
         return $this->staleCache ?? $this->getCache();
+    }
+
+    public function getMetricsCache(): CacheInterface
+    {
+        return $this->metricsCache ?? $this->getCache();
     }
 
     public function getUrl(): string
@@ -113,6 +119,13 @@ final class UnleashConfiguration
     public function setStaleCache(?CacheInterface $cache): self
     {
         $this->staleCache = $cache;
+
+        return $this;
+    }
+
+    public function setMetricsCache(?CacheInterface $cache): self
+    {
+        $this->metricsCache = $cache;
 
         return $this;
     }
