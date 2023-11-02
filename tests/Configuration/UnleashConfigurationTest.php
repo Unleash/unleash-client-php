@@ -29,7 +29,7 @@ final class UnleashConfigurationTest extends TestCase
             0,
             false,
             [],
-            false,
+            false
         );
     }
 
