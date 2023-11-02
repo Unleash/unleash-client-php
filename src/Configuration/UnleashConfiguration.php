@@ -2,19 +2,17 @@
 
 namespace Unleash\Client\Configuration;
 
-use JetBrains\PhpStorm\Deprecated;
 use JetBrains\PhpStorm\Pure;
 use LogicException;
 use Psr\SimpleCache\CacheInterface;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Unleash\Client\Bootstrap\BootstrapHandler;
 use Unleash\Client\Bootstrap\BootstrapProvider;
 use Unleash\Client\Bootstrap\DefaultBootstrapHandler;
 use Unleash\Client\Bootstrap\EmptyBootstrapProvider;
 use Unleash\Client\ContextProvider\DefaultUnleashContextProvider;
-use Unleash\Client\ContextProvider\SettableUnleashContextProvider;
 use Unleash\Client\ContextProvider\UnleashContextProvider;
-use Unleash\Client\Helper\EventDispatcher;
 
 final class UnleashConfiguration
 {
@@ -31,25 +29,16 @@ final class UnleashConfiguration
         private bool $metricsEnabled = true,
         private array $headers = [],
         private bool $autoRegistrationEnabled = true,
-        // todo remove in next major version
-        ?Context $defaultContext = null,
-        // todo remove nullability in next major version
-        private ?UnleashContextProvider $contextProvider = null,
-        // todo remove nullability in next major version
-        private ?BootstrapHandler $bootstrapHandler = null,
-        // todo remove nullability in next major version
-        private ?BootstrapProvider $bootstrapProvider = null,
+        private UnleashContextProvider $contextProvider = new DefaultUnleashContextProvider(),
+        private BootstrapHandler $bootstrapHandler = new DefaultBootstrapHandler(),
+        private BootstrapProvider $bootstrapProvider = new EmptyBootstrapProvider(),
         private bool $fetchingEnabled = true,
-        // todo remove nullability in next major version
-        private ?EventDispatcherInterface $eventDispatcher = null,
+        private EventDispatcherInterface $eventDispatcher = new EventDispatcher(),
         private int $staleTtl = 30 * 60,
         private ?CacheInterface $staleCache = null,
         private ?string $proxyKey = null,
     ) {
         $this->contextProvider ??= new DefaultUnleashContextProvider();
-        if ($defaultContext !== null) {
-            $this->setDefaultContext($defaultContext);
-        }
     }
 
     public function getCache(): CacheInterface
@@ -204,25 +193,8 @@ final class UnleashConfiguration
         return $this->getContextProvider()->getContext();
     }
 
-    /**
-     * @todo remove on next major version
-     */
-    #[Deprecated(reason: 'Support for context provider was added, default context logic should be handled in a provider')]
-    public function setDefaultContext(?Context $defaultContext): self
-    {
-        if ($this->getContextProvider() instanceof SettableUnleashContextProvider) {
-            $this->getContextProvider()->setDefaultContext($defaultContext ?? new UnleashContext());
-        } else {
-            throw new LogicException("Default context cannot be set via configuration for a context provider that doesn't implement SettableUnleashContextProvider");
-        }
-
-        return $this;
-    }
-
     public function getContextProvider(): UnleashContextProvider
     {
-        assert($this->contextProvider !== null);
-
         return $this->contextProvider;
     }
 
@@ -236,7 +208,7 @@ final class UnleashConfiguration
     #[Pure]
     public function getBootstrapHandler(): BootstrapHandler
     {
-        return $this->bootstrapHandler ?? new DefaultBootstrapHandler();
+        return $this->bootstrapHandler;
     }
 
     public function setBootstrapHandler(BootstrapHandler $bootstrapHandler): self
@@ -249,7 +221,7 @@ final class UnleashConfiguration
     #[Pure]
     public function getBootstrapProvider(): BootstrapProvider
     {
-        return $this->bootstrapProvider ?? new EmptyBootstrapProvider();
+        return $this->bootstrapProvider;
     }
 
     public function setBootstrapProvider(BootstrapProvider $bootstrapProvider): self
@@ -271,28 +243,12 @@ final class UnleashConfiguration
         return $this;
     }
 
-    #[Deprecated('This method has been deprecated and will be removed in next major version')]
-    public function getEventDispatcher(): EventDispatcher
-    {
-        if ($this->eventDispatcher === null) {
-            return new EventDispatcher(null);
-        }
-        if ($this->eventDispatcher instanceof EventDispatcher) {
-            return $this->eventDispatcher;
-        }
-
-        return new EventDispatcher($this->eventDispatcher);
-    }
-
-    /**
-     * @internal
-     */
-    public function getEventDispatcherOrNull(): ?EventDispatcherInterface
+    public function getEventDispatcher(): EventDispatcherInterface
     {
         return $this->eventDispatcher;
     }
 
-    public function setEventDispatcher(?EventDispatcherInterface $eventDispatcher): self
+    public function setEventDispatcher(EventDispatcherInterface $eventDispatcher): self
     {
         $this->eventDispatcher = $eventDispatcher;
 

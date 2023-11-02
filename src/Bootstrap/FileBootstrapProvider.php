@@ -9,10 +9,10 @@ use SplFileInfo;
 use Throwable;
 use Unleash\Client\Exception\InvalidValueException;
 
-final class FileBootstrapProvider implements BootstrapProvider
+final readonly class FileBootstrapProvider implements BootstrapProvider
 {
     public function __construct(
-        private readonly string|SplFileInfo $file,
+        private string|SplFileInfo $file,
     ) {
     }
 

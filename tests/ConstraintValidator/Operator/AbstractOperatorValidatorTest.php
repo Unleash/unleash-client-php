@@ -13,11 +13,11 @@ use Unleash\Client\Exception\OperatorValidatorException;
 use Unleash\Client\Metrics\MetricsHandler;
 use Unleash\Client\Stickiness\MurmurHashCalculator;
 use Unleash\Client\Strategy\DefaultStrategyHandler;
-use Unleash\Client\Tests\AbstractHttpClientTest;
+use Unleash\Client\Tests\AbstractHttpClientTestCase;
 use Unleash\Client\Tests\Traits\FakeCacheImplementationTrait;
 use Unleash\Client\Variant\DefaultVariantHandler;
 
-final class AbstractOperatorValidatorTest extends AbstractHttpClientTest
+final class AbstractOperatorValidatorTest extends AbstractHttpClientTestCase
 {
     use FakeCacheImplementationTrait;
 

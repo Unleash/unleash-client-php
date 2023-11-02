@@ -13,11 +13,11 @@ use Unleash\Client\DTO\DefaultVariant;
 use Unleash\Client\DTO\DefaultVariantPayload;
 use Unleash\Client\Enum\Stickiness;
 use Unleash\Client\Repository\DefaultUnleashProxyRepository;
-use Unleash\Client\Tests\AbstractHttpClientTest;
+use Unleash\Client\Tests\AbstractHttpClientTestCase;
 use Unleash\Client\Tests\Traits\FakeCacheImplementationTrait;
 use Unleash\Client\Tests\Traits\RealCacheImplementationTrait;
 
-final class DefaultUnleashProxyRepositoryTest extends AbstractHttpClientTest
+final class DefaultUnleashProxyRepositoryTest extends AbstractHttpClientTestCase
 {
     use FakeCacheImplementationTrait, RealCacheImplementationTrait {
         FakeCacheImplementationTrait::getCache insteadof RealCacheImplementationTrait;

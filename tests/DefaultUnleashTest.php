@@ -30,7 +30,7 @@ use Unleash\Client\Tests\Traits\FakeCacheImplementationTrait;
 use Unleash\Client\UnleashBuilder;
 use Unleash\Client\Variant\DefaultVariantHandler;
 
-final class DefaultUnleashTest extends AbstractHttpClientTest
+final class DefaultUnleashTest extends AbstractHttpClientTestCase
 {
     use FakeCacheImplementationTrait;
 

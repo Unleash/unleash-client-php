@@ -15,7 +15,6 @@ use Unleash\Client\Event\FeatureToggleDisabledEvent;
 use Unleash\Client\Event\FeatureToggleMissingStrategyHandlerEvent;
 use Unleash\Client\Event\FeatureToggleNotFoundEvent;
 use Unleash\Client\Exception\CompoundException;
-use Unleash\Client\Helper\EventDispatcher as HelperEventDispatcher;
 
 /**
  * This class is only for triggering code that doesn't really make sense to test and is here to achieve 100% code coverage.
@@ -108,13 +107,7 @@ final class CoverageOnlyTest extends TestCase
                 ->setFetchingEnabled(false);
         };
 
-        $configurationNull = $configuration()->setEventDispatcher(null);
-        $configurationNull->getEventDispatcher();
-
-        $configurationHelper = $configuration()->setEventDispatcher(new HelperEventDispatcher(null));
-        $configurationHelper->getEventDispatcher();
-
         $configurationEventDispatcher = $configuration()->setEventDispatcher(new EventDispatcher());
-        $configurationEventDispatcher->getEventDispatcher();
+        self::assertInstanceOf(EventDispatcher::class, $configurationEventDispatcher->getEventDispatcher());
     }
 }

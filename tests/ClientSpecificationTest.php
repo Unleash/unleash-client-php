@@ -19,7 +19,7 @@ use Unleash\Client\Strategy\UserIdStrategyHandler;
 use Unleash\Client\Tests\Traits\FakeCacheImplementationTrait;
 use Unleash\Client\Variant\DefaultVariantHandler;
 
-final class ClientSpecificationTest extends AbstractHttpClientTest
+final class ClientSpecificationTest extends AbstractHttpClientTestCase
 {
     use FakeCacheImplementationTrait;
 

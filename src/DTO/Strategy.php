@@ -2,10 +2,6 @@
 
 namespace Unleash\Client\DTO;
 
-/**
- * @method array<Segment> getSegments()
- * @method bool           hasNonexistentSegments()
- */
 interface Strategy
 {
     public function getName(): string;
@@ -24,4 +20,11 @@ interface Strategy
      * @return array<Variant>
      */
     public function getVariants(): array;
+
+    /**
+     * @return array<Segment>
+     */
+    public function getSegments(): array;
+
+    public function hasNonexistentSegments(): bool;
 }

@@ -1,7 +1,5 @@
 <?php
 
-/** @noinspection PhpPluralMixedCanBeReplacedWithArrayInspection */
-
 namespace Unleash\Client\DTO;
 
 use JetBrains\PhpStorm\ArrayShape;
@@ -11,12 +9,12 @@ use JsonException;
 use LogicException;
 use Unleash\Client\Enum\VariantPayloadType;
 
-final class DefaultVariantPayload implements VariantPayload
+final readonly class DefaultVariantPayload implements VariantPayload
 {
     public function __construct(
         #[ExpectedValues(valuesFromClass: VariantPayloadType::class)]
-        private readonly string $type,
-        private readonly string $value,
+        private string $type,
+        private string $value,
     ) {
     }
 

@@ -22,7 +22,7 @@ use Unleash\Client\Repository\DefaultUnleashRepository;
 use Unleash\Client\Tests\Traits\FakeCacheImplementationTrait;
 use Unleash\Client\Variant\VariantHandler;
 
-abstract class AbstractHttpClientTest extends TestCase
+abstract class AbstractHttpClientTestCase extends TestCase
 {
     use FakeCacheImplementationTrait;
 
