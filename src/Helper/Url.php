@@ -2,7 +2,7 @@
 
 namespace Unleash\Client\Helper;
 
-final readonly class Url
+final class Url
 {
     /**
      * @param array<string>|null $tags
