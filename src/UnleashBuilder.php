@@ -58,66 +58,135 @@ use Unleash\Client\Variant\VariantHandler;
 #[Immutable]
 final class UnleashBuilder
 {
-    private DefaultImplementationLocator $defaultImplementationLocator;
+    /**
+     * @var \Unleash\Client\Helper\DefaultImplementationLocator
+     */
+    private $defaultImplementationLocator;
 
-    private ?string $appUrl = null;
+    /**
+     * @var string|null
+     */
+    private $appUrl;
 
-    private ?string $instanceId = null;
+    /**
+     * @var string|null
+     */
+    private $instanceId;
 
-    private ?string $appName = null;
+    /**
+     * @var string|null
+     */
+    private $appName;
 
-    private ?ClientInterface $httpClient = null;
+    /**
+     * @var \Psr\Http\Client\ClientInterface|null
+     */
+    private $httpClient;
 
-    private ?RequestFactoryInterface $requestFactory = null;
+    /**
+     * @var \Psr\Http\Message\RequestFactoryInterface|null
+     */
+    private $requestFactory;
 
-    private ?CacheInterface $cache = null;
+    /**
+     * @var \Psr\SimpleCache\CacheInterface|null
+     */
+    private $cache;
 
-    private ?CacheInterface $staleCache = null;
+    /**
+     * @var \Psr\SimpleCache\CacheInterface|null
+     */
+    private $staleCache;
 
-    private ?int $cacheTtl = null;
+    /**
+     * @var int|null
+     */
+    private $cacheTtl;
 
-    private ?int $staleTtl = null;
+    /**
+     * @var int|null
+     */
+    private $staleTtl;
 
-    private ?RegistrationService $registrationService = null;
+    /**
+     * @var \Unleash\Client\Client\RegistrationService|null
+     */
+    private $registrationService;
 
-    private bool $autoregister = true;
+    /**
+     * @var bool
+     */
+    private $autoregister = true;
 
-    private ?bool $metricsEnabled = null;
+    /**
+     * @var bool|null
+     */
+    private $metricsEnabled;
 
-    private ?int $metricsInterval = null;
+    /**
+     * @var int|null
+     */
+    private $metricsInterval;
 
-    private ?Context $defaultContext = null;
+    /**
+     * @var \Unleash\Client\Configuration\Context|null
+     */
+    private $defaultContext;
 
-    private ?UnleashContextProvider $contextProvider = null;
+    /**
+     * @var \Unleash\Client\ContextProvider\UnleashContextProvider|null
+     */
+    private $contextProvider;
 
-    private ?BootstrapProvider $bootstrapProvider = null;
+    /**
+     * @var \Unleash\Client\Bootstrap\BootstrapProvider|null
+     */
+    private $bootstrapProvider;
 
-    private ?BootstrapHandler $bootstrapHandler = null;
+    /**
+     * @var \Unleash\Client\Bootstrap\BootstrapHandler|null
+     */
+    private $bootstrapHandler;
 
-    private ?string $proxyKey = null;
+    /**
+     * @var string|null
+     */
+    private $proxyKey;
 
-    private bool $fetchingEnabled = true;
+    /**
+     * @var bool
+     */
+    private $fetchingEnabled = true;
 
     /**
      * @var array<string,string>
      */
-    private array $headers = [];
+    private $headers = [];
 
     /**
      * @var array<StrategyHandler>
      */
-    private array $strategies;
+    private $strategies;
 
-    private ?EventDispatcherInterface $eventDispatcher = null;
+    /**
+     * @var \Symfony\Component\EventDispatcher\EventDispatcherInterface|null
+     */
+    private $eventDispatcher;
 
     /**
      * @var array<EventSubscriberInterface>
      */
-    private array $eventSubscribers = [];
+    private $eventSubscribers = [];
 
-    private ?MetricsHandler $metricsHandler = null;
+    /**
+     * @var \Unleash\Client\Metrics\MetricsHandler|null
+     */
+    private $metricsHandler;
 
-    private ?VariantHandler $variantHandler = null;
+    /**
+     * @var \Unleash\Client\Variant\VariantHandler|null
+     */
+    private $variantHandler;
 
     public function __construct()
     {
@@ -283,7 +352,7 @@ final class UnleashBuilder
      * @param array<mixed>|Traversable<mixed>|JsonSerializable|null|string $bootstrap
      */
     #[Pure]
-    public function withBootstrap(array|Traversable|JsonSerializable|null|string $bootstrap): self
+    public function withBootstrap($bootstrap): self
     {
         if ($bootstrap === null) {
             $provider = new EmptyBootstrapProvider();
@@ -296,8 +365,11 @@ final class UnleashBuilder
         return $this->withBootstrapProvider($provider);
     }
 
+    /**
+     * @param string|\SplFileInfo|null $file
+     */
     #[Pure]
-    public function withBootstrapFile(string|SplFileInfo|null $file): self
+    public function withBootstrapFile($file): self
     {
         if ($file === null) {
             $provider = new EmptyBootstrapProvider();
@@ -366,9 +438,9 @@ final class UnleashBuilder
         $appName = $this->appName;
 
         if (!$this->fetchingEnabled) {
-            $appUrl ??= 'http://127.0.0.1';
-            $instanceId ??= 'dev';
-            $appName ??= 'dev';
+            $appUrl = $appUrl ?? 'http://127.0.0.1';
+            $instanceId = $instanceId ?? 'dev';
+            $appName = $appName ?? 'dev';
         }
 
         if ($appUrl === null) {
@@ -403,9 +475,7 @@ final class UnleashBuilder
         if ($httpClient === null) {
             $httpClient = $this->defaultImplementationLocator->findHttpClient();
             if ($httpClient === null) {
-                throw new InvalidValueException(
-                    "No http client provided, please use 'withHttpClient()' method or install a package providing 'psr/http-client-implementation'.",
-                );
+                throw new InvalidValueException("No http client provided, please use 'withHttpClient()' method or install a package providing 'psr/http-client-implementation'.");
             }
         }
         assert($httpClient instanceof ClientInterface);
@@ -422,9 +492,7 @@ final class UnleashBuilder
              */
             // @codeCoverageIgnoreStart
             if ($requestFactory === null) {
-                throw new InvalidValueException(
-                    "No request factory provided, please use 'withRequestFactory()' method or install a package providing 'psr/http-factory-implementation'.",
-                );
+                throw new InvalidValueException("No request factory provided, please use 'withRequestFactory()' method or install a package providing 'psr/http-factory-implementation'.");
             }
             // @codeCoverageIgnoreEnd
         }
@@ -434,15 +502,7 @@ final class UnleashBuilder
 
         $hashCalculator = new MurmurHashCalculator();
 
-        $dependencyContainer = new UnleashBuilderContainer(
-            cache: $cache,
-            staleCache: $staleCache,
-            httpClient: $httpClient,
-            metricsSender: null,
-            requestFactory: $requestFactory,
-            stickinessCalculator: $hashCalculator,
-            configuration: null,
-        );
+        $dependencyContainer = new UnleashBuilderContainer($cache, $staleCache, $httpClient, null, $requestFactory, $hashCalculator, null);
 
         $contextProvider = $this->contextProvider;
         if ($contextProvider === null) {
@@ -489,15 +549,7 @@ final class UnleashBuilder
         $repository = new DefaultUnleashRepository($httpClient, $requestFactory, $configuration);
         $metricsSender = new DefaultMetricsSender($httpClient, $requestFactory, $configuration);
 
-        $dependencyContainer = new UnleashBuilderContainer(
-            cache: $cache,
-            staleCache: $staleCache,
-            httpClient: $httpClient,
-            metricsSender: $metricsSender,
-            requestFactory: $requestFactory,
-            stickinessCalculator: $hashCalculator,
-            configuration: $configuration,
-        );
+        $dependencyContainer = new UnleashBuilderContainer($cache, $staleCache, $httpClient, $metricsSender, $requestFactory, $hashCalculator, $configuration);
 
         $registrationService = $this->registrationService;
         if ($registrationService === null) {
@@ -519,29 +571,18 @@ final class UnleashBuilder
 
         if ($this->proxyKey !== null) {
             $configuration->setProxyKey($this->proxyKey);
-            $proxyRepository = new DefaultUnleashProxyRepository(
-                $configuration,
-                $httpClient,
-                $requestFactory,
-            );
+            $proxyRepository = new DefaultUnleashProxyRepository($configuration, $httpClient, $requestFactory);
 
-            return new DefaultProxyUnleash(
-                $proxyRepository,
-                $metricsHandler,
-            );
+            return new DefaultProxyUnleash($proxyRepository, $metricsHandler);
         } else {
-            return new DefaultUnleash(
-                $this->strategies,
-                $repository,
-                $registrationService,
-                $configuration,
-                $metricsHandler,
-                $variantHandler,
-            );
+            return new DefaultUnleash($this->strategies, $repository, $registrationService, $configuration, $metricsHandler, $variantHandler);
         }
     }
 
-    private function with(string $property, mixed $value): self
+    /**
+     * @param mixed $value
+     */
+    private function with(string $property, $value): self
     {
         $copy = clone $this;
         $copy->{$property} = $value;
@@ -558,10 +599,7 @@ final class UnleashBuilder
             if ($configuration = $container->getConfiguration()) {
                 $target->setConfiguration($configuration);
             } else {
-                throw new CyclicDependencyException(sprintf(
-                    "A dependency '%s' is tagged as ConfigurationAware but that would cause a cyclic dependency as it needs to be part of Configuration",
-                    $target::class,
-                ));
+                throw new CyclicDependencyException(sprintf("A dependency '%s' is tagged as ConfigurationAware but that would cause a cyclic dependency as it needs to be part of Configuration", get_class($target)));
             }
         }
         if ($target instanceof HttpClientAware) {
@@ -571,10 +609,7 @@ final class UnleashBuilder
             if ($sender = $container->getMetricsSender()) {
                 $target->setMetricsSender($sender);
             } else {
-                throw new CyclicDependencyException(sprintf(
-                    "A dependency '%s' is tagged as MetricsSenderAware but MetricsSender is not available for this type of dependency",
-                    $target::class,
-                ));
+                throw new CyclicDependencyException(sprintf("A dependency '%s' is tagged as MetricsSenderAware but MetricsSender is not available for this type of dependency", get_class($target)));
             }
         }
         if ($target instanceof RequestFactoryAware) {
