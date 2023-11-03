@@ -11,9 +11,9 @@ use Unleash\Client\DTO\DefaultVariant;
 use Unleash\Client\Metrics\DefaultMetricsSender;
 use Unleash\Client\Metrics\MetricsBucket;
 use Unleash\Client\Metrics\MetricsBucketToggle;
-use Unleash\Client\Tests\AbstractHttpClientTest;
+use Unleash\Client\Tests\AbstractHttpClientTestCase;
 
-final class DefaultMetricsSenderTest extends AbstractHttpClientTest
+final class DefaultMetricsSenderTest extends AbstractHttpClientTestCase
 {
     /**
      * @var DefaultMetricsSender

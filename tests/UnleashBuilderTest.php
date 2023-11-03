@@ -24,7 +24,6 @@ use Unleash\Client\Bootstrap\JsonSerializableBootstrapProvider;
 use Unleash\Client\Client\DefaultRegistrationService;
 use Unleash\Client\Configuration\Context;
 use Unleash\Client\Configuration\UnleashConfiguration;
-use Unleash\Client\Configuration\UnleashContext;
 use Unleash\Client\ContextProvider\DefaultUnleashContextProvider;
 use Unleash\Client\DefaultProxyUnleash;
 use Unleash\Client\DefaultUnleash;
@@ -437,17 +436,6 @@ final class UnleashBuilderTest extends TestCase
         self::assertCount(9, $strategiesProperty->getValue($instance));
     }
 
-    public function testWithDefaultContext()
-    {
-        self::assertNotSame($this->instance, $this->instance->withDefaultContext(new UnleashContext()));
-
-        $context = new UnleashContext();
-        $instance = $this->instance->withDefaultContext($context);
-        $defaultContextProperty = (new ReflectionObject($instance))->getProperty('defaultContext');
-        $defaultContextProperty->setAccessible(true);
-        self::assertSame($context, $defaultContextProperty->getValue($instance));
-    }
-
     public function testWithContextProvider()
     {
         self::assertNotSame($this->instance, $this->instance->withContextProvider(new DefaultUnleashContextProvider()));
@@ -457,28 +445,6 @@ final class UnleashBuilderTest extends TestCase
         $providerProperty = (new ReflectionObject($instance))->getProperty('contextProvider');
         $providerProperty->setAccessible(true);
         self::assertSame($provider, $providerProperty->getValue($instance));
-
-        // test that the deprecated withDefaultContext() works
-        $defaultContext = new UnleashContext('456');
-        $instance = $this->instance
-            ->withContextProvider($provider)
-            ->withDefaultContext($defaultContext)
-            ->withAutomaticRegistrationEnabled(false)
-            ->withMetricsEnabled(false)
-            ->withAppUrl('test')
-            ->withInstanceId('test')
-            ->withAppName('test')
-            ->build();
-
-        $configurationProperty = (new ReflectionObject($instance))->getProperty('configuration');
-        $configurationProperty->setAccessible(true);
-        $configuration = $configurationProperty->getValue($instance);
-
-        $providerProperty = (new ReflectionObject($configuration))->getProperty('contextProvider');
-        $providerProperty->setAccessible(true);
-        $provider = $providerProperty->getValue($configuration);
-        assert($provider instanceof DefaultUnleashContextProvider);
-        self::assertEquals('456', $provider->getContext()->getCurrentUserId());
     }
 
     public function testWithBootstrapHandler()
@@ -672,16 +638,16 @@ final class UnleashBuilderTest extends TestCase
         self::assertSame($eventDispatcher, $property);
 
         $unleash = $instance->withFetchingEnabled(false)->build();
-        $configuredEventDispatcher = $this->getConfiguration($unleash)->getEventDispatcherOrNull();
+        $configuredEventDispatcher = $this->getConfiguration($unleash)->getEventDispatcher();
         self::assertInstanceOf(SymfonyEventDispatcher::class, $configuredEventDispatcher);
 
         $unleash = $this->instance->withFetchingEnabled(false)->build();
-        $configuredEventDispatcher = $this->getConfiguration($unleash)->getEventDispatcherOrNull();
+        $configuredEventDispatcher = $this->getConfiguration($unleash)->getEventDispatcher();
         self::assertInstanceOf(SymfonyEventDispatcher::class, $configuredEventDispatcher);
 
         $unleash = $this->instance->withFetchingEnabled(false)->withEventDispatcher(null)->build();
-        $configuredEventDispatcher = $this->getConfiguration($unleash)->getEventDispatcherOrNull();
-        self::assertNull($configuredEventDispatcher);
+        $configuredEventDispatcher = $this->getConfiguration($unleash)->getEventDispatcher();
+        self::assertNotNull($configuredEventDispatcher);
     }
 
     public function testWithEventSubscriber()
@@ -726,7 +692,7 @@ final class UnleashBuilderTest extends TestCase
         ));
 
         $unleash = $instance->build();
-        $eventDispatcher = $this->getConfiguration($unleash)->getEventDispatcherOrNull();
+        $eventDispatcher = $this->getConfiguration($unleash)->getEventDispatcher();
         self::assertInstanceOf(SymfonyEventDispatcher::class, $eventDispatcher);
         self::assertCount(2, $eventDispatcher->getListeners());
         self::assertCount(1, $eventDispatcher->getListeners(UnleashEvents::FEATURE_TOGGLE_NOT_FOUND));

@@ -2,9 +2,6 @@
 
 namespace Unleash\Client\DTO;
 
-/**
- * @method bool hasImpressionData()
- */
 interface Feature
 {
     public function getName(): string;
@@ -20,4 +17,6 @@ interface Feature
      * @return array<Variant>
      */
     public function getVariants(): array;
+
+    public function hasImpressionData(): bool;
 }

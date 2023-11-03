@@ -11,7 +11,7 @@ use LogicException;
 use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\Psr16Cache;
-use Symfony\Component\EventDispatcher\EventDispatcher as SymfonyEventDispatcher;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 use Unleash\Client\Bootstrap\JsonSerializableBootstrapProvider;
 use Unleash\Client\Configuration\UnleashConfiguration;
 use Unleash\Client\DTO\Feature;
@@ -19,13 +19,12 @@ use Unleash\Client\Event\FetchingDataFailedEvent;
 use Unleash\Client\Event\UnleashEvents;
 use Unleash\Client\Exception\HttpResponseException;
 use Unleash\Client\Exception\InvalidValueException;
-use Unleash\Client\Helper\EventDispatcher;
 use Unleash\Client\Repository\DefaultUnleashRepository;
-use Unleash\Client\Tests\AbstractHttpClientTest;
+use Unleash\Client\Tests\AbstractHttpClientTestCase;
 use Unleash\Client\Tests\Traits\FakeCacheImplementationTrait;
 use Unleash\Client\Tests\Traits\RealCacheImplementationTrait;
 
-final class DefaultUnleashRepositoryTest extends AbstractHttpClientTest
+final class DefaultUnleashRepositoryTest extends AbstractHttpClientTestCase
 {
     use FakeCacheImplementationTrait, RealCacheImplementationTrait {
         FakeCacheImplementationTrait::getCache insteadof RealCacheImplementationTrait;
@@ -294,7 +293,7 @@ final class DefaultUnleashRepositoryTest extends AbstractHttpClientTest
     {
         $failCount = 0;
 
-        $eventDispatcher = new EventDispatcher(new SymfonyEventDispatcher());
+        $eventDispatcher = new EventDispatcher();
         $eventDispatcher->addListener(
             UnleashEvents::FETCHING_DATA_FAILED,
             function (FetchingDataFailedEvent $event) use (&$failCount): void {
@@ -359,7 +358,7 @@ final class DefaultUnleashRepositoryTest extends AbstractHttpClientTest
     {
         $eventEmittedCount = 0;
 
-        $eventDispatcher = new EventDispatcher(new SymfonyEventDispatcher());
+        $eventDispatcher = new EventDispatcher();
         $eventDispatcher->addListener(
             UnleashEvents::FETCHING_DATA_FAILED,
             function (FetchingDataFailedEvent $event) use (&$eventEmittedCount): void {

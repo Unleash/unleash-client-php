@@ -5,7 +5,7 @@ namespace Unleash\Client\Bootstrap;
 use JsonException;
 use Traversable;
 
-final class DefaultBootstrapHandler implements BootstrapHandler
+final readonly class DefaultBootstrapHandler implements BootstrapHandler
 {
     /**
      * @throws JsonException

@@ -8,11 +8,11 @@ use Unleash\Client\Configuration\UnleashConfiguration;
 use Unleash\Client\DTO\DefaultFeature;
 use Unleash\Client\Metrics\DefaultMetricsHandler;
 use Unleash\Client\Metrics\DefaultMetricsSender;
-use Unleash\Client\Tests\AbstractHttpClientTest;
+use Unleash\Client\Tests\AbstractHttpClientTestCase;
 use Unleash\Client\Tests\Traits\FakeCacheImplementationTrait;
 use Unleash\Client\Tests\Traits\RealCacheImplementationTrait;
 
-final class DefaultMetricsHandlerTest extends AbstractHttpClientTest
+final class DefaultMetricsHandlerTest extends AbstractHttpClientTestCase
 {
     use FakeCacheImplementationTrait, RealCacheImplementationTrait {
         FakeCacheImplementationTrait::getCache insteadof RealCacheImplementationTrait;

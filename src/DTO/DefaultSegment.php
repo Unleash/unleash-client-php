@@ -2,14 +2,14 @@
 
 namespace Unleash\Client\DTO;
 
-final class DefaultSegment implements Segment
+final readonly class DefaultSegment implements Segment
 {
     /**
      * @param array<Constraint> $constraints
      */
     public function __construct(
-        private readonly int $id,
-        private readonly array $constraints,
+        private int $id,
+        private array $constraints,
     ) {
     }
 

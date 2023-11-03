@@ -2,7 +2,6 @@
 
 namespace Unleash\Client;
 
-use JetBrains\PhpStorm\Deprecated;
 use JetBrains\PhpStorm\Immutable;
 use JetBrains\PhpStorm\Pure;
 use JsonSerializable;
@@ -10,7 +9,7 @@ use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
 use Psr\SimpleCache\CacheInterface;
 use SplFileInfo;
-use Symfony\Component\EventDispatcher\EventDispatcher as SymfonyEventDispatcher;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Traversable;
@@ -26,7 +25,6 @@ use Unleash\Client\Client\RegistrationService;
 use Unleash\Client\Configuration\Context;
 use Unleash\Client\Configuration\UnleashConfiguration;
 use Unleash\Client\ContextProvider\DefaultUnleashContextProvider;
-use Unleash\Client\ContextProvider\SettableUnleashContextProvider;
 use Unleash\Client\ContextProvider\UnleashContextProvider;
 use Unleash\Client\Exception\CyclicDependencyException;
 use Unleash\Client\Exception\InvalidValueException;
@@ -110,12 +108,7 @@ final class UnleashBuilder
      */
     private array $strategies;
 
-    /**
-     * @var EventDispatcherInterface|null
-     *
-     * @noinspection PhpDocFieldTypeMismatchInspection
-     */
-    private ?object $eventDispatcher = null;
+    private ?EventDispatcherInterface $eventDispatcher = null;
 
     /**
      * @var array<EventSubscriberInterface>
@@ -129,8 +122,8 @@ final class UnleashBuilder
     public function __construct()
     {
         $this->defaultImplementationLocator = new DefaultImplementationLocator();
-        if (class_exists(SymfonyEventDispatcher::class)) {
-            $this->eventDispatcher = new SymfonyEventDispatcher();
+        if (class_exists(EventDispatcher::class)) {
+            $this->eventDispatcher = new EventDispatcher();
         }
 
         $rolloutStrategyHandler = new GradualRolloutStrategyHandler(new MurmurHashCalculator());
@@ -266,13 +259,6 @@ final class UnleashBuilder
     public function withMetricsInterval(int $milliseconds): self
     {
         return $this->with('metricsInterval', $milliseconds);
-    }
-
-    #[Pure]
-    #[Deprecated(reason: 'Context provider support was added, use custom context provider using withContextProvider()')]
-    public function withDefaultContext(?Context $context): self
-    {
-        return $this->with('defaultContext', $context);
     }
 
     #[Pure]
@@ -462,15 +448,12 @@ final class UnleashBuilder
         if ($contextProvider === null) {
             $contextProvider = new DefaultUnleashContextProvider();
         }
-        if ($this->defaultContext !== null && $contextProvider instanceof SettableUnleashContextProvider) {
-            $contextProvider->setDefaultContext($this->defaultContext);
-        }
 
         $bootstrapHandler = $this->bootstrapHandler ?? new DefaultBootstrapHandler();
         $bootstrapProvider = $this->bootstrapProvider ?? new EmptyBootstrapProvider();
-        $eventDispatcher = $this->eventDispatcher;
+        $eventDispatcher = $this->eventDispatcher ?? new EventDispatcher();
         foreach ($this->eventSubscribers as $eventSubscriber) {
-            $eventDispatcher?->addSubscriber($eventSubscriber);
+            $eventDispatcher->addSubscriber($eventSubscriber);
         }
 
         // initialize services

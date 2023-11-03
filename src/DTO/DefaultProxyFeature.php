@@ -2,17 +2,18 @@
 
 namespace Unleash\Client\DTO;
 
+use JsonSerializable;
 use Unleash\Client\Enum\Stickiness;
 
-final class DefaultProxyFeature implements ProxyFeature
+final readonly class DefaultProxyFeature implements ProxyFeature, JsonSerializable
 {
-    public string $name;
+    private string $name;
 
-    public bool $enabled;
+    private bool $enabled;
 
-    public Variant $variant;
+    private Variant $variant;
 
-    public bool $impression_data;
+    private bool $impressionData;
 
     /**
      * @param array{
@@ -40,7 +41,7 @@ final class DefaultProxyFeature implements ProxyFeature
 
         $this->name = $response['name'];
         $this->enabled = $response['enabled'];
-        $this->impression_data = $response['impression_data'];
+        $this->impressionData = $response['impression_data'];
 
         $payload = null;
 
@@ -68,6 +69,19 @@ final class DefaultProxyFeature implements ProxyFeature
 
     public function hasImpressionData(): bool
     {
-        return $this->impression_data;
+        return $this->impressionData;
+    }
+
+    /**
+     * @return array<mixed>
+     */
+    public function jsonSerialize(): array
+    {
+        return [
+            'name' => $this->name,
+            'enabled' => $this->enabled,
+            'variant' => $this->variant,
+            'impression_data' => $this->impressionData,
+        ];
     }
 }

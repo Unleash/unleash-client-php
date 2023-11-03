@@ -7,12 +7,12 @@ use JsonSerializable;
 use Traversable;
 use Unleash\Client\Exception\CompoundException;
 
-final class CompoundBootstrapProvider implements BootstrapProvider
+final readonly class CompoundBootstrapProvider implements BootstrapProvider
 {
     /**
      * @var BootstrapProvider[]
      */
-    private readonly array $bootstrapProviders;
+    private array $bootstrapProviders;
 
     public function __construct(
         BootstrapProvider ...$bootstrapProviders

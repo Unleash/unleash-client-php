@@ -4,17 +4,6 @@ namespace Unleash\Client\Configuration;
 
 use DateTimeInterface;
 
-/**
- * @todo move to required methods in next major
- *
- * @method string|null           getHostname()
- * @method string|null           getEnvironment()
- * @method DateTimeInterface     getCurrentTime()
- * @method Context               setHostname(string|null $hostname)
- * @method Context               setEnvironment(string|null $environment)
- * @method Context               setCurrentTime(DateTimeInterface|null $time)
- * @method array<string, string> getCustomProperties()
- */
 interface Context
 {
     public function getCurrentUserId(): ?string;
@@ -46,4 +35,21 @@ interface Context
     public function hasMatchingFieldValue(string $fieldName, array $values): bool;
 
     public function findContextValue(string $fieldName): ?string;
+
+    public function getHostname(): ?string;
+
+    public function setHostname(?string $hostname): self;
+
+    public function getEnvironment(): ?string;
+
+    public function setEnvironment(?string $environment): self;
+
+    public function getCurrentTime(): DateTimeInterface;
+
+    public function setCurrentTime(?DateTimeInterface $time): self;
+
+    /**
+     * @return array<string, string>
+     */
+    public function getCustomProperties(): array;
 }
