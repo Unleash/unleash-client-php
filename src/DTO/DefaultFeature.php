@@ -2,18 +2,18 @@
 
 namespace Unleash\Client\DTO;
 
-final readonly class DefaultFeature implements Feature
+final class DefaultFeature implements Feature
 {
     /**
      * @param iterable<Strategy> $strategies
      * @param array<Variant>     $variants
      */
     public function __construct(
-        private string $name,
-        private bool $enabled,
-        private iterable $strategies,
-        private array $variants = [],
-        private bool $impressionData = false,
+        private readonly string $name,
+        private readonly bool $enabled,
+        private readonly iterable $strategies,
+        private readonly array $variants = [],
+        private readonly bool $impressionData = false,
     ) {
     }
 
