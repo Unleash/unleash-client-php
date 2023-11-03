@@ -11,6 +11,8 @@ use Unleash\Client\Stickiness\StickinessCalculator;
 
 final readonly class DefaultVariantHandler implements VariantHandler
 {
+    private const VARIANT_HASH_SEED = 86028157;
+
     public function __construct(
         private StickinessCalculator $stickinessCalculator,
     ) {
@@ -103,7 +105,7 @@ final readonly class DefaultVariantHandler implements VariantHandler
                 ?? $this->randomString();
         }
 
-        return $this->stickinessCalculator->calculate($seed, $groupId, $totalWeight);
+        return $this->stickinessCalculator->calculate($seed, $groupId, $totalWeight, $seed = DefaultVariantHandler::VARIANT_HASH_SEED);
     }
 
     private function randomString(): string
