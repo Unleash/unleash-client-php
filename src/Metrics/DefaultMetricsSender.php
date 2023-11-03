@@ -8,15 +8,26 @@ use Psr\Http\Message\RequestFactoryInterface;
 use Unleash\Client\Configuration\UnleashConfiguration;
 use Unleash\Client\Helper\StringStream;
 
-final readonly class DefaultMetricsSender implements MetricsSender
+final class DefaultMetricsSender implements MetricsSender
 {
-    public function __construct(
-        private ClientInterface $httpClient,
-        private RequestFactoryInterface $requestFactory,
-        private UnleashConfiguration $configuration,
-    ) {
+    /**
+     * @readonly
+     */
+    private ClientInterface $httpClient;
+    /**
+     * @readonly
+     */
+    private RequestFactoryInterface $requestFactory;
+    /**
+     * @readonly
+     */
+    private UnleashConfiguration $configuration;
+    public function __construct(ClientInterface $httpClient, RequestFactoryInterface $requestFactory, UnleashConfiguration $configuration)
+    {
+        $this->httpClient = $httpClient;
+        $this->requestFactory = $requestFactory;
+        $this->configuration = $configuration;
     }
-
     public function sendMetrics(MetricsBucket $bucket): void
     {
         if (!$this->configuration->isMetricsEnabled() || !$this->configuration->isFetchingEnabled()) {
@@ -37,7 +48,7 @@ final readonly class DefaultMetricsSender implements MetricsSender
 
         try {
             $this->httpClient->sendRequest($request);
-        } catch (ClientExceptionInterface) {
+        } catch (ClientExceptionInterface $exception) {
             // ignore the error
         }
     }
