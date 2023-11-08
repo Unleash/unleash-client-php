@@ -12,6 +12,7 @@ use Unleash\Client\DTO\FeatureEnabledResult;
 use Unleash\Client\DTO\Strategy;
 use Unleash\Client\DTO\Variant;
 use Unleash\Client\Enum\ImpressionDataEventType;
+use Unleash\Client\Event\FeatureToggleDependencyNotFoundEvent;
 use Unleash\Client\Event\FeatureToggleDisabledEvent;
 use Unleash\Client\Event\FeatureToggleMissingStrategyHandlerEvent;
 use Unleash\Client\Event\FeatureToggleNotFoundEvent;
@@ -22,7 +23,6 @@ use Unleash\Client\Metrics\MetricsHandler;
 use Unleash\Client\Repository\UnleashRepository;
 use Unleash\Client\Strategy\StrategyHandler;
 use Unleash\Client\Variant\VariantHandler;
-use Unleash\Client\Event\FeatureToggleDependencyNotFoundEvent;
 
 final readonly class DefaultUnleash implements Unleash
 {
