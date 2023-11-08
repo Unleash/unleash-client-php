@@ -12,7 +12,6 @@ use Unleash\Client\DTO\FeatureEnabledResult;
 use Unleash\Client\DTO\Strategy;
 use Unleash\Client\DTO\Variant;
 use Unleash\Client\Enum\ImpressionDataEventType;
-use Unleash\Client\Event\FeatureToggleDependencyNotFoundEvent;
 use Unleash\Client\Event\FeatureToggleDisabledEvent;
 use Unleash\Client\Event\FeatureToggleMissingStrategyHandlerEvent;
 use Unleash\Client\Event\FeatureToggleNotFoundEvent;
@@ -23,19 +22,20 @@ use Unleash\Client\Metrics\MetricsHandler;
 use Unleash\Client\Repository\UnleashRepository;
 use Unleash\Client\Strategy\StrategyHandler;
 use Unleash\Client\Variant\VariantHandler;
+use Unleash\Client\Event\FeatureToggleDependencyNotFoundEvent;
 
-final class DefaultUnleash implements Unleash
+final readonly class DefaultUnleash implements Unleash
 {
     /**
      * @param iterable<StrategyHandler> $strategyHandlers
      */
     public function __construct(
-        private readonly iterable $strategyHandlers,
-        private readonly UnleashRepository $repository,
-        private readonly RegistrationService $registrationService,
-        private readonly UnleashConfiguration $configuration,
-        private readonly MetricsHandler $metricsHandler,
-        private readonly VariantHandler $variantHandler,
+        private iterable $strategyHandlers,
+        private UnleashRepository $repository,
+        private RegistrationService $registrationService,
+        private UnleashConfiguration $configuration,
+        private MetricsHandler $metricsHandler,
+        private VariantHandler $variantHandler,
     ) {
         if ($configuration->isAutoRegistrationEnabled()) {
             $this->register();
@@ -57,7 +57,7 @@ final class DefaultUnleash implements Unleash
                     clone $feature,
                     null,
                 );
-                $this->configuration->getEventDispatcherOrNull()?->dispatch($event, UnleashEvents::IMPRESSION_DATA);
+                $this->configuration->getEventDispatcher()->dispatch($event, UnleashEvents::IMPRESSION_DATA);
             }
         }
 
@@ -95,7 +95,7 @@ final class DefaultUnleash implements Unleash
 
         if ($parentFeature == null || is_string($parentFeature)) {
             $event = new FeatureToggleDependencyNotFoundEvent($context, $parentFeature ? $parentFeature : '');
-            $this->configuration->getEventDispatcherOrNull()?->dispatch(
+            $this->configuration->getEventDispatcher()?->dispatch(
                 $event,
                 UnleashEvents::FEATURE_TOGGLE_NOT_FOUND,
             );
@@ -150,7 +150,7 @@ final class DefaultUnleash implements Unleash
 
         if ($feature === null) {
             $event = new FeatureToggleNotFoundEvent($context, $featureName);
-            $this->configuration->getEventDispatcherOrNull()?->dispatch(
+            $this->configuration->getEventDispatcher()?->dispatch(
                 $event,
                 UnleashEvents::FEATURE_TOGGLE_NOT_FOUND,
             );
@@ -201,7 +201,7 @@ final class DefaultUnleash implements Unleash
                     clone $feature,
                     clone $variant,
                 );
-                $this->configuration->getEventDispatcherOrNull()?->dispatch($event, UnleashEvents::IMPRESSION_DATA);
+                $this->configuration->getEventDispatcher()?->dispatch($event, UnleashEvents::IMPRESSION_DATA);
             }
         }
         $resolvedVariant = $variant ?? $fallbackVariant;
@@ -224,7 +224,7 @@ final class DefaultUnleash implements Unleash
 
         if (!$feature->isEnabled()) {
             $event = new FeatureToggleDisabledEvent($feature, $context);
-            $this->configuration->getEventDispatcherOrNull()?->dispatch(
+            $this->configuration->getEventDispatcher()?->dispatch(
                 $event,
                 UnleashEvents::FEATURE_TOGGLE_DISABLED,
             );
@@ -273,7 +273,7 @@ final class DefaultUnleash implements Unleash
 
         if (!$handlersFound) {
             $event = new FeatureToggleMissingStrategyHandlerEvent($context, $feature);
-            $this->configuration->getEventDispatcherOrNull()?->dispatch(
+            $this->configuration->getEventDispatcher()?->dispatch(
                 $event,
                 UnleashEvents::FEATURE_TOGGLE_MISSING_STRATEGY_HANDLER,
             );

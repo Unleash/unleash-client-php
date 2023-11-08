@@ -8,12 +8,12 @@ use Unleash\Client\DTO\Variant;
 /**
  * @internal
  */
-final class MetricsBucketToggle
+final readonly class MetricsBucketToggle
 {
     public function __construct(
-        private readonly Feature $feature,
-        private readonly bool $success,
-        private readonly ?Variant $variant = null,
+        private Feature $feature,
+        private bool $success,
+        private ?Variant $variant = null,
     ) {
     }
 

@@ -22,7 +22,7 @@ use Unleash\Client\Metrics\DefaultMetricsSender;
 use Unleash\Client\Repository\DefaultUnleashProxyRepository;
 use Unleash\Client\Tests\Traits\FakeCacheImplementationTrait;
 
-final class DefaultProxyUnleashTest extends AbstractHttpClientTest
+final class DefaultProxyUnleashTest extends AbstractHttpClientTestCase
 {
     use FakeCacheImplementationTrait;
 

@@ -9,11 +9,11 @@ use Unleash\Client\DefaultUnleash;
 use Unleash\Client\Enum\ConstraintOperator;
 use Unleash\Client\Stickiness\MurmurHashCalculator;
 use Unleash\Client\Strategy\DefaultStrategyHandler;
-use Unleash\Client\Tests\AbstractHttpClientTest;
+use Unleash\Client\Tests\AbstractHttpClientTestCase;
 use Unleash\Client\Tests\Traits\FakeCacheImplementationTrait;
 use Unleash\Client\Variant\DefaultVariantHandler;
 
-final class ConstraintTest extends AbstractHttpClientTest
+final class ConstraintTest extends AbstractHttpClientTestCase
 {
     use FakeCacheImplementationTrait;
 

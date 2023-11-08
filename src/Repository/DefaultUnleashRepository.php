@@ -63,12 +63,12 @@ use Unleash\Client\Exception\InvalidValueException;
  *       variants?: array<string>,
  *   }
  */
-final class DefaultUnleashRepository implements UnleashRepository
+final readonly class DefaultUnleashRepository implements UnleashRepository
 {
     public function __construct(
-        private readonly ClientInterface $httpClient,
-        private readonly RequestFactoryInterface $requestFactory,
-        private readonly UnleashConfiguration $configuration,
+        private ClientInterface $httpClient,
+        private RequestFactoryInterface $requestFactory,
+        private UnleashConfiguration $configuration,
     ) {
     }
 
@@ -120,7 +120,7 @@ final class DefaultUnleashRepository implements UnleashRepository
                         throw new HttpResponseException("Invalid status code: '{$response->getStatusCode()}'");
                     }
                 } catch (Exception $exception) {
-                    $this->configuration->getEventDispatcherOrNull()?->dispatch(
+                    $this->configuration->getEventDispatcher()->dispatch(
                         new FetchingDataFailedEvent($exception),
                         UnleashEvents::FETCHING_DATA_FAILED,
                     );

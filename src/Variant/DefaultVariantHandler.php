@@ -9,12 +9,12 @@ use Unleash\Client\DTO\Variant;
 use Unleash\Client\Enum\Stickiness;
 use Unleash\Client\Stickiness\StickinessCalculator;
 
-final class DefaultVariantHandler implements VariantHandler
+final readonly class DefaultVariantHandler implements VariantHandler
 {
-    public const HASH_SEED = 86028157;
+    private const VARIANT_HASH_SEED = 86028157;
 
     public function __construct(
-        private readonly StickinessCalculator $stickinessCalculator,
+        private StickinessCalculator $stickinessCalculator,
     ) {
     }
 
@@ -105,12 +105,7 @@ final class DefaultVariantHandler implements VariantHandler
                 ?? $this->randomString();
         }
 
-        return $this->stickinessCalculator->calculate(
-            $seed,
-            $groupId,
-            $totalWeight,
-            DefaultVariantHandler::HASH_SEED
-        );
+        return $this->stickinessCalculator->calculate($seed, $groupId, $totalWeight, $seed = DefaultVariantHandler::VARIANT_HASH_SEED);
     }
 
     private function randomString(): string

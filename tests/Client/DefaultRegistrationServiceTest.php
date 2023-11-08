@@ -8,10 +8,10 @@ use RuntimeException;
 use Unleash\Client\Client\DefaultRegistrationService;
 use Unleash\Client\Configuration\UnleashConfiguration;
 use Unleash\Client\Strategy\DefaultStrategyHandler;
-use Unleash\Client\Tests\AbstractHttpClientTest;
+use Unleash\Client\Tests\AbstractHttpClientTestCase;
 use Unleash\Client\Tests\Traits\RealCacheImplementationTrait;
 
-final class DefaultRegistrationServiceTest extends AbstractHttpClientTest
+final class DefaultRegistrationServiceTest extends AbstractHttpClientTestCase
 {
     use RealCacheImplementationTrait {
         RealCacheImplementationTrait::tearDown as cleanupCache;
