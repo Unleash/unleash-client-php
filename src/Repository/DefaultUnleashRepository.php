@@ -180,6 +180,7 @@ final readonly class DefaultUnleashRepository implements UnleashRepository
 
     /**
      * @throws JsonException
+     * @param array $body
      *
      * @return array<Feature>
      */
