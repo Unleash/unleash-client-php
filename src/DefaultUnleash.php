@@ -45,7 +45,7 @@ final readonly class DefaultUnleash implements Unleash
     public function isEnabled(string $featureName, ?Context $context = null, bool $default = false): bool
     {
         $context ??= $this->configuration->getContextProvider()->getContext();
-        $feature = $this->findFeature($featureName, $context) ?? null;
+        $feature = $this->findFeature($featureName, $context);
 
         if ($feature !== null) {
             if (method_exists($feature, 'hasImpressionData') && $feature->hasImpressionData()) {
