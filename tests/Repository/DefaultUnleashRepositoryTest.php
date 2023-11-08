@@ -443,7 +443,7 @@ final class DefaultUnleashRepositoryTest extends AbstractHttpClientTestCase
         $eventDispatcher->addListener(
             UnleashEvents::FETCHING_DATA_FAILED,
             function (FetchingDataFailedEvent $event) use (&$failCount): void {
-                self::assertInstanceOf(JsonException::class, $event->getException());
+                self::assertInstanceOf(InvalidValueException::class, $event->getException());
                 ++$failCount;
             }
         );
