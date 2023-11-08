@@ -4,6 +4,37 @@
 [![Coverage Status](https://img.shields.io/coverallsCoverage/github/Unleash/unleash-client-php?label=Code%20Coverage)](https://coveralls.io/github/Unleash/unleash-client-php?branch=main)
 [![Download](https://img.shields.io/packagist/dt/unleash/client.svg)](https://packagist.org/packages/unleash/client)
 
+<!-- TOC -->
+  * [Unleash client SDK](#unleash-client-sdk)
+  * [Migrating](#migrating)
+  * [Installation](#installation)
+  * [Usage](#usage)
+    * [Builder](#builder)
+      * [Required parameters](#required-parameters)
+      * [Optional parameters](#optional-parameters)
+  * [Proxy SDK](#proxy-sdk)
+  * [Caching](#caching)
+  * [Bootstrapping](#bootstrapping)
+    * [Custom bootstrap provider](#custom-bootstrap-provider)
+    * [Disabling communication with Unleash server](#disabling-communication-with-unleash-server)
+  * [Strategies](#strategies)
+    * [Default strategy](#default-strategy)
+    * [IP address strategy](#ip-address-strategy)
+    * [User ID strategy](#user-id-strategy)
+    * [Gradual rollout strategy](#gradual-rollout-strategy)
+    * [Hostname strategy](#hostname-strategy)
+    * [Context provider](#context-provider)
+    * [Custom strategies](#custom-strategies)
+  * [Variants](#variants)
+  * [Client registration](#client-registration)
+  * [Metrics](#metrics)
+  * [Custom headers via middleware](#custom-headers-via-middleware)
+  * [Constraints](#constraints)
+  * [GitLab specifics](#gitlab-specifics)
+<!-- TOC -->
+
+## Unleash client SDK
+
 A PHP implementation of the [Unleash protocol](https://www.getunleash.io/)
 aka [Feature Flags](https://docs.gitlab.com/ee/operations/feature_flags.html) in GitLab.
 
@@ -12,6 +43,10 @@ You may also be interested in the [Symfony Bundle](https://github.com/Unleash/un
 > Unleash allows you to gradually release your app's feature before doing a full release based on multiple strategies
 > like releasing to only specific users or releasing to a percentage of your user base. Read more in the above linked
 > documentations.
+
+## Migrating
+
+If you're migrating from 1.x to 2.x, you can read the [migration guide](doc/migrating-1.x-2.x.md).
 
 ## Installation
 
