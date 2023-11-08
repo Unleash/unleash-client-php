@@ -8,7 +8,6 @@ use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\HttpFactory;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
-use JsonException;
 use LogicException;
 use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
