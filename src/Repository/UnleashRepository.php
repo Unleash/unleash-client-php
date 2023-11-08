@@ -9,7 +9,7 @@ interface UnleashRepository
     public function findFeature(string $featureName): ?Feature;
 
     /**
-     * @return array<Feature>
+     * @return iterable<Feature>
      */
-    public function getFeatures(): array;
+    public function getFeatures(): iterable;
 }
