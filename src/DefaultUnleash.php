@@ -224,7 +224,7 @@ final readonly class DefaultUnleash implements Unleash
 
         if (!$feature->isEnabled()) {
             $event = new FeatureToggleDisabledEvent($feature, $context);
-            $this->configuration->getEventDispatcher()?->dispatch(
+            $this->configuration->getEventDispatcher()->dispatch(
                 $event,
                 UnleashEvents::FEATURE_TOGGLE_DISABLED,
             );
