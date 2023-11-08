@@ -7,6 +7,8 @@ use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\HttpFactory;
 use GuzzleHttp\Psr7\Request;
+use GuzzleHttp\Psr7\Response;
+use JsonException;
 use LogicException;
 use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
@@ -15,6 +17,7 @@ use Symfony\Component\EventDispatcher\EventDispatcher;
 use Unleash\Client\Bootstrap\JsonSerializableBootstrapProvider;
 use Unleash\Client\Configuration\UnleashConfiguration;
 use Unleash\Client\DTO\Feature;
+use Unleash\Client\Enum\CacheKey;
 use Unleash\Client\Event\FetchingDataFailedEvent;
 use Unleash\Client\Event\UnleashEvents;
 use Unleash\Client\Exception\HttpResponseException;
@@ -423,5 +426,46 @@ final class DefaultUnleashRepositoryTest extends AbstractHttpClientTestCase
         $cacheNormal->clear();
         $this->expectException(HttpResponseException::class);
         $repository->getFeatures();
+    }
+
+    public function testGetFeaturesCorruptedBodyIsNotStored()
+    {
+        $this->mockHandler->append(new Response(
+            200,
+            ['Content-Type' => 'application/json'],
+            '{"version":1,"features":['
+        ));
+
+        $cache = $this->getRealCache();
+        $failCount = 0;
+
+        $eventDispatcher = new EventDispatcher();
+        $eventDispatcher->addListener(
+            UnleashEvents::FETCHING_DATA_FAILED,
+            function (FetchingDataFailedEvent $event) use (&$failCount): void {
+                self::assertInstanceOf(JsonException::class, $event->getException());
+                ++$failCount;
+            }
+        );
+
+        $repository = new DefaultUnleashRepository(
+            new Client([
+                'handler' => $this->handlerStack,
+            ]),
+            new HttpFactory(),
+            (new UnleashConfiguration('', '', ''))
+                ->setCache($cache)
+                ->setFetchingEnabled(true)
+                ->setTtl(5)
+                ->setBootstrapProvider(new JsonSerializableBootstrapProvider(['features' => []]))
+                ->setEventDispatcher($eventDispatcher)
+        );
+
+        $features = $repository->getFeatures();
+        $lastResponse = $cache->get(CacheKey::FEATURES_RESPONSE);
+
+        self::assertEmpty($features);
+        self::assertNull($lastResponse);
+        self::assertEquals(1, $failCount);
     }
 }

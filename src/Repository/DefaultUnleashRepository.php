@@ -109,6 +109,7 @@ final readonly class DefaultUnleashRepository implements UnleashRepository
                     $response = $this->httpClient->sendRequest($request);
                     if ($response->getStatusCode() === 200) {
                         $data = (string) $response->getBody();
+                        json_decode($data, true, 512, JSON_THROW_ON_ERROR);
                         $this->setLastValidState($data);
                     } else {
                         throw new HttpResponseException("Invalid status code: '{$response->getStatusCode()}'");
