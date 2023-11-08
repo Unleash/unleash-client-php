@@ -60,7 +60,7 @@ use Unleash\Client\Exception\InvalidValueException;
  * @phpstan-type DependencyArray array{
  *       feature: string,
  *       enabled: bool,
- *       variants?: array<string>,
+ *       variants?: iterable<string>,
  *   }
  */
 final readonly class DefaultUnleashRepository implements UnleashRepository
@@ -90,7 +90,7 @@ final readonly class DefaultUnleashRepository implements UnleashRepository
      * @throws ClientExceptionInterface
      * @throws JsonException
      *
-     * @return array<Feature>
+     * @return iterable<Feature>
      */
     public function getFeatures(): array
     {
