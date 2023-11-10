@@ -55,6 +55,24 @@ use Unleash\Client\Exception\InvalidValueException;
  *       type:string,
  *       value: string,
  *   }
+ * @phpstan-type StrategyArray array{
+ *       constraints?: array<ConstraintArray>,
+ *       variants?: array<VariantArray>,
+ *       segments?: array<string>,
+ *       name: string,
+ *       parameters: array<string, string>,
+ *   }
+ * @phpstan-type SegmentArray array{
+ *       id: int,
+ *       constraints: array<ConstraintArray>,
+ *   }
+ * @phpstan-type FeatureArray array{
+ *       strategies: array<StrategyArray>,
+ *       variants: array<VariantArray>,
+ *       name: string,
+ *       enabled: bool,
+ *       impressionData?: bool,
+ *   }
  */
 final readonly class DefaultUnleashRepository implements UnleashRepository
 {
@@ -141,6 +159,7 @@ final readonly class DefaultUnleashRepository implements UnleashRepository
                 $data = json_decode($rawData, true);
             }
 
+            assert(is_array($data));
             $features = $this->parseFeatures($data);
             $this->setCache($features);
         }
@@ -179,8 +198,7 @@ final readonly class DefaultUnleashRepository implements UnleashRepository
     }
 
     /**
-     * @throws JsonException
-     * @param array $body
+     * @param array{segments?: array<SegmentArray>, features?: array<FeatureArray>} $body
      *
      * @return array<Feature>
      */
@@ -263,7 +281,7 @@ final readonly class DefaultUnleashRepository implements UnleashRepository
     }
 
     /**
-     * @param array<array{id: int, constraints: array<ConstraintArray>}> $segmentsRaw
+     * @param array<SegmentArray> $segmentsRaw
      *
      * @return array<Segment>
      */
