@@ -55,6 +55,24 @@ use Unleash\Client\Exception\InvalidValueException;
  *       type:string,
  *       value: string,
  *   }
+ * @phpstan-type StrategyArray array{
+ *       constraints?: array<ConstraintArray>,
+ *       variants?: array<VariantArray>,
+ *       segments?: array<string>,
+ *       name: string,
+ *       parameters: array<string, string>,
+ *   }
+ * @phpstan-type SegmentArray array{
+ *       id: int,
+ *       constraints: array<ConstraintArray>,
+ *   }
+ * @phpstan-type FeatureArray array{
+ *       strategies: array<StrategyArray>,
+ *       variants: array<VariantArray>,
+ *       name: string,
+ *       enabled: bool,
+ *       impressionData?: bool,
+ *   }
  */
 final readonly class DefaultUnleashRepository implements UnleashRepository
 {
@@ -89,8 +107,9 @@ final readonly class DefaultUnleashRepository implements UnleashRepository
     {
         $features = $this->getCachedFeatures();
         if ($features === null) {
+            $data = null;
             if (!$this->configuration->isFetchingEnabled()) {
-                if (!$data = $this->getBootstrappedResponse()) {
+                if (!$rawData = $this->getBootstrappedResponse()) {
                     throw new LogicException('Fetching of Unleash api is disabled but no bootstrap is provided');
                 }
             } else {
@@ -108,8 +127,15 @@ final readonly class DefaultUnleashRepository implements UnleashRepository
                 try {
                     $response = $this->httpClient->sendRequest($request);
                     if ($response->getStatusCode() === 200) {
-                        $data = (string) $response->getBody();
-                        $this->setLastValidState($data);
+                        $rawData = (string) $response->getBody();
+                        $data = json_decode($rawData, true);
+                        if (($lastError = json_last_error()) !== JSON_ERROR_NONE) {
+                            throw new InvalidValueException(
+                                sprintf("JsonException: '%s'", json_last_error_msg()),
+                                $lastError
+                            );
+                        }
+                        $this->setLastValidState($rawData);
                     } else {
                         throw new HttpResponseException("Invalid status code: '{$response->getStatusCode()}'");
                     }
@@ -118,10 +144,10 @@ final readonly class DefaultUnleashRepository implements UnleashRepository
                         new FetchingDataFailedEvent($exception),
                         UnleashEvents::FETCHING_DATA_FAILED,
                     );
-                    $data = $this->getLastValidState();
+                    $rawData = $this->getLastValidState();
                 }
-                $data ??= $this->getBootstrappedResponse();
-                if ($data === null) {
+                $rawData ??= $this->getBootstrappedResponse();
+                if ($rawData === null) {
                     throw new HttpResponseException(sprintf(
                         'Got invalid response code when getting features and no default bootstrap provided: %s',
                         isset($response) ? $response->getStatusCode() : 'unknown response status code'
@@ -129,6 +155,11 @@ final readonly class DefaultUnleashRepository implements UnleashRepository
                 }
             }
 
+            if ($data === null) {
+                $data = json_decode($rawData, true);
+            }
+
+            assert(is_array($data));
             $features = $this->parseFeatures($data);
             $this->setCache($features);
         }
@@ -167,16 +198,13 @@ final readonly class DefaultUnleashRepository implements UnleashRepository
     }
 
     /**
-     * @throws JsonException
+     * @param array{segments?: array<SegmentArray>, features?: array<FeatureArray>} $body
      *
      * @return array<Feature>
      */
-    private function parseFeatures(string $rawBody): array
+    private function parseFeatures(array $body): array
     {
         $features = [];
-        $body = json_decode($rawBody, true, 512, JSON_THROW_ON_ERROR);
-        assert(is_array($body));
-
         $globalSegments = $this->parseSegments($body['segments'] ?? []);
 
         if (!isset($body['features']) || !is_array($body['features'])) {
@@ -253,7 +281,7 @@ final readonly class DefaultUnleashRepository implements UnleashRepository
     }
 
     /**
-     * @param array<array{id: int, constraints: array<ConstraintArray>}> $segmentsRaw
+     * @param array<SegmentArray> $segmentsRaw
      *
      * @return array<Segment>
      */
