@@ -983,6 +983,7 @@ $unleash = UnleashBuilder::create()
     ->withMetricsEnabled(false) // turn off metric sending
     ->withMetricsEnabled(true) // turn on metric sending
     ->withMetricsInterval(10_000) // interval in milliseconds (10 seconds)
+    ->withMetricsCacheHandler(new Psr16Cache(new RedisAdapter())) // use custom cache handler for metrics, defaults to standard cache handler
     ->build();
 
 // the metric will be collected but not sent immediately

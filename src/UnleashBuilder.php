@@ -74,6 +74,8 @@ final class UnleashBuilder
 
     private ?CacheInterface $staleCache = null;
 
+    private ?CacheInterface $metricsCache = null;
+
     private ?int $cacheTtl = null;
 
     private ?int $staleTtl = null;
@@ -214,6 +216,12 @@ final class UnleashBuilder
     public function withStaleCacheHandler(?CacheInterface $cache): self
     {
         return $this->with('staleCache', $cache);
+    }
+
+    #[Pure]
+    public function withMetricsCacheHandler(?CacheInterface $cache): self
+    {
+        return $this->with('metricsCache', $cache);
     }
 
     #[Pure]
@@ -398,6 +406,7 @@ final class UnleashBuilder
         }
         assert($cache instanceof CacheInterface);
         $staleCache = $this->staleCache ?? $cache;
+        $metricsCache = $this->metricsCache ?? $cache;
 
         $httpClient = $this->httpClient;
         if ($httpClient === null) {
@@ -471,6 +480,7 @@ final class UnleashBuilder
         $configuration
             ->setCache($cache)
             ->setStaleCache($staleCache)
+            ->setMetricsCache($metricsCache)
             ->setTtl($this->cacheTtl ?? $configuration->getTtl())
             ->setStaleTtl($this->staleTtl ?? $configuration->getStaleTtl())
             ->setMetricsEnabled($this->metricsEnabled ?? $configuration->isMetricsEnabled())
