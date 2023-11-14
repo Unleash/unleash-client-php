@@ -98,6 +98,13 @@ final class UnleashConfiguration
         return $this;
     }
 
+    public function getMetricsUrl(): string
+    {
+        return $this->proxyKey !== null
+            ? $this->getUrl() . 'frontend/client/metrics'
+            : $this->getUrl() . 'client/metrics';
+    }
+
     public function setCache(CacheInterface $cache): self
     {
         $this->cache = $cache;
