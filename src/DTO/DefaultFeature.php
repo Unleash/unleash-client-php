@@ -2,21 +2,45 @@
 
 namespace Unleash\Client\DTO;
 
-final readonly class DefaultFeature implements Feature
+final class DefaultFeature implements Feature
 {
+    /**
+     * @readonly
+     * @var string
+     */
+    private $name;
+    /**
+     * @readonly
+     * @var bool
+     */
+    private $enabled;
+    /**
+     * @var iterable<Strategy>
+     * @readonly
+     */
+    private $strategies;
+    /**
+     * @var array<Variant>
+     * @readonly
+     */
+    private $variants = [];
+    /**
+     * @readonly
+     * @var bool
+     */
+    private $impressionData = false;
     /**
      * @param iterable<Strategy> $strategies
      * @param array<Variant>     $variants
      */
-    public function __construct(
-        private string $name,
-        private bool $enabled,
-        private iterable $strategies,
-        private array $variants = [],
-        private bool $impressionData = false,
-    ) {
+    public function __construct(string $name, bool $enabled, iterable $strategies, array $variants = [], bool $impressionData = false)
+    {
+        $this->name = $name;
+        $this->enabled = $enabled;
+        $this->strategies = $strategies;
+        $this->variants = $variants;
+        $this->impressionData = $impressionData;
     }
-
     public function getName(): string
     {
         return $this->name;

@@ -9,15 +9,27 @@ use JsonException;
 use LogicException;
 use Unleash\Client\Enum\VariantPayloadType;
 
-final readonly class DefaultVariantPayload implements VariantPayload
+final class DefaultVariantPayload implements VariantPayload
 {
+    /**
+     * @readonly
+     * @var string
+     */
+    private $type;
+    /**
+     * @readonly
+     * @var string
+     */
+    private $value;
     public function __construct(
-        #[ExpectedValues(valuesFromClass: VariantPayloadType::class)]
-        private string $type,
-        private string $value,
-    ) {
+        #[\JetBrains\PhpStorm\ExpectedValues(valuesFromClass: \Unleash\Client\Enum\VariantPayloadType::class)]
+        string $type,
+        string $value
+    )
+    {
+        $this->type = $type;
+        $this->value = $value;
     }
-
     #[ExpectedValues(valuesFromClass: VariantPayloadType::class)]
     public function getType(): string
     {
@@ -38,11 +50,7 @@ final readonly class DefaultVariantPayload implements VariantPayload
     {
         if ($this->type !== VariantPayloadType::JSON) {
             throw new LogicException(
-                sprintf(
-                    "Only payloads of type '%s' can be converted from json, this payload has type '%s'",
-                    VariantPayloadType::JSON,
-                    $this->type,
-                )
+                sprintf("Only payloads of type '%s' can be converted from json, this payload has type '%s'", VariantPayloadType::JSON, $this->type)
             );
         }
 
