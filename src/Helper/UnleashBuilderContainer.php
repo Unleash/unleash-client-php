@@ -12,19 +12,46 @@ use Unleash\Client\Stickiness\StickinessCalculator;
 /**
  * @internal
  */
-final readonly class UnleashBuilderContainer
+final class UnleashBuilderContainer
 {
-    public function __construct(
-        private CacheInterface $cache,
-        private CacheInterface $staleCache,
-        private ClientInterface $httpClient,
-        private ?MetricsSender $metricsSender,
-        private RequestFactoryInterface $requestFactory,
-        private StickinessCalculator $stickinessCalculator,
-        private ?UnleashConfiguration $configuration,
-    ) {
+    /**
+     * @readonly
+     */
+    private CacheInterface $cache;
+    /**
+     * @readonly
+     */
+    private CacheInterface $staleCache;
+    /**
+     * @readonly
+     */
+    private ClientInterface $httpClient;
+    /**
+     * @readonly
+     */
+    private ?MetricsSender $metricsSender;
+    /**
+     * @readonly
+     */
+    private RequestFactoryInterface $requestFactory;
+    /**
+     * @readonly
+     */
+    private StickinessCalculator $stickinessCalculator;
+    /**
+     * @readonly
+     */
+    private ?UnleashConfiguration $configuration;
+    public function __construct(CacheInterface $cache, CacheInterface $staleCache, ClientInterface $httpClient, ?MetricsSender $metricsSender, RequestFactoryInterface $requestFactory, StickinessCalculator $stickinessCalculator, ?UnleashConfiguration $configuration)
+    {
+        $this->cache = $cache;
+        $this->staleCache = $staleCache;
+        $this->httpClient = $httpClient;
+        $this->metricsSender = $metricsSender;
+        $this->requestFactory = $requestFactory;
+        $this->stickinessCalculator = $stickinessCalculator;
+        $this->configuration = $configuration;
     }
-
     public function getCache(): CacheInterface
     {
         return $this->cache;

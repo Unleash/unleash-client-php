@@ -6,22 +6,53 @@ use JetBrains\PhpStorm\ArrayShape;
 use JetBrains\PhpStorm\ExpectedValues;
 use Unleash\Client\Enum\Stickiness;
 
-final readonly class DefaultVariant implements Variant
+final class DefaultVariant implements Variant
 {
+    /**
+     * @readonly
+     */
+    private string $name;
+    /**
+     * @readonly
+     */
+    private bool $enabled;
+    /**
+     * @readonly
+     */
+    private int $weight = 0;
+    /**
+     * @readonly
+     */
+    private string $stickiness = Stickiness::DEFAULT;
+    /**
+     * @readonly
+     */
+    private ?VariantPayload $payload = null;
+    /**
+     * @var array<VariantOverride>
+     * @readonly
+     */
+    private ?array $overrides = null;
     /**
      * @param array<VariantOverride> $overrides
      */
     public function __construct(
-        private string $name,
-        private bool $enabled,
-        private int $weight = 0,
-        #[ExpectedValues(valuesFromClass: Stickiness::class)]
-        private string $stickiness = Stickiness::DEFAULT,
-        private ?VariantPayload $payload = null,
-        private ?array $overrides = null,
-    ) {
+        string $name,
+        bool $enabled,
+        int $weight = 0,
+        #[\JetBrains\PhpStorm\ExpectedValues(valuesFromClass: \Unleash\Client\Enum\Stickiness::class)]
+        string $stickiness = Stickiness::DEFAULT,
+        ?VariantPayload $payload = null,
+        ?array $overrides = null
+    )
+    {
+        $this->name = $name;
+        $this->enabled = $enabled;
+        $this->weight = $weight;
+        $this->stickiness = $stickiness;
+        $this->payload = $payload;
+        $this->overrides = $overrides;
     }
-
     public function getName(): string
     {
         return $this->name;
