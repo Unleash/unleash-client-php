@@ -24,7 +24,7 @@ final class DefaultMetricsSender implements MetricsSender
         }
 
         $request = $this->requestFactory
-            ->createRequest('POST', $this->configuration->getUrl() . 'client/metrics')
+            ->createRequest('POST', $this->configuration->getMetricsUrl())
             ->withHeader('Content-Type', 'application/json')
             ->withBody(new StringStream(json_encode([
                 'appName' => $this->configuration->getAppName(),
