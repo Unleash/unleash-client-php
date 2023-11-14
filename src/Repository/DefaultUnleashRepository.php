@@ -74,15 +74,29 @@ use Unleash\Client\Exception\InvalidValueException;
  *       impressionData?: bool,
  *   }
  */
-final readonly class DefaultUnleashRepository implements UnleashRepository
+final class DefaultUnleashRepository implements UnleashRepository
 {
-    public function __construct(
-        private ClientInterface $httpClient,
-        private RequestFactoryInterface $requestFactory,
-        private UnleashConfiguration $configuration,
-    ) {
+    /**
+     * @readonly
+     * @var \Psr\Http\Client\ClientInterface
+     */
+    private $httpClient;
+    /**
+     * @readonly
+     * @var \Psr\Http\Message\RequestFactoryInterface
+     */
+    private $requestFactory;
+    /**
+     * @readonly
+     * @var \Unleash\Client\Configuration\UnleashConfiguration
+     */
+    private $configuration;
+    public function __construct(ClientInterface $httpClient, RequestFactoryInterface $requestFactory, UnleashConfiguration $configuration)
+    {
+        $this->httpClient = $httpClient;
+        $this->requestFactory = $requestFactory;
+        $this->configuration = $configuration;
     }
-
     /**
      * @throws ClientExceptionInterface
      * @throws InvalidArgumentException
@@ -140,13 +154,10 @@ final readonly class DefaultUnleashRepository implements UnleashRepository
                         throw new HttpResponseException("Invalid status code: '{$response->getStatusCode()}'");
                     }
                 } catch (Exception $exception) {
-                    $this->configuration->getEventDispatcher()->dispatch(
-                        new FetchingDataFailedEvent($exception),
-                        UnleashEvents::FETCHING_DATA_FAILED,
-                    );
+                    $this->configuration->getEventDispatcher()->dispatch(new FetchingDataFailedEvent($exception), UnleashEvents::FETCHING_DATA_FAILED);
                     $rawData = $this->getLastValidState();
                 }
-                $rawData ??= $this->getBootstrappedResponse();
+                $rawData = $rawData ?? $this->getBootstrappedResponse();
                 if ($rawData === null) {
                     throw new HttpResponseException(sprintf(
                         'Got invalid response code when getting features and no default bootstrap provided: %s',
@@ -228,25 +239,12 @@ final readonly class DefaultUnleashRepository implements UnleashRepository
                         break;
                     }
                 }
-                $strategies[] = new DefaultStrategy(
-                    $strategy['name'],
-                    $strategy['parameters'] ?? [],
-                    $constraints,
-                    $segments,
-                    $hasNonexistentSegments,
-                    $strategyVariants,
-                );
+                $strategies[] = new DefaultStrategy($strategy['name'], $strategy['parameters'] ?? [], $constraints, $segments, $hasNonexistentSegments, $strategyVariants);
             }
 
             $featureVariants = $this->parseVariants($feature['variants'] ?? []);
 
-            $features[$feature['name']] = new DefaultFeature(
-                $feature['name'],
-                $feature['enabled'],
-                $strategies,
-                $featureVariants,
-                $feature['impressionData'] ?? false,
-            );
+            $features[$feature['name']] = new DefaultFeature($feature['name'], $feature['enabled'], $strategies, $featureVariants, $feature['impressionData'] ?? false);
         }
 
         return $features;
@@ -254,9 +252,7 @@ final readonly class DefaultUnleashRepository implements UnleashRepository
 
     private function getBootstrappedResponse(): ?string
     {
-        return $this->configuration->getBootstrapHandler()->getBootstrapContents(
-            $this->configuration->getBootstrapProvider(),
-        );
+        return $this->configuration->getBootstrapHandler()->getBootstrapContents($this->configuration->getBootstrapProvider());
     }
 
     private function getLastValidState(): ?string
@@ -273,11 +269,7 @@ final readonly class DefaultUnleashRepository implements UnleashRepository
 
     private function setLastValidState(string $data): void
     {
-        $this->configuration->getStaleCache()->set(
-            CacheKey::FEATURES_RESPONSE,
-            $data,
-            $this->configuration->getStaleTtl(),
-        );
+        $this->configuration->getStaleCache()->set(CacheKey::FEATURES_RESPONSE, $data, $this->configuration->getStaleTtl());
     }
 
     /**
@@ -289,10 +281,7 @@ final readonly class DefaultUnleashRepository implements UnleashRepository
     {
         $result = [];
         foreach ($segmentsRaw as $segmentRaw) {
-            $result[$segmentRaw['id']] = new DefaultSegment(
-                $segmentRaw['id'],
-                $this->parseConstraints($segmentRaw['constraints']),
-            );
+            $result[$segmentRaw['id']] = new DefaultSegment($segmentRaw['id'], $this->parseConstraints($segmentRaw['constraints']));
         }
 
         return $result;
@@ -308,14 +297,7 @@ final readonly class DefaultUnleashRepository implements UnleashRepository
         $constraints = [];
 
         foreach ($constraintsRaw as $constraint) {
-            $constraints[] = new DefaultConstraint(
-                $constraint['contextName'],
-                $constraint['operator'],
-                $constraint['values'] ?? null,
-                $constraint['value'] ?? null,
-                $constraint['inverted'] ?? false,
-                $constraint['caseInsensitive'] ?? false,
-            );
+            $constraints[] = new DefaultConstraint($constraint['contextName'], $constraint['operator'], $constraint['values'] ?? null, $constraint['value'] ?? null, $constraint['inverted'] ?? false, $constraint['caseInsensitive'] ?? false);
         }
 
         return $constraints;
@@ -335,16 +317,9 @@ final readonly class DefaultUnleashRepository implements UnleashRepository
             foreach ($variant['overrides'] ?? [] as $override) {
                 $overrides[] = new DefaultVariantOverride($override['contextName'], $override['values']);
             }
-            $variants[] = new DefaultVariant(
-                $variant['name'],
-                true,
-                $variant['weight'],
-                $variant['stickiness'] ?? Stickiness::DEFAULT,
-                isset($variant['payload'])
-                    ? new DefaultVariantPayload($variant['payload']['type'], $variant['payload']['value'])
-                    : null,
-                $overrides,
-            );
+            $variants[] = new DefaultVariant($variant['name'], true, $variant['weight'], $variant['stickiness'] ?? Stickiness::DEFAULT, isset($variant['payload'])
+                ? new DefaultVariantPayload($variant['payload']['type'], $variant['payload']['value'])
+                : null, $overrides);
         }
 
         return $variants;
