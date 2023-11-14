@@ -98,4 +98,17 @@ final class UnleashConfigurationTest extends TestCase
         $this->expectException(LogicException::class);
         $instance->getStaleCache();
     }
+
+    public function testGetMetricsUrl()
+    {
+        $baseInstance = new UnleashConfiguration('http://localhost:3063/api', '', '');
+
+        $resolvedMetricsUrl = $baseInstance->getMetricsUrl();
+        self::assertSame($resolvedMetricsUrl, 'http://localhost:3063/api/client/metrics');
+
+        $proxyInstance = new UnleashConfiguration('http://localhost:3063/api', '', '');
+        $proxyInstance->setProxyKey('some-key');
+        $resolvedMetricsUrl = $proxyInstance->getMetricsUrl();
+        self::assertSame($resolvedMetricsUrl, 'http://localhost:3063/api/frontend/client/metrics');
+    }
 }
