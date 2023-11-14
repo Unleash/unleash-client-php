@@ -107,7 +107,7 @@ final class UnleashConfigurationTest extends TestCase
         self::assertSame($resolvedMetricsUrl, 'http://localhost:3063/api/client/metrics');
 
         $proxyInstance = new UnleashConfiguration('http://localhost:3063/api', '', '');
-        $proxyInstance->setProxyKey("some-key");
+        $proxyInstance->setProxyKey('some-key');
         $resolvedMetricsUrl = $proxyInstance->getMetricsUrl();
         self::assertSame($resolvedMetricsUrl, 'http://localhost:3063/api/frontend/client/metrics');
     }
