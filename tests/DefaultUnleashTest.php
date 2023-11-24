@@ -3,7 +3,9 @@
 namespace Unleash\Client\Tests;
 
 use ArrayIterator;
+use GuzzleHttp\Psr7\HttpFactory;
 use LimitIterator;
+use ReflectionMethod;
 use RuntimeException;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -19,6 +21,7 @@ use Unleash\Client\Event\FeatureToggleMissingStrategyHandlerEvent;
 use Unleash\Client\Event\FeatureToggleNotFoundEvent;
 use Unleash\Client\Event\ImpressionDataEvent;
 use Unleash\Client\Event\UnleashEvents;
+use Unleash\Client\Repository\DefaultUnleashRepository;
 use Unleash\Client\Repository\UnleashRepository;
 use Unleash\Client\Stickiness\MurmurHashCalculator;
 use Unleash\Client\Strategy\DefaultStrategyHandler;
@@ -27,12 +30,22 @@ use Unleash\Client\Strategy\IpAddressStrategyHandler;
 use Unleash\Client\Strategy\StrategyHandler;
 use Unleash\Client\Strategy\UserIdStrategyHandler;
 use Unleash\Client\Tests\Traits\FakeCacheImplementationTrait;
+use Unleash\Client\Tests\Traits\RealCacheImplementationTrait;
 use Unleash\Client\UnleashBuilder;
 use Unleash\Client\Variant\DefaultVariantHandler;
 
 final class DefaultUnleashTest extends AbstractHttpClientTestCase
 {
-    use FakeCacheImplementationTrait;
+    use FakeCacheImplementationTrait, RealCacheImplementationTrait {
+        FakeCacheImplementationTrait::getCache insteadof RealCacheImplementationTrait;
+        RealCacheImplementationTrait::tearDown as clearCache;
+    }
+
+    protected function tearDown(): void
+    {
+        parent::tearDown();
+        $this->clearCache();
+    }
 
     public function testIsEnabled()
     {
@@ -813,6 +826,182 @@ final class DefaultUnleashTest extends AbstractHttpClientTestCase
         );
     }
 
+    public function testDependenciesUnresolvedFeatureVariants()
+    {
+        $data = [
+            'features' => [
+                [
+                    'name' => 'child',
+                    'enabled' => true,
+                    'strategies' => [
+                        [
+                            'name' => 'default',
+                        ],
+                    ],
+                    'dependencies' => [
+                        [
+                            'feature' => 'parent',
+                            'variants' => ['variant1'],
+                        ],
+                    ],
+                ],
+                [
+                    'name' => 'parent',
+                    'enabled' => true,
+                    'strategies' => [
+                        [
+                            'name' => 'default',
+                        ],
+                    ],
+                    'variants' => [
+                        [
+                            'name' => 'variant1',
+                            'weight' => 1,
+                        ],
+                    ],
+                ],
+            ],
+        ];
+        $this->pushResponse($data);
+        $instance = $this->getCachedInstance();
+        self::assertTrue($instance->isEnabled('child'));
+    }
+
+    public function testDependenciesDirectFeatureVariants()
+    {
+        $data = [
+            'features' => [
+                [
+                    'name' => 'parent',
+                    'enabled' => true,
+                    'strategies' => [
+                        [
+                            'name' => 'default',
+                        ],
+                    ],
+                    'variants' => [
+                        [
+                            'name' => 'variant1',
+                            'weight' => 1,
+                        ],
+                    ],
+                ],
+                [
+                    'name' => 'child',
+                    'enabled' => true,
+                    'strategies' => [
+                        [
+                            'name' => 'default',
+                        ],
+                    ],
+                    'dependencies' => [
+                        [
+                            'feature' => 'parent',
+                            'variants' => ['variant1'],
+                        ],
+                    ],
+                ],
+            ],
+        ];
+        $this->pushResponse($data);
+        $instance = $this->getCachedInstance();
+        self::assertTrue($instance->isEnabled('child'));
+    }
+
+    public function testDependenciesMixedResolvedUnresolved()
+    {
+        $data = [
+            'features' => [
+                [
+                    'name' => 'parent2',
+                    'enabled' => true,
+                    'strategies' => [
+                        [
+                            'name' => 'default',
+                        ],
+                    ],
+                    'variants' => [
+                        [
+                            'name' => 'variant1',
+                            'weight' => 1,
+                        ],
+                    ],
+                ],
+                [
+                    'name' => 'child',
+                    'enabled' => true,
+                    'strategies' => [
+                        [
+                            'name' => 'default',
+                        ],
+                    ],
+                    'dependencies' => [
+                        [
+                            'feature' => 'parent1',
+                            'variants' => ['variant0', 'variant1'],
+                        ],
+                        [
+                            'feature' => 'parent2',
+                        ],
+                    ],
+                ],
+                [
+                    'name' => 'parent1',
+                    'enabled' => true,
+                    'strategies' => [
+                        [
+                            'name' => 'default',
+                        ],
+                    ],
+                    'variants' => [
+                        [
+                            'name' => 'variant1',
+                            'weight' => 1,
+                        ],
+                    ],
+                ],
+            ],
+        ];
+        $this->pushResponse($data);
+        $instance = $this->getCachedInstance();
+        self::assertTrue($instance->isEnabled('child'));
+    }
+
+    public function testFeatureWithoutOptionalMethods()
+    {
+        $feature = new class implements Feature {
+            public function getName(): string
+            {
+                return 'test';
+            }
+
+            public function isEnabled(): bool
+            {
+                return true;
+            }
+
+            public function getStrategies(): iterable
+            {
+                return [new DefaultStrategy('default')];
+            }
+
+            public function getVariants(): array
+            {
+                return [];
+            }
+
+            public function hasImpressionData(): bool
+            {
+                return false;
+            }
+        };
+
+        $unleash = $this->getInstance(new DefaultStrategyHandler());
+        $isEnabled = new ReflectionMethod($unleash, 'isFeatureEnabled');
+
+        self::assertTrue($isEnabled->getClosure($unleash)($feature, new UnleashContext())->isEnabled());
+    }
+
     private function getInstance(StrategyHandler ...$handlers): DefaultUnleash
     {
         return new DefaultUnleash(
@@ -822,6 +1011,30 @@ final class DefaultUnleashTest extends AbstractHttpClientTestCase
             (new UnleashConfiguration('', '', ''))
                 ->setAutoRegistrationEnabled(false)
                 ->setCache($this->getCache()),
+            $this->metricsHandler,
+            new DefaultVariantHandler(new MurmurHashCalculator())
+        );
+    }
+
+    private function getCachedInstance(): DefaultUnleash
+    {
+        return new DefaultUnleash(
+            [
+                new DefaultStrategyHandler(),
+            ],
+            new DefaultUnleashRepository(
+                $this->httpClient,
+                new HttpFactory(),
+                (new UnleashConfiguration('', '', ''))
+                    ->setAutoRegistrationEnabled(false)
+                    ->setCache($this->getFreshCacheInstance())
+                    ->setTtl(30),
+            ),
+            $this->registrationService,
+            (new UnleashConfiguration('', '', ''))
+                ->setAutoRegistrationEnabled(false)
+                ->setCache($this->getFreshCacheInstance())
+                ->setTtl(30),
             $this->metricsHandler,
             new DefaultVariantHandler(new MurmurHashCalculator())
         );

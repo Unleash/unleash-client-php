@@ -2,12 +2,14 @@
 
 namespace Unleash\Client\Tests;
 
+use GuzzleHttp\Psr7\HttpFactory;
 use Unleash\Client\Configuration\UnleashConfiguration;
 use Unleash\Client\Configuration\UnleashContext;
 use Unleash\Client\DefaultUnleash;
 use Unleash\Client\DTO\Feature;
 use Unleash\Client\DTO\Variant;
 use Unleash\Client\Metrics\MetricsHandler;
+use Unleash\Client\Repository\DefaultUnleashRepository;
 use Unleash\Client\Stickiness\MurmurHashCalculator;
 use Unleash\Client\Strategy\DefaultStrategyHandler;
 use Unleash\Client\Strategy\GradualRolloutRandomStrategyHandler;
@@ -16,36 +18,46 @@ use Unleash\Client\Strategy\GradualRolloutStrategyHandler;
 use Unleash\Client\Strategy\GradualRolloutUserIdStrategyHandler;
 use Unleash\Client\Strategy\IpAddressStrategyHandler;
 use Unleash\Client\Strategy\UserIdStrategyHandler;
-use Unleash\Client\Tests\Traits\FakeCacheImplementationTrait;
+use Unleash\Client\Tests\Traits\RealCacheImplementationTrait;
 use Unleash\Client\Variant\DefaultVariantHandler;
 
 final class ClientSpecificationTest extends AbstractHttpClientTestCase
 {
-    use FakeCacheImplementationTrait;
+    use RealCacheImplementationTrait;
 
     public function testClientSpecifications()
     {
+        $stickinessCalculator = new MurmurHashCalculator();
+        $gradualRolloutStrategy = new GradualRolloutStrategyHandler($stickinessCalculator);
+
+        $configuration = (new UnleashConfiguration('', '', ''))
+            ->setAutoRegistrationEnabled(false)
+            ->setCache($this->getCache());
+        $this->repository = new DefaultUnleashRepository(
+            $this->httpClient,
+            new HttpFactory(),
+            $configuration,
+        );
+
         $unleash = new DefaultUnleash(
             [
             new DefaultStrategyHandler(),
-            new GradualRolloutStrategyHandler(new MurmurHashCalculator()),
+            $gradualRolloutStrategy,
             new IpAddressStrategyHandler(),
             new UserIdStrategyHandler(),
-            new GradualRolloutUserIdStrategyHandler(new GradualRolloutStrategyHandler(new MurmurHashCalculator())),
-            new GradualRolloutSessionIdStrategyHandler(new GradualRolloutStrategyHandler(new MurmurHashCalculator())),
-            new GradualRolloutRandomStrategyHandler(new GradualRolloutStrategyHandler(new MurmurHashCalculator())),
+            new GradualRolloutUserIdStrategyHandler($gradualRolloutStrategy),
+            new GradualRolloutSessionIdStrategyHandler($gradualRolloutStrategy),
+            new GradualRolloutRandomStrategyHandler($gradualRolloutStrategy),
         ],
             $this->repository,
             $this->registrationService,
-            (new UnleashConfiguration('', '', ''))
-                ->setAutoRegistrationEnabled(false)
-                ->setCache($this->getCache()),
+            $configuration,
             new class implements MetricsHandler {
                 public function handleMetrics(Feature $feature, bool $successful, Variant $variant = null): void
                 {
                 }
             },
-            new DefaultVariantHandler(new MurmurHashCalculator())
+            new DefaultVariantHandler($stickinessCalculator)
         );
 
         $specificationList = $this->getJson('index.json');
@@ -64,6 +76,7 @@ final class ClientSpecificationTest extends AbstractHttpClientTestCase
                     $unleash->isEnabled($test['toggleName'], $this->createContext($test['context'])),
                     $test['description']
                 );
+                $configuration->setCache($this->getFreshCacheInstance());
             }
 
             foreach ($specificationConfig['variantTests'] ?? [] as $variantTest) {
@@ -75,6 +88,7 @@ final class ClientSpecificationTest extends AbstractHttpClientTestCase
                         ->jsonSerialize(),
                     $variantTest['description']
                 );
+                $configuration->setCache($this->getFreshCacheInstance());
             }
         }
     }
