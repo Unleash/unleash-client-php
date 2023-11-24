@@ -158,7 +158,7 @@ final readonly class DefaultUnleash implements Unleash
             : [];
 
         foreach ($dependencies as $dependency) {
-            if ($this->isDependencyEnabled($dependency, $context, $default) !== $dependency->getExpectedState()) {
+            if ($this->isParentDependencySatisfied($dependency, $context, $default) !== $dependency->getExpectedState()) {
                 $event = new FeatureToggleDisabledEvent($feature, $context);
                 $this->configuration->getEventDispatcher()->dispatch(
                     $event,
@@ -225,7 +225,7 @@ final readonly class DefaultUnleash implements Unleash
         return $handlers;
     }
 
-    private function isDependencyEnabled(FeatureDependency $dependency, Context $context, bool $default): bool
+    private function isParentDependencySatisfied(FeatureDependency $dependency, Context $context, bool $default): bool
     {
         if (!$dependency->isResolved()) {
             return false;
