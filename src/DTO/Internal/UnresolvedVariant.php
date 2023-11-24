@@ -7,6 +7,9 @@ use Unleash\Client\DTO\Variant;
 use Unleash\Client\DTO\VariantPayload;
 use Unleash\Client\Enum\Stickiness;
 
+/**
+ * @internal
+ */
 final readonly class UnresolvedVariant implements Variant
 {
     public function __construct(

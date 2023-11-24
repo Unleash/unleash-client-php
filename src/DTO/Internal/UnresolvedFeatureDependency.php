@@ -7,7 +7,7 @@ use Unleash\Client\DTO\FeatureDependency;
 use Unleash\Client\DTO\Variant;
 
 /**
- * @interal
+ * @internal
  */
 final readonly class UnresolvedFeatureDependency implements FeatureDependency
 {

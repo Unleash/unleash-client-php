@@ -33,7 +33,7 @@
         "friendsofphp/php-cs-fixer": "^3.0",
         "phpstan/phpstan": "^1.2",
         "jetbrains/phpstorm-attributes": "^1.0",
-        "rector/rector": "^0.14.8",
+        "rector/rector": "^0.18.10",
         "phpunit/phpunit": "^9.5",
         "symfony/http-client": "^5.0 | ^6.0",
         "nyholm/psr7": "^1.0",
