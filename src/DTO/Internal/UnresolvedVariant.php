@@ -48,7 +48,14 @@ final readonly class UnresolvedVariant implements Variant
         return Stickiness::DEFAULT;
     }
 
-    public function jsonSerialize(): null
+    /**
+     * todo Change to null once rector supports it
+     *
+     * @return null
+     *
+     * @noinspection PhpMixedReturnTypeCanBeReducedInspection
+     */
+    public function jsonSerialize(): mixed
     {
         return null;
     }
