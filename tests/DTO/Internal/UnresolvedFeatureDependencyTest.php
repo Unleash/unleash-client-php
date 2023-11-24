@@ -18,7 +18,7 @@ final class UnresolvedFeatureDependencyTest extends TestCase
         $this->instance = new UnresolvedFeatureDependency(
             new DefaultFeature('test', false, []),
             true,
-            [],
+            []
         );
     }
 
