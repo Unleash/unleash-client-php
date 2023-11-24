@@ -1028,7 +1028,7 @@ final class DefaultUnleashTest extends AbstractHttpClientTestCase
                 (new UnleashConfiguration('', '', ''))
                     ->setAutoRegistrationEnabled(false)
                     ->setCache($this->getFreshCacheInstance())
-                    ->setTtl(30),
+                    ->setTtl(30)
             ),
             $this->registrationService,
             (new UnleashConfiguration('', '', ''))
