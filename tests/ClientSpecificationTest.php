@@ -36,7 +36,7 @@ final class ClientSpecificationTest extends AbstractHttpClientTestCase
         $this->repository = new DefaultUnleashRepository(
             $this->httpClient,
             new HttpFactory(),
-            $configuration,
+            $configuration
         );
 
         $unleash = new DefaultUnleash(
