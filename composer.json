@@ -25,7 +25,8 @@
     },
     "autoload": {
         "psr-4": {
-            "Unleash\\Client\\": "src/"
+            "Unleash\\Client\\": "src/",
+            "Unleash\\Client\\PhpstanRules\\": "phpstan/"
         }
     },
     "require-dev": {
