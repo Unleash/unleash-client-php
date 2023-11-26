@@ -26,20 +26,20 @@ final readonly class NoEmptyFunctionRule implements Rule
                 $type = $scope->getVariableType($expression->name);
                 if ($type->isArray()->yes()) {
                     $hint = "You're probably looking for `!count(\${$expression->name})`.";
-                } else if ($type->isBoolean()->yes()) {
+                } elseif ($type->isBoolean()->yes()) {
                     $hint = "You're probably looking for `!\${$expression->name}`.";
-                } else if ($type->isFloat()->yes()) {
+                } elseif ($type->isFloat()->yes()) {
                     $hint = "You're probably looking for `\${$expression->name} === 0.0 || \${$expression->name} === -0.0` or simply `!\${$expression->name}`.";
-                } else if ($type->isInteger()->yes()) {
+                } elseif ($type->isInteger()->yes()) {
                     $hint = "You're probably looking for `\${$expression->name} === 0` or simply `!\${$expression->name}`.";
-                } else if ($type->isString()->yes()) {
+                } elseif ($type->isString()->yes()) {
                     $hint = "You're probably looking for `\${$expression->name} === '' || \${$expression->name} === '0'` or simply `!\${$expression->name}`.";
-                } else if ($type->isNull()->yes()) {
+                } elseif ($type->isNull()->yes()) {
                     $hint = "You're probably looking for '\${$expression->name} === null` or simply `!\${$expression->name}`.";
-                } else if ($type->isObject()->yes()) {
+                } elseif ($type->isObject()->yes()) {
                     $hint = "Checking for empty on an object always returns false (except for some internal objects, but you shouldn't rely on this behavior).";
-                } else if ($type instanceof ResourceType) {
-                    $hint = "Checking for empty on a resource always returns false.";
+                } elseif ($type instanceof ResourceType) {
+                    $hint = 'Checking for empty on a resource always returns false.';
                 }
             }
         }
@@ -48,6 +48,7 @@ final readonly class NoEmptyFunctionRule implements Rule
         if ($hint) {
             $message .= " {$hint}";
         }
+
         return [
             RuleErrorBuilder::message($message)->build(),
         ];
