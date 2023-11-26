@@ -70,12 +70,15 @@ final readonly class DefaultUnleash implements Unleash
         $feature = $this->findFeature($featureName, $context);
         $enabledResult = $this->isFeatureEnabled($feature, $context);
         $strategyVariants = $enabledResult->getStrategy()?->getVariants() ?? [];
-        if ($feature === null || $enabledResult->isEnabled() === false ||
-            (!count($feature->getVariants()) && empty($strategyVariants))) {
+        if (
+            $feature === null
+            || $enabledResult->isEnabled() === false
+            || (!count($feature->getVariants()) && !count($strategyVariants))
+        ) {
             return $fallbackVariant;
         }
 
-        if (empty($strategyVariants)) {
+        if (!count($strategyVariants)) {
             $variant = $this->variantHandler->selectVariant($feature->getVariants(), $featureName, $context);
         } else {
             $variant = $this->variantHandler->selectVariant($strategyVariants, $enabledResult->getStrategy()?->getParameters()['groupId'] ?? '', $context);
