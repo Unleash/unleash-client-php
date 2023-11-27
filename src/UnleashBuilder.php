@@ -291,7 +291,7 @@ final class UnleashBuilder
      * @param array<mixed>|Traversable<mixed>|JsonSerializable|null|string $bootstrap
      */
     #[Pure]
-    public function withBootstrap(array|Traversable|JsonSerializable|null|string $bootstrap): self
+    public function withBootstrap($bootstrap): self
     {
         if ($bootstrap === null) {
             $provider = new EmptyBootstrapProvider();
@@ -304,8 +304,11 @@ final class UnleashBuilder
         return $this->withBootstrapProvider($provider);
     }
 
+    /**
+     * @param string|\SplFileInfo|null $file
+     */
     #[Pure]
-    public function withBootstrapFile(string|SplFileInfo|null $file): self
+    public function withBootstrapFile($file): self
     {
         if ($file === null) {
             $provider = new EmptyBootstrapProvider();
@@ -412,9 +415,7 @@ final class UnleashBuilder
         if ($httpClient === null) {
             $httpClient = $this->defaultImplementationLocator->findHttpClient();
             if ($httpClient === null) {
-                throw new InvalidValueException(
-                    "No http client provided, please use 'withHttpClient()' method or install a package providing 'psr/http-client-implementation'.",
-                );
+                throw new InvalidValueException("No http client provided, please use 'withHttpClient()' method or install a package providing 'psr/http-client-implementation'.");
             }
         }
         assert($httpClient instanceof ClientInterface);
@@ -431,9 +432,7 @@ final class UnleashBuilder
              */
             // @codeCoverageIgnoreStart
             if ($requestFactory === null) {
-                throw new InvalidValueException(
-                    "No request factory provided, please use 'withRequestFactory()' method or install a package providing 'psr/http-factory-implementation'.",
-                );
+                throw new InvalidValueException("No request factory provided, please use 'withRequestFactory()' method or install a package providing 'psr/http-factory-implementation'.");
             }
             // @codeCoverageIgnoreEnd
         }
@@ -443,15 +442,7 @@ final class UnleashBuilder
 
         $hashCalculator = new MurmurHashCalculator();
 
-        $dependencyContainer = new UnleashBuilderContainer(
-            cache: $cache,
-            staleCache: $staleCache,
-            httpClient: $httpClient,
-            metricsSender: null,
-            requestFactory: $requestFactory,
-            stickinessCalculator: $hashCalculator,
-            configuration: null,
-        );
+        $dependencyContainer = new UnleashBuilderContainer($cache, $staleCache, $httpClient, null, $requestFactory, $hashCalculator, null);
 
         $contextProvider = $this->contextProvider;
         if ($contextProvider === null) {
@@ -499,15 +490,7 @@ final class UnleashBuilder
         $repository = new DefaultUnleashRepository($httpClient, $requestFactory, $configuration);
         $metricsSender = new DefaultMetricsSender($httpClient, $requestFactory, $configuration);
 
-        $dependencyContainer = new UnleashBuilderContainer(
-            cache: $cache,
-            staleCache: $staleCache,
-            httpClient: $httpClient,
-            metricsSender: $metricsSender,
-            requestFactory: $requestFactory,
-            stickinessCalculator: $hashCalculator,
-            configuration: $configuration,
-        );
+        $dependencyContainer = new UnleashBuilderContainer($cache, $staleCache, $httpClient, $metricsSender, $requestFactory, $hashCalculator, $configuration);
 
         $registrationService = $this->registrationService;
         if ($registrationService === null) {
@@ -529,29 +512,18 @@ final class UnleashBuilder
 
         if ($this->proxyKey !== null) {
             $configuration->setProxyKey($this->proxyKey);
-            $proxyRepository = new DefaultUnleashProxyRepository(
-                $configuration,
-                $httpClient,
-                $requestFactory,
-            );
+            $proxyRepository = new DefaultUnleashProxyRepository($configuration, $httpClient, $requestFactory);
 
-            return new DefaultProxyUnleash(
-                $proxyRepository,
-                $metricsHandler,
-            );
+            return new DefaultProxyUnleash($proxyRepository, $metricsHandler);
         } else {
-            return new DefaultUnleash(
-                $this->strategies,
-                $repository,
-                $registrationService,
-                $configuration,
-                $metricsHandler,
-                $variantHandler,
-            );
+            return new DefaultUnleash($this->strategies, $repository, $registrationService, $configuration, $metricsHandler, $variantHandler);
         }
     }
 
-    private function with(string $property, mixed $value): self
+    /**
+     * @param mixed $value
+     */
+    private function with(string $property, $value): self
     {
         $copy = clone $this;
         $copy->{$property} = $value;
@@ -568,10 +540,7 @@ final class UnleashBuilder
             if ($configuration = $container->getConfiguration()) {
                 $target->setConfiguration($configuration);
             } else {
-                throw new CyclicDependencyException(sprintf(
-                    "A dependency '%s' is tagged as ConfigurationAware but that would cause a cyclic dependency as it needs to be part of Configuration",
-                    $target::class,
-                ));
+                throw new CyclicDependencyException(sprintf("A dependency '%s' is tagged as ConfigurationAware but that would cause a cyclic dependency as it needs to be part of Configuration", get_class($target)));
             }
         }
         if ($target instanceof HttpClientAware) {
@@ -581,10 +550,7 @@ final class UnleashBuilder
             if ($sender = $container->getMetricsSender()) {
                 $target->setMetricsSender($sender);
             } else {
-                throw new CyclicDependencyException(sprintf(
-                    "A dependency '%s' is tagged as MetricsSenderAware but MetricsSender is not available for this type of dependency",
-                    $target::class,
-                ));
+                throw new CyclicDependencyException(sprintf("A dependency '%s' is tagged as MetricsSenderAware but MetricsSender is not available for this type of dependency", get_class($target)));
             }
         }
         if ($target instanceof RequestFactoryAware) {
