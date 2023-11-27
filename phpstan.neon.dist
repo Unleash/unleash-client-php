@@ -10,3 +10,5 @@ parameters:
       path: src/Helper/DefaultImplementationLocator.php
       reportUnmatched: false
   treatPhpDocTypesAsCertain: false
+rules:
+  - Unleash\Client\PhpstanRules\NoEmptyFunctionRule
