@@ -13,12 +13,17 @@ use Unleash\Client\Configuration\UnleashConfiguration;
 use Unleash\Client\DTO\Constraint;
 use Unleash\Client\DTO\DefaultConstraint;
 use Unleash\Client\DTO\DefaultFeature;
+use Unleash\Client\DTO\DefaultFeatureDependency;
 use Unleash\Client\DTO\DefaultSegment;
 use Unleash\Client\DTO\DefaultStrategy;
 use Unleash\Client\DTO\DefaultVariant;
 use Unleash\Client\DTO\DefaultVariantOverride;
 use Unleash\Client\DTO\DefaultVariantPayload;
 use Unleash\Client\DTO\Feature;
+use Unleash\Client\DTO\FeatureDependency;
+use Unleash\Client\DTO\Internal\UnresolvedFeature;
+use Unleash\Client\DTO\Internal\UnresolvedFeatureDependency;
+use Unleash\Client\DTO\Internal\UnresolvedVariant;
 use Unleash\Client\DTO\Segment;
 use Unleash\Client\DTO\Variant;
 use Unleash\Client\Enum\CacheKey;
@@ -204,6 +209,7 @@ final readonly class DefaultUnleashRepository implements UnleashRepository
      */
     private function parseFeatures(array $body): array
     {
+        /** @var array<string, DefaultFeature> $features */
         $features = [];
         $globalSegments = $this->parseSegments($body['segments'] ?? []);
 
@@ -211,9 +217,11 @@ final readonly class DefaultUnleashRepository implements UnleashRepository
             throw new InvalidValueException("The body isn't valid because it doesn't contain a 'features' key");
         }
 
+        /** @var array<DefaultFeature> $unresolved */
+        $unresolved = [];
+
         foreach ($body['features'] as $feature) {
             $strategies = [];
-
             foreach ($feature['strategies'] as $strategy) {
                 $constraints = $this->parseConstraints($strategy['constraints'] ?? []);
                 $strategyVariants = $this->parseVariants($strategy['variants'] ?? []);
@@ -239,17 +247,194 @@ final readonly class DefaultUnleashRepository implements UnleashRepository
             }
 
             $featureVariants = $this->parseVariants($feature['variants'] ?? []);
+            $dependencies = $this->parseDependencies($feature['dependencies'] ?? [], $features, $hasUnresolvedDependencies);
 
-            $features[$feature['name']] = new DefaultFeature(
+            $featureDto = new DefaultFeature(
                 $feature['name'],
                 $feature['enabled'],
                 $strategies,
                 $featureVariants,
                 $feature['impressionData'] ?? false,
+                $dependencies,
             );
+            if ($hasUnresolvedDependencies) {
+                $unresolved[] = $featureDto;
+            } else {
+                $features[$feature['name']] = $featureDto;
+            }
         }
 
+        // $features are passed by reference so that the method can modify them
+        $this->handleUnresolvedDependencies($unresolved, $features);
+
         return $features;
+    }
+
+    /**
+     * All unresolved dependencies are solved in this method (if possible).
+     * The implementation is simplified, because only one level of nesting is allowed, if there ever is need for more,
+     * the code will have to be much more complex.
+     *
+     * @param array<Feature>                $unresolved
+     * @param array<string, DefaultFeature> $features
+     */
+    private function handleUnresolvedDependencies(array $unresolved, array &$features): void
+    {
+        foreach ($unresolved as $unresolvedFeature) {
+            $dependencies = [];
+            foreach ($unresolvedFeature->getDependencies() as $dependency) {
+                // This can happen if we get multiple dependencies and at least one is unresolved.
+                // We don't need to do anything with them.
+                if (!$dependency instanceof UnresolvedFeatureDependency) {
+                    $dependencies[] = $dependency;
+                    continue;
+                }
+
+                $feature = $dependency->getFeature();
+                if ($feature instanceof UnresolvedFeature) {
+                    $feature = $features[$feature->getName()] ?? null;
+                    // This can happen if the feature truly does not exist.
+                    // Because dependencies can only be 1 level deep, we can safely assume that it cannot be resolved.
+                    // If there ever is support for more levels, this will need to be rewritten.
+                    if ($feature === null) {
+                        $dependencies[] = $dependency;
+                        continue;
+                    }
+                }
+
+                $requiredVariants = [];
+                foreach ($dependency->getRequiredVariants() ?? [] as $requiredVariant) {
+                    // Same as with resolved dependencies, just add them directly.
+                    if (!$requiredVariant instanceof UnresolvedVariant) {
+                        $requiredVariants[] = $requiredVariant;
+                        continue;
+                    }
+
+                    // Either find a resolved variant, or return the unresolved one.
+                    $requiredVariants[] = $this->findVariant(
+                        name: $requiredVariant->getName(),
+                        feature: $feature,
+                        defaultVariant: $requiredVariant,
+                    );
+                }
+
+                // Add it as a resolved dependency, this pass is complete and nothing more can be done with the dependency.
+                $dependencies[] = new DefaultFeatureDependency(
+                    feature: $feature,
+                    expectedState: $dependency->getExpectedState(),
+                    requiredVariants: $requiredVariants,
+                );
+            }
+
+            // Everything except the dependencies is copied directly from the unresolved feature
+            $features[$unresolvedFeature->getName()] = new DefaultFeature(
+                name: $unresolvedFeature->getName(),
+                enabled: $unresolvedFeature->isEnabled(),
+                strategies: $unresolvedFeature->getStrategies(),
+                variants: $unresolvedFeature->getVariants(),
+                impressionData: $unresolvedFeature->hasImpressionData(),
+                dependencies: $dependencies,
+            );
+        }
+    }
+
+    private function findVariant(string $name, Feature $feature, Variant $defaultVariant): Variant
+    {
+        foreach ($feature->getVariants() as $variant) {
+            if ($variant->getName() === $name) {
+                return $variant;
+            }
+        }
+
+        return $defaultVariant;
+    }
+
+    /**
+     * @param array<array{feature: string, enabled?: bool, variants?: array<string>}> $dependencies
+     * @param array<string, Feature>                                                  $features
+     *
+     * @return array<FeatureDependency>
+     */
+    private function parseDependencies(array $dependencies, array $features, ?bool &$hasUnresolvedDependencies = null): array
+    {
+        $hasUnresolvedDependencies = false;
+        $result = [];
+
+        foreach ($dependencies as $dependency) {
+            $dependentFeatureName = $dependency['feature'];
+            $expectedState = $dependency['enabled'] ?? true;
+            $requiredVariants = $dependency['variants'] ?? null;
+
+            $dependencyResolved = $this->isFeatureResolved($features, $dependentFeatureName);
+            if (is_array($requiredVariants)) {
+                $requiredVariants = $this->getResolvedVariants($requiredVariants, $features, $dependentFeatureName, $dependencyResolved);
+            }
+
+            $result[] = $dependencyResolved
+                ? new DefaultFeatureDependency(
+                    feature: $features[$dependentFeatureName],
+                    expectedState: $expectedState,
+                    requiredVariants: $requiredVariants,
+                )
+                : new UnresolvedFeatureDependency(
+                    feature: $features[$dependentFeatureName] ?? new UnresolvedFeature($dependentFeatureName),
+                    expectedState: $expectedState,
+                    requiredVariants: $requiredVariants,
+                );
+
+            if (!$dependencyResolved) {
+                $hasUnresolvedDependencies = true;
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * @param array<string, Feature> $features
+     */
+    private function isFeatureResolved(array $features, string $dependentFeatureName): bool
+    {
+        return isset($features[$dependentFeatureName]);
+    }
+
+    /**
+     * @param array<string>  $requiredVariants
+     * @param array<Feature> $features
+     *
+     * @return array<Variant>
+     */
+    private function getResolvedVariants(array $requiredVariants, array $features, string $dependentFeatureName, bool &$dependencyResolved): array
+    {
+        return array_map(
+            function (string $variantName) use ($dependentFeatureName, &$features, &$dependencyResolved) {
+                if (!$dependencyResolved) {
+                    return new UnresolvedVariant($variantName);
+                }
+
+                $feature = $features[$dependentFeatureName];
+
+                $variants = $feature->getVariants();
+                foreach ($variants as $variant) {
+                    if ($variant->getName() === $variantName) {
+                        return $variant;
+                    }
+                }
+
+                foreach ($feature->getStrategies() as $strategy) {
+                    foreach ($strategy->getVariants() as $variant) {
+                        if ($variant->getName() === $variantName) {
+                            return $variant;
+                        }
+                    }
+                }
+
+                $dependencyResolved = false;
+
+                return new UnresolvedVariant($variantName);
+            },
+            $requiredVariants,
+        );
     }
 
     private function getBootstrappedResponse(): ?string

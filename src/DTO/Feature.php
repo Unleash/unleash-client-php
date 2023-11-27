@@ -2,6 +2,9 @@
 
 namespace Unleash\Client\DTO;
 
+/**
+ * @method array<FeatureDependency> getDependencies()
+ */
 interface Feature
 {
     public function getName(): string;

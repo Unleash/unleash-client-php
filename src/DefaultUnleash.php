@@ -7,6 +7,7 @@ use Unleash\Client\Configuration\Context;
 use Unleash\Client\Configuration\UnleashConfiguration;
 use Unleash\Client\DTO\DefaultFeatureEnabledResult;
 use Unleash\Client\DTO\Feature;
+use Unleash\Client\DTO\FeatureDependency;
 use Unleash\Client\DTO\FeatureEnabledResult;
 use Unleash\Client\DTO\Strategy;
 use Unleash\Client\DTO\Variant;
@@ -155,6 +156,24 @@ final readonly class DefaultUnleash implements Unleash
             return new DefaultFeatureEnabledResult();
         }
 
+        $dependencies = method_exists($feature, 'getDependencies')
+            ? $feature->getDependencies()
+            : [];
+
+        foreach ($dependencies as $dependency) {
+            if ($this->isParentDependencySatisfied($dependency, $context, $default) !== $dependency->getExpectedState()) {
+                $event = new FeatureToggleDisabledEvent($feature, $context);
+                $this->configuration->getEventDispatcher()->dispatch(
+                    $event,
+                    UnleashEvents::FEATURE_TOGGLE_DISABLED,
+                );
+
+                $this->metricsHandler->handleMetrics($feature, false);
+
+                return new DefaultFeatureEnabledResult();
+            }
+        }
+
         $strategies = $feature->getStrategies();
         if (!is_countable($strategies)) {
             $strategies = iterator_to_array($strategies);
@@ -207,5 +226,36 @@ final readonly class DefaultUnleash implements Unleash
         }
 
         return $handlers;
+    }
+
+    private function isParentDependencySatisfied(FeatureDependency $dependency, Context $context, bool $default): bool
+    {
+        if (!$dependency->isResolved()) {
+            return false;
+        }
+
+        $enabled = $this->isFeatureEnabled($dependency->getFeature(), $context, $default);
+        if (!$enabled->isEnabled()) {
+            return false;
+        }
+
+        assert($dependency->getFeature() !== null);
+
+        if (
+            method_exists($dependency->getFeature(), 'getDependencies')
+            && count($dependency->getFeature()->getDependencies())
+        ) {
+            return false;
+        }
+
+        if ($dependency->getRequiredVariants() === null || !count($dependency->getRequiredVariants())) {
+            return true;
+        }
+
+        $variant = $this->getVariant($dependency->getFeature()->getName(), $context);
+
+        $requiredVariants = array_map(fn (Variant $variant) => $variant->getName(), $dependency->getRequiredVariants());
+
+        return in_array($variant->getName(), $requiredVariants, true);
     }
 }

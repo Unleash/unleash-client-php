@@ -5,8 +5,9 @@ namespace Unleash\Client\DTO;
 final readonly class DefaultFeature implements Feature
 {
     /**
-     * @param iterable<Strategy> $strategies
-     * @param array<Variant>     $variants
+     * @param iterable<Strategy>       $strategies
+     * @param array<Variant>           $variants
+     * @param array<FeatureDependency> $dependencies
      */
     public function __construct(
         private string $name,
@@ -14,6 +15,7 @@ final readonly class DefaultFeature implements Feature
         private iterable $strategies,
         private array $variants = [],
         private bool $impressionData = false,
+        private array $dependencies = [],
     ) {
     }
 
@@ -46,5 +48,13 @@ final readonly class DefaultFeature implements Feature
     public function hasImpressionData(): bool
     {
         return $this->impressionData;
+    }
+
+    /**
+     * @return array<FeatureDependency>
+     */
+    public function getDependencies(): array
+    {
+        return $this->dependencies;
     }
 }
