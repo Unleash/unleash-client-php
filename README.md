@@ -52,7 +52,11 @@ If you're migrating from 1.x to 2.x, you can read the [migration guide](doc/migr
 
 `composer require unleash/client`
 
-Requires PHP 7.2 or newer.
+Requires PHP 7.2 or newer.  
+Use the appropriate release tag that corresponds to your version of PHP (note the last two digits of the release), for example:  
+
+- v2.2.0*82* -> PHP SDK 2.2.0 requiring PHP 8.2  
+- v2.2.0*74* -> PHP SDK 2.2.0 requiring PHP 7.4  
 
 > You will also need some implementation of [PSR-18](https://packagist.org/providers/psr/http-client-implementation)
 > and [PSR-17](https://packagist.org/providers/psr/http-factory-implementation), for example 
