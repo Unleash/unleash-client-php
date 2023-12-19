@@ -31,12 +31,15 @@ final readonly class DefaultMetricsSender implements MetricsSender
                 'instanceId' => $this->configuration->getInstanceId(),
                 'bucket' => $bucket->jsonSerialize(),
             ], JSON_THROW_ON_ERROR)));
+        if ($this->configuration->getProxyKey() !== null) {
+            $request = $request->withHeader('Authorization', $this->configuration->getProxyKey());
+        }
         foreach ($this->configuration->getHeaders() as $name => $value) {
             $request = $request->withHeader($name, $value);
         }
 
         try {
-            $this->httpClient->sendRequest($request);
+            $response = $this->httpClient->sendRequest($request);
         } catch (ClientExceptionInterface) {
             // ignore the error
         }
