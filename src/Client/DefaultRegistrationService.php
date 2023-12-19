@@ -57,7 +57,6 @@ final class DefaultRegistrationService implements RegistrationService
                 'started' => (new DateTimeImmutable())->format('c'),
                 'interval' => $this->configuration->getMetricsInterval(),
             ], JSON_THROW_ON_ERROR)));
-        
         foreach ($this->configuration->getHeaders() as $name => $value) {
             $request = $request->withHeader($name, $value);
         }
