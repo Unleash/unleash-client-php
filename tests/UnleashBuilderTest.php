@@ -883,7 +883,8 @@ final class UnleashBuilderTest extends TestCase
         self::assertInstanceOf(DefaultProxyUnleash::class, $base->build());
     }
 
-    public function testbuilderWithProxyKeyYieldsAuthorizationHeader() {
+    public function testbuilderWithProxyKeyYieldsAuthorizationHeader()
+    {
         $base = $this->instance->withProxy('proxy-key')->withAppUrl('https://localhost')->withInstanceId('test')->withAppName('test');
         $unleash = $base->build();
         $reflection = new ReflectionObject($unleash);
