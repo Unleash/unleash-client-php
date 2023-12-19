@@ -883,6 +883,26 @@ final class UnleashBuilderTest extends TestCase
         self::assertInstanceOf(DefaultProxyUnleash::class, $base->build());
     }
 
+    public function testbuilderWithProxyKeyYieldsAuthorizationHeader() {
+        $base = $this->instance->withProxy('proxy-key')->withAppUrl('https://localhost')->withInstanceId('test')->withAppName('test');
+        $unleash = $base->build();
+        $reflection = new ReflectionObject($unleash);
+        $repositoryProperty = $reflection->getProperty('repository');
+        $repositoryProperty->setAccessible(true);
+        $repository = $repositoryProperty->getValue($unleash);
+
+        $reflection = new ReflectionObject($repository);
+        $configurationProperty = $reflection->getProperty('configuration');
+        $configurationProperty->setAccessible(true);
+        $configuration = $configurationProperty->getValue($repository);
+
+        $reflection = new ReflectionObject($configuration);
+        $headersPropertyBuilt = $reflection->getProperty('headers');
+        $headersPropertyBuilt->setAccessible(true);
+        $headersBuilt = $headersPropertyBuilt->getValue($configuration);
+        self::assertArrayHasKey('Authorization', $headersBuilt);
+    }
+
     private function getConfiguration(DefaultUnleash $unleash): UnleashConfiguration
     {
         $configurationProperty = (new ReflectionObject($unleash))->getProperty('configuration');

@@ -58,9 +58,6 @@ final class DefaultRegistrationService implements RegistrationService
                 'interval' => $this->configuration->getMetricsInterval(),
             ], JSON_THROW_ON_ERROR)));
         
-        if ($this->configuration->getProxyKey() !== null) {
-            $request = $request->withHeader('Authorization', $this->configuration->getProxyKey());
-        }
         foreach ($this->configuration->getHeaders() as $name => $value) {
             $request = $request->withHeader($name, $value);
         }
