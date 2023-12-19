@@ -110,4 +110,23 @@ final class DefaultRegistrationServiceTest extends AbstractHttpClientTestCase
         $this->pushResponse(new RuntimeException("This exception shouldn't be propagated"), 1, 404);
         $instance->register([new DefaultStrategyHandler()]);
     }
+
+    public function testAuthorizationKeyFromProxyKey() {
+        $configuration = (new UnleashConfiguration('', '', ''))
+        ->setProxyKey('apiKey')
+        ->setCache($this->getCache())
+        ->setStaleCache($this->getFreshCacheInstance())
+        ->setStaleTtl(30)
+        ->setTtl(0);
+
+        $instance = new DefaultRegistrationService(
+            $this->httpClient,
+            new HttpFactory(),
+            $configuration
+        );
+        $this->pushResponse([], 2, 202);
+        self::assertTrue($instance->register([]));
+        $request = $this->requestHistory[0]['request'];
+        self::assertEquals('apiKey', $request->getHeaderLine('Authorization'));
+    }
 }

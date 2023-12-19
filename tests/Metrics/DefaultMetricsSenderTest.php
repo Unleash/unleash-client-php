@@ -68,4 +68,15 @@ final class DefaultMetricsSenderTest extends AbstractHttpClientTestCase
         $bucket = new MetricsBucket(new DateTimeImmutable(), new DateTimeImmutable());
         $this->instance->sendMetrics($bucket);
     }
+
+    public function testSendMetricsWithProxyKey()
+    {
+        $this->configuration->setProxyKey('apiKey');
+        $bucket = new MetricsBucket(new DateTimeImmutable(), new DateTimeImmutable());
+        $this->pushResponse([]);
+        $this->instance->sendMetrics($bucket);
+        /** @var RequestInterface $request */
+        $request = $this->requestHistory[0]['request'];
+        self::assertEquals('apiKey', $request->getHeaderLine('Authorization'));
+    }
 }
