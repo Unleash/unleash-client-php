@@ -536,6 +536,7 @@ final class UnleashBuilder
 
         if ($this->proxyKey !== null) {
             $configuration->setProxyKey($this->proxyKey);
+            $configuration->setHeaders(array_merge($this->headers, ['Authorization' => $this->proxyKey]));
             $proxyRepository = new DefaultUnleashProxyRepository(
                 $configuration,
                 $httpClient,
