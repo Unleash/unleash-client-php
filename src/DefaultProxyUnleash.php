@@ -12,12 +12,13 @@ use Unleash\Client\Repository\ProxyRepository;
 
 final class DefaultProxyUnleash implements Unleash
 {
-    public function __construct(
-        private ProxyRepository $repository,
-        private MetricsHandler $metricsHandler,
-    ) {
+    private ProxyRepository $repository;
+    private MetricsHandler $metricsHandler;
+    public function __construct(ProxyRepository $repository, MetricsHandler $metricsHandler)
+    {
+        $this->repository = $repository;
+        $this->metricsHandler = $metricsHandler;
     }
-
     /**
      * @codeCoverageIgnore
      */

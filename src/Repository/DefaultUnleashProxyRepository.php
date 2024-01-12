@@ -13,11 +13,14 @@ use Unleash\Client\DTO\ProxyFeature;
 
 final class DefaultUnleashProxyRepository implements ProxyRepository
 {
-    public function __construct(
-        private UnleashConfiguration $configuration,
-        private ClientInterface $httpClient,
-        private RequestFactoryInterface $requestFactory
-    ) {
+    private UnleashConfiguration $configuration;
+    private ClientInterface $httpClient;
+    private RequestFactoryInterface $requestFactory;
+    public function __construct(UnleashConfiguration $configuration, ClientInterface $httpClient, RequestFactoryInterface $requestFactory)
+    {
+        $this->configuration = $configuration;
+        $this->httpClient = $httpClient;
+        $this->requestFactory = $requestFactory;
     }
 
     public function findFeatureByContext(string $featureName, ?Context $context = null): ?ProxyFeature

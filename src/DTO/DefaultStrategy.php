@@ -5,21 +5,48 @@ namespace Unleash\Client\DTO;
 final class DefaultStrategy implements Strategy
 {
     /**
+     * @readonly
+     */
+    private string $name;
+    /**
+     * @var array<string, string>
+     * @readonly
+     */
+    private array $parameters = [];
+    /**
+     * @var array<Constraint>
+     * @readonly
+     */
+    private array $constraints = [];
+    /**
+     * @var array<Segment>
+     * @readonly
+     */
+    private array $segments = [];
+    /**
+     * @readonly
+     */
+    private bool $nonexistentSegments = false;
+    /**
+     * @var array<Variant>
+     * @readonly
+     */
+    private array $variants = [];
+    /**
      * @param array<string,string> $parameters
      * @param array<Constraint>    $constraints
      * @param array<Segment>       $segments
      * @param array<Variant>       $variants
      */
-    public function __construct(
-        private readonly string $name,
-        private readonly array $parameters = [],
-        private readonly array $constraints = [],
-        private readonly array $segments = [],
-        private readonly bool $nonexistentSegments = false,
-        private readonly array $variants = [],
-    ) {
+    public function __construct(string $name, array $parameters = [], array $constraints = [], array $segments = [], bool $nonexistentSegments = false, array $variants = [])
+    {
+        $this->name = $name;
+        $this->parameters = $parameters;
+        $this->constraints = $constraints;
+        $this->segments = $segments;
+        $this->nonexistentSegments = $nonexistentSegments;
+        $this->variants = $variants;
     }
-
     public function getName(): string
     {
         return $this->name;

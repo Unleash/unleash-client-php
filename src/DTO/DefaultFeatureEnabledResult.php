@@ -4,12 +4,19 @@ namespace Unleash\Client\DTO;
 
 final class DefaultFeatureEnabledResult implements FeatureEnabledResult
 {
-    public function __construct(
-        private readonly bool $isEnabled = false,
-        private readonly ?Strategy $strategy = null,
-    ) {
+    /**
+     * @readonly
+     */
+    private bool $isEnabled = false;
+    /**
+     * @readonly
+     */
+    private ?Strategy $strategy = null;
+    public function __construct(bool $isEnabled = false, ?Strategy $strategy = null)
+    {
+        $this->isEnabled = $isEnabled;
+        $this->strategy = $strategy;
     }
-
     public function isEnabled(): bool
     {
         return $this->isEnabled;
