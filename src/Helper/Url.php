@@ -2,18 +2,32 @@
 
 namespace Unleash\Client\Helper;
 
-final readonly class Url
+final class Url
 {
+    /**
+     * @readonly
+     * @var string
+     */
+    private $url;
+    /**
+     * @readonly
+     * @var string|null
+     */
+    private $namePrefix;
+    /**
+     * @var array<string>|null
+     * @readonly
+     */
+    private $tags;
     /**
      * @param array<string>|null $tags
      */
-    public function __construct(
-        private string $url,
-        private ?string $namePrefix = null,
-        private ?array $tags = null,
-    ) {
+    public function __construct(string $url, ?string $namePrefix = null, ?array $tags = null)
+    {
+        $this->url = $url;
+        $this->namePrefix = $namePrefix;
+        $this->tags = $tags;
     }
-
     public function __toString(): string
     {
         $url = $this->url;
@@ -32,7 +46,7 @@ final readonly class Url
             }
         }
 
-        if (str_ends_with($url, '&') || str_ends_with($url, '?')) {
+        if (substr_compare($url, '&', -strlen('&')) === 0 || substr_compare($url, '?', -strlen('?')) === 0) {
             $url = substr($url, 0, -1);
         }
 

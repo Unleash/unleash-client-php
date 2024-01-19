@@ -6,7 +6,7 @@ use JetBrains\PhpStorm\Pure;
 use Unleash\Client\Configuration\Context;
 use Unleash\Client\Configuration\UnleashContext;
 
-final readonly class DefaultUnleashContextProvider implements UnleashContextProvider
+final class DefaultUnleashContextProvider implements UnleashContextProvider
 {
     #[Pure]
     public function getContext(): Context
