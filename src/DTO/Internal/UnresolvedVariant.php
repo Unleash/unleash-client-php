@@ -10,13 +10,16 @@ use Unleash\Client\Enum\Stickiness;
 /**
  * @internal
  */
-final readonly class UnresolvedVariant implements Variant
+final class UnresolvedVariant implements Variant
 {
-    public function __construct(
-        private string $name,
-    ) {
+    /**
+     * @readonly
+     */
+    private string $name;
+    public function __construct(string $name)
+    {
+        $this->name = $name;
     }
-
     public function getName(): string
     {
         return $this->name;
@@ -55,7 +58,7 @@ final readonly class UnresolvedVariant implements Variant
      *
      * @noinspection PhpMixedReturnTypeCanBeReducedInspection
      */
-    public function jsonSerialize(): mixed
+    public function jsonSerialize()
     {
         return null;
     }
