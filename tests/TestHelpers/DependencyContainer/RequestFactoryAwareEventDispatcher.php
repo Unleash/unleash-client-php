@@ -25,19 +25,19 @@ final class RequestFactoryAwareEventDispatcher implements EventDispatcherInterfa
         $this->requestFactory = $requestFactory;
     }
 
-    public function addListener(string $eventName, callable $listener, int $priority = 0)
+    public function addListener(string $eventName, callable $listener, int $priority = 0): void
     {
     }
 
-    public function addSubscriber(EventSubscriberInterface $subscriber)
+    public function addSubscriber(EventSubscriberInterface $subscriber): void
     {
     }
 
-    public function removeListener(string $eventName, callable $listener)
+    public function removeListener(string $eventName, callable $listener): void
     {
     }
 
-    public function removeSubscriber(EventSubscriberInterface $subscriber)
+    public function removeSubscriber(EventSubscriberInterface $subscriber): void
     {
     }
 

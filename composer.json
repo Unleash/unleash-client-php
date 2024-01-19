@@ -21,7 +21,7 @@
         "lastguest/murmurhash": "^2.1",
         "psr/http-message": "^1.0 | ^2.0",
         "php-http/discovery": "^1.14",
-        "symfony/event-dispatcher": "^5.0 | ^6.0"
+        "symfony/event-dispatcher": "^5.0 | ^6.0 | ^7.0"
     },
     "autoload": {
         "psr-4": {
@@ -36,9 +36,9 @@
         "jetbrains/phpstorm-attributes": "^1.0",
         "rector/rector": "^0.14.8",
         "phpunit/phpunit": "^9.5",
-        "symfony/http-client": "^5.0 | ^6.0",
+        "symfony/http-client": "^5.0 | ^6.0 | ^7.0",
         "nyholm/psr7": "^1.0",
-        "symfony/cache": "^5.0 | ^6.0"
+        "symfony/cache": "^5.0 | ^6.0 | ^7.0"
     },
     "autoload-dev": {
         "psr-4": {
