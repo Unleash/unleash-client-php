@@ -23,7 +23,7 @@ final class DefaultMetricsBucketSerializerTest extends TestCase
         self::assertSame($bucket->jsonSerialize(), $deserialized->jsonSerialize());
     }
 
-    private function serializeDeserializeData(): iterable
+    public function serializeDeserializeData(): iterable
     {
         yield [new MetricsBucket(new DateTimeImmutable(), new DateTimeImmutable('+5 seconds'))];
         yield [
