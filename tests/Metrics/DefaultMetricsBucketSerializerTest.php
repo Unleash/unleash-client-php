@@ -77,7 +77,7 @@ final class DefaultMetricsBucketSerializerTest extends TestCase
                     new DefaultFeature('test', true, []),
                     true,
                     new DefaultVariant('test1', true)
-                ))
+                )),
         ];
     }
 }
