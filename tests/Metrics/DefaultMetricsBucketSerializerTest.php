@@ -44,31 +44,31 @@ final class DefaultMetricsBucketSerializerTest extends TestCase
                 ->addToggle(new MetricsBucketToggle(
                     new DefaultFeature('test', true, []),
                     true,
-                    new DefaultVariant('test1', true),
+                    new DefaultVariant('test1', true)
                 ))
                 ->addToggle(new MetricsBucketToggle(
                     new DefaultFeature('test', true, []),
                     false,
-                    new DefaultVariant('test1', true),
+                    new DefaultVariant('test1', true)
                 ))
                 ->addToggle(new MetricsBucketToggle(
                     new DefaultFeature('test', true, []),
                     true,
-                    new DefaultVariant('test1', true),
+                    new DefaultVariant('test1', true)
+                ))
+                ->addToggle(new MetricsBucketToggle(
+                    new DefaultFeature('test', true, []),
+                    true
                 ))
                 ->addToggle(new MetricsBucketToggle(
                     new DefaultFeature('test', true, []),
                     true,
+                    new DefaultVariant('test2', true)
                 ))
                 ->addToggle(new MetricsBucketToggle(
                     new DefaultFeature('test', true, []),
                     true,
-                    new DefaultVariant('test2', true),
-                ))
-                ->addToggle(new MetricsBucketToggle(
-                    new DefaultFeature('test', true, []),
-                    true,
-                    new DefaultVariant('test3', true),
+                    new DefaultVariant('test3', true)
                 )),
         ];
         yield [
@@ -76,8 +76,8 @@ final class DefaultMetricsBucketSerializerTest extends TestCase
                 ->addToggle(new MetricsBucketToggle(
                     new DefaultFeature('test', true, []),
                     true,
-                    new DefaultVariant('test1', true),
-                )),
+                    new DefaultVariant('test1', true)
+                ))
         ];
     }
 }
