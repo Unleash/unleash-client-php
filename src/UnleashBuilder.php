@@ -503,7 +503,8 @@ final class UnleashBuilder
             ->setBootstrapProvider($bootstrapProvider)
             ->setFetchingEnabled($this->fetchingEnabled)
             ->setEventDispatcher($eventDispatcher)
-            ->setMetricsBucketSerializer($metricsBucketSerializer);
+            ->setMetricsBucketSerializer($metricsBucketSerializer)
+        ;
 
         // runtime-unchangeable blocks of Unleash
 
