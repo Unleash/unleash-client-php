@@ -37,8 +37,10 @@ use Unleash\Client\Helper\Builder\StaleCacheAware;
 use Unleash\Client\Helper\Builder\StickinessCalculatorAware;
 use Unleash\Client\Helper\DefaultImplementationLocator;
 use Unleash\Client\Helper\UnleashBuilderContainer;
+use Unleash\Client\Metrics\DefaultMetricsBucketSerializer;
 use Unleash\Client\Metrics\DefaultMetricsHandler;
 use Unleash\Client\Metrics\DefaultMetricsSender;
+use Unleash\Client\Metrics\MetricsBucketSerializer;
 use Unleash\Client\Metrics\MetricsHandler;
 use Unleash\Client\Repository\DefaultUnleashProxyRepository;
 use Unleash\Client\Repository\DefaultUnleashRepository;
@@ -120,6 +122,8 @@ final class UnleashBuilder
     private ?MetricsHandler $metricsHandler = null;
 
     private ?VariantHandler $variantHandler = null;
+
+    private ?MetricsBucketSerializer $metricsBucketSerializer = null;
 
     public function __construct()
     {
@@ -366,6 +370,12 @@ final class UnleashBuilder
         return $this->with('proxyKey', $proxyKey);
     }
 
+    #[Pure]
+    public function withMetricsBucketSerializer(?MetricsBucketSerializer $metricsBucketSerializer): self
+    {
+        return $this->with('metricsBucketSerializer', $metricsBucketSerializer);
+    }
+
     public function build(): Unleash
     {
         // basic scalar attributes
@@ -464,6 +474,7 @@ final class UnleashBuilder
         foreach ($this->eventSubscribers as $eventSubscriber) {
             $eventDispatcher->addSubscriber($eventSubscriber);
         }
+        $metricsBucketSerializer = $this->metricsBucketSerializer ?? new DefaultMetricsBucketSerializer();
 
         // initialize services
         $this->initializeServices($contextProvider, $dependencyContainer);
@@ -492,7 +503,7 @@ final class UnleashBuilder
             ->setBootstrapProvider($bootstrapProvider)
             ->setFetchingEnabled($this->fetchingEnabled)
             ->setEventDispatcher($eventDispatcher)
-        ;
+            ->setMetricsBucketSerializer($metricsBucketSerializer);
 
         // runtime-unchangeable blocks of Unleash
 

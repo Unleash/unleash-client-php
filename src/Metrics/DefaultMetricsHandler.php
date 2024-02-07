@@ -38,6 +38,9 @@ final readonly class DefaultMetricsHandler implements MetricsHandler
         $bucket = null;
         if ($cache->has(CacheKey::METRICS_BUCKET)) {
             $bucket = $cache->get(CacheKey::METRICS_BUCKET);
+            if (is_string($bucket)) {
+                $bucket = $this->configuration->getMetricsBucketSerializer()->deserialize($bucket);
+            }
             assert($bucket instanceof MetricsBucket || $bucket === null);
         }
 
@@ -71,6 +74,6 @@ final readonly class DefaultMetricsHandler implements MetricsHandler
     private function store(MetricsBucket $bucket): void
     {
         $cache = $this->configuration->getMetricsCache();
-        $cache->set(CacheKey::METRICS_BUCKET, $bucket);
+        $cache->set(CacheKey::METRICS_BUCKET, $this->configuration->getMetricsBucketSerializer()->serialize($bucket));
     }
 }

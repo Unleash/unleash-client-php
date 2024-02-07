@@ -42,6 +42,19 @@ final class MetricsBucket implements JsonSerializable
         return $this;
     }
 
+    public function getEndDate(): ?DateTimeInterface
+    {
+        return $this->endDate;
+    }
+
+    /**
+     * @return array<MetricsBucketToggle>
+     */
+    public function getToggles(): array
+    {
+        return $this->toggles;
+    }
+
     /**
      * @return array<string,mixed>
      */
