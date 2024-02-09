@@ -6,7 +6,7 @@ use DateTimeImmutable;
 use Unleash\Client\DTO\DefaultFeature;
 use Unleash\Client\DTO\DefaultVariant;
 
-final readonly class DefaultMetricsBucketSerializer implements MetricsBucketSerializer
+final class DefaultMetricsBucketSerializer implements MetricsBucketSerializer
 {
     public function serialize(MetricsBucket $bucket): string
     {
