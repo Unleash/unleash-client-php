@@ -13,6 +13,8 @@ use Unleash\Client\Bootstrap\DefaultBootstrapHandler;
 use Unleash\Client\Bootstrap\EmptyBootstrapProvider;
 use Unleash\Client\ContextProvider\DefaultUnleashContextProvider;
 use Unleash\Client\ContextProvider\UnleashContextProvider;
+use Unleash\Client\Metrics\DefaultMetricsBucketSerializer;
+use Unleash\Client\Metrics\MetricsBucketSerializer;
 
 final class UnleashConfiguration
 {
@@ -38,6 +40,7 @@ final class UnleashConfiguration
         private ?CacheInterface $staleCache = null,
         private ?string $proxyKey = null,
         private ?CacheInterface $metricsCache = null,
+        private MetricsBucketSerializer $metricsBucketSerializer = new DefaultMetricsBucketSerializer(),
     ) {
         $this->contextProvider ??= new DefaultUnleashContextProvider();
     }
@@ -283,6 +286,18 @@ final class UnleashConfiguration
     public function setStaleTtl(int $staleTtl): self
     {
         $this->staleTtl = $staleTtl;
+
+        return $this;
+    }
+
+    public function getMetricsBucketSerializer(): MetricsBucketSerializer
+    {
+        return $this->metricsBucketSerializer;
+    }
+
+    public function setMetricsBucketSerializer(MetricsBucketSerializer $metricsBucketSerializer): self
+    {
+        $this->metricsBucketSerializer = $metricsBucketSerializer;
 
         return $this;
     }

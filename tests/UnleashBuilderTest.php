@@ -36,6 +36,9 @@ use Unleash\Client\Event\FeatureToggleNotFoundEvent;
 use Unleash\Client\Event\UnleashEvents;
 use Unleash\Client\Exception\CyclicDependencyException;
 use Unleash\Client\Exception\InvalidValueException;
+use Unleash\Client\Metrics\DefaultMetricsBucketSerializer;
+use Unleash\Client\Metrics\MetricsBucket;
+use Unleash\Client\Metrics\MetricsBucketSerializer;
 use Unleash\Client\Metrics\MetricsHandler;
 use Unleash\Client\Strategy\DefaultStrategyHandler;
 use Unleash\Client\Strategy\StrategyHandler;
@@ -902,6 +905,26 @@ final class UnleashBuilderTest extends TestCase
         $headersPropertyBuilt->setAccessible(true);
         $headersBuilt = $headersPropertyBuilt->getValue($configuration);
         self::assertArrayHasKey('Authorization', $headersBuilt);
+    }
+
+    public function testWithMetricsBucketSerializer()
+    {
+        $unleash = $this->instance->withFetchingEnabled(false)->build();
+        self::assertInstanceOf(DefaultMetricsBucketSerializer::class, $this->getConfiguration($unleash)->getMetricsBucketSerializer());
+
+        $serializer = new class implements MetricsBucketSerializer {
+            public function serialize(MetricsBucket $bucket): string
+            {
+                return serialize($bucket);
+            }
+
+            public function deserialize(string $serialized): MetricsBucket
+            {
+                return unserialize($serialized);
+            }
+        };
+        $unleash = $this->instance->withFetchingEnabled(false)->withMetricsBucketSerializer($serializer)->build();
+        self::assertSame($serializer, $this->getConfiguration($unleash)->getMetricsBucketSerializer());
     }
 
     private function getConfiguration(DefaultUnleash $unleash): UnleashConfiguration
