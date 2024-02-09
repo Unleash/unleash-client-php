@@ -2,18 +2,30 @@
 
 namespace Unleash\Client\DTO;
 
-final readonly class DefaultFeatureDependency implements FeatureDependency
+final class DefaultFeatureDependency implements FeatureDependency
 {
+    /**
+     * @readonly
+     */
+    private ?Feature $feature;
+    /**
+     * @readonly
+     */
+    private bool $expectedState;
+    /**
+     * @var array<Variant>|null
+     * @readonly
+     */
+    private ?array $requiredVariants;
     /**
      * @param array<Variant>|null $requiredVariants
      */
-    public function __construct(
-        private ?Feature $feature,
-        private bool $expectedState,
-        private ?array $requiredVariants,
-    ) {
+    public function __construct(?Feature $feature, bool $expectedState, ?array $requiredVariants)
+    {
+        $this->feature = $feature;
+        $this->expectedState = $expectedState;
+        $this->requiredVariants = $requiredVariants;
     }
-
     public function getFeature(): ?Feature
     {
         return $this->feature;

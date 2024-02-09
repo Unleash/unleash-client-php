@@ -18,33 +18,59 @@ use Unleash\Client\Metrics\MetricsBucketSerializer;
 
 final class UnleashConfiguration
 {
+    private string $url;
+    private string $appName;
+    private string $instanceId;
+    private ?CacheInterface $cache = null;
+    private int $ttl = 30;
+    private int $metricsInterval = 30_000;
+    private bool $metricsEnabled = true;
+    /**
+     * @var array<string, string>
+     */
+    private array $headers = [];
+    private bool $autoRegistrationEnabled = true;
+    private UnleashContextProvider $contextProvider;
+    private BootstrapHandler $bootstrapHandler;
+    private BootstrapProvider $bootstrapProvider;
+    private bool $fetchingEnabled = true;
+    private EventDispatcherInterface $eventDispatcher;
+    private int $staleTtl = 30 * 60;
+    private ?CacheInterface $staleCache = null;
+    private ?string $proxyKey = null;
+    private ?CacheInterface $metricsCache = null;
+    private MetricsBucketSerializer $metricsBucketSerializer;
     /**
      * @param array<string,string> $headers
      */
-    public function __construct(
-        private string $url,
-        private string $appName,
-        private string $instanceId,
-        private ?CacheInterface $cache = null,
-        private int $ttl = 30,
-        private int $metricsInterval = 30_000,
-        private bool $metricsEnabled = true,
-        private array $headers = [],
-        private bool $autoRegistrationEnabled = true,
-        private UnleashContextProvider $contextProvider = new DefaultUnleashContextProvider(),
-        private BootstrapHandler $bootstrapHandler = new DefaultBootstrapHandler(),
-        private BootstrapProvider $bootstrapProvider = new EmptyBootstrapProvider(),
-        private bool $fetchingEnabled = true,
-        private EventDispatcherInterface $eventDispatcher = new EventDispatcher(),
-        private int $staleTtl = 30 * 60,
-        private ?CacheInterface $staleCache = null,
-        private ?string $proxyKey = null,
-        private ?CacheInterface $metricsCache = null,
-        private MetricsBucketSerializer $metricsBucketSerializer = new DefaultMetricsBucketSerializer(),
-    ) {
+    public function __construct(string $url, string $appName, string $instanceId, ?CacheInterface $cache = null, int $ttl = 30, int $metricsInterval = 30_000, bool $metricsEnabled = true, array $headers = [], bool $autoRegistrationEnabled = true, UnleashContextProvider $contextProvider = null, BootstrapHandler $bootstrapHandler = null, BootstrapProvider $bootstrapProvider = null, bool $fetchingEnabled = true, EventDispatcherInterface $eventDispatcher = null, int $staleTtl = 30 * 60, ?CacheInterface $staleCache = null, ?string $proxyKey = null, ?CacheInterface $metricsCache = null, MetricsBucketSerializer $metricsBucketSerializer = null)
+    {
+        $contextProvider ??= new DefaultUnleashContextProvider();
+        $bootstrapHandler ??= new DefaultBootstrapHandler();
+        $bootstrapProvider ??= new EmptyBootstrapProvider();
+        $eventDispatcher ??= new EventDispatcher();
+        $metricsBucketSerializer ??= new DefaultMetricsBucketSerializer();
+        $this->url = $url;
+        $this->appName = $appName;
+        $this->instanceId = $instanceId;
+        $this->cache = $cache;
+        $this->ttl = $ttl;
+        $this->metricsInterval = $metricsInterval;
+        $this->metricsEnabled = $metricsEnabled;
+        $this->headers = $headers;
+        $this->autoRegistrationEnabled = $autoRegistrationEnabled;
+        $this->contextProvider = $contextProvider;
+        $this->bootstrapHandler = $bootstrapHandler;
+        $this->bootstrapProvider = $bootstrapProvider;
+        $this->fetchingEnabled = $fetchingEnabled;
+        $this->eventDispatcher = $eventDispatcher;
+        $this->staleTtl = $staleTtl;
+        $this->staleCache = $staleCache;
+        $this->proxyKey = $proxyKey;
+        $this->metricsCache = $metricsCache;
+        $this->metricsBucketSerializer = $metricsBucketSerializer;
         $this->contextProvider ??= new DefaultUnleashContextProvider();
     }
-
     public function getCache(): CacheInterface
     {
         if ($this->cache === null) {
@@ -67,7 +93,7 @@ final class UnleashConfiguration
     public function getUrl(): string
     {
         $url = $this->url;
-        if (!str_ends_with($url, '/')) {
+        if (substr_compare($url, '/', -strlen('/')) !== 0) {
             $url .= '/';
         }
 
