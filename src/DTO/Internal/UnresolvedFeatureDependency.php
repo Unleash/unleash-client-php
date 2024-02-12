@@ -9,19 +9,33 @@ use Unleash\Client\DTO\Variant;
 /**
  * @internal
  */
-final readonly class UnresolvedFeatureDependency implements FeatureDependency
+final class UnresolvedFeatureDependency implements FeatureDependency
 {
+    /**
+     * @readonly
+     * @var \Unleash\Client\DTO\Feature
+     */
+    private $feature;
+    /**
+     * @readonly
+     * @var bool
+     */
+    private $expectedState;
+    /**
+     * @var array<Variant>|null
+     * @readonly
+     */
+    private $requiredVariants;
     /**
      * @param array<Variant>|null $requiredVariants
      */
-    public function __construct(
-        private Feature $feature,
-        private bool $expectedState,
-        private ?array $requiredVariants,
-    ) {
+    public function __construct(Feature $feature, bool $expectedState, ?array $requiredVariants)
+    {
+        $this->feature = $feature;
+        $this->expectedState = $expectedState;
+        $this->requiredVariants = $requiredVariants;
     }
-
-    public function getFeature(): Feature
+    public function getFeature(): ?\Unleash\Client\DTO\Feature
     {
         return $this->feature;
     }

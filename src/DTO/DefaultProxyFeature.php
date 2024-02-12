@@ -5,15 +5,31 @@ namespace Unleash\Client\DTO;
 use JsonSerializable;
 use Unleash\Client\Enum\Stickiness;
 
-final readonly class DefaultProxyFeature implements ProxyFeature, JsonSerializable
+final class DefaultProxyFeature implements ProxyFeature, JsonSerializable
 {
-    private string $name;
+    /**
+     * @readonly
+     * @var string
+     */
+    private $name;
 
-    private bool $enabled;
+    /**
+     * @readonly
+     * @var bool
+     */
+    private $enabled;
 
-    private Variant $variant;
+    /**
+     * @readonly
+     * @var \Unleash\Client\DTO\Variant
+     */
+    private $variant;
 
-    private bool $impressionData;
+    /**
+     * @readonly
+     * @var bool
+     */
+    private $impressionData;
 
     /**
      * @param array{

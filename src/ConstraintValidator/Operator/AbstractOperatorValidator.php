@@ -12,7 +12,7 @@ abstract class AbstractOperatorValidator implements OperatorValidator
     /**
      * @param array<mixed>|string|null $allowedValues
      */
-    public function __invoke(string $currentValue, array|string|null $allowedValues): bool
+    public function __invoke(string $currentValue, $allowedValues): bool
     {
         if ($allowedValues === null) {
             throw new OperatorValidatorException('No values to validate against have been found');
@@ -46,17 +46,17 @@ abstract class AbstractOperatorValidator implements OperatorValidator
     /**
      * @param array<mixed>|string $values
      */
-    abstract protected function acceptsValues(array|string $values): bool;
+    abstract protected function acceptsValues($values): bool;
 
     /**
      * @param string|array<mixed> $searchInValue
      */
-    abstract protected function validate(string $currentValue, array|string $searchInValue): bool;
+    abstract protected function validate(string $currentValue, $searchInValue): bool;
 
     /**
      * @param array<mixed>|string $allowedValues
      */
-    private function isMultiple(array|string $allowedValues): bool
+    private function isMultiple($allowedValues): bool
     {
         return is_array($allowedValues) && !$this->acceptsValues($allowedValues);
     }

@@ -5,9 +5,12 @@ namespace Unleash\Client\Bootstrap;
 use JsonSerializable;
 use Traversable;
 
-final readonly class EmptyBootstrapProvider implements BootstrapProvider
+final class EmptyBootstrapProvider implements BootstrapProvider
 {
-    public function getBootstrap(): array|JsonSerializable|Traversable|null
+    /**
+     * @return mixed[]|\JsonSerializable|\Traversable|null
+     */
+    public function getBootstrap()
     {
         return null;
     }

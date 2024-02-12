@@ -5,22 +5,58 @@ namespace Unleash\Client\DTO;
 use JetBrains\PhpStorm\ExpectedValues;
 use Unleash\Client\Enum\ConstraintOperator;
 
-final readonly class DefaultConstraint implements Constraint
+final class DefaultConstraint implements Constraint
 {
+    /**
+     * @readonly
+     * @var string
+     */
+    private $contextName;
+    /**
+     * @readonly
+     * @var string
+     */
+    private $operator;
+    /**
+     * @var array<string>
+     * @readonly
+     */
+    private $values;
+    /**
+     * @readonly
+     * @var string|null
+     */
+    private $singleValue;
+    /**
+     * @readonly
+     * @var bool
+     */
+    private $inverted = false;
+    /**
+     * @readonly
+     * @var bool
+     */
+    private $caseInsensitive = false;
     /**
      * @param array<string> $values
      */
     public function __construct(
-        private string $contextName,
-        #[ExpectedValues(valuesFromClass: ConstraintOperator::class)]
-        private string $operator,
-        private ?array $values = null,
-        private ?string $singleValue = null,
-        private bool $inverted = false,
-        private bool $caseInsensitive = false,
-    ) {
+        string $contextName,
+        #[\JetBrains\PhpStorm\ExpectedValues(valuesFromClass: \Unleash\Client\Enum\ConstraintOperator::class)]
+        string $operator,
+        ?array $values = null,
+        ?string $singleValue = null,
+        bool $inverted = false,
+        bool $caseInsensitive = false
+    )
+    {
+        $this->contextName = $contextName;
+        $this->operator = $operator;
+        $this->values = $values;
+        $this->singleValue = $singleValue;
+        $this->inverted = $inverted;
+        $this->caseInsensitive = $caseInsensitive;
     }
-
     public function getContextName(): string
     {
         return $this->contextName;

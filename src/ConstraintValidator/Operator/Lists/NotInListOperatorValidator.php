@@ -7,7 +7,10 @@ namespace Unleash\Client\ConstraintValidator\Operator\Lists;
  */
 final class NotInListOperatorValidator extends AbstractListOperatorValidator
 {
-    protected function validate(string $currentValue, array|string $searchInValue): bool
+    /**
+     * @param mixed[]|string $searchInValue
+     */
+    protected function validate(string $currentValue, $searchInValue): bool
     {
         assert(is_array($searchInValue));
 
