@@ -26,7 +26,7 @@ final class IpAddressStrategyHandler extends AbstractStrategyHandler
             foreach ($ipAddresses as $ipAddress) {
                 try {
                     $calculator = NetworkCalculator::fromString($ipAddress);
-                } catch (InvalidIpAddressException) {
+                } catch (InvalidIpAddressException $exception) {
                     continue;
                 }
                 if ($calculator->isInRange($currentIpAddress)) {
