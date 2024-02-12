@@ -12,16 +12,16 @@ use Unleash\Client\Stickiness\StickinessCalculator;
 /**
  * @internal
  */
-final readonly class UnleashBuilderContainer
+final class UnleashBuilderContainer
 {
     public function __construct(
-        private CacheInterface $cache,
-        private CacheInterface $staleCache,
-        private ClientInterface $httpClient,
-        private ?MetricsSender $metricsSender,
-        private RequestFactoryInterface $requestFactory,
-        private StickinessCalculator $stickinessCalculator,
-        private ?UnleashConfiguration $configuration,
+        private readonly CacheInterface $cache,
+        private readonly CacheInterface $staleCache,
+        private readonly ClientInterface $httpClient,
+        private readonly ?MetricsSender $metricsSender,
+        private readonly RequestFactoryInterface $requestFactory,
+        private readonly StickinessCalculator $stickinessCalculator,
+        private readonly ?UnleashConfiguration $configuration,
     ) {
     }
 

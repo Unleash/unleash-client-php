@@ -9,12 +9,12 @@ use Unleash\Client\DTO\Variant;
 use Unleash\Client\Enum\Stickiness;
 use Unleash\Client\Stickiness\StickinessCalculator;
 
-final readonly class DefaultVariantHandler implements VariantHandler
+final class DefaultVariantHandler implements VariantHandler
 {
     private const VARIANT_HASH_SEED = 86028157;
 
     public function __construct(
-        private StickinessCalculator $stickinessCalculator,
+        private readonly StickinessCalculator $stickinessCalculator,
     ) {
     }
 

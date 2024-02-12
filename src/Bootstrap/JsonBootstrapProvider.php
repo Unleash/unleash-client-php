@@ -5,10 +5,10 @@ namespace Unleash\Client\Bootstrap;
 use JsonException;
 use Unleash\Client\Exception\InvalidValueException;
 
-final readonly class JsonBootstrapProvider implements BootstrapProvider
+final class JsonBootstrapProvider implements BootstrapProvider
 {
     public function __construct(
-        private string $json,
+        private readonly string $json,
     ) {
     }
 
