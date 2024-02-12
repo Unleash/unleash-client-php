@@ -10,14 +10,21 @@ use Unleash\Client\Enum\Stickiness;
 use Unleash\Client\Metrics\MetricsHandler;
 use Unleash\Client\Repository\ProxyRepository;
 
-final readonly class DefaultProxyUnleash implements Unleash
+final class DefaultProxyUnleash implements Unleash
 {
-    public function __construct(
-        private ProxyRepository $repository,
-        private MetricsHandler $metricsHandler,
-    ) {
+    /**
+     * @readonly
+     */
+    private ProxyRepository $repository;
+    /**
+     * @readonly
+     */
+    private MetricsHandler $metricsHandler;
+    public function __construct(ProxyRepository $repository, MetricsHandler $metricsHandler)
+    {
+        $this->repository = $repository;
+        $this->metricsHandler = $metricsHandler;
     }
-
     /**
      * @codeCoverageIgnore
      */

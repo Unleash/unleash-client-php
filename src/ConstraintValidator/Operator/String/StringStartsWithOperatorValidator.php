@@ -7,10 +7,13 @@ namespace Unleash\Client\ConstraintValidator\Operator\String;
  */
 final class StringStartsWithOperatorValidator extends AbstractStringOperatorValidator
 {
-    protected function validate(string $currentValue, array|string $searchInValue): bool
+    /**
+     * @param mixed[]|string $searchInValue
+     */
+    protected function validate(string $currentValue, $searchInValue): bool
     {
         assert(is_string($searchInValue));
 
-        return str_starts_with($currentValue, $searchInValue);
+        return strncmp($currentValue, $searchInValue, strlen($searchInValue)) === 0;
     }
 }
