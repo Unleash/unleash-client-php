@@ -2,7 +2,7 @@
 
 namespace Unleash\Client\DTO;
 
-final readonly class DefaultFeatureDependency implements FeatureDependency
+final class DefaultFeatureDependency implements FeatureDependency
 {
     /**
      * @param array<Variant>|null $requiredVariants

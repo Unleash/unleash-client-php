@@ -8,7 +8,7 @@ use Psr\Http\Message\RequestFactoryInterface;
 use Unleash\Client\Configuration\UnleashConfiguration;
 use Unleash\Client\Helper\StringStream;
 
-final readonly class DefaultMetricsSender implements MetricsSender
+final class DefaultMetricsSender implements MetricsSender
 {
     public function __construct(
         private ClientInterface $httpClient,

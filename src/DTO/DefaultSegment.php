@@ -2,7 +2,7 @@
 
 namespace Unleash\Client\DTO;
 
-final readonly class DefaultSegment implements Segment
+final class DefaultSegment implements Segment
 {
     /**
      * @param array<Constraint> $constraints

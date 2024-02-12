@@ -8,7 +8,7 @@ use Unleash\Client\DTO\FeatureDependency;
 /**
  * @internal
  */
-final readonly class UnresolvedFeature implements Feature
+final class UnresolvedFeature implements Feature
 {
     public function __construct(
         private string $name,

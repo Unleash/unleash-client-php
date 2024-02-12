@@ -2,7 +2,7 @@
 
 namespace Unleash\Client\DTO;
 
-final readonly class DefaultVariantOverride implements VariantOverride
+final class DefaultVariantOverride implements VariantOverride
 {
     /**
      * @param array<string> $values

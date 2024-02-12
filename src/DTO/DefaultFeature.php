@@ -2,7 +2,7 @@
 
 namespace Unleash\Client\DTO;
 
-final readonly class DefaultFeature implements Feature
+final class DefaultFeature implements Feature
 {
     /**
      * @param iterable<Strategy>       $strategies

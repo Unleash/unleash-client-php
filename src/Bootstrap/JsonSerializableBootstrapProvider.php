@@ -5,7 +5,7 @@ namespace Unleash\Client\Bootstrap;
 use JsonSerializable;
 use Traversable;
 
-final readonly class JsonSerializableBootstrapProvider implements BootstrapProvider
+final class JsonSerializableBootstrapProvider implements BootstrapProvider
 {
     /**
      * @param JsonSerializable|array<mixed>|Traversable<mixed> $data

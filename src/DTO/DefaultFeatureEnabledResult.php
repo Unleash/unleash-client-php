@@ -2,7 +2,7 @@
 
 namespace Unleash\Client\DTO;
 
-final readonly class DefaultFeatureEnabledResult implements FeatureEnabledResult
+final class DefaultFeatureEnabledResult implements FeatureEnabledResult
 {
     public function __construct(
         private bool $isEnabled = false,
