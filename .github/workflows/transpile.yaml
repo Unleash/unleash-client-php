@@ -18,7 +18,7 @@ jobs:
         with:
           php-version: 8.2
       - name: Checkout Code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: Install Dependencies
         run: composer install
       - name: Transpile to ${{ matrix.version }}
@@ -40,7 +40,7 @@ jobs:
       - name: Update README
         run: sed -i '1s/^/# This branch is auto generated\n/' README.md
       - name: Commit PHP ${{ matrix.version }} version
-        uses: actions-x/commit@v5
+        uses: actions-x/commit@v6
         with:
           files: .
           branch: php-${{ matrix.version }}
@@ -58,7 +58,7 @@ jobs:
         version: [7x, 8x]
     steps:
       - name: Trigger ${{ matrix.version }} tests
-        uses: peter-evans/repository-dispatch@v1
+        uses: peter-evans/repository-dispatch@v3
         with:
           token: ${{ secrets.REPO_TOKEN }}
           event-type: trigger-${{ matrix.version }}-tests
