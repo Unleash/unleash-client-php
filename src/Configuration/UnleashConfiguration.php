@@ -5,6 +5,7 @@ namespace Unleash\Client\Configuration;
 use JetBrains\PhpStorm\Pure;
 use LogicException;
 use Psr\SimpleCache\CacheInterface;
+use Stringable;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Unleash\Client\Bootstrap\BootstrapHandler;
@@ -22,9 +23,9 @@ final class UnleashConfiguration
      * @param array<string,string> $headers
      */
     public function __construct(
-        private string $url,
-        private string $appName,
-        private string $instanceId,
+        private string|Stringable $url,
+        private string|Stringable $appName,
+        private string|Stringable $instanceId,
         private ?CacheInterface $cache = null,
         private int $ttl = 30,
         private int $metricsInterval = 30_000,
@@ -71,7 +72,7 @@ final class UnleashConfiguration
             $url .= '/';
         }
 
-        return $url;
+        return (string) $url;
     }
 
     public function getAppName(): string
@@ -146,21 +147,21 @@ final class UnleashConfiguration
         return $this->metricsEnabled;
     }
 
-    public function setUrl(string $url): self
+    public function setUrl(string|Stringable $url): self
     {
         $this->url = $url;
 
         return $this;
     }
 
-    public function setAppName(string $appName): self
+    public function setAppName(string|Stringable $appName): self
     {
         $this->appName = $appName;
 
         return $this;
     }
 
-    public function setInstanceId(string $instanceId): self
+    public function setInstanceId(string|Stringable $instanceId): self
     {
         $this->instanceId = $instanceId;
 
