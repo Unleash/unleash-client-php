@@ -2,15 +2,15 @@
 
 namespace Unleash\Client\Helper;
 
-final readonly class Url
+final class Url
 {
     /**
      * @param array<string>|null $tags
      */
     public function __construct(
-        private string $url,
-        private ?string $namePrefix = null,
-        private ?array $tags = null,
+        private readonly string $url,
+        private readonly ?string $namePrefix = null,
+        private readonly ?array $tags = null,
     ) {
     }
 
