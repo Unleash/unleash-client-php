@@ -79,7 +79,7 @@ use Unleash\Client\Exception\InvalidValueException;
  *       impressionData?: bool,
  *   }
  */
-final readonly class DefaultUnleashRepository implements UnleashRepository
+final class DefaultUnleashRepository implements UnleashRepository
 {
     public function __construct(
         private ClientInterface $httpClient,

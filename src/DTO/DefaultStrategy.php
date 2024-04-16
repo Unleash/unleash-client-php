@@ -2,7 +2,7 @@
 
 namespace Unleash\Client\DTO;
 
-final readonly class DefaultStrategy implements Strategy
+final class DefaultStrategy implements Strategy
 {
     /**
      * @param array<string,string> $parameters
