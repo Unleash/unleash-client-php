@@ -126,7 +126,7 @@ final class UnleashConfigurationTest extends TestCase
                 private $realUrl;
 
                 public function __construct(
-                    string &$realUrl,
+                    string &$realUrl
                 ) {
                     $this->realUrl = &$realUrl;
                 }
