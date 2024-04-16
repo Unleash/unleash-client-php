@@ -118,19 +118,24 @@ final class UnleashConfigurationTest extends TestCase
         $realAppName = 'TestApp';
         $realInstanceId = '123';
 
-        $shadowed = fn (string &$value) => new class($value) {
-            private string $realUrl;
+        $shadowed = function (string &$value) {
+            return new class($value) {
+                /**
+                 * @var string
+                 */
+                private $realUrl;
 
-            public function __construct(
-                string &$realUrl,
-            ) {
-                $this->realUrl = &$realUrl;
-            }
+                public function __construct(
+                    string &$realUrl,
+                ) {
+                    $this->realUrl = &$realUrl;
+                }
 
-            public function __toString(): string
-            {
-                return $this->realUrl;
-            }
+                public function __toString(): string
+                {
+                    return $this->realUrl;
+                }
+            };
         };
 
         $url = $shadowed($realUrl);
