@@ -111,4 +111,43 @@ final class UnleashConfigurationTest extends TestCase
         $resolvedMetricsUrl = $proxyInstance->getMetricsUrl();
         self::assertSame($resolvedMetricsUrl, 'http://localhost:3063/api/frontend/client/metrics');
     }
+
+    public function testStringable()
+    {
+        $realUrl = 'http://localhost:3063/api/';
+        $realAppName = 'TestApp';
+        $realInstanceId = '123';
+
+        $shadowed = fn (string &$value) => new class($value) {
+            private string $realUrl;
+
+            public function __construct(
+                string &$realUrl,
+            ) {
+                $this->realUrl = &$realUrl;
+            }
+
+            public function __toString(): string
+            {
+                return $this->realUrl;
+            }
+        };
+
+        $url = $shadowed($realUrl);
+        $appName = $shadowed($realAppName);
+        $instanceId = $shadowed($realInstanceId);
+
+        $instance = new UnleashConfiguration($url, $appName, $instanceId);
+        self::assertSame($realUrl, (string) $instance->getUrl());
+        self::assertSame($realAppName, (string) $instance->getAppName());
+        self::assertSame($realInstanceId, (string) $instance->getInstanceId());
+
+        $realUrl = 'http://localhost:3063/api/v2/';
+        $realAppName = 'TestApp2';
+        $realInstanceId = '456';
+
+        self::assertSame($realUrl, (string) $instance->getUrl());
+        self::assertSame($realAppName, (string) $instance->getAppName());
+        self::assertSame($realInstanceId, (string) $instance->getInstanceId());
+    }
 }
