@@ -16,11 +16,15 @@ final class MetricsBucket implements JsonSerializable
      * @var array<MetricsBucketToggle>
      */
     private array $toggles = [];
-
-    public function __construct(
-        private readonly DateTimeInterface $startDate,
-        private ?DateTimeInterface $endDate = null,
-    ) {
+    /**
+     * @readonly
+     */
+    private DateTimeInterface $startDate;
+    private ?DateTimeInterface $endDate = null;
+    public function __construct(DateTimeInterface $startDate, ?DateTimeInterface $endDate = null)
+    {
+        $this->startDate = $startDate;
+        $this->endDate = $endDate;
     }
 
     public function addToggle(MetricsBucketToggle $toggle): self
