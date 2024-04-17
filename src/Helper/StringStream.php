@@ -85,11 +85,11 @@ final class StringStream implements StreamInterface
         $tell = ftell($this->stream);
 
         // this doesn't happen anymore in php 8.3, but is kept here for older versions
-        /** @codeCoverageIgnoreStart */
+        // @codeCoverageIgnoreStart
         if ($tell === false) {
             throw new StreamException('Could not retrieve stream position. Is the stream after EOF?');
         }
-        /** @codeCoverageIgnoreEnd */
+        // @codeCoverageIgnoreEnd
 
         return $tell;
     }
