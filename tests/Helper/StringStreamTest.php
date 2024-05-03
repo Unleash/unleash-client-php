@@ -36,8 +36,13 @@ final class StringStreamTest extends TestCase
         $this->instance->seek(11);
         self::assertEquals(11, $this->instance->tell());
         $this->instance->seek(12);
-        $this->expectException(StreamException::class);
-        $this->instance->tell();
+
+        if (PHP_VERSION_ID < 80300) {
+            $this->expectException(StreamException::class);
+            $this->instance->tell();
+        } else {
+            self::assertSame(12, $this->instance->tell());
+        }
     }
 
     public function testClose()

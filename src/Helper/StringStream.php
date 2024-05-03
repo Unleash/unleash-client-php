@@ -83,9 +83,13 @@ final class StringStream implements StreamInterface
             throw new StreamException('The stream is detached');
         }
         $tell = ftell($this->stream);
+
+        // this doesn't happen anymore in php 8.3, but is kept here for older versions
+        // @codeCoverageIgnoreStart
         if ($tell === false) {
             throw new StreamException('Could not retrieve stream position. Is the stream after EOF?');
         }
+        // @codeCoverageIgnoreEnd
 
         return $tell;
     }
