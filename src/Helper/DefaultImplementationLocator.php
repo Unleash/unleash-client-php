@@ -60,7 +60,7 @@ final class DefaultImplementationLocator
              * let's silence the error.
              */
             return @Psr18ClientDiscovery::find();
-        } catch (NotFoundException $e) {
+        } catch (NotFoundException) {
             return null;
         }
     }
@@ -70,7 +70,7 @@ final class DefaultImplementationLocator
         try {
             return Psr17FactoryDiscovery::findRequestFactory();
             // @codeCoverageIgnoreStart
-        } catch (NotFoundException $e) {
+        } catch (NotFoundException) {
             /**
              * This will only be thrown if a HTTP client was found, but a request factory is not.
              * Due to how php-http/discovery works, this scenario is unlikely to happen.

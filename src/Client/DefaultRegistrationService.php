@@ -53,9 +53,7 @@ final class DefaultRegistrationService implements RegistrationService
                 'appName' => $this->configuration->getAppName(),
                 'instanceId' => $this->configuration->getInstanceId(),
                 'sdkVersion' => $this->sdkName . ':' . $this->sdkVersion,
-                'strategies' => array_map(function (StrategyHandler $strategyHandler): string {
-                    return $strategyHandler->getStrategyName();
-                }, $strategyHandlers),
+                'strategies' => array_map(fn(StrategyHandler $strategyHandler): string => $strategyHandler->getStrategyName(), $strategyHandlers),
                 'started' => (new DateTimeImmutable())->format('c'),
                 'interval' => $this->configuration->getMetricsInterval(),
             ], JSON_THROW_ON_ERROR)));

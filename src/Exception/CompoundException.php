@@ -31,7 +31,7 @@ final class CompoundException extends Exception
         $message = '';
 
         foreach ($this->exceptions as $exception) {
-            $message .= sprintf('%s: %s%s', get_class($exception), $exception->getMessage(), PHP_EOL);
+            $message .= sprintf('%s: %s%s', $exception::class, $exception->getMessage(), PHP_EOL);
         }
 
         return $message;
