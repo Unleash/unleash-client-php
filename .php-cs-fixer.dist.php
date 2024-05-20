@@ -89,5 +89,6 @@ return (new PhpCsFixer\Config())
         'phpdoc_order' => true,
         'phpdoc_scalar' => true,
         'phpdoc_separation' => true,
+        'global_namespace_import' => true,
     ])
     ->setFinder($finder);

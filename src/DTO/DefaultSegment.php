@@ -2,6 +2,8 @@
 
 namespace Unleash\Client\DTO;
 
+use Override;
+
 final readonly class DefaultSegment implements Segment
 {
     /**
@@ -13,11 +15,13 @@ final readonly class DefaultSegment implements Segment
     ) {
     }
 
+    #[Override]
     public function getId(): int
     {
         return $this->id;
     }
 
+    #[Override]
     public function getConstraints(): array
     {
         return $this->constraints;

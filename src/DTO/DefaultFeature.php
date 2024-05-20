@@ -2,6 +2,8 @@
 
 namespace Unleash\Client\DTO;
 
+use Override;
+
 final readonly class DefaultFeature implements Feature
 {
     /**
@@ -19,11 +21,13 @@ final readonly class DefaultFeature implements Feature
     ) {
     }
 
+    #[Override]
     public function getName(): string
     {
         return $this->name;
     }
 
+    #[Override]
     public function isEnabled(): bool
     {
         return $this->enabled;
@@ -32,6 +36,7 @@ final readonly class DefaultFeature implements Feature
     /**
      * @return iterable<Strategy>
      */
+    #[Override]
     public function getStrategies(): iterable
     {
         return $this->strategies;
@@ -40,11 +45,13 @@ final readonly class DefaultFeature implements Feature
     /**
      * @return array<Variant>
      */
+    #[Override]
     public function getVariants(): array
     {
         return $this->variants;
     }
 
+    #[Override]
     public function hasImpressionData(): bool
     {
         return $this->impressionData;

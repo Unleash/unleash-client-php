@@ -2,6 +2,8 @@
 
 namespace Unleash\Client\DTO;
 
+use Override;
+
 final readonly class DefaultVariantOverride implements VariantOverride
 {
     /**
@@ -13,6 +15,7 @@ final readonly class DefaultVariantOverride implements VariantOverride
     ) {
     }
 
+    #[Override]
     public function getField(): string
     {
         return $this->field;
@@ -21,6 +24,7 @@ final readonly class DefaultVariantOverride implements VariantOverride
     /**
      * @return array<string>
      */
+    #[Override]
     public function getValues(): array
     {
         return $this->values;

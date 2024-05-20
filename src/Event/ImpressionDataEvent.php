@@ -5,6 +5,7 @@ namespace Unleash\Client\Event;
 use DateTimeInterface;
 use JetBrains\PhpStorm\ExpectedValues;
 use JsonSerializable;
+use Override;
 use Unleash\Client\Configuration\Context;
 use Unleash\Client\Configuration\UnleashConfiguration;
 use Unleash\Client\DTO\Feature;
@@ -92,6 +93,7 @@ final class ImpressionDataEvent extends AbstractEvent implements JsonSerializabl
      *     variant?: string
      * }
      */
+    #[Override]
     public function jsonSerialize(): array
     {
         $result = [

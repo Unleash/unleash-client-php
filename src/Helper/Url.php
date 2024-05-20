@@ -2,6 +2,8 @@
 
 namespace Unleash\Client\Helper;
 
+use Override;
+
 final readonly class Url
 {
     /**
@@ -14,6 +16,7 @@ final readonly class Url
     ) {
     }
 
+    #[Override]
     public function __toString(): string
     {
         $url = $this->url;

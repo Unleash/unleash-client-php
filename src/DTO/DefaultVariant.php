@@ -4,6 +4,7 @@ namespace Unleash\Client\DTO;
 
 use JetBrains\PhpStorm\ArrayShape;
 use JetBrains\PhpStorm\ExpectedValues;
+use Override;
 use Unleash\Client\Enum\Stickiness;
 
 final readonly class DefaultVariant implements Variant
@@ -22,11 +23,13 @@ final readonly class DefaultVariant implements Variant
     ) {
     }
 
+    #[Override]
     public function getName(): string
     {
         return $this->name;
     }
 
+    #[Override]
     public function getPayload(): ?VariantPayload
     {
         return $this->payload;
@@ -36,6 +39,7 @@ final readonly class DefaultVariant implements Variant
      * @phpstan-return array<string|bool|array<string>>
      */
     #[ArrayShape(['name' => 'string', 'enabled' => 'bool', 'payload' => 'mixed'])]
+    #[Override]
     public function jsonSerialize(): array
     {
         $result = [
@@ -50,11 +54,13 @@ final readonly class DefaultVariant implements Variant
         return $result;
     }
 
+    #[Override]
     public function getWeight(): int
     {
         return $this->weight;
     }
 
+    #[Override]
     public function isEnabled(): bool
     {
         return $this->enabled;
@@ -63,12 +69,14 @@ final readonly class DefaultVariant implements Variant
     /**
      * @return array<VariantOverride>
      */
+    #[Override]
     public function getOverrides(): array
     {
         return $this->overrides ?? [];
     }
 
     #[ExpectedValues(valuesFromClass: Stickiness::class)]
+    #[Override]
     public function getStickiness(): string
     {
         return $this->stickiness;

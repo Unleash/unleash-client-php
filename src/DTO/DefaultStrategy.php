@@ -2,6 +2,8 @@
 
 namespace Unleash\Client\DTO;
 
+use Override;
+
 final readonly class DefaultStrategy implements Strategy
 {
     /**
@@ -20,6 +22,7 @@ final readonly class DefaultStrategy implements Strategy
     ) {
     }
 
+    #[Override]
     public function getName(): string
     {
         return $this->name;
@@ -28,6 +31,7 @@ final readonly class DefaultStrategy implements Strategy
     /**
      * @return array<string, string>
      */
+    #[Override]
     public function getParameters(): array
     {
         return $this->parameters;
@@ -36,6 +40,7 @@ final readonly class DefaultStrategy implements Strategy
     /**
      * @return array<Constraint>
      */
+    #[Override]
     public function getConstraints(): array
     {
         return $this->constraints;
@@ -44,6 +49,7 @@ final readonly class DefaultStrategy implements Strategy
     /**
      * @return array<Segment>
      */
+    #[Override]
     public function getSegments(): array
     {
         return $this->segments;
@@ -52,11 +58,13 @@ final readonly class DefaultStrategy implements Strategy
     /**
      * @return array<Variant>
      */
+    #[Override]
     public function getVariants(): array
     {
         return $this->variants;
     }
 
+    #[Override]
     public function hasNonexistentSegments(): bool
     {
         return $this->nonexistentSegments;

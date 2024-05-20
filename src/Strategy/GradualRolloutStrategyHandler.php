@@ -2,6 +2,7 @@
 
 namespace Unleash\Client\Strategy;
 
+use Override;
 use Unleash\Client\Configuration\Context;
 use Unleash\Client\DTO\Strategy;
 use Unleash\Client\Enum\Stickiness;
@@ -14,6 +15,7 @@ final class GradualRolloutStrategyHandler extends AbstractStrategyHandler
     ) {
     }
 
+    #[Override]
     public function isEnabled(Strategy $strategy, Context $context): bool
     {
         if (!$stickiness = $this->findParameter('stickiness', $strategy)) {
@@ -50,6 +52,7 @@ final class GradualRolloutStrategyHandler extends AbstractStrategyHandler
         return true;
     }
 
+    #[Override]
     public function getStrategyName(): string
     {
         return 'flexibleRollout';

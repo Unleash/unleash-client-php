@@ -3,6 +3,7 @@
 namespace Unleash\Client\Variant;
 
 use JetBrains\PhpStorm\Pure;
+use Override;
 use Unleash\Client\Configuration\Context;
 use Unleash\Client\DTO\DefaultVariant;
 use Unleash\Client\DTO\Variant;
@@ -19,6 +20,7 @@ final readonly class DefaultVariantHandler implements VariantHandler
     }
 
     #[Pure]
+    #[Override]
     public function getDefaultVariant(): Variant
     {
         return new DefaultVariant(
@@ -30,6 +32,7 @@ final readonly class DefaultVariantHandler implements VariantHandler
     /**
      * @param array<Variant> $variants
      */
+    #[Override]
     public function selectVariant(array $variants, string $groupId, Context $context): ?Variant
     {
         $totalWeight = 0;

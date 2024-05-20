@@ -3,6 +3,7 @@
 namespace Unleash\Client\Bootstrap;
 
 use JsonSerializable;
+use Override;
 use Traversable;
 
 final readonly class JsonSerializableBootstrapProvider implements BootstrapProvider
@@ -18,6 +19,7 @@ final readonly class JsonSerializableBootstrapProvider implements BootstrapProvi
     /**
      * @return array<mixed>|JsonSerializable|Traversable<mixed>
      */
+    #[Override]
     public function getBootstrap(): array|JsonSerializable|Traversable
     {
         return $this->data;

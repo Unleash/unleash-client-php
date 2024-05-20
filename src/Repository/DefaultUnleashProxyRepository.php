@@ -2,6 +2,8 @@
 
 namespace Unleash\Client\Repository;
 
+use InvalidArgumentException;
+use Override;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
 use Symfony\Component\VarExporter\Exception\LogicException;
@@ -20,6 +22,7 @@ final readonly class DefaultUnleashProxyRepository implements ProxyRepository
     ) {
     }
 
+    #[Override]
     public function findFeatureByContext(string $featureName, ?Context $context = null): ?ProxyFeature
     {
         $apiKey = $this->configuration->getProxyKey();
@@ -124,7 +127,7 @@ final readonly class DefaultUnleashProxyRepository implements ProxyRepository
 
         // @codeCoverageIgnoreStart
         if ($urlParts === false) {
-            throw new \InvalidArgumentException('Invalid URL provided');
+            throw new InvalidArgumentException('Invalid URL provided');
         }
         // @codeCoverageIgnoreEnd
 

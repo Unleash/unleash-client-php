@@ -3,11 +3,13 @@
 namespace Unleash\Client\Metrics;
 
 use DateTimeImmutable;
+use Override;
 use Unleash\Client\DTO\DefaultFeature;
 use Unleash\Client\DTO\DefaultVariant;
 
 final readonly class DefaultMetricsBucketSerializer implements MetricsBucketSerializer
 {
+    #[Override]
     public function serialize(MetricsBucket $bucket): string
     {
         $serialized = $bucket->getStartDate()->getTimestamp() . ';';
@@ -27,6 +29,7 @@ final readonly class DefaultMetricsBucketSerializer implements MetricsBucketSeri
         return $serialized;
     }
 
+    #[Override]
     public function deserialize(string $serialized): MetricsBucket
     {
         [$startDate, $toggles, $endDate] = explode(';', $serialized);

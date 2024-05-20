@@ -5,6 +5,7 @@ namespace Unleash\Client\Client;
 use DateTimeImmutable;
 use Exception;
 use JsonException;
+use Override;
 use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
@@ -33,6 +34,7 @@ final class DefaultRegistrationService implements RegistrationService
      * @throws JsonException
      * @throws ClientExceptionInterface
      */
+    #[Override]
     public function register(iterable $strategyHandlers): bool
     {
         if (!$this->configuration->isFetchingEnabled()) {
