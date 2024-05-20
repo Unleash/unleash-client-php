@@ -2,6 +2,7 @@
 
 namespace Unleash\Client\Helper;
 
+use Override;
 use Psr\Http\Message\StreamInterface;
 use Unleash\Client\Exception\StreamException;
 
@@ -32,6 +33,7 @@ final class StringStream implements StreamInterface
         rewind($this->stream);
     }
 
+    #[Override]
     public function __toString(): string
     {
         $stream = $this->stream;
@@ -48,6 +50,7 @@ final class StringStream implements StreamInterface
         return $content;
     }
 
+    #[Override]
     public function close(): void
     {
         if ($this->stream === null) {
@@ -60,6 +63,7 @@ final class StringStream implements StreamInterface
         fclose($this->stream);
     }
 
+    #[Override]
     public function detach()
     {
         $resource = $this->stream;
@@ -68,6 +72,7 @@ final class StringStream implements StreamInterface
         return $resource;
     }
 
+    #[Override]
     public function getSize(): int
     {
         if ($this->stream === null) {
@@ -77,6 +82,7 @@ final class StringStream implements StreamInterface
         return $this->size;
     }
 
+    #[Override]
     public function tell(): int
     {
         if ($this->stream === null) {
@@ -94,6 +100,7 @@ final class StringStream implements StreamInterface
         return $tell;
     }
 
+    #[Override]
     public function eof(): bool
     {
         if ($this->stream === null) {
@@ -103,6 +110,7 @@ final class StringStream implements StreamInterface
         return feof($this->stream);
     }
 
+    #[Override]
     public function isSeekable(): bool
     {
         if ($this->stream === null) {
@@ -112,6 +120,7 @@ final class StringStream implements StreamInterface
         return true;
     }
 
+    #[Override]
     public function seek($offset, $whence = SEEK_SET): void
     {
         if ($this->stream === null) {
@@ -120,6 +129,7 @@ final class StringStream implements StreamInterface
         fseek($this->stream, $offset, $whence);
     }
 
+    #[Override]
     public function rewind(): void
     {
         if ($this->stream === null) {
@@ -128,6 +138,7 @@ final class StringStream implements StreamInterface
         rewind($this->stream);
     }
 
+    #[Override]
     public function isWritable(): bool
     {
         if ($this->stream === null) {
@@ -137,6 +148,7 @@ final class StringStream implements StreamInterface
         return true;
     }
 
+    #[Override]
     public function write($string): int
     {
         if ($this->stream === null) {
@@ -152,6 +164,7 @@ final class StringStream implements StreamInterface
         return $result;
     }
 
+    #[Override]
     public function isReadable(): bool
     {
         if ($this->stream === null) {
@@ -164,6 +177,7 @@ final class StringStream implements StreamInterface
     /**
      * @param int<0, max> $length
      */
+    #[Override]
     public function read($length): string
     {
         if ($this->stream === null) {
@@ -179,6 +193,7 @@ final class StringStream implements StreamInterface
         return $result;
     }
 
+    #[Override]
     public function getContents(): string
     {
         if ($this->stream === null) {
@@ -194,6 +209,7 @@ final class StringStream implements StreamInterface
         return $result;
     }
 
+    #[Override]
     public function getMetadata($key = null): mixed
     {
         if ($this->stream === null) {

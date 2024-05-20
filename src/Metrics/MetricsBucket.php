@@ -6,6 +6,7 @@ use DateTimeInterface;
 use JetBrains\PhpStorm\ArrayShape;
 use JsonSerializable;
 use LogicException;
+use Override;
 
 /**
  * @internal
@@ -59,6 +60,7 @@ final class MetricsBucket implements JsonSerializable
      * @return array<string,mixed>
      */
     #[ArrayShape(['start' => 'string', 'stop' => 'string', 'toggles' => 'array'])]
+    #[Override]
     public function jsonSerialize(): array
     {
         $togglesArray = [];

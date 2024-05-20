@@ -4,6 +4,7 @@ namespace Unleash\Client\Bootstrap;
 
 use Exception;
 use JsonSerializable;
+use Override;
 use Traversable;
 use Unleash\Client\Exception\CompoundException;
 
@@ -23,6 +24,7 @@ final readonly class CompoundBootstrapProvider implements BootstrapProvider
     /**
      * @return array<mixed>|JsonSerializable|Traversable<mixed>|null
      */
+    #[Override]
     public function getBootstrap(): array|JsonSerializable|Traversable|null
     {
         $exceptions = [];

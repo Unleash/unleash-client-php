@@ -7,6 +7,7 @@ use JetBrains\PhpStorm\ExpectedValues;
 use JetBrains\PhpStorm\Pure;
 use JsonException;
 use LogicException;
+use Override;
 use Unleash\Client\Enum\VariantPayloadType;
 
 final readonly class DefaultVariantPayload implements VariantPayload
@@ -19,11 +20,13 @@ final readonly class DefaultVariantPayload implements VariantPayload
     }
 
     #[ExpectedValues(valuesFromClass: VariantPayloadType::class)]
+    #[Override]
     public function getType(): string
     {
         return $this->type;
     }
 
+    #[Override]
     public function getValue(): string
     {
         return $this->value;
@@ -34,6 +37,7 @@ final readonly class DefaultVariantPayload implements VariantPayload
      *
      * @return array<mixed>
      */
+    #[Override]
     public function fromJson(): array
     {
         if ($this->type !== VariantPayloadType::JSON) {
@@ -54,6 +58,7 @@ final readonly class DefaultVariantPayload implements VariantPayload
      */
     #[Pure]
     #[ArrayShape(['type' => 'string', 'value' => 'string'])]
+    #[Override]
     public function jsonSerialize(): array
     {
         return [

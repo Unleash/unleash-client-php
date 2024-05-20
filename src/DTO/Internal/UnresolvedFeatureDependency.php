@@ -2,6 +2,7 @@
 
 namespace Unleash\Client\DTO\Internal;
 
+use Override;
 use Unleash\Client\DTO\Feature;
 use Unleash\Client\DTO\FeatureDependency;
 use Unleash\Client\DTO\Variant;
@@ -21,21 +22,25 @@ final readonly class UnresolvedFeatureDependency implements FeatureDependency
     ) {
     }
 
+    #[Override]
     public function getFeature(): Feature
     {
         return $this->feature;
     }
 
+    #[Override]
     public function getExpectedState(): bool
     {
         return $this->expectedState;
     }
 
+    #[Override]
     public function getRequiredVariants(): ?array
     {
         return $this->requiredVariants;
     }
 
+    #[Override]
     public function isResolved(): bool
     {
         return false;

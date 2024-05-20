@@ -5,6 +5,7 @@ namespace Unleash\Client\Repository;
 use Exception;
 use JsonException;
 use LogicException;
+use Override;
 use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
@@ -93,6 +94,7 @@ final readonly class DefaultUnleashRepository implements UnleashRepository
      * @throws InvalidArgumentException
      * @throws JsonException
      */
+    #[Override]
     public function findFeature(string $featureName): ?Feature
     {
         $features = $this->getFeatures();
@@ -108,6 +110,7 @@ final readonly class DefaultUnleashRepository implements UnleashRepository
      *
      * @return iterable<Feature>
      */
+    #[Override]
     public function getFeatures(): iterable
     {
         $features = $this->getCachedFeatures();

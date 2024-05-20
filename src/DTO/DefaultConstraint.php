@@ -3,6 +3,7 @@
 namespace Unleash\Client\DTO;
 
 use JetBrains\PhpStorm\ExpectedValues;
+use Override;
 use Unleash\Client\Enum\ConstraintOperator;
 
 final readonly class DefaultConstraint implements Constraint
@@ -21,11 +22,13 @@ final readonly class DefaultConstraint implements Constraint
     ) {
     }
 
+    #[Override]
     public function getContextName(): string
     {
         return $this->contextName;
     }
 
+    #[Override]
     #[ExpectedValues(valuesFromClass: ConstraintOperator::class)]
     public function getOperator(): string
     {
@@ -35,21 +38,25 @@ final readonly class DefaultConstraint implements Constraint
     /**
      * @return array<string>|null
      */
+    #[Override]
     public function getValues(): ?array
     {
         return $this->values;
     }
 
+    #[Override]
     public function getSingleValue(): ?string
     {
         return $this->singleValue;
     }
 
+    #[Override]
     public function isInverted(): bool
     {
         return $this->inverted;
     }
 
+    #[Override]
     public function isCaseInsensitive(): bool
     {
         return $this->caseInsensitive;

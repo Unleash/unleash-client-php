@@ -2,6 +2,7 @@
 
 namespace Unleash\Client;
 
+use Override;
 use Unleash\Client\Client\RegistrationService;
 use Unleash\Client\Configuration\Context;
 use Unleash\Client\Configuration\UnleashConfiguration;
@@ -41,6 +42,7 @@ final readonly class DefaultUnleash implements Unleash
         }
     }
 
+    #[Override]
     public function isEnabled(string $featureName, ?Context $context = null, bool $default = false): bool
     {
         $context ??= $this->configuration->getContextProvider()->getContext();
@@ -63,6 +65,7 @@ final readonly class DefaultUnleash implements Unleash
         return $this->isFeatureEnabled($feature, $context, $default)->isEnabled();
     }
 
+    #[Override]
     public function getVariant(string $featureName, ?Context $context = null, ?Variant $fallbackVariant = null): Variant
     {
         $fallbackVariant ??= $this->variantHandler->getDefaultVariant();
@@ -104,6 +107,7 @@ final readonly class DefaultUnleash implements Unleash
         return $resolvedVariant;
     }
 
+    #[Override]
     public function register(): bool
     {
         return $this->registrationService->register($this->strategyHandlers);

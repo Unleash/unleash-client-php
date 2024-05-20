@@ -2,7 +2,10 @@
 
 namespace Unleash\Client\Helper;
 
-final readonly class Url
+use Override;
+use Stringable;
+
+final readonly class Url implements Stringable
 {
     /**
      * @param array<string>|null $tags
@@ -14,6 +17,7 @@ final readonly class Url
     ) {
     }
 
+    #[Override]
     public function __toString(): string
     {
         $url = $this->url;

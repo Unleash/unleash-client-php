@@ -10,6 +10,7 @@ use PHPUnit\Framework\TestCase;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
 use ReflectionObject;
+use SplFileInfo;
 use Symfony\Component\Cache\Psr16Cache;
 use Symfony\Component\EventDispatcher\EventDispatcher as SymfonyEventDispatcher;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -582,7 +583,7 @@ final class UnleashBuilderTest extends TestCase
 
         self::assertInstanceOf(
             FileBootstrapProvider::class,
-            $this->getBootstrapProvider($builder->withBootstrapFile(new \SplFileInfo('/file'))->build())
+            $this->getBootstrapProvider($builder->withBootstrapFile(new SplFileInfo('/file'))->build())
         );
     }
 

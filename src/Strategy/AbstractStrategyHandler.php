@@ -2,6 +2,7 @@
 
 namespace Unleash\Client\Strategy;
 
+use Override;
 use Unleash\Client\Configuration\Context;
 use Unleash\Client\DTO\Constraint;
 use Unleash\Client\DTO\Strategy;
@@ -11,6 +12,7 @@ abstract class AbstractStrategyHandler implements StrategyHandler
 {
     use ConstraintValidatorTrait;
 
+    #[Override]
     public function supports(Strategy $strategy): bool
     {
         return $strategy->getName() === $this->getStrategyName();

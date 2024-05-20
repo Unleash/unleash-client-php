@@ -5,6 +5,7 @@ namespace Unleash\Client\ConstraintValidator\Operator\Date;
 use DateTimeImmutable;
 use DateTimeInterface;
 use Exception;
+use Override;
 use Unleash\Client\ConstraintValidator\Operator\AbstractOperatorValidator;
 
 /**
@@ -12,6 +13,7 @@ use Unleash\Client\ConstraintValidator\Operator\AbstractOperatorValidator;
  */
 abstract class AbstractDateOperatorValidator extends AbstractOperatorValidator
 {
+    #[Override]
     protected function acceptsValues(array|string $values): bool
     {
         if (!is_string($values)) {

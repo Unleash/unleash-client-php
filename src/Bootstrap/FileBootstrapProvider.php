@@ -4,6 +4,7 @@ namespace Unleash\Client\Bootstrap;
 
 use InvalidArgumentException;
 use JsonException;
+use Override;
 use RuntimeException;
 use SplFileInfo;
 use Throwable;
@@ -22,6 +23,7 @@ final readonly class FileBootstrapProvider implements BootstrapProvider
      *
      * @return array<mixed>
      */
+    #[Override]
     public function getBootstrap(): array
     {
         $filePath = $this->getFilePath($this->file);
