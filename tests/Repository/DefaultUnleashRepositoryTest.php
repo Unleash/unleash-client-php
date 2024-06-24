@@ -481,7 +481,7 @@ final class DefaultUnleashRepositoryTest extends AbstractHttpClientTestCase
                 'handler' => $this->handlerStack,
             ]),
             new HttpFactory(),
-            $configuration,
+            $configuration
         );
 
         $this->pushResponse($this->response);
