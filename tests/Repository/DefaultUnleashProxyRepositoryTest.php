@@ -12,6 +12,7 @@ use Unleash\Client\Configuration\UnleashConfiguration;
 use Unleash\Client\DTO\DefaultVariant;
 use Unleash\Client\DTO\DefaultVariantPayload;
 use Unleash\Client\Enum\Stickiness;
+use Unleash\Client\Helper\Url;
 use Unleash\Client\Repository\DefaultUnleashProxyRepository;
 use Unleash\Client\Tests\AbstractHttpClientTestCase;
 use Unleash\Client\Tests\Traits\FakeCacheImplementationTrait;
@@ -149,5 +150,20 @@ final class DefaultUnleashProxyRepositoryTest extends AbstractHttpClientTestCase
         $repository->findFeatureByContext('test');
 
         $this->assertCount(2, $container);
+    }
+
+    public function testUrl()
+    {
+        $configuration = (new UnleashConfiguration(
+            new Url('https://localhost/api', 'somePrefix'),
+            '',
+            ''
+        ))->setCache($this->getCache())->setProxyKey('test');
+        $instance = new DefaultUnleashProxyRepository($configuration, $this->httpClient, new HttpFactory());
+        $this->pushResponse([]);
+
+        $instance->findFeatureByContext('testFeature');
+        self::assertCount(1, $this->requestHistory);
+        self::assertSame('https://localhost/api/frontend/features/testFeature?namePrefix=somePrefix', (string) $this->requestHistory[0]['request']->getUri());
     }
 }

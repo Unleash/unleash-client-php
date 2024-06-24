@@ -12,6 +12,7 @@ use Unleash\Client\Configuration\UnleashConfiguration;
 use Unleash\Client\Configuration\UnleashContext;
 use Unleash\Client\DTO\DefaultProxyFeature;
 use Unleash\Client\DTO\ProxyFeature;
+use Unleash\Client\Helper\Url;
 
 final readonly class DefaultUnleashProxyRepository implements ProxyRepository
 {
@@ -46,7 +47,7 @@ final readonly class DefaultUnleashProxyRepository implements ProxyRepository
         }
 
         $context ??= new UnleashContext();
-        $featureUrl = $this->configuration->getUrl() . 'frontend/features/' . $featureName;
+        $featureUrl = (string) Url::appendPath($this->configuration->getUrl(), 'frontend/features/' . $featureName);
         $url = $this->addQuery($featureUrl, $this->contextToQueryString($context));
 
         $request = $this->requestFactory->createRequest('GET', $url)
@@ -135,7 +136,7 @@ final readonly class DefaultUnleashProxyRepository implements ProxyRepository
             $urlParts['query'] = $query;
         }
 
-        return $this->buildUrl($urlParts);
+        return Url::buildUrl($urlParts);
     }
 
     /**
@@ -174,39 +175,5 @@ final readonly class DefaultUnleashProxyRepository implements ProxyRepository
         }
 
         return $response;
-    }
-
-    /**
-     * @param array<string, mixed> $parts
-     *
-     * @return string
-     */
-    private function buildUrl(array $parts): string
-    {
-        $result = '';
-        if (isset($parts['scheme']) && is_string($parts['scheme'])) {
-            $result .= $parts['scheme'] . '://';
-        }
-        if (isset($parts['user']) && is_string($parts['user'])) {
-            $result .= $parts['user'];
-            if (isset($parts['pass']) && is_string($parts['pass'])) {
-                $result .= ':' . $parts['pass'];
-            }
-            $result .= '@';
-        }
-        if (isset($parts['host']) && is_string($parts['host'])) {
-            $result .= $parts['host'];
-        }
-        if (isset($parts['port']) && is_numeric($parts['port'])) {
-            $result .= ':' . $parts['port'];
-        }
-        if (isset($parts['path']) && is_string($parts['path'])) {
-            $result .= $parts['path'];
-        }
-        if (isset($parts['query']) && is_string($parts['query'])) {
-            $result .= '?' . $parts['query'];
-        }
-
-        return $result;
     }
 }

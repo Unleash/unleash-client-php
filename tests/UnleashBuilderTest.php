@@ -176,7 +176,7 @@ final class UnleashBuilderTest extends TestCase
         $configuration = $configurationProperty->getValue($repository);
         assert($configuration instanceof UnleashConfiguration);
 
-        self::assertEquals('https://example.com/', $configuration->getUrl());
+        self::assertEquals('https://example.com', $configuration->getUrl());
         self::assertEquals('Test App', $configuration->getAppName());
         self::assertEquals('test', $configuration->getInstanceId());
         self::assertNotNull($configuration->getCache());

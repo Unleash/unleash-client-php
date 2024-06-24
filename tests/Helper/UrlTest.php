@@ -48,4 +48,38 @@ final class UrlTest extends TestCase
             (string) $instance
         );
     }
+
+    public function testPreexistingQueryString()
+    {
+        $instance = new Url('https://localhost?someQuery=someValue&someQuery2=someValue2', 'somePrefix', [
+            'someTag' => 'someValue',
+            'someTag2' => 'someValue2',
+        ]);
+        self::assertSame(
+            'https://localhost?someQuery=someValue&someQuery2=someValue2&namePrefix=somePrefix&tag=someTag%3AsomeValue&tag=someTag2%3AsomeValue2',
+            (string) $instance
+        );
+    }
+
+    /**
+     * @dataProvider appendPathData
+     */
+    public function testAppendPath(string $url, string $path, string $expected)
+    {
+        self::assertSame(
+            $expected,
+            (string) Url::appendPath($url, $path)
+        );
+    }
+
+    public function appendPathData(): iterable
+    {
+        yield ['http://localhost', 'test', 'http://localhost/test'];
+        yield ['http://localhost', '/test', 'http://localhost/test'];
+        yield ['http://localhost/', '/test', 'http://localhost/test'];
+        yield ['http://localhost/', '/test/', 'http://localhost/test/'];
+        yield ['http://localhost', '', 'http://localhost'];
+        yield ['http://localhost/test', '/test', 'http://localhost/test/test'];
+        yield ['http://localhost/test?someQuery=someParam', '/test', 'http://localhost/test/test?someQuery=someParam'];
+    }
 }

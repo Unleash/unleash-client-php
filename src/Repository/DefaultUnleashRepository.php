@@ -33,6 +33,7 @@ use Unleash\Client\Event\FetchingDataFailedEvent;
 use Unleash\Client\Event\UnleashEvents;
 use Unleash\Client\Exception\HttpResponseException;
 use Unleash\Client\Exception\InvalidValueException;
+use Unleash\Client\Helper\Url;
 
 /**
  * @phpstan-type ConstraintArray array{
@@ -122,7 +123,7 @@ final readonly class DefaultUnleashRepository implements UnleashRepository
                 }
             } else {
                 $request = $this->requestFactory
-                    ->createRequest('GET', $this->configuration->getUrl() . 'client/features')
+                    ->createRequest('GET', (string) Url::appendPath($this->configuration->getUrl(), 'client/features'))
                     ->withHeader('UNLEASH-APPNAME', $this->configuration->getAppName())
                     ->withHeader('UNLEASH-INSTANCEID', $this->configuration->getInstanceId())
                     ->withHeader('Unleash-Client-Spec', '4.3.2')

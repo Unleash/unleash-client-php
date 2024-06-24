@@ -21,6 +21,7 @@ use Unleash\Client\Event\FetchingDataFailedEvent;
 use Unleash\Client\Event\UnleashEvents;
 use Unleash\Client\Exception\HttpResponseException;
 use Unleash\Client\Exception\InvalidValueException;
+use Unleash\Client\Helper\Url;
 use Unleash\Client\Repository\DefaultUnleashRepository;
 use Unleash\Client\Tests\AbstractHttpClientTestCase;
 use Unleash\Client\Tests\Traits\FakeCacheImplementationTrait;
@@ -466,5 +467,27 @@ final class DefaultUnleashRepositoryTest extends AbstractHttpClientTestCase
         self::assertEmpty($features);
         self::assertNull($lastResponse);
         self::assertEquals(1, $failCount);
+    }
+
+    public function testUrl()
+    {
+        $configuration = (new UnleashConfiguration(
+            new Url('https://localhost/api', 'somePrefix'),
+            '',
+            ''
+        ))->setCache($this->getCache());
+        $repository = new DefaultUnleashRepository(
+            new Client([
+                'handler' => $this->handlerStack,
+            ]),
+            new HttpFactory(),
+            $configuration,
+        );
+
+        $this->pushResponse($this->response);
+
+        $repository->getFeatures();
+        self::assertCount(1, $this->requestHistory);
+        self::assertSame('https://localhost/api/client/features?namePrefix=somePrefix', (string) $this->requestHistory[0]['request']->getUri());
     }
 }

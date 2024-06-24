@@ -14,6 +14,7 @@ use Unleash\Client\Bootstrap\DefaultBootstrapHandler;
 use Unleash\Client\Bootstrap\EmptyBootstrapProvider;
 use Unleash\Client\ContextProvider\DefaultUnleashContextProvider;
 use Unleash\Client\ContextProvider\UnleashContextProvider;
+use Unleash\Client\Helper\Url;
 use Unleash\Client\Metrics\DefaultMetricsBucketSerializer;
 use Unleash\Client\Metrics\MetricsBucketSerializer;
 
@@ -67,12 +68,7 @@ final class UnleashConfiguration
 
     public function getUrl(): string
     {
-        $url = $this->url;
-        if (!str_ends_with($url, '/')) {
-            $url .= '/';
-        }
-
-        return (string) $url;
+        return $this->url;
     }
 
     public function getAppName(): string
@@ -105,8 +101,8 @@ final class UnleashConfiguration
     public function getMetricsUrl(): string
     {
         return $this->proxyKey !== null
-            ? $this->getUrl() . 'frontend/client/metrics'
-            : $this->getUrl() . 'client/metrics';
+            ? Url::appendPath($this->getUrl(), 'frontend/client/metrics')
+            : Url::appendPath($this->getUrl(), 'client/metrics');
     }
 
     public function setCache(CacheInterface $cache): self

@@ -8,6 +8,7 @@ use Psr\SimpleCache\CacheInterface;
 use Unleash\Client\Configuration\UnleashConfiguration;
 use Unleash\Client\Configuration\UnleashContext;
 use Unleash\Client\ContextProvider\DefaultUnleashContextProvider;
+use Unleash\Client\Helper\Url;
 use Unleash\Client\Tests\Traits\FakeCacheImplementationTrait;
 
 final class UnleashConfigurationTest extends TestCase
@@ -17,7 +18,7 @@ final class UnleashConfigurationTest extends TestCase
     public function testConstructor()
     {
         $instance = new UnleashConfiguration('https://www.example.com/test', '', '');
-        self::assertEquals('https://www.example.com/test/', $instance->getUrl());
+        self::assertEquals('https://www.example.com/test', $instance->getUrl());
 
         $context = new UnleashContext('147');
         $instance = new UnleashConfiguration(
@@ -37,7 +38,7 @@ final class UnleashConfigurationTest extends TestCase
     {
         $instance = new UnleashConfiguration('', '', '');
         $instance->setUrl('https://www.example.com/test');
-        self::assertEquals('https://www.example.com/test/', $instance->getUrl());
+        self::assertEquals('https://www.example.com/test', $instance->getUrl());
     }
 
     public function testGetCache()
@@ -110,6 +111,15 @@ final class UnleashConfigurationTest extends TestCase
         $proxyInstance->setProxyKey('some-key');
         $resolvedMetricsUrl = $proxyInstance->getMetricsUrl();
         self::assertSame($resolvedMetricsUrl, 'http://localhost:3063/api/frontend/client/metrics');
+
+        $queriedInstance = new UnleashConfiguration(new Url('http://localhost:3063/api', 'somePrefix'), '', '');
+        $resolvedMetricsUrl = $queriedInstance->getMetricsUrl();
+        self::assertSame('http://localhost:3063/api/client/metrics?namePrefix=somePrefix', $resolvedMetricsUrl);
+
+        $queriedInstance = new UnleashConfiguration(new Url('http://localhost:3063/api', 'somePrefix'), '', '');
+        $queriedInstance->setProxyKey('some-key');
+        $resolvedMetricsUrl = $queriedInstance->getMetricsUrl();
+        self::assertSame('http://localhost:3063/api/frontend/client/metrics?namePrefix=somePrefix', $resolvedMetricsUrl);
     }
 
     public function testStringable()
