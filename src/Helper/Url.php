@@ -52,6 +52,8 @@ final readonly class Url implements Stringable
         }
 
         $parts = parse_url($url);
+        assert(is_array($parts));
+
         if (!str_starts_with($path, '/')) {
             $path = "/{$path}";
         }
