@@ -7,7 +7,7 @@ use Unleash\Client\DTO\Variant;
 
 interface Unleash
 {
-    public const string SDK_VERSION = '2.4.0';
+    public const string SDK_VERSION = '2.4.1';
 
     public function isEnabled(string $featureName, ?Context $context = null, bool $default = false): bool;
 
