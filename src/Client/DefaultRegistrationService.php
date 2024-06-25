@@ -12,6 +12,7 @@ use Psr\Http\Message\RequestFactoryInterface;
 use Unleash\Client\Configuration\UnleashConfiguration;
 use Unleash\Client\Enum\CacheKey;
 use Unleash\Client\Helper\StringStream;
+use Unleash\Client\Helper\Url;
 use Unleash\Client\Strategy\StrategyHandler;
 use Unleash\Client\Unleash;
 
@@ -47,7 +48,7 @@ final class DefaultRegistrationService implements RegistrationService
             $strategyHandlers = iterator_to_array($strategyHandlers);
         }
         $request = $this->requestFactory
-            ->createRequest('POST', $this->configuration->getUrl() . 'client/register')
+            ->createRequest('POST', (string) Url::appendPath($this->configuration->getUrl(), 'client/register'))
             ->withHeader('Content-Type', 'application/json')
             ->withBody(new StringStream(json_encode([
                 'appName' => $this->configuration->getAppName(),

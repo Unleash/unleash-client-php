@@ -3,10 +3,12 @@
 namespace Unleash\Client\Tests\Client;
 
 use ArrayIterator;
+use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\HttpFactory;
 use RuntimeException;
 use Unleash\Client\Client\DefaultRegistrationService;
 use Unleash\Client\Configuration\UnleashConfiguration;
+use Unleash\Client\Helper\Url;
 use Unleash\Client\Strategy\DefaultStrategyHandler;
 use Unleash\Client\Tests\AbstractHttpClientTestCase;
 use Unleash\Client\Tests\Traits\RealCacheImplementationTrait;
@@ -109,5 +111,24 @@ final class DefaultRegistrationServiceTest extends AbstractHttpClientTestCase
 
         $this->pushResponse(new RuntimeException("This exception shouldn't be propagated"), 1, 404);
         $instance->register([new DefaultStrategyHandler()]);
+    }
+
+    public function testUrl()
+    {
+        $configuration = (new UnleashConfiguration(
+            new Url('https://localhost/api', 'somePrefix'),
+            '',
+            ''
+        ))->setCache($this->getCache());
+        $instance = new DefaultRegistrationService(
+            $this->httpClient,
+            new HttpFactory(),
+            $configuration
+        );
+        $this->pushResponse([]);
+
+        $instance->register([]);
+        self::assertCount(1, $this->requestHistory);
+        self::assertSame('https://localhost/api/client/register?namePrefix=somePrefix', (string) $this->requestHistory[0]['request']->getUri());
     }
 }
