@@ -18,24 +18,45 @@ use Unleash\Client\Unleash;
 
 final class DefaultRegistrationService implements RegistrationService
 {
-    public function __construct(
-        private readonly ClientInterface $httpClient,
-        private readonly RequestFactoryInterface $requestFactory,
-        private readonly UnleashConfiguration $configuration,
-        private ?string $sdkName = null,
-        private ?string $sdkVersion = null,
-    ) {
-        $this->sdkName ??= 'unleash-client-php';
-        $this->sdkVersion ??= Unleash::SDK_VERSION;
+    /**
+     * @readonly
+     * @var \Psr\Http\Client\ClientInterface
+     */
+    private $httpClient;
+    /**
+     * @readonly
+     * @var \Psr\Http\Message\RequestFactoryInterface
+     */
+    private $requestFactory;
+    /**
+     * @readonly
+     * @var \Unleash\Client\Configuration\UnleashConfiguration
+     */
+    private $configuration;
+    /**
+     * @var string|null
+     */
+    private $sdkName;
+    /**
+     * @var string|null
+     */
+    private $sdkVersion;
+    public function __construct(ClientInterface $httpClient, RequestFactoryInterface $requestFactory, UnleashConfiguration $configuration, ?string $sdkName = null, ?string $sdkVersion = null)
+    {
+        $this->httpClient = $httpClient;
+        $this->requestFactory = $requestFactory;
+        $this->configuration = $configuration;
+        $this->sdkName = $sdkName;
+        $this->sdkVersion = $sdkVersion;
+        $this->sdkName = $this->sdkName ?? 'unleash-client-php';
+        $this->sdkVersion = $this->sdkVersion ?? Unleash::SDK_VERSION;
     }
-
     /**
      * @param iterable<StrategyHandler> $strategyHandlers
      *
      * @throws JsonException
      * @throws ClientExceptionInterface
      */
-    #[Override]
     public function register(iterable $strategyHandlers): bool
     {
         if (!$this->configuration->isFetchingEnabled()) {
@@ -54,23 +75,22 @@ final class DefaultRegistrationService implements RegistrationService
                 'appName' => $this->configuration->getAppName(),
                 'instanceId' => $this->configuration->getInstanceId(),
                 'sdkVersion' => $this->sdkName . ':' . $this->sdkVersion,
-                'strategies' => array_map(fn (StrategyHandler $strategyHandler): string => $strategyHandler->getStrategyName(), $strategyHandlers),
+                'strategies' => array_map(function (StrategyHandler $strategyHandler) : string {
+                    return $strategyHandler->getStrategyName();
+                }, $strategyHandlers),
                 'started' => (new DateTimeImmutable())->format('c'),
                 'interval' => $this->configuration->getMetricsInterval(),
             ], JSON_THROW_ON_ERROR)));
         foreach ($this->configuration->getHeaders() as $name => $value) {
             $request = $request->withHeader($name, $value);
         }
-
         try {
             $response = $this->httpClient->sendRequest($request);
             $result = $response->getStatusCode() >= 200 && $response->getStatusCode() < 300;
-        } catch (Exception) {
+        } catch (Exception $exception) {
             $result = false;
         }
-
         $this->storeCache($result);
-
         return $result;
     }
 
@@ -82,11 +102,14 @@ final class DefaultRegistrationService implements RegistrationService
         $hasNormalCache = $cache->has(CacheKey::REGISTRATION);
         $hasStaleCache = $staleCache->has(CacheKey::REGISTRATION);
 
-        return match (true) {
-            $hasNormalCache => (bool) $cache->get(CacheKey::REGISTRATION),
-            $hasStaleCache => (bool) $staleCache->get(CacheKey::REGISTRATION),
-            default => false,
-        };
+        switch (true) {
+            case $hasNormalCache:
+                return (bool) $cache->get(CacheKey::REGISTRATION);
+            case $hasStaleCache:
+                return (bool) $staleCache->get(CacheKey::REGISTRATION);
+            default:
+                return false;
+        }
     }
 
     private function storeCache(bool $result): void
