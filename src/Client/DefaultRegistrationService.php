@@ -18,24 +18,36 @@ use Unleash\Client\Unleash;
 
 final class DefaultRegistrationService implements RegistrationService
 {
-    public function __construct(
-        private readonly ClientInterface $httpClient,
-        private readonly RequestFactoryInterface $requestFactory,
-        private readonly UnleashConfiguration $configuration,
-        private ?string $sdkName = null,
-        private ?string $sdkVersion = null,
-    ) {
+    /**
+     * @readonly
+     */
+    private ClientInterface $httpClient;
+    /**
+     * @readonly
+     */
+    private RequestFactoryInterface $requestFactory;
+    /**
+     * @readonly
+     */
+    private UnleashConfiguration $configuration;
+    private ?string $sdkName = null;
+    private ?string $sdkVersion = null;
+    public function __construct(ClientInterface $httpClient, RequestFactoryInterface $requestFactory, UnleashConfiguration $configuration, ?string $sdkName = null, ?string $sdkVersion = null)
+    {
+        $this->httpClient = $httpClient;
+        $this->requestFactory = $requestFactory;
+        $this->configuration = $configuration;
+        $this->sdkName = $sdkName;
+        $this->sdkVersion = $sdkVersion;
         $this->sdkName ??= 'unleash-client-php';
         $this->sdkVersion ??= Unleash::SDK_VERSION;
     }
-
     /**
      * @param iterable<StrategyHandler> $strategyHandlers
      *
      * @throws JsonException
      * @throws ClientExceptionInterface
      */
-    #[Override]
     public function register(iterable $strategyHandlers): bool
     {
         if (!$this->configuration->isFetchingEnabled()) {
@@ -61,16 +73,13 @@ final class DefaultRegistrationService implements RegistrationService
         foreach ($this->configuration->getHeaders() as $name => $value) {
             $request = $request->withHeader($name, $value);
         }
-
         try {
             $response = $this->httpClient->sendRequest($request);
             $result = $response->getStatusCode() >= 200 && $response->getStatusCode() < 300;
-        } catch (Exception) {
+        } catch (Exception $exception) {
             $result = false;
         }
-
         $this->storeCache($result);
-
         return $result;
     }
 
@@ -82,11 +91,14 @@ final class DefaultRegistrationService implements RegistrationService
         $hasNormalCache = $cache->has(CacheKey::REGISTRATION);
         $hasStaleCache = $staleCache->has(CacheKey::REGISTRATION);
 
-        return match (true) {
-            $hasNormalCache => (bool) $cache->get(CacheKey::REGISTRATION),
-            $hasStaleCache => (bool) $staleCache->get(CacheKey::REGISTRATION),
-            default => false,
-        };
+        switch (true) {
+            case $hasNormalCache:
+                return (bool) $cache->get(CacheKey::REGISTRATION);
+            case $hasStaleCache:
+                return (bool) $staleCache->get(CacheKey::REGISTRATION);
+            default:
+                return false;
+        }
     }
 
     private function storeCache(bool $result): void
