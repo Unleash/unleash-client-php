@@ -175,7 +175,7 @@ final class StringStream implements StreamInterface
     }
 
     /**
-     * @param int<0, max> $length
+     * @param int<1, max> $length
      */
     #[Override]
     public function read($length): string
