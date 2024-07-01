@@ -535,6 +535,10 @@ final class DefaultUnleashTest extends AbstractHttpClientTestCase
             {
                 return [];
             }
+
+            public function refreshCache(): void
+            {
+            }
         };
 
         $instance = new DefaultUnleash(
@@ -1000,6 +1004,27 @@ final class DefaultUnleashTest extends AbstractHttpClientTestCase
         $isEnabled = new ReflectionMethod($unleash, 'isFeatureEnabled');
 
         self::assertTrue($isEnabled->getClosure($unleash)($feature, new UnleashContext())->isEnabled());
+    }
+
+    public function testRefreshCache()
+    {
+        $this->pushResponse([
+            'version' => 1,
+            'features' => [
+                [
+                    'name' => 'test',
+                    'description' => '',
+                    'enabled' => true,
+                    'strategies' => [],
+                ],
+            ],
+        ], 2);
+
+        $instance = $this->getCachedInstance();
+        $instance->isEnabled('test');
+        $instance->refreshCache();
+        $instance->isEnabled('test');
+        self::assertCount(2, $this->requestHistory);
     }
 
     private function getInstance(StrategyHandler ...$handlers): DefaultUnleash

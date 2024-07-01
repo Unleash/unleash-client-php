@@ -113,6 +113,11 @@ final readonly class DefaultUnleash implements Unleash
         return $this->registrationService->register($this->strategyHandlers);
     }
 
+    public function refreshCache(): void
+    {
+        $this->repository->refreshCache();
+    }
+
     /**
      * Finds a feature and posts events if the feature is not found.
      *

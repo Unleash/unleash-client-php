@@ -423,6 +423,29 @@ $builder = UnleashBuilder::create()
 ;
 ```
 
+### Refreshing cache
+
+To manually refresh the cache, you can call the `refreshCache()` method on the `Unleash` object. This function fetches 
+the feature list from the server and saves it to the cache, regardless of the time-to-live (ttl).
+
+Additionally, by utilizing async refresh, you can trigger a cache refresh in the background to avoid impacting end users.
+This method allows you to schedule a cronjob or use a scheduler to refresh the cache with a lower time-to-live (ttl) 
+than what is configured.
+
+```php
+<?php
+
+use Unleash\Client\UnleashBuilder;
+
+$unleash = UnleashBuilder::create()
+    ->withAppName('Some app name')
+    ->withAppUrl('https://some-app-url.com')
+    ->withInstanceId('Some instance id')
+    ->build();
+
+$unleash->refreshCache();
+```
+
 ## Bootstrapping
 
 You can set a default response from the SDK in cases when for some reason contacting Unleash server fails.
