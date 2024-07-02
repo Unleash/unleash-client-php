@@ -20,6 +20,7 @@ final readonly class DefaultVariant implements Variant
         private string $stickiness = Stickiness::DEFAULT,
         private ?VariantPayload $payload = null,
         private ?array $overrides = null,
+        private bool $featureEnabled = false,
     ) {
     }
 
@@ -45,6 +46,7 @@ final readonly class DefaultVariant implements Variant
         $result = [
             'name' => $this->name,
             'enabled' => $this->enabled,
+            'feature_enabled' => $this->featureEnabled,
         ];
         if ($this->payload !== null) {
             $result['payload'] = $this->payload->jsonSerialize();
@@ -80,5 +82,23 @@ final readonly class DefaultVariant implements Variant
     public function getStickiness(): string
     {
         return $this->stickiness;
+    }
+
+    public function isFeatureEnabled(): bool
+    {
+        return $this->featureEnabled;
+    }
+
+    public static function fromVariant(Variant $variant, ?bool $featureEnabled = null): self
+    {
+        return new self(
+            $variant->getName(),
+            $variant->isEnabled(),
+            $variant->getWeight(),
+            $variant->getStickiness(),
+            $variant->getPayload(),
+            $variant->getOverrides(),
+            $featureEnabled ?? (method_exists($variant, 'isFeatureEnabled') ? $variant->isFeatureEnabled() : false),
+        );
     }
 }
