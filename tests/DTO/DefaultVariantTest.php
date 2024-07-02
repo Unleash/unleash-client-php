@@ -40,7 +40,7 @@ final class DefaultVariantTest extends TestCase
         self::assertSame($expected, $target->isFeatureEnabled());
     }
 
-    private function fromVariantData(): iterable
+    public function fromVariantData(): iterable
     {
         yield [
             new DefaultVariant('test', true, 5, Stickiness::RANDOM, new DefaultVariantPayload(VariantPayloadType::STRING, 'test'), [], true),
