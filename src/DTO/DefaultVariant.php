@@ -89,7 +89,8 @@ final readonly class DefaultVariant implements Variant
         return $this->featureEnabled;
     }
 
-    public static function fromVariant(Variant $variant, ?bool $featureEnabled = null): self {
+    public static function fromVariant(Variant $variant, ?bool $featureEnabled = null): self
+    {
         return new self(
             $variant->getName(),
             $variant->isEnabled(),

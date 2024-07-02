@@ -511,8 +511,8 @@ final readonly class DefaultUnleashRepository implements UnleashRepository
     }
 
     /**
-     * @param array<VariantArray> $variantsRaw
-     * @param array<string, mixed>|null $strategy
+     * @param array<VariantArray>                                 $variantsRaw
+     * @param array{parameters?: array{stickiness?: string}}|null $strategy
      *
      * @return array<Variant>
      */

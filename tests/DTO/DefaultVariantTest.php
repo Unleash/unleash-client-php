@@ -63,8 +63,7 @@ final class DefaultVariantTest extends TestCase
             true,
         ];
 
-        $notFullyImplementedClass = new class implements Variant
-        {
+        $notFullyImplementedClass = new class implements Variant {
             public function getName(): string
             {
                 return 'test';
