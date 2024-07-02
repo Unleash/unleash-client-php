@@ -31,6 +31,11 @@ class PrefixedUnleash implements Unleash
     {
         return $this->original->register();
     }
+
+    public function refreshCache(): void
+    {
+        $this->original->refreshCache();
+    }
 }
 
 $unleash = UnleashBuilder::create()

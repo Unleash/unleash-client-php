@@ -2,6 +2,7 @@
 
 namespace Unleash\Client;
 
+use BadMethodCallException;
 use Override;
 use Unleash\Client\Configuration\Context;
 use Unleash\Client\DTO\DefaultFeature;
@@ -53,5 +54,14 @@ final readonly class DefaultProxyUnleash implements Unleash
         $this->metricsHandler->handleMetrics(new DefaultFeature($featureName, $variant->isEnabled(), []), $variant->isEnabled(), $metricVariant);
 
         return $variant;
+    }
+
+    /**
+     * @codeCoverageIgnore
+     */
+    #[Override]
+    public function refreshCache(): void
+    {
+        throw new BadMethodCallException('This method is not supported in the proxy implementation');
     }
 }
