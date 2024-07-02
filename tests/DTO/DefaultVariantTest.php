@@ -32,7 +32,7 @@ final class DefaultVariantTest extends TestCase
 
         self::assertSame($variant->getName(), $target->getName());
         self::assertSame($variant->isEnabled(), $target->isEnabled());
-        self::assertSame($variant->getPayload()?->jsonSerialize(), $target->getPayload()?->jsonSerialize());
+        self::assertSame(serialize($variant->getPayload()), serialize($target->getPayload()));
         self::assertSame($variant->getWeight(), $target->getWeight());
         self::assertSame(serialize($variant->getOverrides()), serialize($target->getOverrides()));
         self::assertSame($variant->getStickiness(), $target->getStickiness());
