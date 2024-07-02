@@ -126,7 +126,7 @@ final readonly class DefaultUnleashRepository implements UnleashRepository
                     ->createRequest('GET', (string) Url::appendPath($this->configuration->getUrl(), 'client/features'))
                     ->withHeader('UNLEASH-APPNAME', $this->configuration->getAppName())
                     ->withHeader('UNLEASH-INSTANCEID', $this->configuration->getInstanceId())
-                    ->withHeader('Unleash-Client-Spec', '4.3.2')
+                    ->withHeader('Unleash-Client-Spec', '5.1.6')
                 ;
 
                 foreach ($this->configuration->getHeaders() as $name => $value) {
@@ -228,7 +228,7 @@ final readonly class DefaultUnleashRepository implements UnleashRepository
             $strategies = [];
             foreach ($feature['strategies'] as $strategy) {
                 $constraints = $this->parseConstraints($strategy['constraints'] ?? []);
-                $strategyVariants = $this->parseVariants($strategy['variants'] ?? []);
+                $strategyVariants = $this->parseVariants($strategy['variants'] ?? [], $feature['enabled'] ?? false, $strategy);
 
                 $hasNonexistentSegments = false;
                 $segments = [];
@@ -250,7 +250,7 @@ final readonly class DefaultUnleashRepository implements UnleashRepository
                 );
             }
 
-            $featureVariants = $this->parseVariants($feature['variants'] ?? []);
+            $featureVariants = $this->parseVariants($feature['variants'] ?? [], $feature['enabled'] ?? false);
             $dependencies = $this->parseDependencies($feature['dependencies'] ?? [], $features, $hasUnresolvedDependencies);
 
             $featureDto = new DefaultFeature(
@@ -512,10 +512,11 @@ final readonly class DefaultUnleashRepository implements UnleashRepository
 
     /**
      * @param array<VariantArray> $variantsRaw
+     * @param array<string, mixed>|null $strategy
      *
      * @return array<Variant>
      */
-    private function parseVariants(array $variantsRaw): array
+    private function parseVariants(array $variantsRaw, bool $featureEnabled, ?array $strategy = null): array
     {
         $variants = [];
 
@@ -528,11 +529,12 @@ final readonly class DefaultUnleashRepository implements UnleashRepository
                 $variant['name'],
                 true,
                 $variant['weight'],
-                $variant['stickiness'] ?? Stickiness::DEFAULT,
+                $variant['stickiness'] ?? $strategy['parameters']['stickiness'] ?? Stickiness::DEFAULT,
                 isset($variant['payload'])
                     ? new DefaultVariantPayload($variant['payload']['type'], $variant['payload']['value'])
                     : null,
                 $overrides,
+                $featureEnabled,
             );
         }
 

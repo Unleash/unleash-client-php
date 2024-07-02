@@ -67,4 +67,9 @@ final readonly class UnresolvedVariant implements Variant
     {
         return null;
     }
+
+    public function isFeatureEnabled(): bool
+    {
+        return false;
+    }
 }

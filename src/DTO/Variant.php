@@ -6,6 +6,9 @@ use JetBrains\PhpStorm\ExpectedValues;
 use JsonSerializable;
 use Unleash\Client\Enum\Stickiness;
 
+/**
+ * @method bool isFeatureEnabled()
+ */
 interface Variant extends JsonSerializable
 {
     public function getName(): string;
