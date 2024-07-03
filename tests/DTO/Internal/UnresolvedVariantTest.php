@@ -47,4 +47,9 @@ final class UnresolvedVariantTest extends TestCase
     {
         self::assertNull($this->instance->jsonSerialize());
     }
+
+    public function testIsFeatureEnabled()
+    {
+        self::assertFalse($this->instance->isFeatureEnabled());
+    }
 }
