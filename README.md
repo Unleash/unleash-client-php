@@ -12,6 +12,7 @@
     * [Builder](#builder)
       * [Required parameters](#required-parameters)
       * [Optional parameters](#optional-parameters)
+      * [Returning intermediate objects](#returning-intermediate-objects)
   * [Proxy SDK](#proxy-sdk)
   * [Caching](#caching)
   * [Bootstrapping](#bootstrapping)
@@ -326,7 +327,26 @@ $builder = UnleashBuilder::create()
         'Yet-Another-Header' => 'and-another-value',
     ]);
 ```
+#### Returning intermediate objects
 
+For some use cases the builder can return intermediate objects, for example the `UnleashRepository` object. This can be 
+useful if you need to directly interact with the repository, to refresh the cache manually for example.
+
+```php 
+<?php
+
+use Unleash\Client\UnleashBuilder;
+use Unleash\Client\Helper\Url;
+
+$repository = UnleashBuilder::create()
+    ->withAppName('Some app name')
+    ->withAppUrl(new Url('https://some-app-url.com', namePrefix: 'somePrefix.', tags: [
+        'myTag' => 'myValue',
+    ]))
+    ->withInstanceId('Some instance id')
+    ->buildRepository();
+$repository->refreshCache();
+```
 
 ## Proxy SDK
 

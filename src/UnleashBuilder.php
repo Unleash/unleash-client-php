@@ -22,7 +22,6 @@ use Unleash\Client\Bootstrap\JsonBootstrapProvider;
 use Unleash\Client\Bootstrap\JsonSerializableBootstrapProvider;
 use Unleash\Client\Client\DefaultRegistrationService;
 use Unleash\Client\Client\RegistrationService;
-use Unleash\Client\Configuration\Context;
 use Unleash\Client\Configuration\UnleashConfiguration;
 use Unleash\Client\ContextProvider\DefaultUnleashContextProvider;
 use Unleash\Client\ContextProvider\UnleashContextProvider;
@@ -42,8 +41,10 @@ use Unleash\Client\Metrics\DefaultMetricsHandler;
 use Unleash\Client\Metrics\DefaultMetricsSender;
 use Unleash\Client\Metrics\MetricsBucketSerializer;
 use Unleash\Client\Metrics\MetricsHandler;
+use Unleash\Client\Metrics\MetricsSender;
 use Unleash\Client\Repository\DefaultUnleashProxyRepository;
 use Unleash\Client\Repository\DefaultUnleashRepository;
+use Unleash\Client\Repository\UnleashRepository;
 use Unleash\Client\Stickiness\MurmurHashCalculator;
 use Unleash\Client\Strategy\ApplicationHostnameStrategyHandler;
 use Unleash\Client\Strategy\DefaultStrategyHandler;
@@ -89,8 +90,6 @@ final class UnleashBuilder
     private ?bool $metricsEnabled = null;
 
     private ?int $metricsInterval = null;
-
-    private ?Context $defaultContext = null;
 
     private ?UnleashContextProvider $contextProvider = null;
 
@@ -376,7 +375,80 @@ final class UnleashBuilder
         return $this->with('metricsBucketSerializer', $metricsBucketSerializer);
     }
 
+    public function buildRepository(): UnleashRepository
+    {
+        $dependencyContainer = $this->initializeContainerWithConfiguration();
+
+        return $this->createRepository($dependencyContainer);
+    }
+
     public function build(): Unleash
+    {
+        $dependencyContainer = $this->initializeContainerWithConfiguration();
+        $repository = $this->createRepository($dependencyContainer);
+
+        assert($dependencyContainer->getConfiguration() !== null);
+        $metricsSender = new DefaultMetricsSender($dependencyContainer->getHttpClient(), $dependencyContainer->getRequestFactory(), $dependencyContainer->getConfiguration());
+
+        $dependencyContainer = $this->createContainer(
+            cache: $dependencyContainer->getCache(),
+            staleCache: $dependencyContainer->getStaleCache(),
+            httpClient: $dependencyContainer->getHttpClient(),
+            requestFactory: $dependencyContainer->getRequestFactory(),
+            contextProvider: $dependencyContainer->getContextProvider(),
+            bootstrapHandler: $dependencyContainer->getBootstrapHandler(),
+            bootstrapProvider: $dependencyContainer->getBootstrapProvider(),
+            eventDispatcher: $dependencyContainer->getEventDispatcher(),
+            metricsBucketSerializer: $dependencyContainer->getMetricsBucketSerializer(),
+            metricsCache: $dependencyContainer->getMetricsCache(),
+            metricsSender: $metricsSender,
+            configuration: $dependencyContainer->getConfiguration(),
+        );
+
+        assert($dependencyContainer->getConfiguration() !== null);
+        $registrationService = $this->registrationService ?? new DefaultRegistrationService($dependencyContainer->getHttpClient(), $dependencyContainer->getRequestFactory(), $dependencyContainer->getConfiguration());
+        $metricsHandler = $this->metricsHandler ?? new DefaultMetricsHandler($metricsSender, $dependencyContainer->getConfiguration());
+        $variantHandler = $this->variantHandler ?? new DefaultVariantHandler(new MurmurHashCalculator());
+
+        // initialization of dependencies
+        foreach ($this->strategies as $strategy) {
+            $this->initializeServices($strategy, $dependencyContainer);
+        }
+        $this->initializeServices($repository, $dependencyContainer);
+        $this->initializeServices($registrationService, $dependencyContainer);
+        $this->initializeServices($metricsHandler, $dependencyContainer);
+        $this->initializeServices($variantHandler, $dependencyContainer);
+
+        assert($dependencyContainer->getConfiguration() !== null);
+        if ($this->proxyKey !== null) {
+            $dependencyContainer->getConfiguration()->setProxyKey($this->proxyKey);
+            $dependencyContainer->getConfiguration()->setHeaders(array_merge($this->headers, ['Authorization' => $this->proxyKey]));
+            $proxyRepository = new DefaultUnleashProxyRepository(
+                $dependencyContainer->getConfiguration(),
+                $dependencyContainer->getHttpClient(),
+                $dependencyContainer->getRequestFactory(),
+            );
+
+            return new DefaultProxyUnleash(
+                $proxyRepository,
+                $metricsHandler,
+            );
+        }
+
+        return new DefaultUnleash(
+            $this->strategies,
+            $repository,
+            $registrationService,
+            $dependencyContainer->getConfiguration(),
+            $metricsHandler,
+            $variantHandler,
+        );
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    public function initializeBasicAttributes(): array
     {
         // basic scalar attributes
         $appUrl = $this->appUrl;
@@ -401,73 +473,83 @@ final class UnleashBuilder
             );
         }
 
-        // PSR services
-        $cache = $this->cache;
-        if ($cache === null) {
-            $cache = $this->defaultImplementationLocator->findCache();
-            if ($cache === null) {
-                throw new InvalidValueException(
-                    sprintf(
-                        "No cache implementation provided, please use 'withCacheHandler()' method or install one of officially supported clients: '%s'",
-                        implode("', '", $this->defaultImplementationLocator->getCachePackages())
-                    )
-                );
-            }
-        }
-        assert($cache instanceof CacheInterface);
-        $staleCache = $this->staleCache ?? $cache;
-        $metricsCache = $this->metricsCache ?? $cache;
+        return [$appUrl, $instanceId, $appName];
+    }
 
-        $httpClient = $this->httpClient;
-        if ($httpClient === null) {
-            $httpClient = $this->defaultImplementationLocator->findHttpClient();
-            if ($httpClient === null) {
-                throw new InvalidValueException(
-                    "No http client provided, please use 'withHttpClient()' method or install a package providing 'psr/http-client-implementation'.",
-                );
-            }
-        }
-        assert($httpClient instanceof ClientInterface);
-
-        $requestFactory = $this->requestFactory;
-        if ($requestFactory === null) {
-            $requestFactory = $this->defaultImplementationLocator->findRequestFactory();
-            /**
-             * This will only be thrown if a HTTP client was found, but a request factory is not.
-             * Due to how php-http/discovery works, this scenario is unlikely to happen.
-             * See linked comment for more info.
-             *
-             * https://github.com/Unleash/unleash-client-php/pull/27#issuecomment-920764416
-             */
-            // @codeCoverageIgnoreStart
-            if ($requestFactory === null) {
-                throw new InvalidValueException(
-                    "No request factory provided, please use 'withRequestFactory()' method or install a package providing 'psr/http-factory-implementation'.",
-                );
-            }
-            // @codeCoverageIgnoreEnd
-        }
-        assert($requestFactory instanceof RequestFactoryInterface);
-
-        // internal shared services needed for UnleashConfiguration
-
-        $hashCalculator = new MurmurHashCalculator();
-
-        $dependencyContainer = new UnleashBuilderContainer(
+    private function createContainer(
+        CacheInterface $cache,
+        CacheInterface $staleCache,
+        ClientInterface $httpClient,
+        RequestFactoryInterface $requestFactory,
+        UnleashContextProvider $contextProvider,
+        BootstrapHandler $bootstrapHandler,
+        BootstrapProvider $bootstrapProvider,
+        EventDispatcherInterface $eventDispatcher,
+        MetricsBucketSerializer $metricsBucketSerializer,
+        CacheInterface $metricsCache,
+        ?MetricsSender $metricsSender = null,
+        ?UnleashConfiguration $configuration = null,
+    ): UnleashBuilderContainer {
+        return new UnleashBuilderContainer(
             cache: $cache,
             staleCache: $staleCache,
             httpClient: $httpClient,
-            metricsSender: null,
+            metricsSender: $metricsSender,
+            metricsCache: $metricsCache,
             requestFactory: $requestFactory,
-            stickinessCalculator: $hashCalculator,
-            configuration: null,
+            stickinessCalculator: new MurmurHashCalculator(),
+            configuration: $configuration,
+            contextProvider: $contextProvider,
+            bootstrapHandler: $bootstrapHandler,
+            bootstrapProvider: $bootstrapProvider,
+            eventDispatcher: $eventDispatcher,
+            metricsBucketSerializer: $metricsBucketSerializer,
         );
+    }
 
-        $contextProvider = $this->contextProvider;
-        if ($contextProvider === null) {
-            $contextProvider = new DefaultUnleashContextProvider();
+    private function initializeContainerWithConfiguration(): UnleashBuilderContainer
+    {
+        [$appUrl, $instanceId, $appName] = $this->initializeBasicAttributes();
+        $cache = $this->cache ?? $this->defaultImplementationLocator->findCache();
+        $httpClient = $this->httpClient ?? $this->defaultImplementationLocator->findHttpClient();
+        $requestFactory = $this->requestFactory ?? $this->defaultImplementationLocator->findRequestFactory();
+
+        if (!$cache) {
+            throw new InvalidValueException(
+                sprintf(
+                    "No cache implementation provided, please use 'withCacheHandler()' method or install one of officially supported clients: '%s'",
+                    implode("', '", $this->defaultImplementationLocator->getCachePackages())
+                )
+            );
         }
+        if (!$httpClient) {
+            throw new InvalidValueException(
+                "No http client provided, please use 'withHttpClient()' method or install a package providing 'psr/http-client-implementation'."
+            );
+        }
+        /**
+         * This will only be thrown if a HTTP client was found, but a request factory is not.
+         * Due to how php-http/discovery works, this scenario is unlikely to happen.
+         * See linked comment for more info.
+         *
+         * https://github.com/Unleash/unleash-client-php/pull/27#issuecomment-920764416
+         */
+        // @codeCoverageIgnoreStart
+        if (!$requestFactory) {
+            throw new InvalidValueException(
+                "No request factory provided, please use 'withRequestFactory()' method or install a package providing 'psr/http-factory-implementation'."
+            );
+        }
+        // @codeCoverageIgnoreEnd
 
+        assert($cache instanceof CacheInterface);
+        assert($httpClient instanceof ClientInterface);
+        assert($requestFactory instanceof RequestFactoryInterface);
+
+        $staleCache = $this->staleCache ?? $cache;
+        $metricsCache = $this->metricsCache ?? $cache;
+
+        $contextProvider = $this->contextProvider ?? new DefaultUnleashContextProvider();
         $bootstrapHandler = $this->bootstrapHandler ?? new DefaultBootstrapHandler();
         $bootstrapProvider = $this->bootstrapProvider ?? new EmptyBootstrapProvider();
         $eventDispatcher = $this->eventDispatcher ?? new EventDispatcher();
@@ -475,6 +557,19 @@ final class UnleashBuilder
             $eventDispatcher->addSubscriber($eventSubscriber);
         }
         $metricsBucketSerializer = $this->metricsBucketSerializer ?? new DefaultMetricsBucketSerializer();
+
+        $dependencyContainer = $this->createContainer(
+            cache: $cache,
+            staleCache: $staleCache,
+            httpClient: $httpClient,
+            requestFactory: $requestFactory,
+            contextProvider: $contextProvider,
+            bootstrapHandler: $bootstrapHandler,
+            bootstrapProvider: $bootstrapProvider,
+            eventDispatcher: $eventDispatcher,
+            metricsBucketSerializer: $metricsBucketSerializer,
+            metricsCache: $metricsCache
+        );
 
         // initialize services
         $this->initializeServices($contextProvider, $dependencyContainer);
@@ -489,79 +584,35 @@ final class UnleashBuilder
 
         $configuration = new UnleashConfiguration($appUrl, $appName, $instanceId);
         $configuration
-            ->setCache($cache)
-            ->setStaleCache($staleCache)
-            ->setMetricsCache($metricsCache)
+            ->setCache($dependencyContainer->getCache())
+            ->setStaleCache($dependencyContainer->getStaleCache())
+            ->setMetricsCache($dependencyContainer->getMetricsCache())
             ->setTtl($this->cacheTtl ?? $configuration->getTtl())
             ->setStaleTtl($this->staleTtl ?? $configuration->getStaleTtl())
             ->setMetricsEnabled($this->metricsEnabled ?? $configuration->isMetricsEnabled())
             ->setMetricsInterval($this->metricsInterval ?? $configuration->getMetricsInterval())
             ->setHeaders($this->headers)
             ->setAutoRegistrationEnabled($this->autoregister)
-            ->setContextProvider($contextProvider)
-            ->setBootstrapHandler($bootstrapHandler)
-            ->setBootstrapProvider($bootstrapProvider)
+            ->setContextProvider($dependencyContainer->getContextProvider())
+            ->setBootstrapHandler($dependencyContainer->getBootstrapHandler())
+            ->setBootstrapProvider($dependencyContainer->getBootstrapProvider())
             ->setFetchingEnabled($this->fetchingEnabled)
-            ->setEventDispatcher($eventDispatcher)
-            ->setMetricsBucketSerializer($metricsBucketSerializer)
-        ;
+            ->setEventDispatcher($dependencyContainer->getEventDispatcher())
+            ->setMetricsBucketSerializer($dependencyContainer->getMetricsBucketSerializer());
 
-        // runtime-unchangeable blocks of Unleash
-
-        $repository = new DefaultUnleashRepository($httpClient, $requestFactory, $configuration);
-        $metricsSender = new DefaultMetricsSender($httpClient, $requestFactory, $configuration);
-
-        $dependencyContainer = new UnleashBuilderContainer(
+        return $this->createContainer(
             cache: $cache,
             staleCache: $staleCache,
             httpClient: $httpClient,
-            metricsSender: $metricsSender,
             requestFactory: $requestFactory,
-            stickinessCalculator: $hashCalculator,
+            contextProvider: $contextProvider,
+            bootstrapHandler: $bootstrapHandler,
+            bootstrapProvider: $bootstrapProvider,
+            eventDispatcher: $eventDispatcher,
+            metricsBucketSerializer: $metricsBucketSerializer,
+            metricsCache: $metricsCache,
             configuration: $configuration,
         );
-
-        $registrationService = $this->registrationService;
-        if ($registrationService === null) {
-            $registrationService = new DefaultRegistrationService($httpClient, $requestFactory, $configuration);
-        }
-
-        $metricsHandler = $this->metricsHandler ?? new DefaultMetricsHandler($metricsSender, $configuration);
-        $variantHandler = $this->variantHandler ?? new DefaultVariantHandler($hashCalculator);
-
-        // initialization of dependencies
-
-        foreach ($this->strategies as $strategy) {
-            $this->initializeServices($strategy, $dependencyContainer);
-        }
-        $this->initializeServices($repository, $dependencyContainer);
-        $this->initializeServices($registrationService, $dependencyContainer);
-        $this->initializeServices($metricsHandler, $dependencyContainer);
-        $this->initializeServices($variantHandler, $dependencyContainer);
-
-        if ($this->proxyKey !== null) {
-            $configuration->setProxyKey($this->proxyKey);
-            $configuration->setHeaders(array_merge($this->headers, ['Authorization' => $this->proxyKey]));
-            $proxyRepository = new DefaultUnleashProxyRepository(
-                $configuration,
-                $httpClient,
-                $requestFactory,
-            );
-
-            return new DefaultProxyUnleash(
-                $proxyRepository,
-                $metricsHandler,
-            );
-        } else {
-            return new DefaultUnleash(
-                $this->strategies,
-                $repository,
-                $registrationService,
-                $configuration,
-                $metricsHandler,
-                $variantHandler,
-            );
-        }
     }
 
     private function with(string $property, mixed $value): self
@@ -609,5 +660,17 @@ final class UnleashBuilder
         if ($target instanceof StickinessCalculatorAware) {
             $target->setStickinessCalculator($container->getStickinessCalculator());
         }
+    }
+
+    /**
+     * @param UnleashBuilderContainer $dependencyContainer
+     *
+     * @return DefaultUnleashRepository
+     */
+    private function createRepository(UnleashBuilderContainer $dependencyContainer): DefaultUnleashRepository
+    {
+        assert($dependencyContainer->getConfiguration() !== null);
+
+        return new DefaultUnleashRepository($dependencyContainer->getHttpClient(), $dependencyContainer->getRequestFactory(), $dependencyContainer->getConfiguration());
     }
 }
