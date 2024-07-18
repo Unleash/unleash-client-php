@@ -115,7 +115,7 @@ final readonly class DefaultUnleashRepository implements UnleashRepository
     public function getFeatures(): iterable
     {
         $features = $this->getCachedFeatures();
-        if ($features === null) {
+        if (empty($features)) {
             $features = $this->fetchFeatures();
         }
 
