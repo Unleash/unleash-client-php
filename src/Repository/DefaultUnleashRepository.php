@@ -140,11 +140,10 @@ final readonly class DefaultUnleashRepository implements UnleashRepository
     {
         $cache = $this->configuration->getCache();
 
-        if (!$cache->has(CacheKey::FEATURES)) {
+        $result = $cache->get(CacheKey::FEATURES);
+        if ($result === null) {
             return null;
         }
-
-        $result = $cache->get(CacheKey::FEATURES, []);
         assert(is_array($result));
 
         return $result;
