@@ -26,5 +26,12 @@ $unleash = UnleashBuilder::create()
     ->withAppUrl($appUrl)
     ->withInstanceId($instanceId)
     ->withHttpClient($httpClient)
+    ->withHeader('Authorization', $apiKey)
     ->build()
 ;
+
+if ($unleash->isEnabled('myFeature')) {
+    echo "myFeature is enabled";
+} else {
+    echo "myFeature is disabled";
+}
