@@ -9,7 +9,7 @@ interface Unleash
 {
     public const string SDK_VERSION = '2.5.1';
 
-    public const string SPECIFICATION_VERSION = '4.3.2';
+    public const string SPECIFICATION_VERSION = '5.0.2';
 
     public function isEnabled(string $featureName, ?Context $context = null, bool $default = false): bool;
 
