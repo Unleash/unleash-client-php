@@ -57,6 +57,10 @@ final class DefaultRegistrationService implements RegistrationService
                 'strategies' => array_map(fn (StrategyHandler $strategyHandler): string => $strategyHandler->getStrategyName(), $strategyHandlers),
                 'started' => (new DateTimeImmutable())->format('c'),
                 'interval' => $this->configuration->getMetricsInterval(),
+                'platformName' => PHP_SAPI,
+                'platformVersion' => phpversion(),
+                'yggdrasilVersion' => null,
+                'specVersion' => Unleash::SPECIFICATION_VERSION,
             ], JSON_THROW_ON_ERROR)));
         foreach ($this->configuration->getHeaders() as $name => $value) {
             $request = $request->withHeader($name, $value);
