@@ -34,7 +34,7 @@ final readonly class DefaultMetricsSender implements MetricsSender
                 'instanceId' => $this->configuration->getInstanceId(),
                 'bucket' => $bucket->jsonSerialize(),
                 'platformName' => PHP_SAPI,
-                'platformVersion' => phpversion(),
+                'platformVersion' => PHP_VERSION,
                 'yggdrasilVersion' => null,
                 'specVersion' => Unleash::SPECIFICATION_VERSION,
             ], JSON_THROW_ON_ERROR)));
