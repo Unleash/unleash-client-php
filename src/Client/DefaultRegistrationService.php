@@ -58,7 +58,7 @@ final class DefaultRegistrationService implements RegistrationService
                 'started' => (new DateTimeImmutable())->format('c'),
                 'interval' => $this->configuration->getMetricsInterval(),
                 'platformName' => PHP_SAPI,
-                'platformVersion' => phpversion(),
+                'platformVersion' => PHP_VERSION,
                 'yggdrasilVersion' => null,
                 'specVersion' => Unleash::SPECIFICATION_VERSION,
             ], JSON_THROW_ON_ERROR)));
