@@ -8,6 +8,7 @@ use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
 use Unleash\Client\Configuration\UnleashConfiguration;
 use Unleash\Client\Helper\StringStream;
+use Unleash\Client\Unleash;
 
 final readonly class DefaultMetricsSender implements MetricsSender
 {
@@ -32,6 +33,10 @@ final readonly class DefaultMetricsSender implements MetricsSender
                 'appName' => $this->configuration->getAppName(),
                 'instanceId' => $this->configuration->getInstanceId(),
                 'bucket' => $bucket->jsonSerialize(),
+                'platformName' => PHP_SAPI,
+                'platformVersion' => PHP_VERSION,
+                'yggdrasilVersion' => null,
+                'specVersion' => Unleash::SPECIFICATION_VERSION,
             ], JSON_THROW_ON_ERROR)));
         foreach ($this->configuration->getHeaders() as $name => $value) {
             $request = $request->withHeader($name, $value);
