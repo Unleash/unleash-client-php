@@ -153,16 +153,16 @@ final readonly class DefaultUnleashProxyRepository implements ProxyRepository
      *             value: string
      *         }
      *     },
-     *     impression_data: bool
+     *     impressionData: bool
      * }|null
      */
     private function validateResponse(array $response): ?array
     {
-        if (!isset($response['name'], $response['enabled'], $response['variant'], $response['impression_data'])) {
+        if (!isset($response['name'], $response['enabled'], $response['variant'], $response['impressionData'])) {
             return null;
         }
 
-        if (!is_string($response['name']) || !is_bool($response['enabled']) || !is_bool($response['impression_data']) || !is_array($response['variant'])) {
+        if (!is_string($response['name']) || !is_bool($response['enabled']) || !is_bool($response['impressionData']) || !is_array($response['variant'])) {
             return null;
         }
 

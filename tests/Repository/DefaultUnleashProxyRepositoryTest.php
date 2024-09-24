@@ -71,7 +71,7 @@ final class DefaultUnleashProxyRepositoryTest extends AbstractHttpClientTestCase
                         ],
                         'enabled' => true,
                     ],
-                    'impression_data' => false,
+                    'impressionData' => false,
                 ])
             ),
         ]);
@@ -112,7 +112,7 @@ final class DefaultUnleashProxyRepositoryTest extends AbstractHttpClientTestCase
                 ],
                 'enabled' => true,
             ],
-            'impression_data' => false,
+            'impressionData' => false,
         ]);
 
         $mock = new MockHandler([
