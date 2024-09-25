@@ -158,7 +158,7 @@ final readonly class DefaultUnleashProxyRepository implements ProxyRepository
      */
     private function validateResponse(array $response): ?array
     {
-        if (!isset($response['name'], $response['enabled'], $response['variant'], $response['impressionData'])) {
+        if (!isset($response['name'], $response['enabled'], $response['variant']) && !(isset($response['impressionData']) || isset($response['impression_data']))) {
             return null;
         }
 

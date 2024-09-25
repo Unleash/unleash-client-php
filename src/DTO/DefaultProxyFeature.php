@@ -28,6 +28,7 @@ final readonly class DefaultProxyFeature implements ProxyFeature, JsonSerializab
      *             value: string
      *         }
      *     },
+     *     impression_data: bool,
      *     impressionData: bool
      * } $response
      */
@@ -37,7 +38,9 @@ final readonly class DefaultProxyFeature implements ProxyFeature, JsonSerializab
         // tries to new this up manually and isn't interesting to tests
 
         // @codeCoverageIgnoreStart
-        assert(isset($response['name'], $response['enabled'], $response['variant'], $response['impressionData']));
+        assert(isset($response['name'], $response['enabled'], $response['variant']) 
+            && (isset($response['impressionData']) || isset($response['impression_data']))
+        );
         // @codeCoverageIgnoreEnd
 
         $this->name = $response['name'];
