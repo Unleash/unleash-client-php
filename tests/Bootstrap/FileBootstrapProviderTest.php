@@ -75,7 +75,7 @@ final class FileBootstrapProviderTest extends TestCase
         $file = $this->createTemporaryFile();
         chmod($file, 0222);
         $instance = new FileBootstrapProvider($file);
-        $this->expectException(RuntimeException::class);
+        $this->expectException(JsonException::class);
         $instance->getBootstrap();
     }
 }
