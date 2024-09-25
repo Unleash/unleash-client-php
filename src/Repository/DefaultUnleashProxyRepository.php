@@ -153,7 +153,8 @@ final readonly class DefaultUnleashProxyRepository implements ProxyRepository
      *             value: string
      *         }
      *     },
-     *     impressionData: bool
+     *     impression_data?: bool
+     *     impressionData?: bool
      * }|null
      */
     private function validateResponse(array $response): ?array

@@ -28,8 +28,8 @@ final readonly class DefaultProxyFeature implements ProxyFeature, JsonSerializab
      *             value: string
      *         }
      *     },
-     *     impression_data: bool,
-     *     impressionData: bool
+     *     impression_data?: bool,
+     *     impressionData?: bool
      * } $response
      */
     public function __construct(array $response)
