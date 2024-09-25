@@ -26,6 +26,6 @@ final class DefaultProxyFeatureTest extends TestCase
     {
         $instance = new DefaultProxyFeature(['name' => 'test', 'enabled' => true, 'impressionData' => true, 'variant' => ['name' => 'someVariant', 'enabled' => true, 'payload' => ['type' => 'string', 'value' => 'test']]]);
         $json = json_encode($instance);
-        self::assertEquals('{"name":"test","enabled":true,"variant":{"name":"someVariant","enabled":true,"payload":{"type":"string","value":"test"}},"impressionData":true}', $json);
+        self::assertEquals('{"name":"test","enabled":true,"variant":{"name":"someVariant","enabled":true,"payload":{"type":"string","value":"test"}},"impression_data":true,"impressionData":true}', $json);
     }
 }
