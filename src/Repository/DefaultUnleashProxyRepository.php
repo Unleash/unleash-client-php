@@ -163,7 +163,8 @@ final readonly class DefaultUnleashProxyRepository implements ProxyRepository
             return null;
         }
 
-        if (!is_string($response['name']) || !is_bool($response['enabled']) || !is_bool($response['impressionData']) || !is_array($response['variant'])) {
+        $impressionData = $response['impressionData'] ?? $response['impression_data'] ?? false;
+        if (!is_string($response['name']) || !is_bool($response['enabled']) || !is_bool($impressionData) || !is_array($response['variant'])) {
             return null;
         }
 
