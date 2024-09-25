@@ -153,7 +153,7 @@ final readonly class DefaultUnleashProxyRepository implements ProxyRepository
      *             value: string
      *         }
      *     },
-     *     impression_data?: bool
+     *     impression_data?: bool,
      *     impressionData?: bool
      * }|null
      */
