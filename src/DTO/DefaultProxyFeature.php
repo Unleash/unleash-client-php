@@ -28,8 +28,7 @@ final readonly class DefaultProxyFeature implements ProxyFeature, JsonSerializab
      *             value: string
      *         }
      *     },
-     *     impression_data?: bool,
-     *     impressionData?: bool
+     *     impressionData: bool
      * } $response
      */
     public function __construct(array $response)
@@ -46,7 +45,7 @@ final readonly class DefaultProxyFeature implements ProxyFeature, JsonSerializab
 
         $this->name = $response['name'];
         $this->enabled = $response['enabled'];
-        $this->impressionData = $response['impressionData'] ?? $response['impression_data'];
+        $this->impressionData = $response['impressionData'] ?? $response['impression_data'] ?? false;
 
         $payload = null;
 
