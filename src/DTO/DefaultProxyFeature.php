@@ -91,8 +91,8 @@ final readonly class DefaultProxyFeature implements ProxyFeature, JsonSerializab
             'name' => $this->name,
             'enabled' => $this->enabled,
             'variant' => $this->variant,
-            'impression_data' => $this->impressionData,
-            'impressionData' => $this->impressionData, // maybe we don't need this
+            'impression_data' => $this->impressionData, // deprecated
+            'impressionData' => $this->impressionData, // if you were reading the snake then you should read the camel
         ];
     }
 }
