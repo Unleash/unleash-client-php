@@ -7,7 +7,7 @@ use Unleash\Client\DTO\Variant;
 
 interface Unleash
 {
-    public const string SDK_VERSION = '2.5.2';
+    public const string SDK_VERSION = '2.6.0';
 
     public const string SPECIFICATION_VERSION = '5.0.2';
 
