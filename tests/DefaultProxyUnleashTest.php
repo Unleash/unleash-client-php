@@ -36,7 +36,7 @@ final class DefaultProxyUnleashTest extends AbstractHttpClientTestCase
                 'name' => 'some-variant',
                 'enabled' => true,
             ],
-            'impression_data' => false,
+            'impressionData' => false,
         ]);
         $unleash = $builder->build();
 
@@ -89,7 +89,7 @@ final class DefaultProxyUnleashTest extends AbstractHttpClientTestCase
                 ],
                 'enabled' => true,
             ],
-            'impression_data' => false,
+            'impressionData' => false,
         ]);
         $unleash = $builder->build();
         $variant = $unleash->getVariant('test');
@@ -107,7 +107,7 @@ final class DefaultProxyUnleashTest extends AbstractHttpClientTestCase
                 'name' => 'some-variant',
                 'enabled' => true,
             ],
-            'impression_data' => false,
+            'impressionData' => false,
         ]);
         $unleash = $builder->build();
         $variant = $unleash->getVariant('test');
@@ -138,7 +138,7 @@ final class DefaultProxyUnleashTest extends AbstractHttpClientTestCase
                 'payload' => null,
                 'enabled' => true,
             ],
-            'impression_data' => false,
+            'impressionData' => false,
         ]);
         $unleash = $builder->build();
         $variant = $unleash->getVariant('test');
@@ -159,7 +159,7 @@ final class DefaultProxyUnleashTest extends AbstractHttpClientTestCase
                 'name' => 'some-variant',
                 'enabled' => true,
             ],
-            'impression_data' => false,
+            'impressionData' => false,
         ]);
 
         $builder = new TestBuilder();
@@ -236,7 +236,7 @@ final class DefaultProxyUnleashTest extends AbstractHttpClientTestCase
                     'name' => 'some-variant',
                     'enabled' => true,
                 ],
-                'impression_data' => false,
+                'impressionData' => false,
             ],
             [
                 'name' => 'test',
@@ -244,7 +244,7 @@ final class DefaultProxyUnleashTest extends AbstractHttpClientTestCase
                 'variant' => [
                     'poisoned' => 'variant',
                 ],
-                'impression_data' => false,
+                'impressionData' => false,
             ],
             [
                 'name' => 'test',
@@ -257,7 +257,7 @@ final class DefaultProxyUnleashTest extends AbstractHttpClientTestCase
                         'value' => 'stuff',
                     ],
                 ],
-                'impression_data' => false,
+                'impressionData' => false,
             ],
         ];
 
