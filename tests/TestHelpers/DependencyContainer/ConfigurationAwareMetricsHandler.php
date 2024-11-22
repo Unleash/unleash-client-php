@@ -20,7 +20,7 @@ final class ConfigurationAwareMetricsHandler implements MetricsHandler, Configur
         $this->configuration = $configuration;
     }
 
-    public function handleMetrics(Feature $feature, bool $successful, Variant $variant = null): void
+    public function handleMetrics(Feature $feature, bool $successful, ?Variant $variant = null): void
     {
     }
 }

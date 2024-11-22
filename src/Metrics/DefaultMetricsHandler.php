@@ -18,7 +18,7 @@ final readonly class DefaultMetricsHandler implements MetricsHandler
     }
 
     #[Override]
-    public function handleMetrics(Feature $feature, bool $successful, Variant $variant = null): void
+    public function handleMetrics(Feature $feature, bool $successful, ?Variant $variant = null): void
     {
         if (!$this->configuration->isMetricsEnabled()) {
             return;

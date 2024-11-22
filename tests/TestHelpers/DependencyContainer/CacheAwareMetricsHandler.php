@@ -20,7 +20,7 @@ final class CacheAwareMetricsHandler implements MetricsHandler, CacheAware
         $this->cache = $cache;
     }
 
-    public function handleMetrics(Feature $feature, bool $successful, Variant $variant = null): void
+    public function handleMetrics(Feature $feature, bool $successful, ?Variant $variant = null): void
     {
     }
 }
