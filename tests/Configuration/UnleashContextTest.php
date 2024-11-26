@@ -185,7 +185,7 @@ final class UnleashContextTest extends AbstractHttpClientTestCase
                 ->setAutoRegistrationEnabled(false)
                 ->setCache($this->getCache()),
             new class implements MetricsHandler {
-                public function handleMetrics(Feature $feature, bool $successful, Variant $variant = null): void
+                public function handleMetrics(Feature $feature, bool $successful, ?Variant $variant = null): void
                 {
                 }
             },

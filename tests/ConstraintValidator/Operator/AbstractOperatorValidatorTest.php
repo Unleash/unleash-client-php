@@ -53,7 +53,7 @@ final class AbstractOperatorValidatorTest extends AbstractHttpClientTestCase
                 ->setMetricsEnabled(false)
                 ->setAutoRegistrationEnabled(false),
             new class implements MetricsHandler {
-                public function handleMetrics(Feature $feature, bool $successful, Variant $variant = null): void
+                public function handleMetrics(Feature $feature, bool $successful, ?Variant $variant = null): void
                 {
                 }
             },

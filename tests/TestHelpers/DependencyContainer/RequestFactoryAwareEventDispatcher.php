@@ -15,7 +15,7 @@ final class RequestFactoryAwareEventDispatcher implements EventDispatcherInterfa
      */
     public $requestFactory = null;
 
-    public function dispatch(object $event, string $eventName = null): object
+    public function dispatch(object $event, ?string $eventName = null): object
     {
         return new stdClass();
     }
@@ -41,7 +41,7 @@ final class RequestFactoryAwareEventDispatcher implements EventDispatcherInterfa
     {
     }
 
-    public function getListeners(string $eventName = null): array
+    public function getListeners(?string $eventName = null): array
     {
         return [];
     }
@@ -51,7 +51,7 @@ final class RequestFactoryAwareEventDispatcher implements EventDispatcherInterfa
         return null;
     }
 
-    public function hasListeners(string $eventName = null): bool
+    public function hasListeners(?string $eventName = null): bool
     {
         return false;
     }

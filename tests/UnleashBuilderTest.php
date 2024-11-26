@@ -769,7 +769,7 @@ final class UnleashBuilderTest extends TestCase
     public function testWithMetricsHandler()
     {
         $metricsHandler = new class implements MetricsHandler {
-            public function handleMetrics(Feature $feature, bool $successful, Variant $variant = null): void
+            public function handleMetrics(Feature $feature, bool $successful, ?Variant $variant = null): void
             {
             }
         };

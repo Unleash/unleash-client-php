@@ -92,7 +92,7 @@ abstract class AbstractHttpClientTestCase extends TestCase
         );
 
         $this->metricsHandler = new class implements MetricsHandler {
-            public function handleMetrics(Feature $feature, bool $successful, Variant $variant = null): void
+            public function handleMetrics(Feature $feature, bool $successful, ?Variant $variant = null): void
             {
             }
         };

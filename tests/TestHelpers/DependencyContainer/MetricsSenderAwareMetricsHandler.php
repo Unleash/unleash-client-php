@@ -15,7 +15,7 @@ final class MetricsSenderAwareMetricsHandler implements MetricsHandler, MetricsS
      */
     public $metricsSender = null;
 
-    public function handleMetrics(Feature $feature, bool $successful, Variant $variant = null): void
+    public function handleMetrics(Feature $feature, bool $successful, ?Variant $variant = null): void
     {
     }
 
