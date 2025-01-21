@@ -138,7 +138,7 @@ final class DefaultRegistrationServiceTest extends AbstractHttpClientTestCase
             ->setCache($this->getCache())
             ->setHeaders([
                 'Some-Header' => 'some-value',
-                'x-unleash-connection-id' => 'override',
+                'x-unleash-connection-id' => 'should not override',
             ])->setCache($this->getCache());
 
         $instance = new DefaultRegistrationService(
@@ -151,7 +151,6 @@ final class DefaultRegistrationServiceTest extends AbstractHttpClientTestCase
         $instance->register([]);
         self::assertCount(1, $this->requestHistory);
         self::assertSame('some-value', $this->requestHistory[0]['request']->getHeaderLine('Some-Header'));
-        // should not override the connection ID
-        self::assertNotEquals('override', $this->requestHistory[0]['request']->getHeaderLine('x-unleash-connection-id'));
+        self::assertMatchesRegularExpression('/[0-9a-f-]{36}/', $this->requestHistory[0]['request']->getHeaderLine('x-unleash-connection-id'));
     }
 }
