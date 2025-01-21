@@ -13,11 +13,14 @@ use Unleash\Client\Configuration\UnleashConfiguration;
 use Unleash\Client\Enum\CacheKey;
 use Unleash\Client\Helper\StringStream;
 use Unleash\Client\Helper\Url;
+use Unleash\Client\Helper\Uuid;
 use Unleash\Client\Strategy\StrategyHandler;
 use Unleash\Client\Unleash;
 
 final class DefaultRegistrationService implements RegistrationService
 {
+    private string $connectionId;
+
     public function __construct(
         private readonly ClientInterface $httpClient,
         private readonly RequestFactoryInterface $requestFactory,
@@ -25,8 +28,9 @@ final class DefaultRegistrationService implements RegistrationService
         private ?string $sdkName = null,
         private ?string $sdkVersion = null,
     ) {
-        $this->sdkName ??= 'unleash-client-php';
+        $this->sdkName ??= 'unleash-php';
         $this->sdkVersion ??= Unleash::SDK_VERSION;
+        $this->connectionId = Uuid::v4();
     }
 
     /**
@@ -51,9 +55,15 @@ final class DefaultRegistrationService implements RegistrationService
             ->createRequest('POST', (string) Url::appendPath($this->configuration->getUrl(), 'client/register'))
             ->withHeader('Content-Type', 'application/json')
             ->withBody(new StringStream(json_encode([
+                // TODO: delete non-standard redundant headers
                 'appName' => $this->configuration->getAppName(),
                 'instanceId' => $this->configuration->getInstanceId(),
-                'sdkVersion' => $this->sdkName . ':' . $this->sdkVersion,
+                'sdkVersion' => 'unleash-client-php:' . $this->sdkVersion,
+
+                'x-unleash-appname' => $this->configuration->getAppName(),
+                'x-unleash-sdk' => $this->sdkName . '@' . $this->sdkVersion,
+                'x-unleash-connection-id' => $this->connectionId,
+
                 'strategies' => array_map(fn (StrategyHandler $strategyHandler): string => $strategyHandler->getStrategyName(), $strategyHandlers),
                 'started' => (new DateTimeImmutable())->format('c'),
                 'interval' => $this->configuration->getMetricsInterval(),
