@@ -28,7 +28,7 @@ final class DefaultRegistrationService implements RegistrationService
         private ?string $sdkName = null,
         private ?string $sdkVersion = null,
     ) {
-        $this->sdkName ??= 'unleash-php';
+        $this->sdkName ??= 'unleash-client-php';
         $this->sdkVersion ??= Unleash::SDK_VERSION;
         $this->connectionId = Uuid::v4();
     }
@@ -58,11 +58,10 @@ final class DefaultRegistrationService implements RegistrationService
                 // TODO: delete non-standard redundant headers
                 'appName' => $this->configuration->getAppName(),
                 'instanceId' => $this->configuration->getInstanceId(),
-                'sdkVersion' => 'unleash-client-php:' . $this->sdkVersion,
+                'sdkVersion' =>  $this->sdkName . ':' . $this->sdkVersion,
 
                 'x-unleash-appname' => $this->configuration->getAppName(),
-                'x-unleash-sdk' => $this->sdkName . '@' . $this->sdkVersion,
-                'x-unleash-connection-id' => $this->connectionId,
+                'x-unleash-sdk' => $this->sdkName . ':' . $this->sdkVersion,
 
                 'strategies' => array_map(fn (StrategyHandler $strategyHandler): string => $strategyHandler->getStrategyName(), $strategyHandlers),
                 'started' => (new DateTimeImmutable())->format('c'),
@@ -75,6 +74,8 @@ final class DefaultRegistrationService implements RegistrationService
         foreach ($this->configuration->getHeaders() as $name => $value) {
             $request = $request->withHeader($name, $value);
         }
+
+        $request = $request->withHeader('x-unleash-connection-id', $this->connectionId);
 
         try {
             $response = $this->httpClient->sendRequest($request);
