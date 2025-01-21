@@ -151,6 +151,6 @@ final class DefaultRegistrationServiceTest extends AbstractHttpClientTestCase
         $instance->register([]);
         self::assertCount(1, $this->requestHistory);
         self::assertSame('some-value', $this->requestHistory[0]['request']->getHeaderLine('Some-Header'));
-        self::assertMatchesRegularExpression('/[0-9a-f-]{36}/', $this->requestHistory[0]['request']->getHeaderLine('x-unleash-connection-id'));
+        self::assertStringMatchesFormat('%s-%s-%s-%s-%s', $this->requestHistory[0]['request']->getHeaderLine('x-unleash-connection-id'));
     }
 }
