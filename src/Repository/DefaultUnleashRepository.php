@@ -34,6 +34,7 @@ use Unleash\Client\Event\UnleashEvents;
 use Unleash\Client\Exception\HttpResponseException;
 use Unleash\Client\Exception\InvalidValueException;
 use Unleash\Client\Helper\Url;
+use Unleash\Client\Helper\Uuid;
 use Unleash\Client\Unleash;
 
 /**
@@ -88,9 +89,9 @@ final readonly class DefaultUnleashRepository implements UnleashRepository
         private ClientInterface $httpClient,
         private RequestFactoryInterface $requestFactory,
         private UnleashConfiguration $configuration,
-        private string $sdkName = null,
-        private string $sdkVersion = null,
-        private string $connectionId = null,
+        private string $sdkName = Unleash::SDK_NAME,
+        private string $sdkVersion = Unleash::SDK_VERSION,
+        private string $connectionId = Uuid::v4(),
     ) {}
 
     /**
@@ -512,9 +513,6 @@ final readonly class DefaultUnleashRepository implements UnleashRepository
         } else {
             $request = $this->requestFactory
                 ->createRequest('GET', (string) Url::appendPath($this->configuration->getUrl(), 'client/features'))
-                ->withHeader('x-unleash-appname', $this->configuration->getAppName() ?? $this->configuration->getInstanceId())
-                ->withHeader('x-unleash-sdk', $this->sdkName . ':' . $this->sdkVersion)
-                ->withHeader('x-unleash-connection-id', $this->connectionId)
                 // TODO: remove non-standard headers
                 ->withHeader('UNLEASH-APPNAME', $this->configuration->getAppName())
                 ->withHeader('UNLEASH-INSTANCEID', $this->configuration->getInstanceId())
@@ -523,6 +521,11 @@ final readonly class DefaultUnleashRepository implements UnleashRepository
             foreach ($this->configuration->getHeaders() as $name => $value) {
                 $request = $request->withHeader($name, $value);
             }
+
+            $request = $request
+                ->withHeader('x-unleash-appname', $this->configuration->getAppName())
+                ->withHeader('x-unleash-sdk', $this->sdkName . ':' . $this->sdkVersion)
+                ->withHeader('x-unleash-connection-id', $this->connectionId);
 
             try {
                 $response = $this->httpClient->sendRequest($request);

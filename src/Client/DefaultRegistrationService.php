@@ -27,7 +27,7 @@ final class DefaultRegistrationService implements RegistrationService
         private ?string $sdkVersion = null,
         private ?string $connectionId = null,
     ) {
-        $this->sdkName ??= 'unleash-client-php';
+        $this->sdkName ??= Unleash::SDK_NAME;
         $this->sdkVersion ??= Unleash::SDK_VERSION;
         $this->connectionId = $connectionId ?? Uuid::v4();
     }
@@ -56,7 +56,7 @@ final class DefaultRegistrationService implements RegistrationService
             ->withBody(new StringStream(json_encode([
                 'appName' => $this->configuration->getAppName(),
                 'instanceId' => $this->configuration->getInstanceId(),
-                'sdkVersion' =>  $this->sdkName . ':' . $this->sdkVersion,
+                'sdkVersion' => $this->sdkName . ':' . $this->sdkVersion,
                 'strategies' => array_map(fn(StrategyHandler $strategyHandler): string => $strategyHandler->getStrategyName(), $strategyHandlers),
                 'started' => (new DateTimeImmutable())->format('c'),
                 'interval' => $this->configuration->getMetricsInterval(),
