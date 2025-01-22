@@ -19,18 +19,17 @@ use Unleash\Client\Unleash;
 
 final class DefaultRegistrationService implements RegistrationService
 {
-    private string $connectionId;
-
     public function __construct(
         private readonly ClientInterface $httpClient,
         private readonly RequestFactoryInterface $requestFactory,
         private readonly UnleashConfiguration $configuration,
         private ?string $sdkName = null,
         private ?string $sdkVersion = null,
+        private ?string $connectionId = null,
     ) {
         $this->sdkName ??= 'unleash-client-php';
         $this->sdkVersion ??= Unleash::SDK_VERSION;
-        $this->connectionId = Uuid::v4();
+        $this->connectionId = $connectionId ?? Uuid::v4();
     }
 
     /**
@@ -55,15 +54,10 @@ final class DefaultRegistrationService implements RegistrationService
             ->createRequest('POST', (string) Url::appendPath($this->configuration->getUrl(), 'client/register'))
             ->withHeader('Content-Type', 'application/json')
             ->withBody(new StringStream(json_encode([
-                // TODO: delete non-standard redundant headers
                 'appName' => $this->configuration->getAppName(),
                 'instanceId' => $this->configuration->getInstanceId(),
                 'sdkVersion' =>  $this->sdkName . ':' . $this->sdkVersion,
-
-                'x-unleash-appname' => $this->configuration->getAppName(),
-                'x-unleash-sdk' => $this->sdkName . ':' . $this->sdkVersion,
-
-                'strategies' => array_map(fn (StrategyHandler $strategyHandler): string => $strategyHandler->getStrategyName(), $strategyHandlers),
+                'strategies' => array_map(fn(StrategyHandler $strategyHandler): string => $strategyHandler->getStrategyName(), $strategyHandlers),
                 'started' => (new DateTimeImmutable())->format('c'),
                 'interval' => $this->configuration->getMetricsInterval(),
                 'platformName' => PHP_SAPI,
@@ -75,7 +69,10 @@ final class DefaultRegistrationService implements RegistrationService
             $request = $request->withHeader($name, $value);
         }
 
-        $request = $request->withHeader('x-unleash-connection-id', $this->connectionId);
+        $request = $request
+            ->withHeader('x-unleash-appname', $this->configuration->getAppName() ?? $this->configuration->getInstanceId())
+            ->withHeader('x-unleash-sdk', $this->sdkName . ':' . $this->sdkVersion)
+            ->withHeader('x-unleash-connection-id', $this->connectionId);
 
         try {
             $response = $this->httpClient->sendRequest($request);

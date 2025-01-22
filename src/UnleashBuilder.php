@@ -36,6 +36,7 @@ use Unleash\Client\Helper\Builder\StaleCacheAware;
 use Unleash\Client\Helper\Builder\StickinessCalculatorAware;
 use Unleash\Client\Helper\DefaultImplementationLocator;
 use Unleash\Client\Helper\UnleashBuilderContainer;
+use Unleash\Client\Helper\Uuid;
 use Unleash\Client\Metrics\DefaultMetricsBucketSerializer;
 use Unleash\Client\Metrics\DefaultMetricsHandler;
 use Unleash\Client\Metrics\DefaultMetricsSender;
@@ -68,6 +69,8 @@ final class UnleashBuilder
     private ?string $instanceId = null;
 
     private ?string $appName = null;
+
+    private string $connectionId = Uuid::v4();
 
     private ?ClientInterface $httpClient = null;
 
@@ -406,7 +409,14 @@ final class UnleashBuilder
         );
 
         assert($dependencyContainer->getConfiguration() !== null);
-        $registrationService = $this->registrationService ?? new DefaultRegistrationService($dependencyContainer->getHttpClient(), $dependencyContainer->getRequestFactory(), $dependencyContainer->getConfiguration());
+        $registrationService = $this->registrationService ?? new DefaultRegistrationService(
+            $dependencyContainer->getHttpClient(),
+            $dependencyContainer->getRequestFactory(),
+            $dependencyContainer->getConfiguration(),
+            Unleash::SDK_NAME,
+            Unleash::SDK_VERSION,
+            $this->connectionId
+        );
         $metricsHandler = $this->metricsHandler ?? new DefaultMetricsHandler($metricsSender, $dependencyContainer->getConfiguration());
         $variantHandler = $this->variantHandler ?? new DefaultVariantHandler(new MurmurHashCalculator());
 
@@ -671,6 +681,13 @@ final class UnleashBuilder
     {
         assert($dependencyContainer->getConfiguration() !== null);
 
-        return new DefaultUnleashRepository($dependencyContainer->getHttpClient(), $dependencyContainer->getRequestFactory(), $dependencyContainer->getConfiguration());
+        return new DefaultUnleashRepository(
+            $dependencyContainer->getHttpClient(),
+            $dependencyContainer->getRequestFactory(),
+            $dependencyContainer->getConfiguration(),
+            Unleash::SDK_NAME,
+            Unleash::SDK_VERSION,
+            $this->connectionId
+        );
     }
 }

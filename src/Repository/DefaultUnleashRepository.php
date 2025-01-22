@@ -88,8 +88,10 @@ final readonly class DefaultUnleashRepository implements UnleashRepository
         private ClientInterface $httpClient,
         private RequestFactoryInterface $requestFactory,
         private UnleashConfiguration $configuration,
-    ) {
-    }
+        private string $sdkName = null,
+        private string $sdkVersion = null,
+        private string $connectionId = null,
+    ) {}
 
     /**
      * @throws ClientExceptionInterface
@@ -510,6 +512,10 @@ final readonly class DefaultUnleashRepository implements UnleashRepository
         } else {
             $request = $this->requestFactory
                 ->createRequest('GET', (string) Url::appendPath($this->configuration->getUrl(), 'client/features'))
+                ->withHeader('x-unleash-appname', $this->configuration->getAppName() ?? $this->configuration->getInstanceId())
+                ->withHeader('x-unleash-sdk', $this->sdkName . ':' . $this->sdkVersion)
+                ->withHeader('x-unleash-connection-id', $this->connectionId)
+                // TODO: remove non-standard headers
                 ->withHeader('UNLEASH-APPNAME', $this->configuration->getAppName())
                 ->withHeader('UNLEASH-INSTANCEID', $this->configuration->getInstanceId())
                 ->withHeader('Unleash-Client-Spec', Unleash::SPECIFICATION_VERSION);

@@ -7,6 +7,8 @@ use Unleash\Client\DTO\Variant;
 
 interface Unleash
 {
+    public const string SDK_NAME = 'unleash-client-php';
+
     public const string SDK_VERSION = '2.6.0';
 
     public const string SPECIFICATION_VERSION = '5.0.2';
