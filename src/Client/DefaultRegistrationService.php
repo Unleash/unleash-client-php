@@ -13,29 +13,18 @@ use Unleash\Client\Configuration\UnleashConfiguration;
 use Unleash\Client\Enum\CacheKey;
 use Unleash\Client\Helper\StringStream;
 use Unleash\Client\Helper\Url;
-use Unleash\Client\Helper\Uuid;
 use Unleash\Client\Strategy\StrategyHandler;
 use Unleash\Client\Unleash;
 
 final class DefaultRegistrationService implements RegistrationService
 {
-    private string $sdkName;
-
-    private string $sdkVersion;
-
-    private string $connectionId;
-
     public function __construct(
         private readonly ClientInterface $httpClient,
         private readonly RequestFactoryInterface $requestFactory,
         private readonly UnleashConfiguration $configuration,
-        ?string $sdkName = null,
-        ?string $sdkVersion = null,
-        ?string $connectionId = null,
+        private ?string $sdkName = Unleash::SDK_NAME,
+        private ?string $sdkVersion = Unleash::SDK_VERSION,
     ) {
-        $this->sdkName = $sdkName ?? Unleash::SDK_NAME;
-        $this->sdkVersion = $sdkVersion ?? Unleash::SDK_VERSION;
-        $this->connectionId = $connectionId ?? Uuid::v4();
     }
 
     /**
@@ -78,7 +67,7 @@ final class DefaultRegistrationService implements RegistrationService
         $request = $request
             ->withHeader('x-unleash-appname', $this->configuration->getAppName())
             ->withHeader('x-unleash-sdk', $this->sdkName . ':' . $this->sdkVersion)
-            ->withHeader('x-unleash-connection-id', $this->connectionId);
+            ->withHeader('x-unleash-connection-id', $this->configuration->getConnectionId());
 
         try {
             $response = $this->httpClient->sendRequest($request);

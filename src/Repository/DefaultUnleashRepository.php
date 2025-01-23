@@ -34,7 +34,6 @@ use Unleash\Client\Event\UnleashEvents;
 use Unleash\Client\Exception\HttpResponseException;
 use Unleash\Client\Exception\InvalidValueException;
 use Unleash\Client\Helper\Url;
-use Unleash\Client\Helper\Uuid;
 use Unleash\Client\Unleash;
 
 /**
@@ -85,23 +84,13 @@ use Unleash\Client\Unleash;
  */
 final readonly class DefaultUnleashRepository implements UnleashRepository
 {
-    private string $sdkName;
-
-    private string $sdkVersion;
-
-    private string $connectionId;
-
     public function __construct(
         private ClientInterface $httpClient,
         private RequestFactoryInterface $requestFactory,
         private UnleashConfiguration $configuration,
-        ?string $sdkName = null,
-        ?string $sdkVersion = null,
-        ?string $connectionId = null,
+        private string $sdkName = Unleash::SDK_NAME,
+        private string $sdkVersion = Unleash::SDK_VERSION,
     ) {
-        $this->sdkName = $sdkName ?? Unleash::SDK_NAME;
-        $this->sdkVersion = $sdkVersion ?? Unleash::SDK_VERSION;
-        $this->connectionId = $connectionId ?? Uuid::v4();
     }
 
     /**
@@ -171,7 +160,9 @@ final readonly class DefaultUnleashRepository implements UnleashRepository
     private function setCache(array $features): void
     {
         $cache = $this->configuration->getCache();
-        $cache->set(CacheKey::FEATURES, $features, $this->configuration->getTtl());
+        $ttl = $this->configuration->getTtl();
+        $cache->set(CacheKey::FEATURES, $features, $ttl);
+        $this->configuration->updateCachedConnectionId();
     }
 
     /**
@@ -535,7 +526,7 @@ final readonly class DefaultUnleashRepository implements UnleashRepository
             $request = $request
                 ->withHeader('x-unleash-appname', $this->configuration->getAppName())
                 ->withHeader('x-unleash-sdk', $this->sdkName . ':' . $this->sdkVersion)
-                ->withHeader('x-unleash-connection-id', $this->connectionId);
+                ->withHeader('x-unleash-connection-id', $this->configuration->getConnectionId());
 
             try {
                 $response = $this->httpClient->sendRequest($request);

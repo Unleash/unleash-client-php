@@ -415,9 +415,6 @@ final class UnleashBuilder
             $dependencyContainer->getHttpClient(),
             $dependencyContainer->getRequestFactory(),
             $dependencyContainer->getConfiguration(),
-            Unleash::SDK_NAME,
-            Unleash::SDK_VERSION,
-            $this->connectionId
         );
         $metricsHandler = $this->metricsHandler ?? new DefaultMetricsHandler($metricsSender, $dependencyContainer->getConfiguration());
         $variantHandler = $this->variantHandler ?? new DefaultVariantHandler(new MurmurHashCalculator());
@@ -687,9 +684,6 @@ final class UnleashBuilder
             $dependencyContainer->getHttpClient(),
             $dependencyContainer->getRequestFactory(),
             $dependencyContainer->getConfiguration(),
-            Unleash::SDK_NAME,
-            Unleash::SDK_VERSION,
-            $this->connectionId
         );
     }
 }
