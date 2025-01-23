@@ -19,16 +19,20 @@ use Unleash\Client\Unleash;
 
 final class DefaultRegistrationService implements RegistrationService
 {
+    private string $sdkName;
+    private string $sdkVersion;
+    private string $connectionId;
+
     public function __construct(
         private readonly ClientInterface $httpClient,
         private readonly RequestFactoryInterface $requestFactory,
         private readonly UnleashConfiguration $configuration,
-        private ?string $sdkName = null,
-        private ?string $sdkVersion = null,
-        private ?string $connectionId = null,
+        ?string $sdkName = null,
+        ?string $sdkVersion = null,
+        ?string $connectionId = null,
     ) {
-        $this->sdkName ??= Unleash::SDK_NAME;
-        $this->sdkVersion ??= Unleash::SDK_VERSION;
+        $this->sdkName = $sdkName ?? Unleash::SDK_NAME;
+        $this->sdkVersion = $sdkVersion ?? Unleash::SDK_VERSION;
         $this->connectionId = $connectionId ?? Uuid::v4();
     }
 
