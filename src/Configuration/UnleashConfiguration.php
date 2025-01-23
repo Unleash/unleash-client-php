@@ -33,17 +33,22 @@ final class UnleashConfiguration
         private bool $metricsEnabled = true,
         private array $headers = [],
         private bool $autoRegistrationEnabled = true,
-        private UnleashContextProvider $contextProvider = new DefaultUnleashContextProvider(),
-        private BootstrapHandler $bootstrapHandler = new DefaultBootstrapHandler(),
-        private BootstrapProvider $bootstrapProvider = new EmptyBootstrapProvider(),
+        private ?UnleashContextProvider $contextProvider = null,
+        private ?BootstrapHandler $bootstrapHandler = null,
+        private ?BootstrapProvider $bootstrapProvider = null,
         private bool $fetchingEnabled = true,
-        private EventDispatcherInterface $eventDispatcher = new EventDispatcher(),
+        private ?EventDispatcherInterface $eventDispatcher = null,
         private int $staleTtl = 30 * 60,
         private ?CacheInterface $staleCache = null,
         private ?string $proxyKey = null,
         private ?CacheInterface $metricsCache = null,
-        private MetricsBucketSerializer $metricsBucketSerializer = new DefaultMetricsBucketSerializer(),
+        private ?MetricsBucketSerializer $metricsBucketSerializer = null,
     ) {
+        $this->contextProvider = $contextProvider ?? new DefaultUnleashContextProvider();
+        $this->bootstrapHandler = $bootstrapHandler ?? new DefaultBootstrapHandler();
+        $this->bootstrapProvider = $bootstrapProvider ?? new EmptyBootstrapProvider();
+        $this->eventDispatcher = $eventDispatcher ?? new EventDispatcher();
+        $this->metricsBucketSerializer = $metricsBucketSerializer ?? new DefaultMetricsBucketSerializer();
         $this->contextProvider ??= new DefaultUnleashContextProvider();
     }
 
