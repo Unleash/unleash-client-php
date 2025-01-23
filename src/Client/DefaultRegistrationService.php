@@ -20,7 +20,9 @@ use Unleash\Client\Unleash;
 final class DefaultRegistrationService implements RegistrationService
 {
     private string $sdkName;
+
     private string $sdkVersion;
+
     private string $connectionId;
 
     public function __construct(
@@ -61,7 +63,7 @@ final class DefaultRegistrationService implements RegistrationService
                 'appName' => $this->configuration->getAppName(),
                 'instanceId' => $this->configuration->getInstanceId(),
                 'sdkVersion' => $this->sdkName . ':' . $this->sdkVersion,
-                'strategies' => array_map(fn(StrategyHandler $strategyHandler): string => $strategyHandler->getStrategyName(), $strategyHandlers),
+                'strategies' => array_map(fn (StrategyHandler $strategyHandler): string => $strategyHandler->getStrategyName(), $strategyHandlers),
                 'started' => (new DateTimeImmutable())->format('c'),
                 'interval' => $this->configuration->getMetricsInterval(),
                 'platformName' => PHP_SAPI,

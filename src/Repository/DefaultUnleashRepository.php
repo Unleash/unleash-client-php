@@ -92,7 +92,8 @@ final readonly class DefaultUnleashRepository implements UnleashRepository
         private string $sdkName = Unleash::SDK_NAME,
         private string $sdkVersion = Unleash::SDK_VERSION,
         private string $connectionId = Uuid::v4(),
-    ) {}
+    ) {
+    }
 
     /**
      * @throws ClientExceptionInterface
