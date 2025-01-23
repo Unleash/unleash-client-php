@@ -74,7 +74,7 @@ final class DefaultRegistrationService implements RegistrationService
         }
 
         $request = $request
-            ->withHeader('x-unleash-appname', $this->configuration->getAppName() ?? $this->configuration->getInstanceId())
+            ->withHeader('x-unleash-appname', $this->configuration->getAppName())
             ->withHeader('x-unleash-sdk', $this->sdkName . ':' . $this->sdkVersion)
             ->withHeader('x-unleash-connection-id', $this->connectionId);
 
