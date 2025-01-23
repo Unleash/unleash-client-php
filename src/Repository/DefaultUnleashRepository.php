@@ -85,14 +85,23 @@ use Unleash\Client\Unleash;
  */
 final readonly class DefaultUnleashRepository implements UnleashRepository
 {
+    private string $sdkName;
+
+    private string $sdkVersion;
+
+    private string $connectionId;
+
     public function __construct(
         private ClientInterface $httpClient,
         private RequestFactoryInterface $requestFactory,
         private UnleashConfiguration $configuration,
-        private string $sdkName = Unleash::SDK_NAME,
-        private string $sdkVersion = Unleash::SDK_VERSION,
-        private string $connectionId = Uuid::v4(),
+        ?string $sdkName = null,
+        ?string $sdkVersion = null,
+        ?string $connectionId = null,
     ) {
+        $this->sdkName = $sdkName ?? Unleash::SDK_NAME;
+        $this->sdkVersion = $sdkVersion ?? Unleash::SDK_VERSION;
+        $this->connectionId = $connectionId ?? Uuid::v4();
     }
 
     /**

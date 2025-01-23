@@ -70,7 +70,7 @@ final class UnleashBuilder
 
     private ?string $appName = null;
 
-    private string $connectionId = Uuid::v4();
+    private string $connectionId;
 
     private ?ClientInterface $httpClient = null;
 
@@ -133,6 +133,8 @@ final class UnleashBuilder
         if (class_exists(EventDispatcher::class)) {
             $this->eventDispatcher = new EventDispatcher();
         }
+
+        $this->connectionId = Uuid::v4();
 
         $rolloutStrategyHandler = new GradualRolloutStrategyHandler(new MurmurHashCalculator());
         $this->strategies = [
