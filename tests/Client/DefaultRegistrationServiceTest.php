@@ -138,7 +138,6 @@ final class DefaultRegistrationServiceTest extends AbstractHttpClientTestCase
             ->setCache($this->getCache())
             ->setHeaders([
                 'Some-Header' => 'some-value',
-                'x-unleash-connection-id' => 'should not override',
             ])->setCache($this->getCache());
 
         $instance = new DefaultRegistrationService(
@@ -155,6 +154,5 @@ final class DefaultRegistrationServiceTest extends AbstractHttpClientTestCase
         self::assertSame('some-value', $request->getHeaderLine('Some-Header'));
         self::assertEquals('customAppName', $request->getHeaderLine('x-unleash-appname'));
         self::assertStringStartsWith('unleash-client-php:', $request->getHeaderLine('x-unleash-sdk'));
-        self::assertStringMatchesFormat('%s-%s-%s-%s-%s', $request->getHeaderLine('x-unleash-connection-id'));
     }
 }

@@ -36,7 +36,6 @@ use Unleash\Client\Helper\Builder\StaleCacheAware;
 use Unleash\Client\Helper\Builder\StickinessCalculatorAware;
 use Unleash\Client\Helper\DefaultImplementationLocator;
 use Unleash\Client\Helper\UnleashBuilderContainer;
-use Unleash\Client\Helper\Uuid;
 use Unleash\Client\Metrics\DefaultMetricsBucketSerializer;
 use Unleash\Client\Metrics\DefaultMetricsHandler;
 use Unleash\Client\Metrics\DefaultMetricsSender;
@@ -69,8 +68,6 @@ final class UnleashBuilder
     private ?string $instanceId = null;
 
     private ?string $appName = null;
-
-    private string $connectionId;
 
     private ?ClientInterface $httpClient = null;
 
@@ -133,8 +130,6 @@ final class UnleashBuilder
         if (class_exists(EventDispatcher::class)) {
             $this->eventDispatcher = new EventDispatcher();
         }
-
-        $this->connectionId = Uuid::v4();
 
         $rolloutStrategyHandler = new GradualRolloutStrategyHandler(new MurmurHashCalculator());
         $this->strategies = [

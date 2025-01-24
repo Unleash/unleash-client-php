@@ -14,6 +14,4 @@ final class CacheKey
     public const string REGISTRATION = 'unleash.client.metrics.registration';
 
     public const string FEATURES_RESPONSE = 'unleash.client.feature.response';
-
-    public const string CONNECTION_ID = 'unleash.client.connection.id';
 }

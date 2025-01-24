@@ -162,7 +162,6 @@ final readonly class DefaultUnleashRepository implements UnleashRepository
         $cache = $this->configuration->getCache();
         $ttl = $this->configuration->getTtl();
         $cache->set(CacheKey::FEATURES, $features, $ttl);
-        $this->configuration->updateCachedConnectionId();
     }
 
     /**
@@ -525,8 +524,7 @@ final readonly class DefaultUnleashRepository implements UnleashRepository
 
             $request = $request
                 ->withHeader('x-unleash-appname', $this->configuration->getAppName())
-                ->withHeader('x-unleash-sdk', $this->sdkName . ':' . $this->sdkVersion)
-                ->withHeader('x-unleash-connection-id', $this->configuration->getConnectionId());
+                ->withHeader('x-unleash-sdk', $this->sdkName . ':' . $this->sdkVersion);
 
             try {
                 $response = $this->httpClient->sendRequest($request);

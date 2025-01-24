@@ -14,16 +14,12 @@ use Unleash\Client\Bootstrap\DefaultBootstrapHandler;
 use Unleash\Client\Bootstrap\EmptyBootstrapProvider;
 use Unleash\Client\ContextProvider\DefaultUnleashContextProvider;
 use Unleash\Client\ContextProvider\UnleashContextProvider;
-use Unleash\Client\Enum\CacheKey;
 use Unleash\Client\Helper\Url;
-use Unleash\Client\Helper\Uuid;
 use Unleash\Client\Metrics\DefaultMetricsBucketSerializer;
 use Unleash\Client\Metrics\MetricsBucketSerializer;
 
 final class UnleashConfiguration
 {
-    private string $connectionId;
-
     /**
      * @param array<string,string> $headers
      */
@@ -49,7 +45,6 @@ final class UnleashConfiguration
         private MetricsBucketSerializer $metricsBucketSerializer = new DefaultMetricsBucketSerializer(),
     ) {
         $this->contextProvider ??= new DefaultUnleashContextProvider();
-        $this->connectionId = Uuid::v4();
     }
 
     public function getCache(): CacheInterface
@@ -302,16 +297,5 @@ final class UnleashConfiguration
         $this->metricsBucketSerializer = $metricsBucketSerializer;
 
         return $this;
-    }
-
-    public function getConnectionId(): string
-    {
-        $connectionId = $this->getCache()->get(CacheKey::CONNECTION_ID, $this->connectionId);
-        return is_string($connectionId) ? $connectionId : $this->connectionId;
-    }
-
-    public function updateCachedConnectionId(): void
-    {
-        $this->getCache()->set(CacheKey::CONNECTION_ID, $this->connectionId);
     }
 }
