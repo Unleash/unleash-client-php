@@ -306,9 +306,8 @@ final class UnleashConfiguration
 
     public function getConnectionId(): string
     {
-        $cachedConnectionId = $this->getCache()->get(CacheKey::CONNECTION_ID);
-
-        return $cachedConnectionId ?? $this->connectionId;
+        $connectionId = $this->getCache()->get(CacheKey::CONNECTION_ID, $this->connectionId);
+        return is_string($connectionId) ? $connectionId : $this->connectionId;
     }
 
     public function updateCachedConnectionId(): void
