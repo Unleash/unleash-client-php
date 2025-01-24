@@ -88,8 +88,6 @@ final readonly class DefaultUnleashRepository implements UnleashRepository
         private ClientInterface $httpClient,
         private RequestFactoryInterface $requestFactory,
         private UnleashConfiguration $configuration,
-        private string $sdkName = Unleash::SDK_NAME,
-        private string $sdkVersion = Unleash::SDK_VERSION,
     ) {
     }
 
@@ -521,10 +519,6 @@ final readonly class DefaultUnleashRepository implements UnleashRepository
             foreach ($this->configuration->getHeaders() as $name => $value) {
                 $request = $request->withHeader($name, $value);
             }
-
-            $request = $request
-                ->withHeader('x-unleash-appname', $this->configuration->getAppName())
-                ->withHeader('x-unleash-sdk', $this->sdkName . ':' . $this->sdkVersion);
 
             try {
                 $response = $this->httpClient->sendRequest($request);

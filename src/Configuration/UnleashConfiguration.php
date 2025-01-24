@@ -17,6 +17,7 @@ use Unleash\Client\ContextProvider\UnleashContextProvider;
 use Unleash\Client\Helper\Url;
 use Unleash\Client\Metrics\DefaultMetricsBucketSerializer;
 use Unleash\Client\Metrics\MetricsBucketSerializer;
+use Unleash\Client\Unleash;
 
 final class UnleashConfiguration
 {
@@ -43,6 +44,10 @@ final class UnleashConfiguration
         private ?string $proxyKey = null,
         private ?CacheInterface $metricsCache = null,
         private MetricsBucketSerializer $metricsBucketSerializer = new DefaultMetricsBucketSerializer(),
+        /**
+         * SDK identifier in a format of `unleash-client-<language-or-framework>:<semver>`.
+         */
+        private string $sdkVersion = Unleash::SDK_NAME . ':' . Unleash::SDK_VERSION,
     ) {
         $this->contextProvider ??= new DefaultUnleashContextProvider();
     }
@@ -183,7 +188,12 @@ final class UnleashConfiguration
      */
     public function getHeaders(): array
     {
-        return $this->headers;
+        $identificationHeaders = [
+            'x-unleash-appname' => $this->getAppName(),
+            'x-unleash-sdk' => $this->getSdkVersion(),
+        ];
+
+        return array_merge($this->headers, $identificationHeaders);
     }
 
     /**
@@ -297,5 +307,10 @@ final class UnleashConfiguration
         $this->metricsBucketSerializer = $metricsBucketSerializer;
 
         return $this;
+    }
+
+    public function getSdkVersion(): string
+    {
+        return $this->sdkVersion;
     }
 }

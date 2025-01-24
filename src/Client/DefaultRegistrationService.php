@@ -22,7 +22,13 @@ final class DefaultRegistrationService implements RegistrationService
         private readonly ClientInterface $httpClient,
         private readonly RequestFactoryInterface $requestFactory,
         private readonly UnleashConfiguration $configuration,
+        /**
+         * @deprecated use configuration sdkVersion property
+         */
         private ?string $sdkName = Unleash::SDK_NAME,
+        /**
+         * @deprecated use configuration sdkVersion property
+         */
         private ?string $sdkVersion = Unleash::SDK_VERSION,
     ) {
     }
@@ -51,7 +57,7 @@ final class DefaultRegistrationService implements RegistrationService
             ->withBody(new StringStream(json_encode([
                 'appName' => $this->configuration->getAppName(),
                 'instanceId' => $this->configuration->getInstanceId(),
-                'sdkVersion' => $this->sdkName . ':' . $this->sdkVersion,
+                'sdkVersion' => $this->configuration->getSdkVersion() || $this->sdkName . ':' . $this->sdkVersion,
                 'strategies' => array_map(fn (StrategyHandler $strategyHandler): string => $strategyHandler->getStrategyName(), $strategyHandlers),
                 'started' => (new DateTimeImmutable())->format('c'),
                 'interval' => $this->configuration->getMetricsInterval(),
@@ -63,10 +69,6 @@ final class DefaultRegistrationService implements RegistrationService
         foreach ($this->configuration->getHeaders() as $name => $value) {
             $request = $request->withHeader($name, $value);
         }
-
-        $request = $request
-            ->withHeader('x-unleash-appname', $this->configuration->getAppName())
-            ->withHeader('x-unleash-sdk', $this->sdkName . ':' . $this->sdkVersion);
 
         try {
             $response = $this->httpClient->sendRequest($request);
