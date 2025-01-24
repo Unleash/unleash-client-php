@@ -25,11 +25,11 @@ final class DefaultRegistrationService implements RegistrationService
         /**
          * @deprecated use configuration sdkVersion property
          */
-        private ?string $sdkName = Unleash::SDK_NAME,
+        private ?string $sdkName = '',
         /**
          * @deprecated use configuration sdkVersion property
          */
-        private ?string $sdkVersion = Unleash::SDK_VERSION,
+        private ?string $sdkVersion = '',
     ) {
     }
 
@@ -51,13 +51,15 @@ final class DefaultRegistrationService implements RegistrationService
         if (!is_array($strategyHandlers)) {
             $strategyHandlers = iterator_to_array($strategyHandlers);
         }
+        $legacySdkVersion = $this->sdkName . ':' . $this->sdkVersion;
+
         $request = $this->requestFactory
             ->createRequest('POST', (string) Url::appendPath($this->configuration->getUrl(), 'client/register'))
             ->withHeader('Content-Type', 'application/json')
             ->withBody(new StringStream(json_encode([
                 'appName' => $this->configuration->getAppName(),
                 'instanceId' => $this->configuration->getInstanceId(),
-                'sdkVersion' => $this->configuration->getSdkVersion() || $this->sdkName . ':' . $this->sdkVersion,
+                'sdkVersion' => ($legacySdkVersion !== ':') ? $legacySdkVersion : $this->configuration->getSdkVersion(),
                 'strategies' => array_map(fn (StrategyHandler $strategyHandler): string => $strategyHandler->getStrategyName(), $strategyHandlers),
                 'started' => (new DateTimeImmutable())->format('c'),
                 'interval' => $this->configuration->getMetricsInterval(),
