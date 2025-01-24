@@ -406,11 +406,7 @@ final class UnleashBuilder
         );
 
         assert($dependencyContainer->getConfiguration() !== null);
-        $registrationService = $this->registrationService ?? new DefaultRegistrationService(
-            $dependencyContainer->getHttpClient(),
-            $dependencyContainer->getRequestFactory(),
-            $dependencyContainer->getConfiguration(),
-        );
+        $registrationService = $this->registrationService ?? new DefaultRegistrationService($dependencyContainer->getHttpClient(), $dependencyContainer->getRequestFactory(), $dependencyContainer->getConfiguration());
         $metricsHandler = $this->metricsHandler ?? new DefaultMetricsHandler($metricsSender, $dependencyContainer->getConfiguration());
         $variantHandler = $this->variantHandler ?? new DefaultVariantHandler(new MurmurHashCalculator());
 
@@ -675,10 +671,6 @@ final class UnleashBuilder
     {
         assert($dependencyContainer->getConfiguration() !== null);
 
-        return new DefaultUnleashRepository(
-            $dependencyContainer->getHttpClient(),
-            $dependencyContainer->getRequestFactory(),
-            $dependencyContainer->getConfiguration(),
-        );
+        return new DefaultUnleashRepository($dependencyContainer->getHttpClient(), $dependencyContainer->getRequestFactory(), $dependencyContainer->getConfiguration());
     }
 }
