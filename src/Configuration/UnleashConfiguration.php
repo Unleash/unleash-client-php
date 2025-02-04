@@ -189,8 +189,8 @@ final class UnleashConfiguration
     public function getHeaders(): array
     {
         $identificationHeaders = [
-            'x-unleash-appname' => $this->getAppName(),
-            'x-unleash-sdk' => $this->getSdkVersion(),
+            'unleash-appname' => $this->getAppName(),
+            'unleash-sdk' => $this->getSdkVersion(),
         ];
 
         return array_merge($this->headers, $identificationHeaders);

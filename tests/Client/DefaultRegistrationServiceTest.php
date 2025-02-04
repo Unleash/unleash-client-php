@@ -152,7 +152,7 @@ final class DefaultRegistrationServiceTest extends AbstractHttpClientTestCase
 
         $request = $this->requestHistory[0]['request'];
         self::assertSame('some-value', $request->getHeaderLine('Some-Header'));
-        self::assertEquals('customAppName', $request->getHeaderLine('x-unleash-appname'));
-        self::assertStringStartsWith('unleash-client-php:', $request->getHeaderLine('x-unleash-sdk'));
+        self::assertEquals('customAppName', $request->getHeaderLine('unleash-appname'));
+        self::assertStringStartsWith('unleash-client-php:', $request->getHeaderLine('unleash-sdk'));
     }
 }
