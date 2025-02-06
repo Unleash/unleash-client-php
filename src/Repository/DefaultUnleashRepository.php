@@ -158,7 +158,8 @@ final readonly class DefaultUnleashRepository implements UnleashRepository
     private function setCache(array $features): void
     {
         $cache = $this->configuration->getCache();
-        $cache->set(CacheKey::FEATURES, $features, $this->configuration->getTtl());
+        $ttl = $this->configuration->getTtl();
+        $cache->set(CacheKey::FEATURES, $features, $ttl);
     }
 
     /**
@@ -510,6 +511,7 @@ final readonly class DefaultUnleashRepository implements UnleashRepository
         } else {
             $request = $this->requestFactory
                 ->createRequest('GET', (string) Url::appendPath($this->configuration->getUrl(), 'client/features'))
+                // TODO: remove non-standard headers
                 ->withHeader('UNLEASH-APPNAME', $this->configuration->getAppName())
                 ->withHeader('UNLEASH-INSTANCEID', $this->configuration->getInstanceId())
                 ->withHeader('Unleash-Client-Spec', Unleash::SPECIFICATION_VERSION);
