@@ -514,6 +514,7 @@ final readonly class DefaultUnleashRepository implements UnleashRepository
                 // TODO: remove non-standard headers
                 ->withHeader('UNLEASH-APPNAME', $this->configuration->getAppName())
                 ->withHeader('UNLEASH-INSTANCEID', $this->configuration->getInstanceId())
+                ->withHeader('Unleash-Interval', (string) ($this->configuration->getTtl() * 1000))
                 ->withHeader('Unleash-Client-Spec', Unleash::SPECIFICATION_VERSION);
 
             foreach ($this->configuration->getHeaders() as $name => $value) {
