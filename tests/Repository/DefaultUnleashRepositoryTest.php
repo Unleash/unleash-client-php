@@ -223,7 +223,7 @@ final class DefaultUnleashRepositoryTest extends AbstractHttpClientTestCase
         self::assertEquals('some value', $headers['Custom-Header-1'][0]);
         self::assertEquals('some other value', $headers['Custom-Header-2'][0]);
         self::assertEquals('Some API key', $headers['Authorization'][0]);
-        self::assertEquals('30000', $headers['Unleash-Interval'][0]);
+        self::assertEquals('15000', $headers['Unleash-Interval'][0]);
     }
 
     public function testBootstrappingValid()
