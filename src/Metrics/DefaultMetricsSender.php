@@ -29,6 +29,7 @@ final readonly class DefaultMetricsSender implements MetricsSender
         $request = $this->requestFactory
             ->createRequest('POST', $this->configuration->getMetricsUrl())
             ->withHeader('Content-Type', 'application/json')
+            ->withHeader('Unleash-Interval', (string) $this->configuration->getMetricsInterval())
             ->withBody(new StringStream(json_encode([
                 'appName' => $this->configuration->getAppName(),
                 'instanceId' => $this->configuration->getInstanceId(),

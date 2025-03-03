@@ -30,7 +30,7 @@ final class UnleashConfiguration
         private string|Stringable $instanceId,
         private ?CacheInterface $cache = null,
         private int $ttl = 30,
-        private int $metricsInterval = 30_000,
+        private int $metricsInterval = 15_000,
         private bool $metricsEnabled = true,
         private array $headers = [],
         private bool $autoRegistrationEnabled = true,
