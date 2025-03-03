@@ -67,6 +67,6 @@ final class DefaultMetricsHandlerTest extends AbstractHttpClientTestCase
         self::assertArrayHasKey('no', $body['bucket']['toggles'][$feature->getName()]);
         self::assertEquals(3, $body['bucket']['toggles'][$feature->getName()]['yes']);
         self::assertEquals(1, $body['bucket']['toggles'][$feature->getName()]['no']);
-        self::assertEquals('3000', $request->getHeaderLine('unleash-interval'));
+        self::assertEquals('3000', $request->getHeaderLine('Unleash-Interval'));
     }
 }
