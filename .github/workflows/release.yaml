@@ -73,6 +73,12 @@ jobs:
       - name: Downgrade phpunit
         if: matrix.version == '7.2'
         run: 'sed -i -e ''s/"phpunit\/phpunit": "\^9.5"/"phpunit\/phpunit": "\^8.5"/'' composer.json'
+      - name: Downgrade PHPStan
+        if: matrix.version == '7.2' || matrix.version == '7.3'
+        run: 'sed -i -e ''s/"phpstan\/phpstan": "\^2.0"/"phpstan\/phpstan": "\^1.0"/'' composer.json'
+      - name: Downgrade Rector
+        if: matrix.version == '7.2' || matrix.version == '7.3'
+        run: 'sed -i -e ''s/"rector\/rector": "\^2.0"/"rector\/rector": "\^1.0"/'' composer.json'
       - name: Copy Bootstrap
         if: matrix.version == '7.2'
         run: cp .github/bootstrap-72.php src
