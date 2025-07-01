@@ -965,7 +965,7 @@ final class UnleashBuilderTest extends TestCase
         $unleash = $this->instance->withFetchingEnabled(false)->withRepository($repository)->build();
         $unleash->isEnabled('some-feature');
         self::assertSame(1, $calls);
-        self::assertSame($repository, $this->getReflection($unleash)->getProperty('repository')->getValue($unleash));
+        self::assertSame($repository, $this->getProperty($unleash, 'repository'));
         self::assertSame($repository, $this->instance->withRepository($repository)->buildRepository());
     }
 
