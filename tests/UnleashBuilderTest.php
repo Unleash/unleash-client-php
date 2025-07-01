@@ -41,6 +41,7 @@ use Unleash\Client\Metrics\DefaultMetricsBucketSerializer;
 use Unleash\Client\Metrics\MetricsBucket;
 use Unleash\Client\Metrics\MetricsBucketSerializer;
 use Unleash\Client\Metrics\MetricsHandler;
+use Unleash\Client\Repository\UnleashRepository;
 use Unleash\Client\Strategy\DefaultStrategyHandler;
 use Unleash\Client\Strategy\StrategyHandler;
 use Unleash\Client\Tests\TestHelpers\CustomBootstrapProviderImpl74;
@@ -926,6 +927,40 @@ final class UnleashBuilderTest extends TestCase
         };
         $unleash = $this->instance->withFetchingEnabled(false)->withMetricsBucketSerializer($serializer)->build();
         self::assertSame($serializer, $this->getConfiguration($unleash)->getMetricsBucketSerializer());
+    }
+
+    public function testWithRepository()
+    {
+        $calls = 0;
+
+        $repository = new class ($calls) implements UnleashRepository
+        {
+            public function __construct(
+                private int &$calls,
+            ) {
+            }
+
+            public function findFeature(string $featureName): ?Feature
+            {
+                $this->calls += 1;
+                return null;
+            }
+
+            public function getFeatures(): iterable
+            {
+                return [];
+            }
+
+            public function refreshCache(): void
+            {
+            }
+        };
+
+        $unleash = $this->instance->withFetchingEnabled(false)->withRepository($repository)->build();
+        $unleash->isEnabled('some-feature');
+        self::assertSame(1, $calls);
+        self::assertSame($repository, $this->getReflection($unleash)->getProperty('repository')->getValue($unleash));
+        self::assertSame($repository, $this->instance->withRepository($repository)->buildRepository());
     }
 
     public function testBuildRepository()
