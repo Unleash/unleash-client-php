@@ -73,7 +73,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        version: ['7.2', '7.3', '7.4', '8.0', '8.1', '8.2']
+        version: ['7.2', '7.3', '7.4', '8.0', '8.1', '8.2', '8.3']
     steps:
       - name: Setup Build PHP
         uses: shivammathur/setup-php@v2
