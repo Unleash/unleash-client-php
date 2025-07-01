@@ -124,6 +124,8 @@ final class UnleashBuilder
 
     private ?MetricsBucketSerializer $metricsBucketSerializer = null;
 
+    private ?UnleashRepository $repository = null;
+
     public function __construct()
     {
         $this->defaultImplementationLocator = new DefaultImplementationLocator();
@@ -375,8 +377,18 @@ final class UnleashBuilder
         return $this->with('metricsBucketSerializer', $metricsBucketSerializer);
     }
 
+    #[Pure]
+    public function withRepository(?UnleashRepository $repository): self
+    {
+        return $this->with('repository', $repository);
+    }
+
     public function buildRepository(): UnleashRepository
     {
+        if ($this->repository !== null) {
+            return $this->repository;
+        }
+
         $dependencyContainer = $this->initializeContainerWithConfiguration();
 
         return $this->createRepository($dependencyContainer);
@@ -385,7 +397,7 @@ final class UnleashBuilder
     public function build(): Unleash
     {
         $dependencyContainer = $this->initializeContainerWithConfiguration();
-        $repository = $this->createRepository($dependencyContainer);
+        $repository = $this->repository ?? $this->createRepository($dependencyContainer);
 
         assert($dependencyContainer->getConfiguration() !== null);
         $metricsSender = new DefaultMetricsSender($dependencyContainer->getHttpClient(), $dependencyContainer->getRequestFactory(), $dependencyContainer->getConfiguration());
