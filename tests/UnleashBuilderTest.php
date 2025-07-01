@@ -940,7 +940,7 @@ final class UnleashBuilderTest extends TestCase
             private $calls;
 
             public function __construct(
-                int &$calls,
+                int &$calls
             ) {
                 $this->calls = &$calls;
             }
