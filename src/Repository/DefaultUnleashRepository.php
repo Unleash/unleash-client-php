@@ -207,7 +207,6 @@ final readonly class DefaultUnleashRepository implements UnleashRepository
             }
 
             $featureVariants = $this->parseVariants($feature['variants'] ?? []);
-            // @phpstan-ignore-next-line variable.undefined
             $dependencies = $this->parseDependencies($feature['dependencies'] ?? [], $features, $hasUnresolvedDependencies);
 
             $featureDto = new DefaultFeature(
@@ -316,7 +315,8 @@ final readonly class DefaultUnleashRepository implements UnleashRepository
      *
      * @return array<FeatureDependency>
      */
-    private function parseDependencies(array $dependencies, array $features, bool &$hasUnresolvedDependencies): array
+    // @phpstan-ignore-next-line parameterByRef.unusedType
+    private function parseDependencies(array $dependencies, array $features, ?bool &$hasUnresolvedDependencies): array
     {
         $hasUnresolvedDependencies = false;
         $result = [];

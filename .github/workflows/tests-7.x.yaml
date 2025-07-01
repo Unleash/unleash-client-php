@@ -22,6 +22,6 @@ jobs:
           ref: php-${{ matrix.version }}
           submodules: true
       - name: Install Dependencies
-        run: composer install
+        run: composer install --ignore-platform-req=php
       - name: Run tests
         run: composer phpunit
