@@ -933,8 +933,7 @@ final class UnleashBuilderTest extends TestCase
     {
         $calls = 0;
 
-        $repository = new class ($calls) implements UnleashRepository
-        {
+        $repository = new class($calls) implements UnleashRepository {
             public function __construct(
                 private int &$calls,
             ) {
@@ -943,6 +942,7 @@ final class UnleashBuilderTest extends TestCase
             public function findFeature(string $featureName): ?Feature
             {
                 $this->calls += 1;
+
                 return null;
             }
 
