@@ -934,7 +934,10 @@ final class UnleashBuilderTest extends TestCase
         $calls = 0;
 
         $repository = new class($calls) implements UnleashRepository {
-            private int $calls;
+            /**
+             * @var int
+             */
+            private $calls;
 
             public function __construct(
                 int &$calls,
