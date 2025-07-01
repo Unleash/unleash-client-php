@@ -49,7 +49,6 @@ final class UnleashConfiguration
          */
         private string $sdkVersion = Unleash::SDK_NAME . ':' . Unleash::SDK_VERSION,
     ) {
-        $this->contextProvider ??= new DefaultUnleashContextProvider();
     }
 
     public function getCache(): CacheInterface

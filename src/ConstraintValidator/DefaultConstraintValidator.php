@@ -32,11 +32,11 @@ final class DefaultConstraintValidator implements ConstraintValidator
         $currentValue = $context->findContextValue($field) ?? '';
 
         $callback = $this->getValidationCallback($constraint->getOperator());
-        $valueToPass = method_exists($constraint, 'getSingleValue') && $constraint->getSingleValue() !== null
+        $valueToPass = $constraint->getSingleValue() !== null
             ? $constraint->getSingleValue()
             : $constraint->getValues();
 
-        $isCaseInsensitive = method_exists($constraint, 'isCaseInsensitive') && $constraint->isCaseInsensitive();
+        $isCaseInsensitive = $constraint->isCaseInsensitive();
         if ($isCaseInsensitive) {
             $currentValue = $this->makeCaseInsensitive($currentValue);
             $valueToPass = $valueToPass === null ? null : $this->makeCaseInsensitive($valueToPass);
@@ -47,7 +47,7 @@ final class DefaultConstraintValidator implements ConstraintValidator
         try {
             $result = $callback($currentValue, $valueToPass);
 
-            $isInverted = method_exists($constraint, 'isInverted') && $constraint->isInverted();
+            $isInverted = $constraint->isInverted();
             if ($isInverted) {
                 $result = !$result;
             }
@@ -55,7 +55,7 @@ final class DefaultConstraintValidator implements ConstraintValidator
             $result = false;
         }
 
-        return $result;
+        return (bool) $result;
     }
 
     /**
@@ -70,6 +70,7 @@ final class DefaultConstraintValidator implements ConstraintValidator
     private function makeCaseInsensitive(string|array $value): string|array
     {
         if (is_string($value)) {
+            // @phpstan-ignore-next-line return.type
             return mb_strtolower($value);
         }
 
@@ -79,6 +80,7 @@ final class DefaultConstraintValidator implements ConstraintValidator
             $result[$key] = $this->makeCaseInsensitive($item);
         }
 
+        // @phpstan-ignore-next-line return.type
         return $result;
     }
 

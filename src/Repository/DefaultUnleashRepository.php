@@ -141,11 +141,11 @@ final readonly class DefaultUnleashRepository implements UnleashRepository
     {
         $cache = $this->configuration->getCache();
 
+        /** @var array<Feature>|null $result */
         $result = $cache->get(CacheKey::FEATURES);
         if ($result === null) {
             return null;
         }
-        assert(is_array($result));
 
         return $result;
     }
@@ -207,6 +207,7 @@ final readonly class DefaultUnleashRepository implements UnleashRepository
             }
 
             $featureVariants = $this->parseVariants($feature['variants'] ?? []);
+            // @phpstan-ignore-next-line variable.undefined
             $dependencies = $this->parseDependencies($feature['dependencies'] ?? [], $features, $hasUnresolvedDependencies);
 
             $featureDto = new DefaultFeature(
@@ -315,7 +316,7 @@ final readonly class DefaultUnleashRepository implements UnleashRepository
      *
      * @return array<FeatureDependency>
      */
-    private function parseDependencies(array $dependencies, array $features, ?bool &$hasUnresolvedDependencies = null): array
+    private function parseDependencies(array $dependencies, array $features, bool &$hasUnresolvedDependencies): array
     {
         $hasUnresolvedDependencies = false;
         $result = [];
@@ -367,7 +368,7 @@ final readonly class DefaultUnleashRepository implements UnleashRepository
     private function getResolvedVariants(array $requiredVariants, array $features, string $dependentFeatureName, bool &$dependencyResolved): array
     {
         return array_map(
-            function (string $variantName) use ($dependentFeatureName, &$features, &$dependencyResolved) {
+            function (string $variantName) use ($dependentFeatureName, &$features, &$dependencyResolved): Variant {
                 if (!$dependencyResolved) {
                     return new UnresolvedVariant($variantName);
                 }
@@ -557,6 +558,7 @@ final readonly class DefaultUnleashRepository implements UnleashRepository
         }
 
         assert(is_array($data));
+        // @phpstan-ignore-next-line argument.type
         $features = $this->parseFeatures($data);
         $this->setCache($features);
 

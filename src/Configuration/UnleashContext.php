@@ -42,6 +42,8 @@ final class UnleashContext implements Context
     #[Override]
     public function getIpAddress(): ?string
     {
+        assert(is_string($_SERVER['REMOTE_ADDR']) || $_SERVER['REMOTE_ADDR'] === null);
+
         return $this->ipAddress ?? $_SERVER['REMOTE_ADDR'] ?? null;
     }
 
