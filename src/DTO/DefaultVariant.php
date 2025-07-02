@@ -99,6 +99,7 @@ final readonly class DefaultVariant implements Variant
             $variant->getStickiness(),
             $variant->getPayload(),
             $variant->getOverrides(),
+            // @phpstan-ignore-next-line function.alreadyNarrowedType
             $featureEnabled ?? (method_exists($variant, 'isFeatureEnabled') ? $variant->isFeatureEnabled() : false),
         );
     }
