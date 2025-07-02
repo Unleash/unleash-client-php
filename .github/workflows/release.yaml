@@ -32,17 +32,17 @@ jobs:
       - name: Create latest release tag
         env:
           VERSION: ${{ steps.extract_name.outputs.result }}
-        run: git tag v${VERSION}83
+        run: git tag v${VERSION}84
       - name: Push latest release tag
         env:
           VERSION: ${{ steps.extract_name.outputs.result }}
-        run: git push origin v${VERSION}83
+        run: git push origin v${VERSION}84
   release_older:
     name: Release older PHP version
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        version: ['7.2', '7.3', '7.4', '8.0', '8.1', '8.2']
+        version: ['7.2', '7.3', '7.4', '8.0', '8.1', '8.2', '8.3']
     steps:
       - name: Extract Version Name
         id: extract_name
