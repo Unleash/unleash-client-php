@@ -12,6 +12,7 @@
     * [Builder](#builder)
       * [Required parameters](#required-parameters)
       * [Optional parameters](#optional-parameters)
+      * [Returning intermediate objects](#returning-intermediate-objects)
   * [Proxy SDK](#proxy-sdk)
   * [Caching](#caching)
   * [Bootstrapping](#bootstrapping)
@@ -326,7 +327,26 @@ $builder = UnleashBuilder::create()
         'Yet-Another-Header' => 'and-another-value',
     ]);
 ```
+#### Returning intermediate objects
 
+For some use cases the builder can return intermediate objects, for example the `UnleashRepository` object. This can be 
+useful if you need to directly interact with the repository, to refresh the cache manually for example.
+
+```php 
+<?php
+
+use Unleash\Client\UnleashBuilder;
+use Unleash\Client\Helper\Url;
+
+$repository = UnleashBuilder::create()
+    ->withAppName('Some app name')
+    ->withAppUrl(new Url('https://some-app-url.com', namePrefix: 'somePrefix.', tags: [
+        'myTag' => 'myValue',
+    ]))
+    ->withInstanceId('Some instance id')
+    ->buildRepository();
+$repository->refreshCache();
+```
 
 ## Proxy SDK
 
@@ -363,7 +383,7 @@ It would be slow to perform a http request every time you check if a feature is 
 apps. That's why this library has built-in support for PSR-16 cache implementations.
 
 If you don't provide any implementation and default implementation exists, it's used, otherwise you'll get an exception.
-You can also provide a TTL which defaults to 30 seconds for standard cache and 30 minutes for stale data cache.
+You can also provide a TTL which defaults to 15 seconds for standard cache and 30 minutes for stale data cache.
 
 > Stale data cache is used when http communication fails while fetching feature list from the server. In that case
 > the latest valid version is used until the TTL expires or server starts responding again. An event gets emitted
@@ -982,7 +1002,7 @@ $unleash = UnleashBuilder::create()
     ->withInstanceId('some-instance-id')
     ->withMetricsEnabled(false) // turn off metric sending
     ->withMetricsEnabled(true) // turn on metric sending
-    ->withMetricsInterval(10_000) // interval in milliseconds (10 seconds)
+    ->withMetricsInterval(60_000) // interval in milliseconds (60 seconds)
     ->withMetricsCacheHandler(new Psr16Cache(new RedisAdapter())) // use custom cache handler for metrics, defaults to standard cache handler
     ->build();
 

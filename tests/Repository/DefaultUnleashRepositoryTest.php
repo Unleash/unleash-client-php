@@ -168,6 +168,32 @@ final class DefaultUnleashRepositoryTest extends AbstractHttpClientTestCase
         self::assertNull($repository->findFeature('test'));
     }
 
+    public function testRefreshCache()
+    {
+        $cache = $this->getRealCache();
+        $repository = new DefaultUnleashRepository(
+            $this->httpClient,
+            new HttpFactory(),
+            (new UnleashConfiguration('', '', ''))
+                ->setCache($cache)
+                ->setTtl(5)
+        );
+
+        $this->pushResponse($this->response, 3);
+        $repository->getFeatures();
+
+        sleep(3);
+        $repository->refreshCache();
+        sleep(3);
+
+        self::assertCount(2, $this->requestHistory);
+
+        //Cache entry should have been invalidated by now (3+3 > TTL) if we didn't refresh it
+        $repository->getFeatures();
+        //Cache was hit if we have no new requests
+        self::assertCount(2, $this->requestHistory);
+    }
+
     public function testCustomHeaders()
     {
         $this->pushResponse($this->response);
@@ -197,6 +223,7 @@ final class DefaultUnleashRepositoryTest extends AbstractHttpClientTestCase
         self::assertEquals('some value', $headers['Custom-Header-1'][0]);
         self::assertEquals('some other value', $headers['Custom-Header-2'][0]);
         self::assertEquals('Some API key', $headers['Authorization'][0]);
+        self::assertEquals('15000', $headers['Unleash-Interval'][0]);
     }
 
     public function testBootstrappingValid()

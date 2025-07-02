@@ -18,7 +18,8 @@ use Unleash\Client\Tests\AbstractHttpClientTestCase;
 use Unleash\Client\Tests\Traits\FakeCacheImplementationTrait;
 use Unleash\Client\Tests\Traits\RealCacheImplementationTrait;
 
-final class DefaultUnleashProxyRepositoryTest extends AbstractHttpClientTestCase
+// this tests backward compatibility with a buggy old version of Unleash Edge
+final class DefaultUnleashProxyRepositoryWithSnakeCaseImpressionDataTest extends AbstractHttpClientTestCase
 {
     use FakeCacheImplementationTrait, RealCacheImplementationTrait {
         FakeCacheImplementationTrait::getCache insteadof RealCacheImplementationTrait;
@@ -71,7 +72,7 @@ final class DefaultUnleashProxyRepositoryTest extends AbstractHttpClientTestCase
                         ],
                         'enabled' => true,
                     ],
-                    'impressionData' => false,
+                    'impression_data' => false,
                 ])
             ),
         ]);
@@ -112,7 +113,7 @@ final class DefaultUnleashProxyRepositoryTest extends AbstractHttpClientTestCase
                 ],
                 'enabled' => true,
             ],
-            'impressionData' => false,
+            'impression_data' => false,
         ]);
 
         $mock = new MockHandler([

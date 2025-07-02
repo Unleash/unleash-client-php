@@ -34,6 +34,7 @@ use Unleash\Client\Event\UnleashEvents;
 use Unleash\Client\Exception\HttpResponseException;
 use Unleash\Client\Exception\InvalidValueException;
 use Unleash\Client\Helper\Url;
+use Unleash\Client\Unleash;
 
 /**
  * @phpstan-type ConstraintArray array{
@@ -116,64 +117,19 @@ final readonly class DefaultUnleashRepository implements UnleashRepository
     {
         $features = $this->getCachedFeatures();
         if ($features === null) {
-            $data = null;
-            if (!$this->configuration->isFetchingEnabled()) {
-                if (!$rawData = $this->getBootstrappedResponse()) {
-                    throw new LogicException('Fetching of Unleash api is disabled but no bootstrap is provided');
-                }
-            } else {
-                $request = $this->requestFactory
-                    ->createRequest('GET', (string) Url::appendPath($this->configuration->getUrl(), 'client/features'))
-                    ->withHeader('UNLEASH-APPNAME', $this->configuration->getAppName())
-                    ->withHeader('UNLEASH-INSTANCEID', $this->configuration->getInstanceId())
-                    ->withHeader('Unleash-Client-Spec', '5.1.6')
-                ;
-
-                foreach ($this->configuration->getHeaders() as $name => $value) {
-                    $request = $request->withHeader($name, $value);
-                }
-
-                try {
-                    $response = $this->httpClient->sendRequest($request);
-                    if ($response->getStatusCode() === 200) {
-                        $rawData = (string) $response->getBody();
-                        $data = json_decode($rawData, true);
-                        if (($lastError = json_last_error()) !== JSON_ERROR_NONE) {
-                            throw new InvalidValueException(
-                                sprintf("JsonException: '%s'", json_last_error_msg()),
-                                $lastError
-                            );
-                        }
-                        $this->setLastValidState($rawData);
-                    } else {
-                        throw new HttpResponseException("Invalid status code: '{$response->getStatusCode()}'");
-                    }
-                } catch (Exception $exception) {
-                    $this->configuration->getEventDispatcher()->dispatch(
-                        new FetchingDataFailedEvent($exception),
-                        UnleashEvents::FETCHING_DATA_FAILED,
-                    );
-                    $rawData = $this->getLastValidState();
-                }
-                $rawData ??= $this->getBootstrappedResponse();
-                if ($rawData === null) {
-                    throw new HttpResponseException(sprintf(
-                        'Got invalid response code when getting features and no default bootstrap provided: %s',
-                        isset($response) ? $response->getStatusCode() : 'unknown response status code'
-                    ), 0, $exception ?? null);
-                }
-            }
-
-            if ($data === null) {
-                $data = json_decode($rawData, true);
-            }
-
-            assert(is_array($data));
-            $features = $this->parseFeatures($data);
-            $this->setCache($features);
+            $features = $this->fetchFeatures();
         }
 
         return $features;
+    }
+
+    /**
+     * @throws InvalidArgumentException
+     * @throws ClientExceptionInterface
+     */
+    public function refreshCache(): void
+    {
+        $this->fetchFeatures();
     }
 
     /**
@@ -185,11 +141,10 @@ final readonly class DefaultUnleashRepository implements UnleashRepository
     {
         $cache = $this->configuration->getCache();
 
-        if (!$cache->has(CacheKey::FEATURES)) {
+        $result = $cache->get(CacheKey::FEATURES);
+        if ($result === null) {
             return null;
         }
-
-        $result = $cache->get(CacheKey::FEATURES, []);
         assert(is_array($result));
 
         return $result;
@@ -203,7 +158,8 @@ final readonly class DefaultUnleashRepository implements UnleashRepository
     private function setCache(array $features): void
     {
         $cache = $this->configuration->getCache();
-        $cache->set(CacheKey::FEATURES, $features, $this->configuration->getTtl());
+        $ttl = $this->configuration->getTtl();
+        $cache->set(CacheKey::FEATURES, $features, $ttl);
     }
 
     /**
@@ -539,5 +495,73 @@ final readonly class DefaultUnleashRepository implements UnleashRepository
         }
 
         return $variants;
+    }
+
+    /**
+     * @throws ClientExceptionInterface
+     * @throws InvalidArgumentException
+     *
+     * @return array<Feature>
+     */
+    private function fetchFeatures(): array
+    {
+        $data = null;
+        if (!$this->configuration->isFetchingEnabled()) {
+            if (!$rawData = $this->getBootstrappedResponse()) {
+                throw new LogicException('Fetching of Unleash api is disabled but no bootstrap is provided');
+            }
+        } else {
+            $request = $this->requestFactory
+                ->createRequest('GET', (string) Url::appendPath($this->configuration->getUrl(), 'client/features'))
+                // TODO: remove non-standard headers
+                ->withHeader('UNLEASH-APPNAME', $this->configuration->getAppName())
+                ->withHeader('UNLEASH-INSTANCEID', $this->configuration->getInstanceId())
+                ->withHeader('Unleash-Interval', (string) ($this->configuration->getTtl() * 1000))
+                ->withHeader('Unleash-Client-Spec', Unleash::SPECIFICATION_VERSION);
+
+            foreach ($this->configuration->getHeaders() as $name => $value) {
+                $request = $request->withHeader($name, $value);
+            }
+
+            try {
+                $response = $this->httpClient->sendRequest($request);
+                if ($response->getStatusCode() === 200) {
+                    $rawData = (string) $response->getBody();
+                    $data = json_decode($rawData, true);
+                    if (($lastError = json_last_error()) !== JSON_ERROR_NONE) {
+                        throw new InvalidValueException(
+                            sprintf("JsonException: '%s'", json_last_error_msg()),
+                            $lastError
+                        );
+                    }
+                    $this->setLastValidState($rawData);
+                } else {
+                    throw new HttpResponseException("Invalid status code: '{$response->getStatusCode()}'");
+                }
+            } catch (Exception $exception) {
+                $this->configuration->getEventDispatcher()->dispatch(
+                    new FetchingDataFailedEvent($exception),
+                    UnleashEvents::FETCHING_DATA_FAILED,
+                );
+                $rawData = $this->getLastValidState();
+            }
+            $rawData ??= $this->getBootstrappedResponse();
+            if ($rawData === null) {
+                throw new HttpResponseException(sprintf(
+                    'Got invalid response code when getting features and no default bootstrap provided: %s',
+                    isset($response) ? $response->getStatusCode() : 'unknown response status code'
+                ), 0, $exception ?? null);
+            }
+        }
+
+        if ($data === null) {
+            $data = json_decode($rawData, true);
+        }
+
+        assert(is_array($data));
+        $features = $this->parseFeatures($data);
+        $this->setCache($features);
+
+        return $features;
     }
 }

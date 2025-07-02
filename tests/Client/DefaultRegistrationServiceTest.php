@@ -131,4 +131,28 @@ final class DefaultRegistrationServiceTest extends AbstractHttpClientTestCase
         self::assertCount(1, $this->requestHistory);
         self::assertSame('https://localhost/api/client/register?namePrefix=somePrefix', (string) $this->requestHistory[0]['request']->getUri());
     }
+
+    public function testRequestHeaders()
+    {
+        $configuration = (new UnleashConfiguration('', 'customAppName', ''))
+            ->setCache($this->getCache())
+            ->setHeaders([
+                'Some-Header' => 'some-value',
+            ])->setCache($this->getCache());
+
+        $instance = new DefaultRegistrationService(
+            $this->httpClient,
+            new HttpFactory(),
+            $configuration
+        );
+        $this->pushResponse([]);
+
+        $instance->register([]);
+        self::assertCount(1, $this->requestHistory);
+
+        $request = $this->requestHistory[0]['request'];
+        self::assertSame('some-value', $request->getHeaderLine('Some-Header'));
+        self::assertEquals('customAppName', $request->getHeaderLine('unleash-appname'));
+        self::assertStringStartsWith('unleash-client-php:', $request->getHeaderLine('unleash-sdk'));
+    }
 }

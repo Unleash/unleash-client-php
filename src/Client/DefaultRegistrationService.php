@@ -22,11 +22,15 @@ final class DefaultRegistrationService implements RegistrationService
         private readonly ClientInterface $httpClient,
         private readonly RequestFactoryInterface $requestFactory,
         private readonly UnleashConfiguration $configuration,
-        private ?string $sdkName = null,
-        private ?string $sdkVersion = null,
+        /**
+         * @deprecated use configuration sdkVersion property
+         */
+        private ?string $sdkName = '',
+        /**
+         * @deprecated use configuration sdkVersion property
+         */
+        private ?string $sdkVersion = '',
     ) {
-        $this->sdkName ??= 'unleash-client-php';
-        $this->sdkVersion ??= Unleash::SDK_VERSION;
     }
 
     /**
@@ -47,16 +51,22 @@ final class DefaultRegistrationService implements RegistrationService
         if (!is_array($strategyHandlers)) {
             $strategyHandlers = iterator_to_array($strategyHandlers);
         }
+        $legacySdkVersion = $this->sdkName . ':' . $this->sdkVersion;
+
         $request = $this->requestFactory
             ->createRequest('POST', (string) Url::appendPath($this->configuration->getUrl(), 'client/register'))
             ->withHeader('Content-Type', 'application/json')
             ->withBody(new StringStream(json_encode([
                 'appName' => $this->configuration->getAppName(),
                 'instanceId' => $this->configuration->getInstanceId(),
-                'sdkVersion' => $this->sdkName . ':' . $this->sdkVersion,
+                'sdkVersion' => ($legacySdkVersion !== ':') ? $legacySdkVersion : $this->configuration->getSdkVersion(),
                 'strategies' => array_map(fn (StrategyHandler $strategyHandler): string => $strategyHandler->getStrategyName(), $strategyHandlers),
                 'started' => (new DateTimeImmutable())->format('c'),
                 'interval' => $this->configuration->getMetricsInterval(),
+                'platformName' => PHP_SAPI,
+                'platformVersion' => PHP_VERSION,
+                'yggdrasilVersion' => null,
+                'specVersion' => Unleash::SPECIFICATION_VERSION,
             ], JSON_THROW_ON_ERROR)));
         foreach ($this->configuration->getHeaders() as $name => $value) {
             $request = $request->withHeader($name, $value);

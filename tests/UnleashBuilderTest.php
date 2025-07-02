@@ -41,6 +41,7 @@ use Unleash\Client\Metrics\DefaultMetricsBucketSerializer;
 use Unleash\Client\Metrics\MetricsBucket;
 use Unleash\Client\Metrics\MetricsBucketSerializer;
 use Unleash\Client\Metrics\MetricsHandler;
+use Unleash\Client\Repository\UnleashRepository;
 use Unleash\Client\Strategy\DefaultStrategyHandler;
 use Unleash\Client\Strategy\StrategyHandler;
 use Unleash\Client\Tests\TestHelpers\CustomBootstrapProviderImpl74;
@@ -769,7 +770,7 @@ final class UnleashBuilderTest extends TestCase
     public function testWithMetricsHandler()
     {
         $metricsHandler = new class implements MetricsHandler {
-            public function handleMetrics(Feature $feature, bool $successful, Variant $variant = null): void
+            public function handleMetrics(Feature $feature, bool $successful, ?Variant $variant = null): void
             {
             }
         };
@@ -926,6 +927,127 @@ final class UnleashBuilderTest extends TestCase
         };
         $unleash = $this->instance->withFetchingEnabled(false)->withMetricsBucketSerializer($serializer)->build();
         self::assertSame($serializer, $this->getConfiguration($unleash)->getMetricsBucketSerializer());
+    }
+
+    public function testWithRepository()
+    {
+        $calls = 0;
+
+        $repository = new class($calls) implements UnleashRepository {
+            /**
+             * @var int
+             */
+            private $calls;
+
+            public function __construct(
+                int &$calls
+            ) {
+                $this->calls = &$calls;
+            }
+
+            public function findFeature(string $featureName): ?Feature
+            {
+                $this->calls += 1;
+
+                return null;
+            }
+
+            public function getFeatures(): iterable
+            {
+                return [];
+            }
+
+            public function refreshCache(): void
+            {
+            }
+        };
+
+        $unleash = $this->instance->withFetchingEnabled(false)->withRepository($repository)->build();
+        $unleash->isEnabled('some-feature');
+        self::assertSame(1, $calls);
+        self::assertSame($repository, $this->getProperty($unleash, 'repository'));
+        self::assertSame($repository, $this->instance->withRepository($repository)->buildRepository());
+    }
+
+    public function testBuildRepository()
+    {
+        try {
+            $this->instance->buildRepository();
+            self::fail('Expected exception: ' . InvalidValueException::class);
+        } catch (InvalidValueException $e) {
+        }
+
+        try {
+            $this->instance
+                ->withAppUrl('https://example.com')
+                ->buildRepository();
+            self::fail('Expected exception: ' . InvalidValueException::class);
+        } catch (InvalidValueException $e) {
+        }
+
+        try {
+            $this->instance
+                ->withAppUrl('https://example.com')
+                ->withInstanceId('test')
+                ->buildRepository();
+            self::fail('Expected exception: ' . InvalidValueException::class);
+        } catch (InvalidValueException $e) {
+        }
+
+        $repository = $this->instance
+            ->withAppUrl('https://example.com')
+            ->withAppName('Test App')
+            ->withInstanceId('test')
+            ->withAutomaticRegistrationEnabled(false)
+            ->buildRepository();
+        $reflection = new ReflectionObject($repository);
+        $configurationProperty = $reflection->getProperty('configuration');
+        $configurationProperty->setAccessible(true);
+        $configuration = $configurationProperty->getValue($repository);
+        assert($configuration instanceof UnleashConfiguration);
+
+        self::assertEquals('https://example.com', $configuration->getUrl());
+        self::assertEquals('Test App', $configuration->getAppName());
+        self::assertEquals('test', $configuration->getInstanceId());
+        self::assertNotNull($configuration->getCache());
+        self::assertIsInt($configuration->getTtl());
+
+        $requestFactory = $this->newRequestFactory();
+        $httpClient = $this->newHttpClient();
+
+        $repository = $this->instance
+            ->withAppUrl('https://example.com')
+            ->withAppName('Test App')
+            ->withInstanceId('test')
+            ->withAutomaticRegistrationEnabled(false)
+            ->withRequestFactory($requestFactory)
+            ->withHttpClient($httpClient)
+            ->buildRepository();
+        $reflection = new ReflectionObject($repository);
+        $httpClientProperty = $reflection->getProperty('httpClient');
+        $httpClientProperty->setAccessible(true);
+        $requestFactoryProperty = $reflection->getProperty('requestFactory');
+        $requestFactoryProperty->setAccessible(true);
+        self::assertEquals($httpClient, $httpClientProperty->getValue($repository));
+        self::assertEquals($requestFactory, $requestFactoryProperty->getValue($repository));
+
+        $cacheHandler = $this->getCache();
+        $repository = $this->instance
+            ->withAppUrl('https://example.com')
+            ->withAppName('Test App')
+            ->withInstanceId('test')
+            ->withAutomaticRegistrationEnabled(false)
+            ->withCacheHandler($cacheHandler)
+            ->withCacheTimeToLive(359)
+            ->buildRepository();
+
+        $reflection = new ReflectionObject($repository);
+        $configurationProperty = $reflection->getProperty('configuration');
+        $configurationProperty->setAccessible(true);
+        $configuration = $configurationProperty->getValue($repository);
+        assert($configuration instanceof UnleashConfiguration);
+        self::assertEquals($cacheHandler, $configuration->getCache());
+        self::assertEquals(359, $configuration->getTtl());
     }
 
     private function getConfiguration(DefaultUnleash $unleash): UnleashConfiguration
