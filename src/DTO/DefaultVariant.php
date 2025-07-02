@@ -53,6 +53,7 @@ final readonly class DefaultVariant implements Variant
             assert(is_array($result['payload']));
         }
 
+        // @phpstan-ignore-next-line return.type
         return $result;
     }
 

@@ -10,7 +10,7 @@
     ],
     "minimum-stability": "stable",
     "require": {
-        "php": "^8.3",
+        "php": "^8.4",
         "ext-json": "*",
         "psr/http-client": "^1.0",
         "psr/http-client-implementation": "^1.0",
@@ -32,9 +32,9 @@
     "require-dev": {
         "guzzlehttp/guzzle": "^7.0",
         "friendsofphp/php-cs-fixer": "^3.0",
-        "phpstan/phpstan": "^1.2",
+        "phpstan/phpstan": "^2.0",
         "jetbrains/phpstorm-attributes": "^1.0",
-        "rector/rector": "^1.0",
+        "rector/rector": "^2.0",
         "phpunit/phpunit": "^9.5",
         "symfony/http-client": "^5.0 | ^6.0 | ^7.0",
         "nyholm/psr7": "^1.0",

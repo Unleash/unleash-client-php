@@ -554,10 +554,6 @@ final class UnleashBuilder
         }
         // @codeCoverageIgnoreEnd
 
-        assert($cache instanceof CacheInterface);
-        assert($httpClient instanceof ClientInterface);
-        assert($requestFactory instanceof RequestFactoryInterface);
-
         $staleCache = $this->staleCache ?? $cache;
         $metricsCache = $this->metricsCache ?? $cache;
 
@@ -587,9 +583,8 @@ final class UnleashBuilder
         $this->initializeServices($contextProvider, $dependencyContainer);
         $this->initializeServices($bootstrapHandler, $dependencyContainer);
         $this->initializeServices($bootstrapProvider, $dependencyContainer);
-        if ($eventDispatcher !== null) {
-            $this->initializeServices($eventDispatcher, $dependencyContainer);
-        }
+        $this->initializeServices($eventDispatcher, $dependencyContainer);
+
         foreach ($this->eventSubscribers as $eventSubscriber) {
             $this->initializeServices($eventSubscriber, $dependencyContainer);
         }

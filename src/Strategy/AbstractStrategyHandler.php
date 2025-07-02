@@ -27,7 +27,7 @@ abstract class AbstractStrategyHandler implements StrategyHandler
 
     protected function validateConstraints(Strategy $strategy, Context $context): bool
     {
-        if (method_exists($strategy, 'hasNonexistentSegments') && $strategy->hasNonexistentSegments()) {
+        if ($strategy->hasNonexistentSegments()) {
             return false;
         }
 
@@ -50,8 +50,7 @@ abstract class AbstractStrategyHandler implements StrategyHandler
     {
         yield from $strategy->getConstraints();
 
-        $segments = method_exists($strategy, 'getSegments') ? $strategy->getSegments() : [];
-        foreach ($segments as $segment) {
+        foreach ($strategy->getSegments() as $segment) {
             yield from $segment->getConstraints();
         }
     }

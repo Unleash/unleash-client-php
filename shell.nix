@@ -3,7 +3,7 @@ pkgs.mkShell {
     nativeBuildInputs = with pkgs.buildPackages;
     let
         unstable = import (builtins.fetchTarball https://github.com/nixos/nixpkgs/tarball/master) {};
-        php83 = unstable.php83.buildEnv {
+        php83 = unstable.php84.buildEnv {
             extensions = ({ enabled, all }: enabled ++ (with all; [
                 apcu
                 ctype

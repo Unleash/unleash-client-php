@@ -36,9 +36,10 @@ final readonly class DefaultUnleashProxyRepository implements ProxyRepository
 
         $cacheKey = $this->getCacheKey($featureName, $context);
 
-        if ($this->configuration->getCache() !== null && $this->configuration->getCache()->has($cacheKey)) {
+        if ($this->configuration->getCache()->has($cacheKey)) {
             $cachedFeature = $this->configuration->getCache()->get($cacheKey);
             if (is_array($cachedFeature)) {
+                /** @var array<string, mixed> $cachedFeature */
                 $featureData = $this->validateResponse($cachedFeature);
                 if ($featureData !== null) {
                     return new DefaultProxyFeature($featureData);
@@ -64,6 +65,7 @@ final readonly class DefaultUnleashProxyRepository implements ProxyRepository
             return null;
         }
 
+        /** @var array<string, mixed>|null $body */
         $body = json_decode($response->getBody(), true);
         if ($body === null) {
             return null;
@@ -72,9 +74,7 @@ final readonly class DefaultUnleashProxyRepository implements ProxyRepository
             $featureData = $this->validateResponse($body);
 
             if ($featureData !== null) {
-                if ($this->configuration->getCache() !== null) {
-                    $this->configuration->getCache()->set($cacheKey, $featureData, $this->configuration->getTtl());
-                }
+                $this->configuration->getCache()->set($cacheKey, $featureData, $this->configuration->getTtl());
 
                 return new DefaultProxyFeature($featureData);
             }
@@ -179,6 +179,7 @@ final readonly class DefaultUnleashProxyRepository implements ProxyRepository
             return null;
         }
 
+        // @phpstan-ignore-next-line return.type
         return $response;
     }
 }

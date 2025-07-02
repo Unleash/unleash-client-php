@@ -9,6 +9,9 @@ parameters:
         - '#Class .+Flysystem.* not found#'
       path: src/Helper/DefaultImplementationLocator.php
       reportUnmatched: false
+    - messages:
+        - '#is never assigned (.+) so it can be removed from the property type#'
+      path: src/UnleashBuilder.php
   treatPhpDocTypesAsCertain: false
 rules:
   - Unleash\Client\PhpstanRules\NoEmptyFunctionRule

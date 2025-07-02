@@ -50,7 +50,7 @@ final readonly class DefaultUnleash implements Unleash
         $feature = $this->findFeature($featureName, $context);
 
         if ($feature !== null) {
-            if (method_exists($feature, 'hasImpressionData') && $feature->hasImpressionData()) {
+            if ($feature->hasImpressionData()) {
                 $event = new ImpressionDataEvent(
                     ImpressionDataEventType::IS_ENABLED,
                     Uuid::v4(),
@@ -91,7 +91,7 @@ final readonly class DefaultUnleash implements Unleash
         if ($variant !== null) {
             $this->metricsHandler->handleMetrics($feature, true, $variant);
 
-            if (method_exists($feature, 'hasImpressionData') && $feature->hasImpressionData()) {
+            if ($feature->hasImpressionData()) {
                 $event = new ImpressionDataEvent(
                     ImpressionDataEventType::GET_VARIANT,
                     Uuid::v4(),
@@ -161,6 +161,7 @@ final readonly class DefaultUnleash implements Unleash
             return new DefaultFeatureEnabledResult();
         }
 
+        // @phpstan-ignore-next-line function.alreadyNarrowedType
         $dependencies = method_exists($feature, 'getDependencies')
             ? $feature->getDependencies()
             : [];
@@ -247,6 +248,7 @@ final readonly class DefaultUnleash implements Unleash
         assert($dependency->getFeature() !== null);
 
         if (
+            // @phpstan-ignore-next-line function.alreadyNarrowedType
             method_exists($dependency->getFeature(), 'getDependencies')
             && count($dependency->getFeature()->getDependencies())
         ) {

@@ -1,4 +1,4 @@
-name: Tests (8.3)
+name: Tests (8.4)
 on:
   push:
     branches:
@@ -14,7 +14,7 @@ jobs:
       PHP_CS_FIXER_IGNORE_ENV: 1
     strategy:
       matrix:
-        version: ['8.3']
+        version: ['8.4']
     steps:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -31,7 +31,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        version: ['8.3']
+        version: ['8.4']
     steps:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -48,7 +48,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        version: ['8.3']
+        version: ['8.4']
         optional-deps: ['', 'cache/filesystem-adapter:^1.1']
     steps:
       - name: Setup PHP
@@ -73,12 +73,12 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        version: ['7.2', '7.3', '7.4', '8.0', '8.1', '8.2']
+        version: ['7.2', '7.3', '7.4', '8.0', '8.1', '8.2', '8.3']
     steps:
       - name: Setup Build PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: 8.3
+          php-version: 8.4
       - name: Checkout Code
         uses: actions/checkout@v4
         with:
@@ -91,10 +91,16 @@ jobs:
         if: matrix.version == '7.2'
         run: composer require symfony/polyfill-php73:^1.0
       - name: Update composer.json version
-        run: 'sed -i -e ''s/"php": "\^8.3"/"php": "\^${{ matrix.version }}"/'' composer.json'
+        run: 'sed -i -e ''s/"php": "\^8.4"/"php": "\^${{ matrix.version }}"/'' composer.json'
       - name: Downgrade phpunit
         if: matrix.version == '7.2'
         run: 'sed -i -e ''s/"phpunit\/phpunit": "\^9.5"/"phpunit\/phpunit": "\^8.5"/'' composer.json'
+      - name: Downgrade PHPStan
+        if: matrix.version == '7.2' || matrix.version == '7.3'
+        run: 'sed -i -e ''s/"phpstan\/phpstan": "\^2.0"/"phpstan\/phpstan": "\^1.0"/'' composer.json'
+      - name: Downgrade Rector
+        if: matrix.version == '7.2' || matrix.version == '7.3'
+        run: 'sed -i -e ''s/"rector\/rector": "\^2.0"/"rector\/rector": "\^1.0"/'' composer.json'
       - name: Copy Bootstrap
         if: matrix.version == '7.2'
         run: cp .github/bootstrap-72.php src
