@@ -7,7 +7,7 @@ use Override;
 use Unleash\Client\DTO\DefaultFeature;
 use Unleash\Client\DTO\DefaultVariant;
 
-final readonly class DefaultMetricsBucketSerializer implements MetricsBucketSerializer
+final class DefaultMetricsBucketSerializer implements MetricsBucketSerializer
 {
     #[Override]
     public function serialize(MetricsBucket $bucket): string
@@ -33,8 +33,8 @@ final readonly class DefaultMetricsBucketSerializer implements MetricsBucketSeri
     public function deserialize(string $serialized): MetricsBucket
     {
         [$startDate, $toggles, $endDate] = explode(';', $serialized);
-        $startDate = new DateTimeImmutable()->setTimestamp((int) $startDate);
-        $endDate = $endDate === '~' ? null : new DateTimeImmutable()->setTimestamp((int) $endDate);
+        $startDate = (new DateTimeImmutable())->setTimestamp((int) $startDate);
+        $endDate = $endDate === '~' ? null : (new DateTimeImmutable())->setTimestamp((int) $endDate);
         $toggles = array_filter(explode(',', $toggles));
 
         $bucket = new MetricsBucket($startDate, $endDate);
