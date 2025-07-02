@@ -61,7 +61,7 @@ final class DefaultRegistrationService implements RegistrationService
                 'instanceId' => $this->configuration->getInstanceId(),
                 'sdkVersion' => ($legacySdkVersion !== ':') ? $legacySdkVersion : $this->configuration->getSdkVersion(),
                 'strategies' => array_map(fn (StrategyHandler $strategyHandler): string => $strategyHandler->getStrategyName(), $strategyHandlers),
-                'started' => new DateTimeImmutable()->format('c'),
+                'started' => (new DateTimeImmutable())->format('c'),
                 'interval' => $this->configuration->getMetricsInterval(),
                 'platformName' => PHP_SAPI,
                 'platformVersion' => PHP_VERSION,
