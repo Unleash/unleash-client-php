@@ -7,6 +7,7 @@ use Unleash\Client\Client\RegistrationService;
 use Unleash\Client\Configuration\Context;
 use Unleash\Client\Configuration\UnleashConfiguration;
 use Unleash\Client\DTO\DefaultFeatureEnabledResult;
+use Unleash\Client\DTO\DefaultVariant;
 use Unleash\Client\DTO\Feature;
 use Unleash\Client\DTO\FeatureDependency;
 use Unleash\Client\DTO\FeatureEnabledResult;
@@ -79,7 +80,7 @@ final readonly class DefaultUnleash implements Unleash
             || $enabledResult->isEnabled() === false
             || (!count($feature->getVariants()) && !count($strategyVariants))
         ) {
-            return $fallbackVariant;
+            return DefaultVariant::fromVariant($fallbackVariant, $enabledResult->isEnabled());
         }
 
         if (!count($strategyVariants)) {
@@ -102,7 +103,7 @@ final readonly class DefaultUnleash implements Unleash
                 $this->configuration->getEventDispatcher()->dispatch($event, UnleashEvents::IMPRESSION_DATA);
             }
         }
-        $resolvedVariant = $variant ?? $fallbackVariant;
+        $resolvedVariant = $variant ?? DefaultVariant::fromVariant($fallbackVariant, $feature->isEnabled());
 
         return $resolvedVariant;
     }

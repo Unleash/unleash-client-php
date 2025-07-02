@@ -1002,6 +1002,47 @@ final class DefaultUnleashTest extends AbstractHttpClientTestCase
         self::assertTrue($isEnabled->getClosure($unleash)($feature, new UnleashContext())->isEnabled());
     }
 
+    public function testIsFeatureEnabled()
+    {
+        $this->pushResponse([
+            'version' => 1,
+            'features' => [
+                [
+                    'name' => 'test',
+                    'description' => '',
+                    'enabled' => true,
+                    'strategies' => [
+                        [
+                            'name' => 'default',
+                        ],
+                    ],
+                ],
+            ],
+        ]);
+        $instance = $this->getInstance(new DefaultStrategyHandler());
+        $variant = $instance->getVariant('test');
+        self::assertTrue($variant->isFeatureEnabled());
+
+        $this->pushResponse([
+            'version' => 1,
+            'features' => [
+                [
+                    'name' => 'test',
+                    'description' => '',
+                    'enabled' => false,
+                    'strategies' => [
+                        [
+                            'name' => 'default',
+                        ],
+                    ],
+                ],
+            ],
+        ]);
+        $instance = $this->getInstance(new DefaultStrategyHandler());
+        $variant = $instance->getVariant('test');
+        self::assertFalse($variant->isFeatureEnabled());
+    }
+
     private function getInstance(StrategyHandler ...$handlers): DefaultUnleash
     {
         return new DefaultUnleash(
