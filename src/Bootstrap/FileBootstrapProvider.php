@@ -10,11 +10,19 @@ use SplFileInfo;
 use Throwable;
 use Unleash\Client\Exception\InvalidValueException;
 
-final readonly class FileBootstrapProvider implements BootstrapProvider
+final class FileBootstrapProvider implements BootstrapProvider
 {
-    public function __construct(
-        private string|SplFileInfo $file,
-    ) {
+    /**
+     * @readonly
+     * @var string|\SplFileInfo
+     */
+    private $file;
+    /**
+     * @param string|\SplFileInfo $file
+     */
+    public function __construct($file)
+    {
+        $this->file = $file;
     }
 
     /**
@@ -23,14 +31,12 @@ final readonly class FileBootstrapProvider implements BootstrapProvider
      *
      * @return array<mixed>
      */
-    #[Override]
     public function getBootstrap(): array
     {
         $filePath = $this->getFilePath($this->file);
         if ($exception = $this->getExceptionForInvalidPath($filePath)) {
             throw $exception;
         }
-
         $content = @file_get_contents($filePath);
         if ($content === false) {
             $error = error_get_last();
@@ -40,7 +46,6 @@ final readonly class FileBootstrapProvider implements BootstrapProvider
                 $error['message'] ?? 'Unknown error',
             ));
         }
-
         $result = @json_decode($content, true);
         if (json_last_error()) {
             throw new JsonException(json_last_error_msg(), json_last_error());
@@ -52,11 +57,13 @@ final readonly class FileBootstrapProvider implements BootstrapProvider
                 gettype($result),
             ));
         }
-
         return $result;
     }
 
-    private function getFilePath(string|SplFileInfo $file): string
+    /**
+     * @param string|\SplFileInfo $file
+     */
+    private function getFilePath($file): string
     {
         if ($file instanceof SplFileInfo) {
             if ($path = $file->getRealPath()) {
@@ -73,7 +80,7 @@ final readonly class FileBootstrapProvider implements BootstrapProvider
         if (!fnmatch('*://*', $path)) {
             $path = "file://{$path}";
         }
-        if (!str_starts_with($path, 'file://')) {
+        if (strncmp($path, 'file://', strlen('file://')) !== 0) {
             return null;
         }
 
