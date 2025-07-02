@@ -19,9 +19,9 @@ use Unleash\Client\Unleash;
 final class DefaultRegistrationService implements RegistrationService
 {
     public function __construct(
-        private readonly ClientInterface $httpClient,
-        private readonly RequestFactoryInterface $requestFactory,
-        private readonly UnleashConfiguration $configuration,
+        private ClientInterface $httpClient,
+        private RequestFactoryInterface $requestFactory,
+        private UnleashConfiguration $configuration,
         /**
          * @deprecated use configuration sdkVersion property
          */
@@ -61,7 +61,7 @@ final class DefaultRegistrationService implements RegistrationService
                 'instanceId' => $this->configuration->getInstanceId(),
                 'sdkVersion' => ($legacySdkVersion !== ':') ? $legacySdkVersion : $this->configuration->getSdkVersion(),
                 'strategies' => array_map(fn (StrategyHandler $strategyHandler): string => $strategyHandler->getStrategyName(), $strategyHandlers),
-                'started' => new DateTimeImmutable()->format('c'),
+                'started' => (new DateTimeImmutable())->format('c'),
                 'interval' => $this->configuration->getMetricsInterval(),
                 'platformName' => PHP_SAPI,
                 'platformVersion' => PHP_VERSION,
