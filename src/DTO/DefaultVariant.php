@@ -7,30 +7,71 @@ use JetBrains\PhpStorm\ExpectedValues;
 use Override;
 use Unleash\Client\Enum\Stickiness;
 
-final readonly class DefaultVariant implements Variant
+final class DefaultVariant implements Variant
 {
+    /**
+     * @readonly
+     * @var string
+     */
+    private $name;
+    /**
+     * @readonly
+     * @var bool
+     */
+    private $enabled;
+    /**
+     * @readonly
+     * @var int
+     */
+    private $weight = 0;
+    /**
+     * @readonly
+     * @var string
+     */
+    private $stickiness = Stickiness::DEFAULT;
+    /**
+     * @readonly
+     * @var \Unleash\Client\DTO\VariantPayload|null
+     */
+    private $payload;
+    /**
+     * @var array<VariantOverride>
+     * @readonly
+     */
+    private $overrides;
+    /**
+     * @readonly
+     * @var bool
+     */
+    private $featureEnabled = false;
     /**
      * @param array<VariantOverride> $overrides
      */
     public function __construct(
-        private string $name,
-        private bool $enabled,
-        private int $weight = 0,
-        #[ExpectedValues(valuesFromClass: Stickiness::class)]
-        private string $stickiness = Stickiness::DEFAULT,
-        private ?VariantPayload $payload = null,
-        private ?array $overrides = null,
-        private bool $featureEnabled = false,
-    ) {
+        string $name,
+        bool $enabled,
+        int $weight = 0,
+        #[\JetBrains\PhpStorm\ExpectedValues(valuesFromClass: \Unleash\Client\Enum\Stickiness::class)]
+        string $stickiness = Stickiness::DEFAULT,
+        ?VariantPayload $payload = null,
+        ?array $overrides = null,
+        bool $featureEnabled = false
+    )
+    {
+        $this->name = $name;
+        $this->enabled = $enabled;
+        $this->weight = $weight;
+        $this->stickiness = $stickiness;
+        $this->payload = $payload;
+        $this->overrides = $overrides;
+        $this->featureEnabled = $featureEnabled;
     }
 
-    #[Override]
     public function getName(): string
     {
         return $this->name;
     }
 
-    #[Override]
     public function getPayload(): ?VariantPayload
     {
         return $this->payload;
@@ -39,8 +80,6 @@ final readonly class DefaultVariant implements Variant
     /**
      * @phpstan-return array<string|bool|array<string>>
      */
-    #[ArrayShape(['name' => 'string', 'enabled' => 'bool', 'payload' => 'mixed'])]
-    #[Override]
     public function jsonSerialize(): array
     {
         $result = [
@@ -52,18 +91,15 @@ final readonly class DefaultVariant implements Variant
             $result['payload'] = $this->payload->jsonSerialize();
             assert(is_array($result['payload']));
         }
-
         // @phpstan-ignore-next-line return.type
         return $result;
     }
 
-    #[Override]
     public function getWeight(): int
     {
         return $this->weight;
     }
 
-    #[Override]
     public function isEnabled(): bool
     {
         return $this->enabled;
@@ -72,14 +108,11 @@ final readonly class DefaultVariant implements Variant
     /**
      * @return array<VariantOverride>
      */
-    #[Override]
     public function getOverrides(): array
     {
         return $this->overrides ?? [];
     }
 
-    #[ExpectedValues(valuesFromClass: Stickiness::class)]
-    #[Override]
     public function getStickiness(): string
     {
         return $this->stickiness;
