@@ -82,13 +82,28 @@ use Unleash\Client\Unleash;
  *       impressionData?: bool,
  *   }
  */
-final readonly class DefaultUnleashRepository implements UnleashRepository
+final class DefaultUnleashRepository implements UnleashRepository
 {
-    public function __construct(
-        private ClientInterface $httpClient,
-        private RequestFactoryInterface $requestFactory,
-        private UnleashConfiguration $configuration,
-    ) {
+    /**
+     * @readonly
+     * @var \Psr\Http\Client\ClientInterface
+     */
+    private $httpClient;
+    /**
+     * @readonly
+     * @var \Psr\Http\Message\RequestFactoryInterface
+     */
+    private $requestFactory;
+    /**
+     * @readonly
+     * @var \Unleash\Client\Configuration\UnleashConfiguration
+     */
+    private $configuration;
+    public function __construct(ClientInterface $httpClient, RequestFactoryInterface $requestFactory, UnleashConfiguration $configuration)
+    {
+        $this->httpClient = $httpClient;
+        $this->requestFactory = $requestFactory;
+        $this->configuration = $configuration;
     }
 
     /**
@@ -96,12 +111,10 @@ final readonly class DefaultUnleashRepository implements UnleashRepository
      * @throws InvalidArgumentException
      * @throws JsonException
      */
-    #[Override]
     public function findFeature(string $featureName): ?Feature
     {
         $features = $this->getFeatures();
         assert(is_array($features));
-
         return $features[$featureName] ?? null;
     }
 
@@ -112,14 +125,12 @@ final readonly class DefaultUnleashRepository implements UnleashRepository
      *
      * @return iterable<Feature>
      */
-    #[Override]
     public function getFeatures(): iterable
     {
         $features = $this->getCachedFeatures();
         if ($features === null) {
             $features = $this->fetchFeatures();
         }
-
         return $features;
     }
 
@@ -202,7 +213,7 @@ final readonly class DefaultUnleashRepository implements UnleashRepository
                     $constraints,
                     $segments,
                     $hasNonexistentSegments,
-                    $strategyVariants,
+                    $strategyVariants
                 );
             }
 
@@ -215,7 +226,7 @@ final readonly class DefaultUnleashRepository implements UnleashRepository
                 $strategies,
                 $featureVariants,
                 $feature['impressionData'] ?? false,
-                $dependencies,
+                $dependencies
             );
             if ($hasUnresolvedDependencies) {
                 $unresolved[] = $featureDto;
@@ -272,28 +283,28 @@ final readonly class DefaultUnleashRepository implements UnleashRepository
 
                     // Either find a resolved variant, or return the unresolved one.
                     $requiredVariants[] = $this->findVariant(
-                        name: $requiredVariant->getName(),
-                        feature: $feature,
-                        defaultVariant: $requiredVariant,
+                        $requiredVariant->getName(),
+                        $feature,
+                        $requiredVariant
                     );
                 }
 
                 // Add it as a resolved dependency, this pass is complete and nothing more can be done with the dependency.
                 $dependencies[] = new DefaultFeatureDependency(
-                    feature: $feature,
-                    expectedState: $dependency->getExpectedState(),
-                    requiredVariants: $requiredVariants,
+                    $feature,
+                    $dependency->getExpectedState(),
+                    $requiredVariants
                 );
             }
 
             // Everything except the dependencies is copied directly from the unresolved feature
             $features[$unresolvedFeature->getName()] = new DefaultFeature(
-                name: $unresolvedFeature->getName(),
-                enabled: $unresolvedFeature->isEnabled(),
-                strategies: $unresolvedFeature->getStrategies(),
-                variants: $unresolvedFeature->getVariants(),
-                impressionData: $unresolvedFeature->hasImpressionData(),
-                dependencies: $dependencies,
+                $unresolvedFeature->getName(),
+                $unresolvedFeature->isEnabled(),
+                $unresolvedFeature->getStrategies(),
+                $unresolvedFeature->getVariants(),
+                $unresolvedFeature->hasImpressionData(),
+                $dependencies
             );
         }
     }
@@ -333,14 +344,14 @@ final readonly class DefaultUnleashRepository implements UnleashRepository
 
             $result[] = $dependencyResolved
                 ? new DefaultFeatureDependency(
-                    feature: $features[$dependentFeatureName],
-                    expectedState: $expectedState,
-                    requiredVariants: $requiredVariants,
+                    $features[$dependentFeatureName],
+                    $expectedState,
+                    $requiredVariants
                 )
                 : new UnresolvedFeatureDependency(
-                    feature: $features[$dependentFeatureName] ?? new UnresolvedFeature($dependentFeatureName),
-                    expectedState: $expectedState,
-                    requiredVariants: $requiredVariants,
+                    $features[$dependentFeatureName] ?? new UnresolvedFeature($dependentFeatureName),
+                    $expectedState,
+                    $requiredVariants
                 );
 
             if (!$dependencyResolved) {
@@ -394,14 +405,14 @@ final readonly class DefaultUnleashRepository implements UnleashRepository
 
                 return new UnresolvedVariant($variantName);
             },
-            $requiredVariants,
+            $requiredVariants
         );
     }
 
     private function getBootstrappedResponse(): ?string
     {
         return $this->configuration->getBootstrapHandler()->getBootstrapContents(
-            $this->configuration->getBootstrapProvider(),
+            $this->configuration->getBootstrapProvider()
         );
     }
 
@@ -422,7 +433,7 @@ final readonly class DefaultUnleashRepository implements UnleashRepository
         $this->configuration->getStaleCache()->set(
             CacheKey::FEATURES_RESPONSE,
             $data,
-            $this->configuration->getStaleTtl(),
+            $this->configuration->getStaleTtl()
         );
     }
 
@@ -437,7 +448,7 @@ final readonly class DefaultUnleashRepository implements UnleashRepository
         foreach ($segmentsRaw as $segmentRaw) {
             $result[$segmentRaw['id']] = new DefaultSegment(
                 $segmentRaw['id'],
-                $this->parseConstraints($segmentRaw['constraints']),
+                $this->parseConstraints($segmentRaw['constraints'])
             );
         }
 
@@ -460,7 +471,7 @@ final readonly class DefaultUnleashRepository implements UnleashRepository
                 $constraint['values'] ?? null,
                 $constraint['value'] ?? null,
                 $constraint['inverted'] ?? false,
-                $constraint['caseInsensitive'] ?? false,
+                $constraint['caseInsensitive'] ?? false
             );
         }
 
@@ -491,7 +502,7 @@ final readonly class DefaultUnleashRepository implements UnleashRepository
                     ? new DefaultVariantPayload($variant['payload']['type'], $variant['payload']['value'])
                     : null,
                 $overrides,
-                $featureEnabled,
+                $featureEnabled
             );
         }
 
@@ -542,11 +553,11 @@ final readonly class DefaultUnleashRepository implements UnleashRepository
             } catch (Exception $exception) {
                 $this->configuration->getEventDispatcher()->dispatch(
                     new FetchingDataFailedEvent($exception),
-                    UnleashEvents::FETCHING_DATA_FAILED,
+                    UnleashEvents::FETCHING_DATA_FAILED
                 );
                 $rawData = $this->getLastValidState();
             }
-            $rawData ??= $this->getBootstrappedResponse();
+            $rawData = $rawData ?? $this->getBootstrappedResponse();
             if ($rawData === null) {
                 throw new HttpResponseException(sprintf(
                     'Got invalid response code when getting features and no default bootstrap provided: %s',
